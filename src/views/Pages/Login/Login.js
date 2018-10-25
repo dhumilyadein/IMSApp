@@ -1,7 +1,29 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
 
 class Login extends Component {
+
+  constructor() {
+    super();
+    this.state = {
+      verifyCredentialsResponse: ''
+    }
+
+    this.verifyCredentials = this.verifyCredentials.bind(this)
+  }
+
+  verifyCredentials() {
+    
+    axios.get('http://www.imsapp.com:3000/users').
+      then(response => {
+        //this.setState({ verifyCredentialsResponse: response.userId });
+        console.log('verifyCredentialsResponse - ' + JSON.stringify(response));
+        console.log('verifyCredentialsResponse - ' + response.data[0].userId);
+      });
+    
+  }
+
   render() {
     return (
       <div className="app flex-row align-items-center">
@@ -32,7 +54,7 @@ class Login extends Component {
                       </InputGroup>
                       <Row>
                         <Col xs="6">
-                          <Button color="primary" className="px-4">Login</Button>
+                          <Button color="primary" className="px-4" onClick={this.verifyCredentials} >Login</Button>
                         </Col>
                         <Col xs="6" className="text-right">
                           <Button color="link" className="px-0">Forgot password?</Button>
