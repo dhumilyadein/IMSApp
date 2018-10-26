@@ -90,13 +90,16 @@ module.exports = function(app) {
       .withMessage("Password is required")
   ];
   function loginUser(req, res) {
+
+    console.log("loginUser ENTER");
+
     var errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.send({ errors: errors.mapped() });
     }
     User.findOne({
       username: req.body.username
-         }) 
+         })
       .then(function(user) {
         if (!user) {
           return res.send({ error: true, message: "User does not exist!" });
@@ -133,8 +136,8 @@ module.exports = function(app) {
       .withMessage("Please write something.")
   ];
 
- 
- 
+
+
   app.get("/api/logout", (req, res) => {
     req.session.destroy();
     res.send({ message: "Logged out!" });
