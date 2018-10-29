@@ -163,7 +163,7 @@ class Tables extends Component {
 
         <Row>
 
-          <Col xs="12" lg="6">
+          <Col xs="12" lg="10">
             <Card>
               <CardHeader>
                 <i className="fa fa-align-justify"></i> Condensed Table

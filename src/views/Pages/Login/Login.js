@@ -29,35 +29,57 @@ class Login extends Component {
     this.submitHandler = this.submitHandler.bind(this);
   }
 
+  /**
+   * @description Handles the form submit request
+   * @param {*} e 
+   */
   submitHandler(e) {
-    console.log("submitHandler ENTER" + this.state);
+
+    console.log("submitHandler ENTER");
 
     e.preventDefault();
+
     axios.post("http://localhost:8001/api/login", this.state).then(res => {
+
+      console.log("response - " + JSON.stringify(res.data));
+      console.log("response errors - " + res.data.errors);
+      console.log("response message - " + res.data.message);
+
       if (res.data.error) {
         return this.setState({ error: res.data.message });
-      }
-      if (res.data.errors) {
+      }  if (res.data.errors) {
         return this.setState({ valerrors: res.data.errors });
       }
 
-      console.log("lenght of array - " + res.data.user.role.length);
+      console.log("Number of roles - " + res.data.userData.role.length + " Roles - " + res.data.userData.role);
 
-      if (res.data.user.role.length === 1) {
+      if (res.data.userData.role.length === 1) {
+
+        if(res.data.userData.role == 'admin') {
+
+          console.log('redirecting to registeruser page');
+          return (window.location = "/#/admin/registeruser");
+        } else {
+          return (window.location = "/#/Dashboard");
+        }
+      } else if (res.data.userData.role.length > 1) {
         return (window.location = "/#/Dashboard");
-      } else if (res.data.user.role.length > 1) {
       } else {
+        return (window.location = "/#/Dashboard");
       }
 
-      res.data.user.role.forEach(function(role) {
+      res.data.userData.role.forEach(function (role) {
         console.log(role);
       });
       //return (window.location = "/AdminPage");
     });
   }
 
+  /**
+   * @description Called when the change event is triggered.
+   * @param {*} e 
+   */
   changeHandler(e) {
-    console.log(e.target.name + "  = " + e.target.value);
     this.setState({
       [e.target.name]: e.target.value
     });

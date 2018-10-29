@@ -15,7 +15,7 @@ import {
   AppSidebarNav,
 } from '@coreui/react';
 // sidebar nav config
-import navigation from '../../admin/admin_nav';
+import navigation from '../../views/admin/admin_nav';
 // routes config
 import routes from '../../routes';
 import DefaultAside from './DefaultAside';
@@ -48,7 +48,7 @@ class DefaultLayout extends Component {
                       : (null);
                   },
                 )}
-                <Redirect from="/" to="/dashboard" />
+                <Redirect from="/" to="/admin/registeruser" />
               </Switch>
             </Container>
           </main>

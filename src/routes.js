@@ -182,10 +182,17 @@ const User = Loadable({
   loading: Loading,
 });
 
+// IMS app changes
+const RegisterUser = Loadable({
+  loader: () => import('./views/admin/registeruser/RegisterUser'),
+  loading: Loading,
+});
+
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
+  { path: '/admin/registeruser', name: 'RegisterUser', component: RegisterUser },
   { path: '/', exact: true, name: 'Home', component: DefaultLayout },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/theme', exact: true, name: 'Theme', component: Colors },
