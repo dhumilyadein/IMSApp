@@ -169,7 +169,7 @@ class RegisterUser extends Component {
                           </InputGroupAddon>
                           <Input name="roles"
                             id="roles"
-                            type="label"
+                            type="text" disabled="disabled"
                             placeholder="Select User Roles"
                             autoComplete="role"
                             readOnly />
