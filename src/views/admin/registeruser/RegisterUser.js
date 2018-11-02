@@ -81,7 +81,7 @@ class RegisterUser extends Component {
       <div >
         <Container>
           <Row className="justify-content-center" lg="2">
-            <Col md="7">
+            <Col md="10">
               <Card className="mx-4">
                 <CardBody className="p-4">
                   <Form>
@@ -169,9 +169,10 @@ class RegisterUser extends Component {
                           </InputGroupAddon>
                           <Input name="roles"
                             id="roles"
-                            type="text"
+                            type="label"
                             defaultValue="Select User Roles"
                             autoComplete="role"
+                            disabled="disabled"
                             readOnly="true" />
                         </InputGroup>
 
