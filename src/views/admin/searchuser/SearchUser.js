@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Card, CardBody, CardFooter, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row, Table } from 'reactstrap';
+import { Button, Card, CardBody, CardFooter, Col, Container, Form, FormGroup, Input, InputGroup, InputGroupAddon, InputGroupText,Label, Row, Table } from 'reactstrap';
 import { AppSwitch } from '@coreui/react';
 import axios from "axios";
 
-class RegisterUser extends Component {
+class SearchUser extends Component {
 
   constructor(props) {
     super(props);
@@ -132,36 +132,8 @@ class RegisterUser extends Component {
                         autoComplete="email"
                         onChange={this.changeHandler} />
                     </InputGroup>
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock"></i>
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input type="password"
-                        name="password"
-                        id="password"
-                        placeholder="Password"
-                        autoComplete="new-password"
-                        onChange={this.changeHandler} />
-                    </InputGroup>
-                    <InputGroup className="mb-4">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock"></i>
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input type="password"
-                        name="repeatPassword"
-                        id="repeatPassword"
-                        placeholder="Repeat password"
-                        autoComplete="new-password"
-                        onChange={this.changeHandler} />
-                    </InputGroup>
 
-                    <Card className="mx-1">
-                      <CardBody className="p-2">
-                        <InputGroup className="mb-2">
+                     <InputGroup className="mb-2">
                           <InputGroupAddon addonType="prepend">
                             <InputGroupText>
                               <i className="icon-badge"></i>
@@ -169,68 +141,42 @@ class RegisterUser extends Component {
                           </InputGroupAddon>
                           <Input name="roles"
                             id="roles"
-                            type="label"
-                            defaultValue="Select User Roles"
-                            autoComplete="role"
-                            disabled="disabled"
-                            readOnly="true" />
-                        </InputGroup>
+                            type="select"
 
-                        <Table responsive size="sm" hover>
-                          <tbody>
-                            <tr>
-                              <td>
-                                Admin
-                    </td>
-                              <td>
-                                <AppSwitch
-                                  name="adminSwitch"
-                                  id="adminSwitch"
-                                  className={'mx-1'} variant={'3d'} color={'primary'} size={'sm'}
-                                  onChange={this.changeHandler} />
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                Teacher
-                    </td>
-                              <td>
-                                <AppSwitch
-                                  name="teacherSwitch"
-                                  id="teacherSwitch"
-                                  className={'mx-1'} variant={'3d'} color={'primary'} size={'sm'}
-                                  onChange={this.changeHandler} />
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                Student
-                    </td>
-                              <td>
-                                <AppSwitch
-                                  name="studentSwitch"
-                                  id="studentSwitch"
-                                  className={'mx-1'} variant={'3d'} color={'primary'} checked size={'sm'}
-                                  onChange={this.changeHandler} />
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                Parent
-                    </td>
-                              <td>
-                                <AppSwitch
-                                  name="parentSwitch"
-                                  id="parentSwitch"
-                                  className={'mx-1'} variant={'3d'} color={'primary'} size={'sm'}
-                                  onChange={this.changeHandler} />
-                              </td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      </CardBody>
-                    </Card>
-                    <Button color="success" block>Create Account</Button>
+
+                             >
+                            <option value="0">Select Role</option>
+                        <option value="1">Admin</option>
+                        <option value="2">Teacher</option>
+                        <option value="3">Student</option>
+                        <option value="3">Parent</option>
+                        <option value="3">All</option>
+                      </Input>
+                  </InputGroup>
+
+
+                  <InputGroup className="mb-2">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="icon-flag"></i>
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <Input name="status"
+                            id="status"
+                            type="select"
+
+
+                             >
+                            <option value="0">Select status</option>
+                        <option value="1">Active</option>
+                        <option value="2">Obsolete</option>
+                        <option value="3">All</option>
+                      </Input>
+                  </InputGroup>
+
+
+
+                    <Button color="success" block>Search</Button>
                   </Form>
                 </CardBody>
               </Card>
@@ -242,4 +188,4 @@ class RegisterUser extends Component {
   }
 }
 
-export default RegisterUser;
+export default SearchUser;
