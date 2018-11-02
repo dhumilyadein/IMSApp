@@ -22,7 +22,7 @@ class RegisterUser extends Component {
 
   /**
  * @description Handles the form submit request
- * @param {*} e 
+ * @param {*} e
  */
   submitHandler(e) {
 
@@ -68,7 +68,7 @@ class RegisterUser extends Component {
 
   /**
      * @description Called when the change event is triggered.
-     * @param {*} e 
+     * @param {*} e
      */
   changeHandler(e) {
     this.setState({
@@ -169,10 +169,10 @@ class RegisterUser extends Component {
                           </InputGroupAddon>
                           <Input name="roles"
                             id="roles"
-                            type="text" disabled="disabled"
-                            placeholder="Select User Roles"
+                            type="text"
+                            defaultValue="Select User Roles"
                             autoComplete="role"
-                            readOnly />
+                            readOnly="true" />
                         </InputGroup>
 
                         <Table responsive size="sm" hover>
