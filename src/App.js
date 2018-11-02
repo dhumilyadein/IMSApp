@@ -24,8 +24,8 @@ class App extends Component {
           <Route path="/admin/registeruser" name="Register User" component={DefaultLayout} />
 
           <Route path="/Dashboard" name="Home" component={DefaultLayout} />
-          <Route path="/:path(base|buttons|charts|dashboard|icons|notifications|pages|theme|widgets)" name="Home" component={DefaultLayout} />
-          
+          <Route path="/:path(base|buttons|charts|dashboard|icons|notifications|pages|theme|Users|widgets)" name="Home" component={DefaultLayout} />
+
         </Switch>
       </HashRouter>
     );
