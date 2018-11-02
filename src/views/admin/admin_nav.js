@@ -10,7 +10,7 @@ export default {
 
     {
       title: true,
-      name: 'Manage Profiles',
+      name: 'Manage Users',
       wrapper: {            // optional wrapper object
         element: '',        // required valid HTML5 element tag
         attributes: {}        // optional valid JS object with JS API naming ex: { className: "my-class", style: { fontFamily: "Verdana" }, id: "my-id"}
@@ -18,12 +18,12 @@ export default {
       class: ''             // optional class names space delimited list for title item ex: "text-center"
     },
     {
-      name: 'Register Profiles',
+      name: 'Register Users',
       url: '/admin/registerUser',
       icon: 'icon-user-follow',
     },
     {
-      name: 'Search Profiles',
+      name: 'Search Users',
       url: '/admin/searchUser',
       icon: 'icon-magnifier',
     },
