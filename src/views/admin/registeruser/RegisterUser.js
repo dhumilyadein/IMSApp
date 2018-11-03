@@ -61,16 +61,16 @@ submitHandler(e) {
      * @param {*} e
      */
   roleHandler(e) {
+  //   console.log(this.state.role.indexOf(e.target.name));
+  //   if(e.target.checked && this.state.role.indexOf(e.target.name)===-1)
+  //   {console.log("in iF");
+  //     this.setState({role:this.state.role.concat(e.target.name)})
+  // }
 
-    if(e.target.checked && this.state.role.indexOf(e.target.name)===-1)
-    {console.log("in iF");
-      this.setState({role:this.state.role.concat(e.target.name)})
-  }
+  // else if(e.target.checked!=true)
+  // this.setState({role:this.state.role.splice(this.state.role.indexOf(e.target.name),1)})
 
-  else if(e.target.checked!=true)
-  this.setState({role:this.state.role.splice(this.state.role.indexOf(e.target.name),1)})
-
-    console.log(this.state.role);
+  //   console.log(this.state.role);
 
   }
 
@@ -236,7 +236,7 @@ submitHandler(e) {
                         </Table>
                       </CardBody>
                     </Card>
-                    <h1>hi</h1>
+                    <h3>Validation error here</h3>
                     <Button color="success" block>Create Account</Button>
                   </Form>
 
