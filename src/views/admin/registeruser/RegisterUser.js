@@ -9,72 +9,71 @@ class RegisterUser extends Component {
     super(props);
     this.state = {
       username: null,
-      fistName: null,
-      lastName: null,
+      fistname: null,
+      lastname: null,
       password: null,
-      repeatPassword: null,
-      role: null,
+      password_con: null,
+      role: ["student"],
+
       errors: null
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
+    this.roleHandler = this.roleHandler.bind(this);
   }
+
+
 
   /**
  * @description Handles the form submit request
  * @param {*} e
  */
-  submitHandler(e) {
-
-    console.log("submitHandler ENTER");
-
-    e.preventDefault();
-
-    axios.post("http://localhost:8001/api/register", this.state).then(res => {
-
-      console.log("response - " + JSON.stringify(res.data));
-      console.log("response errors - " + res.data.errors);
-      console.log("response message - " + res.data.message);
-
-      if (res.data.error) {
-        return this.setState({ error: res.data.message });
-      } if (res.data.errors) {
-        return this.setState({ valerrors: res.data.errors });
+submitHandler(e) {
+  e.preventDefault();
+  console.log(this.state);
+  axios
+    .post("http://localhost:8080/api/register", this.state)
+    .then(result => {
+      if (result.data.errors) {
+        return this.setState(result.data);
       }
-
-      console.log("Number of roles - " + res.data.userData.role.length + " Roles - " + res.data.userData.role);
-
-      if (res.data.userData.role.length === 1) {
-
-        if (res.data.userData.role == 'admin') {
-
-          console.log('redirecting to registeruser page');
-          return (window.location = "/#/admin/registeruser");
-        } else {
-          return (window.location = "/#/Dashboard");
-        }
-      } else if (res.data.userData.role.length > 1) {
-        return (window.location = "/#/Dashboard");
-      } else {
-        return (window.location = "/#/Dashboard");
-      }
-
-      res.data.userData.role.forEach(function (role) {
-        console.log(role);
+      return this.setState({
+        userdata: result.data,
+        errors: null,
+        success: true
       });
-      //return (window.location = "/AdminPage");
     });
-  }
+}
 
   /**
      * @description Called when the change event is triggered.
      * @param {*} e
      */
   changeHandler(e) {
+    console.log(e.target.name + " - " + e.target.value);
     this.setState({
       [e.target.name]: e.target.value
     });
   }
+
+ /**
+     * @description Called when the role(s) are selected.
+     * @param {*} e
+     */
+  roleHandler(e) {
+
+    if(e.target.checked && this.state.role.indexOf(e.target.name)===-1)
+    {console.log("in iF");
+      this.setState({role:this.state.role.concat(e.target.name)})
+  }
+
+  else if(e.target.checked!=true)
+  this.setState({role:this.state.role.splice(this.state.role.indexOf(e.target.name),1)})
+
+    console.log(this.state.role);
+
+  }
+
 
   render() {
     return (
@@ -84,7 +83,7 @@ class RegisterUser extends Component {
             <Col md="10">
               <Card className="mx-4">
                 <CardBody className="p-4">
-                  <Form>
+                  <Form >
                     <h1>Register</h1>
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -101,24 +100,28 @@ class RegisterUser extends Component {
                     </InputGroup>
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                        <InputGroupText>F</InputGroupText>
+                        <InputGroupText>
+                         <i className="icon-menu"></i>
+                        </InputGroupText>
                       </InputGroupAddon>
                       <Input type="text"
-                        name="firstName"
-                        id="firstName"
+                        name="firstname"
+                        id="firstname"
                         placeholder="First Name"
-                        autoComplete="firstName"
+                        autoComplete="firstname"
                         onChange={this.changeHandler} />
                     </InputGroup>
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                        <InputGroupText>L</InputGroupText>
+                        <InputGroupText>
+                        <i className="icon-menu"></i>
+                        </InputGroupText>
                       </InputGroupAddon>
                       <Input type="text"
-                        name="lastName"
-                        id="lastName"
+                        name="lastname"
+                        id="lastname"
                         placeholder="Last Name"
-                        autoComplete="lastName"
+                        autoComplete="lastname"
                         onChange={this.changeHandler} />
                     </InputGroup>
                     <InputGroup className="mb-3">
@@ -152,9 +155,9 @@ class RegisterUser extends Component {
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input type="password"
-                        name="repeatPassword"
-                        id="repeatPassword"
-                        placeholder="Repeat password"
+                        name="password_con"
+                        id="password_con"
+                        placeholder="Confirm Password"
                         autoComplete="new-password"
                         onChange={this.changeHandler} />
                     </InputGroup>
@@ -167,8 +170,7 @@ class RegisterUser extends Component {
                               <i className="icon-badge"></i>
                             </InputGroupText>
                           </InputGroupAddon>
-                          <Input name="roles"
-                            id="roles"
+                          <Input
                             type="label"
                             defaultValue="Select User Roles"
                             autoComplete="role"
@@ -184,10 +186,11 @@ class RegisterUser extends Component {
                     </td>
                               <td>
                                 <AppSwitch
-                                  name="adminSwitch"
-                                  id="adminSwitch"
+                                  name="admin"
+                                  id="admin"
                                   className={'mx-1'} variant={'3d'} color={'primary'} size={'sm'}
-                                  onChange={this.changeHandler} />
+                                  onChange={this.roleHandler}
+                                   />
                               </td>
                             </tr>
                             <tr>
@@ -196,10 +199,10 @@ class RegisterUser extends Component {
                     </td>
                               <td>
                                 <AppSwitch
-                                  name="teacherSwitch"
-                                  id="teacherSwitch"
+                                  name="teacher"
+                                  id="teacher"
                                   className={'mx-1'} variant={'3d'} color={'primary'} size={'sm'}
-                                  onChange={this.changeHandler} />
+                                  onChange={this.roleHandler} />
                               </td>
                             </tr>
                             <tr>
@@ -208,10 +211,11 @@ class RegisterUser extends Component {
                     </td>
                               <td>
                                 <AppSwitch
-                                  name="studentSwitch"
-                                  id="studentSwitch"
+                                  name="student"
+                                  id="student"
+
                                   className={'mx-1'} variant={'3d'} color={'primary'} checked size={'sm'}
-                                  onChange={this.changeHandler} />
+                                  onChange={this.roleHandler} />
                               </td>
                             </tr>
                             <tr>
@@ -220,22 +224,28 @@ class RegisterUser extends Component {
                     </td>
                               <td>
                                 <AppSwitch
-                                  name="parentSwitch"
-                                  id="parentSwitch"
+                                  name="parent"
+                                  id="parent"
+
+
                                   className={'mx-1'} variant={'3d'} color={'primary'} size={'sm'}
-                                  onChange={this.changeHandler} />
+                                  onChange={this.roleHandler} />
                               </td>
                             </tr>
                           </tbody>
                         </Table>
                       </CardBody>
                     </Card>
+                    <h1>hi</h1>
                     <Button color="success" block>Create Account</Button>
                   </Form>
+
                 </CardBody>
               </Card>
+
             </Col>
           </Row>
+
         </Container>
       </div>
     );
