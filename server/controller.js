@@ -57,6 +57,8 @@ module.exports = function (app) {
   ];
 
   function register(req, res) {
+
+    console.log("in Register");
     var errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -92,8 +94,8 @@ module.exports = function (app) {
 
   /**
    * @description Used to authenticate user
-   * @param {*} req 
-   * @param {*} res 
+   * @param {*} req
+   * @param {*} res
    */
   function loginUser(req, res) {
 

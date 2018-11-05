@@ -14,7 +14,8 @@ class RegisterUser extends Component {
       password: null,
       password_con: null,
       role: ['student'],
-
+      userdata: null,
+      success: false,
       errors: null
     };
     this.changeHandler = this.changeHandler.bind(this);
@@ -32,7 +33,7 @@ submitHandler(e) {
   e.preventDefault();
   console.log(this.state);
   axios
-    .post("http://localhost:8080/api/register", this.state)
+    .post("http://localhost:8001/api/register", this.state)
     .then(result => {
       if (result.data.errors) {
         return this.setState(result.data);
@@ -50,7 +51,7 @@ submitHandler(e) {
      * @param {*} e
      */
   changeHandler(e) {
-    console.log(e.target.name + " - " + e.target.value);
+
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -89,7 +90,7 @@ temp.splice(this.state.role.indexOf(e.target.name),1);
             <Col md="10">
               <Card className="mx-4">
                 <CardBody className="p-4">
-                  <Form >
+                  <Form onSubmit={this.submitHandler} >
                     <h1>Register</h1>
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -242,7 +243,9 @@ temp.splice(this.state.role.indexOf(e.target.name),1);
                         </Table>
                       </CardBody>
                     </Card>
-                    <h3>Validation error here</h3>
+                    <p>
+                            <font color="red">{this.state.error}</font>
+                          </p>
                     <Button color="success" block>Create Account</Button>
                   </Form>
 
