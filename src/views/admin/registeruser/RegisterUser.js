@@ -13,7 +13,7 @@ class RegisterUser extends Component {
       lastname: null,
       password: null,
       password_con: null,
-      role: ["student"],
+      role: ['student'],
 
       errors: null
     };
@@ -60,17 +60,23 @@ submitHandler(e) {
      * @description Called when the role(s) are selected.
      * @param {*} e
      */
-  roleHandler(e) {
-  //   console.log(this.state.role.indexOf(e.target.name));
-  //   if(e.target.checked && this.state.role.indexOf(e.target.name)===-1)
-  //   {console.log("in iF");
-  //     this.setState({role:this.state.role.concat(e.target.name)})
-  // }
+  roleHandler =(e) => {
 
-  // else if(e.target.checked!=true)
-  // this.setState({role:this.state.role.splice(this.state.role.indexOf(e.target.name),1)})
+   if(e.target.checked && this.state.role.indexOf(e.target.name)===-1)
+{
+const temp=this.state.role;
+temp.push(e.target.name);
 
-  //   console.log(this.state.role);
+  this.setState({role:temp}, () => console.log(this.state.role));
+}
+if(!e.target.checked && this.state.role.indexOf(e.target.name)!==-1)
+{
+  const temp=this.state.role;
+temp.splice(this.state.role.indexOf(e.target.name),1);
+
+  this.setState({role:temp}, () => console.log(this.state.role));
+
+}
 
   }
 
