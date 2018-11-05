@@ -6,6 +6,11 @@ const User = require("./models/User");
 
 module.exports = function (app) {
   const regValidation = [
+    check("role")
+      .not()
+      .isEmpty()
+      .withMessage("Please select atleast one Role"),
+
     check("username")
       .not()
       .isEmpty()
@@ -18,7 +23,7 @@ module.exports = function (app) {
       .withMessage("Email is required")
       .isEmail()
       .withMessage("Email should be an email address"),
-    check("firstName")
+    check("firstname")
       .not()
       .isEmpty()
       .withMessage("First name is required")
@@ -26,7 +31,7 @@ module.exports = function (app) {
       .withMessage("Name should be at least 2 letters")
       .matches(/^([A-z]|\s)+$/)
       .withMessage("Name cannot have numbers"),
-    check("lastName")
+    check("lastname")
       .not()
       .isEmpty()
       .withMessage("Last name is required")
