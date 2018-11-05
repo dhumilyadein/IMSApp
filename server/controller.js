@@ -174,12 +174,6 @@ module.exports = function (app) {
 
   //--------------------------------------
 
-  const postValidation = [
-    check("post")
-      .not()
-      .isEmpty()
-      .withMessage("Please write something.")
-  ];
 
 
 
