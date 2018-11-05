@@ -22,7 +22,7 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Email is required")
       .isEmail()
-      .withMessage("Email should be an email address"),
+      .withMessage("Please enter a valid email address"),
     check("firstname")
       .not()
       .isEmpty()
