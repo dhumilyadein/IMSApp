@@ -112,8 +112,8 @@ class RegisterUser extends Component {
                       />
                     </InputGroup>
                     {this.state.errors &&
-                      this.state.errors.firstname && (
-                        <font color="red">  <p>{this.state.errors.firstname.msg}</p></font>
+                      this.state.errors.username && (
+                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
                       )}
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -199,7 +199,7 @@ class RegisterUser extends Component {
                       this.state.errors.password && (
                         <font color="red">   <p>{this.state.errors.password.msg}</p></font>
                       )}
-                    <br />
+
                     <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>
@@ -220,7 +220,7 @@ class RegisterUser extends Component {
                       this.state.errors.password_con && (
                         <font color="red"><p>{this.state.errors.password_con.msg}</p></font>
                       )}
-                    <br />
+
                     <Card className="mx-1">
                       <CardBody className="p-2">
                         <InputGroup className="mb-2">
@@ -301,9 +301,10 @@ class RegisterUser extends Component {
                         </Table>
                       </CardBody>
                     </Card>
-                    <p>
-                      <font color="red">{this.state.error}</font>
-                    </p>
+                    {this.state.errors &&
+                      this.state.errors.role && (
+                        <font color="red"> <p>{this.state.errors.role.msg}</p></font>
+                      )}
                     <Button color="success" block>
                       Create Account
                     </Button>
