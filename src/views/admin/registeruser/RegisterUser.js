@@ -12,7 +12,8 @@ import {
   InputGroupAddon,
   InputGroupText,
   Row,
-  Table
+  Table,
+  Alert
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
 import axios from "axios";
@@ -96,6 +97,10 @@ class RegisterUser extends Component {
                 <CardBody className="p-4">
                   <Form onSubmit={this.submitHandler}>
                     <h1>Register</h1>
+                    {this.state.success && <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss}>
+                  User: {this.state.username} Registered successfully
+                </Alert>}
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>
