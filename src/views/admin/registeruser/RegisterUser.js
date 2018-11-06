@@ -40,7 +40,7 @@ class RegisterUser extends Component {
    disabled: true,
    checked: true,
    visible:true,
-   modalSuccess:false
+   modalSuccess:true
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);

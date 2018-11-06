@@ -9,26 +9,28 @@ class SearchUser extends Component {
     super(props);
     this.state = {
       username: null,
-      fistName: null,
-      lastName: null,
-      password: null,
-      repeatPassword: null,
+      firstname: null,
+      lastname: null,
+     email:null,
       role: null,
-      errors: null
+      status: null,
+      erorrs:null,
+      success:null,
+      userdata:null
     };
     this.changeHandler = this.changeHandler.bind(this);
-    this.submitHandler = this.submitHandler.bind(this);
+    this.searchHandler = this.searchHandler.bind(this);
   }
 
   /**
- * @description Handles the form submit request
+ * @description Handles the form search request
  * @param {*} e
  */
-submitHandler(e) {
+searchHandler(e) {
   e.preventDefault();
   console.log(this.state);
   axios
-    .post("http://localhost:8001/api/register", this.state)
+    .post("http://localhost:8001/api/search", this.state)
     .then(result => {
       if (result.data.errors) {
         return this.setState(result.data);
@@ -74,13 +76,17 @@ submitHandler(e) {
                         autoComplete="username"
                         onChange={this.changeHandler} />
                     </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.username && (
+                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      )}
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>F</InputGroupText>
                       </InputGroupAddon>
                       <Input type="text"
-                        name="firstName"
-                        id="firstName"
+                        name="firstname"
+                        id="firstname"
                         placeholder="First Name"
                         autoComplete="firstName"
                         onChange={this.changeHandler} />
@@ -90,8 +96,8 @@ submitHandler(e) {
                         <InputGroupText>L</InputGroupText>
                       </InputGroupAddon>
                       <Input type="text"
-                        name="lastName"
-                        id="lastName"
+                        name="lastname"
+                        id="lastname"
                         placeholder="Last Name"
                         autoComplete="lastName"
                         onChange={this.changeHandler} />
@@ -119,8 +125,8 @@ submitHandler(e) {
                               <i className="icon-badge"></i>
                             </InputGroupText>
                           </InputGroupAddon>
-                          <Input name="roles"
-                            id="roles"
+                          <Input name="role"
+                            id="role"
                             type="select"
 
 
@@ -156,7 +162,7 @@ submitHandler(e) {
 
 
 
-                    <Button color="success" block>Search</Button>
+                    <Button color="success" block onClick={this.searchHandler}>Search</Button>
                   </Form>
                 </CardBody>
               </Card>

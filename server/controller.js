@@ -5,6 +5,24 @@ const User = require("./models/User");
 
 
 module.exports = function (app) {
+
+  const serValidation= [
+    check("username")
+      .not()
+      .isEmpty()
+      .withMessage("Username is required")
+      .isLength({ min: 3 })
+      .withMessage("Username should be at least 6 letters"),
+
+      check("email")
+      .not()
+      .isEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Please enter a valid email address"),
+  ];
+
+
   const regValidation = [
     check("role")
       .not()
@@ -68,7 +86,66 @@ module.exports = function (app) {
     })
   ];
 
-  function register(req, res) {
+  function Search(req, res) {
+
+    console.log("\n SEARCH ENTER - " + req.body.username + " " + req.body.password);
+
+    var resMsg = null;
+    var userData = null;
+
+    //Initial validation like fields empty check
+    var valResult = validationResult(req);
+    if (!valResult.isEmpty()) {
+
+      //Mapping the value to the same object
+      valResult = valResult.mapped();
+
+      var validationResultString = JSON.stringify(valResult);
+      console.log("validationResultString - " + validationResultString);
+
+      if (valResult.username && valResult.username.msg) {
+        resMsg = { error: true, message: valResult.username.msg };
+      } else if (valResult.password && valResult.password.msg) {
+        resMsg = { error: true, message: valResult.password.msg };
+      } else {
+        resMsg = { error: true, message: "Login validation failed... Something went wrong!" };
+      }
+
+      // Terminating flow as validation fails.
+      return res.send(resMsg);
+    } else {
+      //Fetching user from Mongo after initial validation is done
+      User.findOne({
+        username: req.body.username,
+        email: req.body.email
+      })
+        .then(function (userData) {
+
+          console.log("userData - " + userData);
+          if (!userData) {
+            resMsg = { error: true, message: "User does not exist! Please check the username." }
+          
+          } else {
+            req.session.user = userData;
+            req.session.isLoggedIn = true;
+            resMsg = { error: false, message: "Authentication Successful.. You are signed in.", userData };
+          }
+
+          if (resMsg) {
+            return res.send(resMsg);
+          } else {
+            console.log("No response from the loginUser service");
+            return res.send({ error: true, message: "Login failed.. something went wrong." });
+          }
+          console.log("userData - " + userData + " resMsg - " + resMsg);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  }
+
+  function Register(req, res) {
 
     console.log("in Register");
     var errors = validationResult(req);
@@ -90,7 +167,8 @@ module.exports = function (app) {
       });
   }
 
-  app.post("/api/register", regValidation, register);
+  app.post("/api/Register", regValidation, Register);
+  app.post("/api/Search", serValidation, Search );
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
   const logValidation = [
