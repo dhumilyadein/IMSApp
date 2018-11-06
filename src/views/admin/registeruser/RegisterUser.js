@@ -77,9 +77,7 @@ class RegisterUser extends Component {
    * @param {*} e
    */
   roleHandler = e => {
-
-
-    if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
+      if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
       const temp = this.state.role;
       temp.push(e.target.name);
 
@@ -104,7 +102,7 @@ class RegisterUser extends Component {
 
      else if(e.target.name==="student" && !e.target.checked)
     { console.log("not checked");
-      this.setState({ checked:!this.state.checked, disabled: false,
+      this.setState({ checked:!this.state.checked, disabled: false
         },  () => console.log(this.state.role+" checked: " +this.state.checked));}
 
   };
@@ -309,7 +307,7 @@ class RegisterUser extends Component {
                                   className={"mx-1"}
                                   variant={"3d"}
                                   color={"primary"}
-                                  checked
+                                  checked={this.state.checked}
                                   size={"sm"}
                                   onChange={this.roleHandler}
 
