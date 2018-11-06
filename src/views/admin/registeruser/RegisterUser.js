@@ -24,7 +24,8 @@ class RegisterUser extends Component {
     super(props);
     this.state = {
       username: null,
-      fistname: null,
+      email:null,
+      firstname: null,
       lastname: null,
       password: null,
       password_con: null,
@@ -39,7 +40,26 @@ class RegisterUser extends Component {
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
     this.roleHandler = this.roleHandler.bind(this);
+    this.resetForm = this.resetForm.bind(this);
   }
+
+   /**
+   * @description Resets the form
+   * @param {*} e
+   */
+
+  resetForm = (e) => {
+    this.setState({
+      username: "",
+      email:"",
+      firstname: "",
+      lastname: "",
+      password: "",
+      password_con: ""
+    });
+
+  }
+
 
   /**
    * @description Handles the form submit request
@@ -132,6 +152,7 @@ class RegisterUser extends Component {
                         type="text"
                         name="username"
                         id="username"
+                        value={this.state.username}
                         placeholder="Username"
                         autoComplete="username"
                         onChange={this.changeHandler}
@@ -151,6 +172,7 @@ class RegisterUser extends Component {
                         type="text"
                         name="firstname"
                         id="firstname"
+                        value={this.state.firstname}
                         placeholder="First Name"
                         autoComplete="firstname"
                         onChange={this.changeHandler}
@@ -173,6 +195,7 @@ class RegisterUser extends Component {
                         type="text"
                         name="lastname"
                         id="lastname"
+                        value={this.state.lastname}
                         placeholder="Last Name"
                         autoComplete="lastname"
                         onChange={this.changeHandler}
@@ -192,6 +215,7 @@ class RegisterUser extends Component {
                         type="text"
                         name="email"
                         id="email"
+                        value={this.state.email}
                         placeholder="Email"
                         autoComplete="email"
                         onChange={this.changeHandler}
@@ -216,6 +240,7 @@ class RegisterUser extends Component {
                         name="password"
                         id="password"
                         placeholder="Password"
+                        value={this.state.password}
                         autoComplete="new-password"
                         onChange={this.changeHandler}
                       />
@@ -237,6 +262,7 @@ class RegisterUser extends Component {
                         name="password_con"
                         id="password_con"
                         placeholder="Confirm Password"
+                        value={this.state.password_con}
                         autoComplete="new-password"
                         onChange={this.changeHandler}
                       />
@@ -344,7 +370,7 @@ class RegisterUser extends Component {
                 <Button type="submit" onClick={this.submitHandler} block color="success"> Register</Button>
               </Col>
               <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                <Button block color="info">Reset</Button>
+                <Button block onClick={this.resetForm} color="info">Reset</Button>
               </Col></Row>
 
                   </Form>
