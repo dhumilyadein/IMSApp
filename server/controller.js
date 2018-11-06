@@ -41,7 +41,7 @@ module.exports = function (app) {
       .not()
       .isEmpty()
       .withMessage("Password is required")
-      .isLength({ min: 6 })
+      .isLength({ min: 4 })
       .withMessage("Password should be at least 6 characters"),
     check(
       "password_con",

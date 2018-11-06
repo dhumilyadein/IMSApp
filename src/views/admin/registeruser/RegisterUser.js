@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import 'bootstrap/dist/css/bootstrap.css';
 import {
   Button,
   Card,
@@ -13,7 +14,9 @@ import {
   InputGroupText,
   Row,
   Table,
-  Alert
+  Alert,
+  Modal,
+  ModalHeader
 
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
@@ -150,9 +153,19 @@ class RegisterUser extends Component {
                 <CardBody className="p-4">
                   <Form >
                     <h1>Register</h1>
-                    {this.state.success &&   <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss} fade={true}>
-                  User: {this.state.username} Registered successfully!
-                </Alert>}
+                     {this.state.success &&
+
+<Modal isOpen={this.state.visible} className={'modal-success ' + this.props.className}>
+                  <ModalHeader>Username: {this.state.username} Registered Successfully!</ModalHeader>
+
+                </Modal>}
+
+
+  {/* <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss}>
+Username: {this.state.username} Registered Successfully!
+</Alert> */}
+
+
 
 
                     <InputGroup className="mb-3">
