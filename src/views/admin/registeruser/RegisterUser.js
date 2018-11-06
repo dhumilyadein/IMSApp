@@ -115,7 +115,7 @@ class RegisterUser extends Component {
             <Col md="10">
               <Card className="mx-4">
                 <CardBody className="p-4">
-                  <Form onSubmit={this.submitHandler}>
+                  <Form >
                     <h1>Register</h1>
                     {this.state.success &&   <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss}>
                   User: {this.state.username} Registered successfully!
@@ -339,9 +339,14 @@ class RegisterUser extends Component {
                       this.state.errors.role && (
                         <font color="red"> <p>{this.state.errors.role.msg}</p></font>
                       )}
-                    <Button color="success" block>
-                      Create Account
-                    </Button>
+                    <Row className="align-items-center">
+                    <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
+                <Button type="submit" onClick={this.submitHandler} block color="success"> Register</Button>
+              </Col>
+              <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
+                <Button block color="info">Reset</Button>
+              </Col></Row>
+
                   </Form>
                 </CardBody>
               </Card>
