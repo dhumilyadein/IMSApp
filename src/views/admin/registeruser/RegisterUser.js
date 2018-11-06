@@ -39,13 +39,23 @@ class RegisterUser extends Component {
       status: "Active",
    disabled: true,
    checked: true,
-   visible:true
+   visible:true,
+   modalSuccess:false
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
     this.roleHandler = this.roleHandler.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.toggleSuccess = this.toggleSuccess.bind(this);
+
+
+  }
+
+  toggleSuccess() {
+    this.setState({
+      modalSuccess: !this.state.modalSuccess,
+    });
   }
 
     /**
@@ -153,10 +163,10 @@ class RegisterUser extends Component {
                 <CardBody className="p-4">
                   <Form >
                     <h1>Register</h1>
-                     {this.state.success &&
+                      {this.state.success &&
 
-<Modal isOpen={this.state.visible} className={'modal-success ' + this.props.className}>
-                  <ModalHeader>Username: {this.state.username} Registered Successfully!</ModalHeader>
+<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
+                  <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.username} Registered Successfully!</ModalHeader>
 
                 </Modal>}
 
