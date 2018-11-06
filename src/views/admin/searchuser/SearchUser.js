@@ -27,20 +27,26 @@ class SearchUser extends Component {
  * @param {*} e
  */
 searchHandler(e) {
+
+  console.log("searchHandler ENTER");
+
   e.preventDefault();
-  console.log(this.state);
-  axios
-    .post("http://localhost:8001/api/search", this.state)
-    .then(result => {
-      if (result.data.errors) {
-        return this.setState(result.data);
-      }
-      return this.setState({
-        userdata: result.data,
-        errors: null,
-        success: true
-      });
-    });
+
+  axios.post("http://localhost:8001/api/search", this.state).then(res => {
+
+    console.log("response - " + JSON.stringify(res.data));
+    console.log("response errors - " + res.data.errors);
+    console.log("response message - " + res.data.message);
+
+    if (res.data.error) {
+      return this.setState({ error: res.data.message });
+    }  if (res.data.errors) {
+      return this.setState({ errors: res.data.errors });
+    }
+
+
+   
+  });
 }
 
   /**

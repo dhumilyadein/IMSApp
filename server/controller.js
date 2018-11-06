@@ -86,34 +86,25 @@ module.exports = function (app) {
     })
   ];
 
-  function Search(req, res) {
+  function search(req, res) {
 
-    console.log("\n SEARCH ENTER - " + req.body.username + " " + req.body.password);
+    console.log("\n SEARCH ENTER - " + req.body.username );
 
     var resMsg = null;
     var userData = null;
 
     //Initial validation like fields empty check
-    var valResult = validationResult(req);
-    if (!valResult.isEmpty()) {
-
+ 
+    var errors = validationResult(req);
+   
       //Mapping the value to the same object
-      valResult = valResult.mapped();
-
-      var validationResultString = JSON.stringify(valResult);
-      console.log("validationResultString - " + validationResultString);
-
-      if (valResult.username && valResult.username.msg) {
-        resMsg = { error: true, message: valResult.username.msg };
-      } else if (valResult.password && valResult.password.msg) {
-        resMsg = { error: true, message: valResult.password.msg };
-      } else {
-        resMsg = { error: true, message: "Login validation failed... Something went wrong!" };
+     
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
       }
-
       // Terminating flow as validation fails.
-      return res.send(resMsg);
-    } else {
+      
+  else {
       //Fetching user from Mongo after initial validation is done
       User.findOne({
         username: req.body.username,
@@ -128,7 +119,7 @@ module.exports = function (app) {
           } else {
             req.session.user = userData;
             req.session.isLoggedIn = true;
-            resMsg = { error: false, message: "Authentication Successful.. You are signed in.", userData };
+            resMsg = { error: false, message: "user Found", userData };
           }
 
           if (resMsg) {
@@ -145,7 +136,7 @@ module.exports = function (app) {
     }
   }
 
-  function Register(req, res) {
+  function register(req, res) {
 
     console.log("in Register");
     var errors = validationResult(req);
@@ -167,8 +158,8 @@ module.exports = function (app) {
       });
   }
 
-  app.post("/api/Register", regValidation, Register);
-  app.post("/api/Search", serValidation, Search );
+  app.post("/api/register", regValidation, register);
+  app.post("/api/search", serValidation, search );
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
   const logValidation = [
