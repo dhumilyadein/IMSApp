@@ -31,7 +31,7 @@ class Login extends Component {
 
   /**
    * @description Handles the form submit request
-   * @param {*} e 
+   * @param {*} e
    */
   submitHandler(e) {
 
@@ -77,7 +77,7 @@ class Login extends Component {
 
   /**
    * @description Called when the change event is triggered.
-   * @param {*} e 
+   * @param {*} e
    */
   changeHandler(e) {
     this.setState({
@@ -85,16 +85,7 @@ class Login extends Component {
     });
   }
 
-  // verifyCredentials() {
 
-  //   axios.get('http://www.imsapp.com:3000/users').
-  //     then(response => {
-  //       //this.setState({ verifyCredentialsResponse: response.userId });
-  //       console.log('verifyCredentialsResponse - ' + JSON.stringify(response));
-  //       console.log('verifyCredentialsResponse - ' + response.data[0].userId);
-  //     });
-
-  // }
 
   render() {
     return (

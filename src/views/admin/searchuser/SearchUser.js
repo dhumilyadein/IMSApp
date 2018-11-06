@@ -24,47 +24,22 @@ class SearchUser extends Component {
  * @description Handles the form submit request
  * @param {*} e
  */
-  submitHandler(e) {
-
-    console.log("submitHandler ENTER");
-
-    e.preventDefault();
-
-    axios.post("http://localhost:8001/api/register", this.state).then(res => {
-
-      console.log("response - " + JSON.stringify(res.data));
-      console.log("response errors - " + res.data.errors);
-      console.log("response message - " + res.data.message);
-
-      if (res.data.error) {
-        return this.setState({ error: res.data.message });
-      } if (res.data.errors) {
-        return this.setState({ valerrors: res.data.errors });
+submitHandler(e) {
+  e.preventDefault();
+  console.log(this.state);
+  axios
+    .post("http://localhost:8001/api/register", this.state)
+    .then(result => {
+      if (result.data.errors) {
+        return this.setState(result.data);
       }
-
-      console.log("Number of roles - " + res.data.userData.role.length + " Roles - " + res.data.userData.role);
-
-      if (res.data.userData.role.length === 1) {
-
-        if (res.data.userData.role == 'admin') {
-
-          console.log('redirecting to registeruser page');
-          return (window.location = "/#/admin/registeruser");
-        } else {
-          return (window.location = "/#/Dashboard");
-        }
-      } else if (res.data.userData.role.length > 1) {
-        return (window.location = "/#/Dashboard");
-      } else {
-        return (window.location = "/#/Dashboard");
-      }
-
-      res.data.userData.role.forEach(function (role) {
-        console.log(role);
+      return this.setState({
+        userdata: result.data,
+        errors: null,
+        success: true
       });
-      //return (window.location = "/AdminPage");
     });
-  }
+}
 
   /**
      * @description Called when the change event is triggered.
@@ -132,6 +107,11 @@ class SearchUser extends Component {
                         autoComplete="email"
                         onChange={this.changeHandler} />
                     </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.email && (
+                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
+                      )}
 
                      <InputGroup className="mb-2">
                           <InputGroupAddon addonType="prepend">
