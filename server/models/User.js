@@ -35,7 +35,8 @@ var UserSchema = new Schema({
   role: {
     type: Array,
     required: true
-  }
+  },
+  status: {type: String}
 
 });
 

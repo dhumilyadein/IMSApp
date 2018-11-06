@@ -13,7 +13,8 @@ import {
   InputGroupText,
   Row,
   Table,
-  Alert
+  Alert,
+
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
 import axios from "axios";
@@ -30,7 +31,10 @@ class RegisterUser extends Component {
       role: ["student"],
       userdata: null,
       success: false,
-      errors: null
+      errors: null,
+      status: "Active",
+   disabled: true,
+   checked: true
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
@@ -73,18 +77,36 @@ class RegisterUser extends Component {
    * @param {*} e
    */
   roleHandler = e => {
+
+
     if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
       const temp = this.state.role;
       temp.push(e.target.name);
 
       this.setState({ role: temp }, () => console.log(this.state.role));
     }
-    if (!e.target.checked && this.state.role.indexOf(e.target.name) !== -1) {
+     else if(!e.target.checked && this.state.role.indexOf(e.target.name) !== -1) {
       const temp = this.state.role;
       temp.splice(this.state.role.indexOf(e.target.name), 1);
 
       this.setState({ role: temp }, () => console.log(this.state.role));
     }
+
+    if(e.target.name==="student"&& e.target.checked)
+    { console.log("Checked");
+      this.setState({
+        checked:!this.state.checked,
+       disabled: true,
+       role:["student"]
+
+      },  () => console.log(this.state.role+" checked: " +this.state.checked));}
+
+
+     else if(e.target.name==="student" && !e.target.checked)
+    { console.log("not checked");
+      this.setState({ checked:!this.state.checked, disabled: false,
+        },  () => console.log(this.state.role+" checked: " +this.state.checked));}
+
   };
 
   render() {
@@ -257,6 +279,8 @@ class RegisterUser extends Component {
                                   color={"primary"}
                                   size={"sm"}
                                   onChange={this.roleHandler}
+                                  disabled={this.state.disabled}
+                                  checked={this.state.checked}
                                 />
                               </td>
                             </tr>
@@ -271,6 +295,8 @@ class RegisterUser extends Component {
                                   color={"primary"}
                                   size={"sm"}
                                   onChange={this.roleHandler}
+                                  disabled={this.state.disabled}
+                                  checked={this.state.checked}
                                 />
                               </td>
                             </tr>
@@ -286,6 +312,8 @@ class RegisterUser extends Component {
                                   checked
                                   size={"sm"}
                                   onChange={this.roleHandler}
+
+
                                 />
                               </td>
                             </tr>
@@ -300,6 +328,8 @@ class RegisterUser extends Component {
                                   color={"primary"}
                                   size={"sm"}
                                   onChange={this.roleHandler}
+                                  disabled={this.state.disabled}
+                                  checked={this.state.checked}
                                 />
                               </td>
                             </tr>
