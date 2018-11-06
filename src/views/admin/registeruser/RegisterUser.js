@@ -13,7 +13,7 @@ import {
   InputGroupText,
   Row,
   Table,
-  Alert,
+  Alert
 
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
@@ -35,15 +35,25 @@ class RegisterUser extends Component {
       errors: null,
       status: "Active",
    disabled: true,
-   checked: true
+   checked: true,
+   visible:true
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
     this.roleHandler = this.roleHandler.bind(this);
     this.resetForm = this.resetForm.bind(this);
+    this.onDismiss = this.onDismiss.bind(this);
   }
 
-   /**
+    /**
+   * @description Dismisses the alert
+   * @param {*} e
+   */
+  onDismiss() {
+    this.setState({ visible: false });
+  }
+
+  /**
    * @description Resets the form
    * @param {*} e
    */
@@ -66,6 +76,7 @@ class RegisterUser extends Component {
    * @param {*} e
    */
   submitHandler(e) {
+
     e.preventDefault();
     console.log(this.state);
     axios
@@ -74,11 +85,13 @@ class RegisterUser extends Component {
         if (result.data.errors) {
           return this.setState(result.data);
         }
+
         return this.setState({
           userdata: result.data,
           errors: null,
           success: true
         });
+
       });
   }
 
@@ -137,7 +150,7 @@ class RegisterUser extends Component {
                 <CardBody className="p-4">
                   <Form >
                     <h1>Register</h1>
-                    {this.state.success &&   <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss}>
+                    {this.state.success &&   <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss} fade={true}>
                   User: {this.state.username} Registered successfully!
                 </Alert>}
 

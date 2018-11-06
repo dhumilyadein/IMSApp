@@ -58,6 +58,13 @@ module.exports = function (app) {
           throw new Error("This email is already in use");
         }
       });
+    }),
+    check("username").custom(value => {
+      return User.findOne({ username: value }).then(function (user) {
+        if (user) {
+          throw new Error("This username is already in use");
+        }
+      });
     })
   ];
 
