@@ -78,7 +78,8 @@ class RegisterUser extends Component {
       firstname: "",
       lastname: "",
       password: "",
-      password_con: ""
+      password_con: "",
+      errors:null
     });
 
   }
@@ -102,7 +103,8 @@ class RegisterUser extends Component {
         return this.setState({
           userdata: result.data,
           errors: null,
-          success: true
+          success: true,
+          modalSuccess:true
         });
 
       });
