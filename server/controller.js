@@ -1,4 +1,4 @@
-const bodyparser = require("body-parser");
+
 var { check, validationResult } = require("express-validator/check");
 
 const User = require("./models/User");
@@ -86,6 +86,8 @@ module.exports = function (app) {
     })
   ];
 
+  const importValidation= [];
+
   function search(req, res) {
 
     console.log("\n SEARCH ENTER - " + req.body.username );
@@ -157,7 +159,13 @@ module.exports = function (app) {
         return res.send(err)
       });
   }
+function importExcel(req,res)
+{console.log("in import  " + req.file);
 
+
+
+}
+  app.post("/api/importExcel", importValidation, importExcel);
   app.post("/api/register", regValidation, register);
   app.post("/api/search", serValidation, search );
   app.get("/", (req, res) => res.json("sdasdsa"));

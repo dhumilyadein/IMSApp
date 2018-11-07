@@ -40,7 +40,8 @@ class RegisterUser extends Component {
    disabled: true,
    checked: true,
    visible:true,
-   modalSuccess:true
+   modalSuccess:true,
+   file:null
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
@@ -48,6 +49,10 @@ class RegisterUser extends Component {
     this.resetForm = this.resetForm.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
+    this.fileInput = React.createRef();
+    this.fileUpload = this.fileUpload.bind(this); 
+ 
+  this.fileHandler = this.fileHandler.bind(this); 
 
 
   }
@@ -153,14 +158,36 @@ class RegisterUser extends Component {
       this.setState({ checked:!this.state.checked, disabled: false
         },  () => console.log(this.state.role+" checked: " +this.state.checked));}
 
-  };
+  }
 
+/**
+   * @description handles the file upload
+   * @param {*} e
+   */
+  fileHandler = e => {
+    e.preventDefault();
+    
+    let formData = new FormData();
+    formData.append('file', this.state.file);
+
+   axios.post("http://localhost:8001/api/importExcel", formData)
+    .then((result) => {
+      // access results...
+    });
+
+  }
+
+fileUpload = e =>{
+  this.setState({ file: e.target.files[0] });
+
+}
   render() {
     return (
       <div>
+         
         <Container>
-          <Row className="justify-content-center" lg="2">
-            <Col md="10">
+          <Row  lg="2">
+            <Col md="6">
               <Card className="mx-4">
                 <CardBody className="p-4">
                   <Form >
@@ -171,13 +198,6 @@ class RegisterUser extends Component {
                   <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.username} Registered Successfully!</ModalHeader>
 
                 </Modal>}
-
-
-  {/* <Alert color="success" isOpen={this.state.visible} toggle={this.onDismiss}>
-Username: {this.state.username} Registered Successfully!
-</Alert> */}
-
-
 
 
                     <InputGroup className="mb-3">
@@ -415,6 +435,52 @@ Username: {this.state.username} Registered Successfully!
                 </CardBody>
               </Card>
             </Col>
+
+            <Col md="6">
+            <Card className="mx-4">
+                <CardBody className="p-4">
+                  <Form onSubmit={this.fileHandler} >
+                    <h1>Import Users</h1>
+                      {this.state.success &&
+
+<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
+                  <ModalHeader toggle={this.toggleSuccess}> Imported Successfully!</ModalHeader>
+
+                </Modal>}
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                       
+                      </InputGroupAddon>
+                      <h3>upload excel file(xlxs,xlx)</h3>
+                      <Input
+                        type="file"
+                        name="file"
+                        id="file"
+                        ref={this.fileInput} 
+                       
+                        onChange={this.fileUpload}
+                      />
+                    </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.file && (
+                        <font color="red">  <p>{this.state.errors.file.msg}</p></font>
+                      )}
+                    <Row className="align-items-center">
+                    <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
+                <Button type="submit" block color="success"> Import sheet</Button>
+              </Col>
+             </Row>
+
+                  </Form>
+                </CardBody>
+              </Card>
+            
+             </Col>
+
+
+            
           </Row>
         </Container>
       </div>
