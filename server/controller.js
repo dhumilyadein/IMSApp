@@ -160,8 +160,9 @@ module.exports = function (app) {
       });
   }
 function importExcel(req,res)
-{console.log("in import  " + req.file);
-
+{console.log("in import  " + req.body);
+var user1 = new User(req.body);
+    console.log("user = " + user1);
 
 
 }

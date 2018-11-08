@@ -167,10 +167,8 @@ class RegisterUser extends Component {
   fileHandler = e => {
     e.preventDefault();
     
-    let formData = new FormData();
-    formData.append('file', this.state.file);
-
-   axios.post("http://localhost:8001/api/importExcel", formData)
+   
+   axios.post("http://localhost:8001/api/importExcel", this.state)
     .then((result) => {
       // access results...
     });
@@ -443,10 +441,10 @@ fileUpload = e =>{
                     <h1>Import Users</h1>
                       {this.state.success &&
 
-<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
+{/* <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
                   <ModalHeader toggle={this.toggleSuccess}> Imported Successfully!</ModalHeader>
 
-                </Modal>}
+                </Modal>} */}
 
 
                     <InputGroup className="mb-3">
