@@ -441,10 +441,6 @@ fileUpload = e =>{
                     <h1>Import Users</h1>
                       {this.state.success &&
 
-{/* <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}> Imported Successfully!</ModalHeader>
-
-                </Modal>} */}
 
 
                     <InputGroup className="mb-3">
