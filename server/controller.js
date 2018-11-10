@@ -3,9 +3,35 @@ var { check, validationResult } = require("express-validator/check");
 
 const User = require("./models/User");
 
+var multer = require('multer');
+var xlstojson = require("xls-to-json-lc");
+var xlsxtojson = require("xlsx-to-json-lc");
+
+var storage = multer.diskStorage({ //multers disk storage settings
+  destination: function (req, file, cb) {
+      cb(null, './uploads/')
+  },
+  filename: function (req, file, cb) {
+      var datetimestamp = Date.now();
+      cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+  }
+});
+
+var upload = multer({ //multer settings
+              storage: storage,
+              fileFilter : function(req, file, callback) { //file filter
+                  if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
+                      return callback(new Error('Wrong extension type'));
+                  }
+                  callback(null, true);
+              }
+          }).single('file');
+
 
 module.exports = function (app) {
 
+
+   
   const serValidation= [
     check("username")
       .not()
@@ -160,12 +186,78 @@ module.exports = function (app) {
       });
   }
 function importExcel(req,res)
-{console.log("in import  " + req.body);
-var user1 = new User(req.body);
-    console.log("user = " + user1);
+{ 
+  console.log("in import  " + !req.file);
+
+  var exceltojson;
+        upload(req,res,function(err){
+            if(err){
+                 res.json({error_code:1,err_desc:err});
+                 return;
+            }
+            /** Multer gives us file info in req.file object */
+            if(!req.file){
+                res.json({error_code:1,err_desc:"No file passed"});
+                return;
+            }
+            /** Check the extension of the incoming file and 
+             *  use the appropriate module
+             */
+            if(req.file.originalname.split('.')[req.file.originalname.split('.').length-1] === 'xlsx'){
+                exceltojson = xlsxtojson;
+            } else {
+                exceltojson = xlstojson;
+            }
+            console.log(req.file.path);
+            try {
+                exceltojson({
+                    input: req.file.path,
+                    output: null, //since we don't need output.json
+                    lowerCaseHeaders:true
+                }, function(err,result){
+                    if(err) {
+                      
+                        return res.json({error_code:1,err_desc:err, data: null});
+                    } 
+                    res.json({error_code:0,err_desc:null, data: result});
+                    console.log("result length: " +result.length)
+                   for(i=0;i<result.length;i++)
+                   {
+                    var user=new User(result[i]);
+                    if(result[i].role1)
+                    user.role.push(result[i].role1);
+                    if(result[i].role2)
+                    user.role.push(result[i].role2);
+                    if(result[i].role3)
+                    user.role.push(result[i].role3);
+                    console.log("User: " + user);
+
+                    user.password = user.hashPassword(user.password);
+    user
+      .save()
+      .then(user => {
+        return res.json(user);
+      })
+      .catch(err => {
+        return res.send(err)
+      });
+                   }
 
 
-}
+                });
+            } catch (e){
+                res.json({error_code:1,err_desc:"Corupted excel file"});
+            }
+        })
+       
+
+ 
+      }
+
+
+
+
+
   app.post("/api/importExcel", importValidation, importExcel);
   app.post("/api/register", regValidation, register);
   app.post("/api/search", serValidation, search );

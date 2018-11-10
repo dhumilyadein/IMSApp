@@ -20,14 +20,14 @@ import {
 
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
-import axios from "axios";
+import axios, { post } from "axios";
 
 class RegisterUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
       username: null,
-      email:null,
+      email:"dfdfdfd",
       firstname: null,
       lastname: null,
       password: null,
@@ -41,7 +41,8 @@ class RegisterUser extends Component {
    checked: true,
    visible:true,
    modalSuccess:true,
-   file:null
+   file:null,
+  
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
@@ -49,10 +50,9 @@ class RegisterUser extends Component {
     this.resetForm = this.resetForm.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
-    this.fileInput = React.createRef();
-    this.fileUpload = this.fileUpload.bind(this); 
- 
-  this.fileHandler = this.fileHandler.bind(this); 
+    
+    this.fileHandler = this.fileHandler.bind(this); 
+     this.fileChange = this.fileChange.bind(this); 
 
 
   }
@@ -165,20 +165,28 @@ class RegisterUser extends Component {
    * @param {*} e
    */
   fileHandler = e => {
-    e.preventDefault();
-    
-   
-   axios.post("http://localhost:8001/api/importExcel", this.state)
-    .then((result) => {
-      // access results...
-    });
+    e.preventDefault() // Stop form submit
+    const data = new FormData();
+    data.append('file', this.state.file,this.state.file.name);
+    axios
+    .post("http://localhost:8001/api/importExcel", data)
+    .then(res => {
+      console.log(res.statusText)
+      console.log(res.data.data)
 
-  }
+    })
+    }
+  
 
-fileUpload = e =>{
-  this.setState({ file: e.target.files[0] });
+fileChange = event =>{
+  const file = event.target.files[0];
+  this.setState({ file: file, filename:file.name }, () => console.log("file:  "+ this.state.file.name));
+
+
 
 }
+
+
   render() {
     return (
       <div>
@@ -437,14 +445,9 @@ fileUpload = e =>{
             <Col md="6">
             <Card className="mx-4">
                 <CardBody className="p-4">
-                  <Form onSubmit={this.fileHandler} >
+                  <Form  >
                     <h1>Import Users</h1>
-                      {this.state.success &&
-
-<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}> Imported Successfully!</ModalHeader>
-
-                </Modal>}
+                      
 
 
                     <InputGroup className="mb-3">
@@ -456,18 +459,14 @@ fileUpload = e =>{
                         type="file"
                         name="file"
                         id="file"
-                        ref={this.fileInput} 
-                       
-                        onChange={this.fileUpload}
+                                         
+                        onChange={this.fileChange}
                       />
                     </InputGroup>
-                    {this.state.errors &&
-                      this.state.errors.file && (
-                        <font color="red">  <p>{this.state.errors.file.msg}</p></font>
-                      )}
+                    
                     <Row className="align-items-center">
                     <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                <Button type="submit" block color="success"> Import sheet</Button>
+                <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
               </Col>
              </Row>
 
