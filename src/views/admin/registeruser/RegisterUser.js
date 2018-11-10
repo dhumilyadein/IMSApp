@@ -170,11 +170,30 @@ class RegisterUser extends Component {
     data.append('file', this.state.file,this.state.file.name);
     axios
     .post("http://localhost:8001/api/importExcel", data)
-    .then(res => {
-      console.log(res.statusText)
-      console.log(res.data.data)
+    .then(result => {
+      if (result.data.errors) {
+        return this.setState(result.data);
+      }
 
-    })
+      return this.setState({
+        userdata: result.data,
+        errors: null,
+        success: true,
+        modalSuccess:true
+      });
+
+    });
+    
+    // .then(res => {
+    //   console.log(res.statusText)
+    //   console.log(res.data.length)
+    //   errors: null,
+    //       success: true,
+    //       modalSuccess:true
+
+    // }
+    
+    // )
     }
   
 
@@ -447,7 +466,12 @@ fileChange = event =>{
                 <CardBody className="p-4">
                   <Form  >
                     <h1>Import Users</h1>
-                      
+                    {this.state.success &&
+
+<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
+                  <ModalHeader toggle={this.toggleSuccess}>Imported Successfully!</ModalHeader>
+
+                </Modal>}
 
 
                     <InputGroup className="mb-3">
