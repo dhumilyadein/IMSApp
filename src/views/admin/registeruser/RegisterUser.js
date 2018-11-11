@@ -167,34 +167,27 @@ class RegisterUser extends Component {
   fileHandler = e => {
     e.preventDefault() // Stop form submit
     const data = new FormData();
-    data.append('file', this.state.file,this.state.file.name);
+         if(this.state.file===null)
+    alert("Please choose the excel file before submitting");
+
+   else
+   { data.append('file', this.state.file,this.state.file.name);
     axios
     .post("http://localhost:8001/api/importExcel", data)
-    .then(result => {
-      if (result.data.errors) {
-        return this.setState(result.data);
-      }
-
+    .then(res => {
+      console.log("in Res "+JSON.stringify(res.data));
+     if(res.data.error_code===1)
+     alert("Please choose only XLS or XLSX file");
+         else{
       return this.setState({
-        userdata: result.data,
+        
         errors: null,
         success: true,
         modalSuccess:true
-      });
-
-    });
+      });}
     
-    // .then(res => {
-    //   console.log(res.statusText)
-    //   console.log(res.data.length)
-    //   errors: null,
-    //       success: true,
-    //       modalSuccess:true
-
-    // }
-    
-    // )
-    }
+    })}}
+   
   
 
 fileChange = event =>{
@@ -469,7 +462,7 @@ fileChange = event =>{
                     {this.state.success &&
 
 <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Imported Successfully!</ModalHeader>
+                  <ModalHeader toggle={this.toggleSuccess}>Excel sheet Imported Successfully!</ModalHeader>
 
                 </Modal>}
 
@@ -478,7 +471,7 @@ fileChange = event =>{
                       <InputGroupAddon addonType="prepend">
                        
                       </InputGroupAddon>
-                      <h3>upload excel file(xlxs,xlx)</h3>
+                      <h3>upload excel file(XLS,XLSX)</h3>
                       <Input
                         type="file"
                         name="file"

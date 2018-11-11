@@ -13,7 +13,8 @@ var storage = multer.diskStorage({ //multers disk storage settings
   },
   filename: function (req, file, cb) {
       var datetimestamp = Date.now();
-      cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+      cb(null, file.fieldname + '-' + datetimestamp + '.' +
+       file.originalname.split('.')[file.originalname.split('.').length -1])
   }
 });
 
@@ -198,6 +199,7 @@ function importExcel(req,res)
             /** Multer gives us file info in req.file object */
             if(!req.file){
                 res.json({error_code:1,err_desc:"No file passed"});
+               
                 return;
             }
             /** Check the extension of the incoming file and 
@@ -220,7 +222,7 @@ function importExcel(req,res)
                         return res.json({error_code:1,err_desc:err, data: null});
                     } 
                     res.json({error_code:0,err_desc:null, data: result});
-                    console.log("result length: " +result.length)
+                    //console.log("result length: " +data.length)
                    for(i=0;i<result.length;i++)
                    {
                     var user=new User(result[i]);
