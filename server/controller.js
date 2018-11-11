@@ -6,34 +6,35 @@ const User = require("./models/User");
 var multer = require('multer');
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
+var resu = null;
 
 var storage = multer.diskStorage({ //multers disk storage settings
   destination: function (req, file, cb) {
-      cb(null, './uploads/')
+    cb(null, './uploads/')
   },
   filename: function (req, file, cb) {
-      var datetimestamp = Date.now();
-      cb(null, file.fieldname + '-' + datetimestamp + '.' +
-       file.originalname.split('.')[file.originalname.split('.').length -1])
+    var datetimestamp = Date.now();
+    cb(null, file.fieldname + '-' + datetimestamp + '.' +
+      file.originalname.split('.')[file.originalname.split('.').length - 1])
   }
 });
 
 var upload = multer({ //multer settings
-              storage: storage,
-              fileFilter : function(req, file, callback) { //file filter
-                  if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
-                      return callback(new Error('Wrong extension type'));
-                  }
-                  callback(null, true);
-              }
-          }).single('file');
+  storage: storage,
+  fileFilter: function (req, file, callback) { //file filter
+    if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
+      return callback(new Error('Wrong extension type'));
+    }
+    callback(null, true);
+  }
+}).single('file');
 
 
 module.exports = function (app) {
 
 
-   
-  const serValidation= [
+
+  const serValidation = [
     check("username")
       .not()
       .isEmpty()
@@ -41,7 +42,7 @@ module.exports = function (app) {
       .isLength({ min: 3 })
       .withMessage("Username should be at least 6 letters"),
 
-      check("email")
+    check("email")
       .not()
       .isEmpty()
       .withMessage("Email is required")
@@ -113,27 +114,27 @@ module.exports = function (app) {
     })
   ];
 
-  const importValidation= [];
+  const importValidation = [];
 
   function search(req, res) {
 
-    console.log("\n SEARCH ENTER - " + req.body.username );
+    console.log("\n SEARCH ENTER - " + req.body.username);
 
     var resMsg = null;
     var userData = null;
 
     //Initial validation like fields empty check
- 
+
     var errors = validationResult(req);
-   
-      //Mapping the value to the same object
-     
-      if (!errors.isEmpty()) {
-        return res.send({ errors: errors.mapped() });
-      }
-      // Terminating flow as validation fails.
-      
-  else {
+
+    //Mapping the value to the same object
+
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.mapped() });
+    }
+    // Terminating flow as validation fails.
+
+    else {
       //Fetching user from Mongo after initial validation is done
       User.findOne({
         username: req.body.username,
@@ -144,7 +145,7 @@ module.exports = function (app) {
           console.log("userData - " + userData);
           if (!userData) {
             resMsg = { error: true, message: "User does not exist! Please check the username." }
-          
+
           } else {
             req.session.user = userData;
             req.session.isLoggedIn = true;
@@ -187,93 +188,92 @@ module.exports = function (app) {
         return res.send(err)
       });
   }
-function importExcel(req,res)
-{ 
-  console.log("in import  " + !req.file);
+  function importExcel(req, res) {
+    console.log("in import  " + !req.file);
 
-  var exceltojson;
-        upload(req,res,function(err){
-            if(err){
-                 res.json({error_code:1,err_desc:err});
-                 return;
-            }
-            /** Multer gives us file info in req.file object */
-            if(!req.file){
-                res.json({error_code:1,err_desc:"No file passed"});
-               
-                return;
-            }
-            /** Check the extension of the incoming file and 
-             *  use the appropriate module
-             */
-            if(req.file.originalname.split('.')[req.file.originalname.split('.').length-1] === 'xlsx'){
-                exceltojson = xlsxtojson;
-            } else {
-                exceltojson = xlstojson;
-            }
-            console.log(req.file.path);
-            try {
-                exceltojson({
-                    input: req.file.path,
-                    output: null, //since we don't need output.json
-                    lowerCaseHeaders:true
-                }, function(err,result){
-                    if(err) {
-                      
-                        return res.json({error_code:1,err_desc:err, data: null});
-                    } 
-                    res.json({error_code:0,err_desc:null, data: result});
-                    //console.log("result length: " +data.length)
-                   for(i=0;i<result.length;i++)
-                   {
-                   var found=null;
-                    var user=new User(result[i]);
-                    console.log(" result.username: "+ result[i].username);
-                   User.findOne({ username: result[i].username },function(err,doc)
-                   {
-                      
-                      if(JSON.stringify(doc)===null)
-                      { 
-                        if(result[i].role1)
-                        user.role.push(result[i].role1);
-                        if(result[i].role2)
-                        user.role.push(result[i].role2);
-                        if(result[i].role3)
-                        user.role.push(result[i].role3);
-                       // console.log("User: " + user);
-    
-                        user.password = user.hashPassword(user.password);
-        user
-          .save()
-          .then( user => {
-            return res.json(user);
-          })
-          .catch(err => {
-            return res.send(err)
+    var exceltojson;
+    upload(req, res,
+       function (err) {
+      if (err) {
+        res.json({ error_code: 1, err_desc: err });
+        return;
+      }
+      /** Multer gives us file info in req.file object */
+      if (!req.file) {
+        res.json({ error_code: 1, err_desc: "No file passed" });
+
+        return;
+      }
+      /** Check the extension of the incoming file and 
+       *  use the appropriate module
+       */
+      if (req.file.originalname.split('.')[req.file.originalname.split('.').length - 1] === 'xlsx') {
+        exceltojson = xlsxtojson;
+      } else {
+        exceltojson = xlstojson;
+      }
+      console.log(req.file.path);
+      try {
+        exceltojson({
+          input: req.file.path,
+          output: null, //since we don't need output.json
+          lowerCaseHeaders: true
+        }, function (err, result) {
+          if (err) {
+            return res.json({ error_code: 1, err_desc: err, data: null });
+          }
+          // resultHolder=result;
+         
+         
+resu=result;
+console.log("result: " + resu);
+          for (i = 0; i < resu.length; i++) {
+
+            var user = new User(resu[i]);
+            console.log(" result.username: " + resu[i].username);
+            User.findOne({ username: resu[i].username }, function (err, doc,resu) {
+              if(doc===null) {
+                if (resu[i].role1)
+                  user.role.push(resu[i].role1);
+                if (resu[i].role2)
+                  user.role.push(resu[i].role2);
+                if (resu[i].role3)
+                  user.role.push(resu[i].role3);
+                // console.log("User: " + user);
+
+                user.password = user.hashPassword(user.password);
+                user
+                  .save()
+                  .then(user => {
+                    return res.json(user);
+                  })
+                  .catch(err => {
+                    return res.send(err)
+                  });
+              }
+
+              else if(doc) {
+                console.log("Username: " + resu[i].username + " already exists...Skipping the same");
+              }
+
+             
+            });}
+
+            res.json({ error_code: 0, err_desc: null, data: result });
+          
           });}
 
-          else{console.log("Username: "+doc.username+" already exists...Skipping the same"        )}
-
-                      
-                      
-                    });
-
-
-
-
-
-                   }
-
-
-                });
-            } catch (e){
-                res.json({error_code:1,err_desc:"Corupted excel file"});
+                catch (e) {
+              console.log(e);
+              res.json({ error_code: 2, err_desc: "Corupted excel file" });
             }
-        })
-       
 
- 
-      }
+          } );
+      
+  }
+
+
+
 
 
 
@@ -281,7 +281,7 @@ function importExcel(req,res)
 
   app.post("/api/importExcel", importValidation, importExcel);
   app.post("/api/register", regValidation, register);
-  app.post("/api/search", serValidation, search );
+  app.post("/api/search", serValidation, search);
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
   const logValidation = [
