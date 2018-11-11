@@ -231,7 +231,7 @@ console.log("result: " + resu);
 
             var user = new User(resu[i]);
             console.log(" result.username: " + resu[i].username);
-            User.findOne({ username: resu[i].username }, function (err, doc,resu) {
+            User.findOne({ username: resu[i].username }, function (err, doc) {
               if(doc===null) {
                 if (resu[i].role1)
                   user.role.push(resu[i].role1);
