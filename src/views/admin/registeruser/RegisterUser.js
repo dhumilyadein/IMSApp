@@ -27,14 +27,15 @@ class RegisterUser extends Component {
     super(props);
     this.state = {
       username: null,
-      email:"dfdfdfd",
+      email:null,
       firstname: null,
       lastname: null,
       password: null,
       password_con: null,
       role: ["student"],
       userdata: null,
-      success: false,
+      regSuccess: false,
+      impSuccess:false,
       errors: null,
       status: "Active",
    disabled: true,
@@ -108,7 +109,7 @@ class RegisterUser extends Component {
         return this.setState({
           userdata: result.data,
           errors: null,
-          success: true,
+          regSuccess: true,
           modalSuccess:true
         });
 
@@ -182,7 +183,7 @@ class RegisterUser extends Component {
       return this.setState({
         
         errors: null,
-        success: true,
+        impSuccess: true,
         modalSuccess:true
       });}
     
@@ -210,7 +211,7 @@ fileChange = event =>{
                 <CardBody className="p-4">
                   <Form >
                     <h1>Register</h1>
-                      {this.state.success &&
+                      {this.state.regSuccess &&
 
 <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
                   <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.username} Registered Successfully!</ModalHeader>
@@ -459,7 +460,7 @@ fileChange = event =>{
                 <CardBody className="p-4">
                   <Form  >
                     <h1>Import Users</h1>
-                    {this.state.success &&
+                    {this.state.impSuccess &&
 
 <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
                   <ModalHeader toggle={this.toggleSuccess}>Excel sheet Imported Successfully!</ModalHeader>

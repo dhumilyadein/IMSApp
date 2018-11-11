@@ -167,7 +167,8 @@ module.exports = function (app) {
 
   function register(req, res) {
 
-    console.log("in Register");
+    console.log("in Register" + JSON.stringify(req));
+
     var errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -225,24 +226,42 @@ function importExcel(req,res)
                     //console.log("result length: " +data.length)
                    for(i=0;i<result.length;i++)
                    {
+                   var found=null;
                     var user=new User(result[i]);
-                    if(result[i].role1)
-                    user.role.push(result[i].role1);
-                    if(result[i].role2)
-                    user.role.push(result[i].role2);
-                    if(result[i].role3)
-                    user.role.push(result[i].role3);
-                    console.log("User: " + user);
+                    console.log(" result.username: "+ result[i].username);
+                   User.findOne({ username: result[i].username },function(err,doc)
+                   {
+                      
+                      if(JSON.stringify(doc)===null)
+                      { 
+                        if(result[i].role1)
+                        user.role.push(result[i].role1);
+                        if(result[i].role2)
+                        user.role.push(result[i].role2);
+                        if(result[i].role3)
+                        user.role.push(result[i].role3);
+                       // console.log("User: " + user);
+    
+                        user.password = user.hashPassword(user.password);
+        user
+          .save()
+          .then( user => {
+            return res.json(user);
+          })
+          .catch(err => {
+            return res.send(err)
+          });}
 
-                    user.password = user.hashPassword(user.password);
-    user
-      .save()
-      .then(user => {
-        return res.json(user);
-      })
-      .catch(err => {
-        return res.send(err)
-      });
+          else{console.log("Username: "+doc.username+" already exists...Skipping the same"        )}
+
+                      
+                      
+                    });
+
+
+
+
+
                    }
 
 
