@@ -43,6 +43,10 @@ class RegisterUser extends Component {
    visible:true,
    modalSuccess:true,
    file:null,
+   noFile:false,
+   corruptFile:false,
+   
+
 
     };
     this.changeHandler = this.changeHandler.bind(this);
@@ -107,14 +111,14 @@ class RegisterUser extends Component {
 
           return this.setState(result.data);
         }
-
+        this.resetForm();
         return this.setState({
           userdata: result.data,
           errors: null,
           regSuccess: true,
           modalSuccess:true
         });
-
+        
       });
   }
 
@@ -171,8 +175,13 @@ class RegisterUser extends Component {
     e.preventDefault() // Stop form submit
     const data = new FormData();
          if(this.state.file===null)
-    alert("Please choose the excel file before submitting");
+    
+    this.setState({
 
+      noFile: true,
+      modalSuccess:true
+      
+    });
    else
    { data.append('file', this.state.file,this.state.file.name);
     axios
@@ -180,7 +189,14 @@ class RegisterUser extends Component {
     .then(res => {
       console.log("in Res "+JSON.stringify(res.data));
      if(res.data.error_code===1)
-     alert("Please choose only XLS or XLSX file");
+{   document.getElementById("file").value = "";
+     this.setState({
+
+      corruptFile: true,
+      modalSuccess:true,
+      
+      
+    });}
          else{
       return this.setState({
 
@@ -195,7 +211,7 @@ class RegisterUser extends Component {
 
 fileChange = event =>{
   const file = event.target.files[0];
-  this.setState({ file: file, filename:file.name }, () => console.log("file:  "+ this.state.file.name));
+  this.setState({ file: file }, () => console.log("file:  "+ this.state.file.name));
 
 
 
@@ -216,7 +232,7 @@ fileChange = event =>{
                       {this.state.regSuccess &&
 
 <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.username} Registered Successfully!</ModalHeader>
+                  <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.userdata.username} Registered Successfully!</ModalHeader>
 
                 </Modal>}
 
@@ -469,6 +485,13 @@ fileChange = event =>{
 
                 </Modal>}
 
+                {this.state.noFile &&
+
+<Modal isOpen={this.state.modalSuccess} className={'modal-danger ' + this.props.className} toggle={this.toggleSuccess}>
+                  <ModalHeader toggle={this.toggleSuccess}>Please choose the excel file before submitting.</ModalHeader>
+
+                </Modal>}
+
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -479,6 +502,7 @@ fileChange = event =>{
                         type="file"
                         name="file"
                         id="file"
+                     
 
                         onChange={this.fileChange}
                       />
@@ -489,7 +513,12 @@ fileChange = event =>{
                 <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
               </Col>
              </Row>
+             {this.state.corruptFile &&
 
+<Modal isOpen={this.state.modalSuccess} className={'modal-danger ' + this.props.className} toggle={this.toggleSuccess}>
+                  <ModalHeader toggle={this.toggleSuccess}>Please select a valid XLS or XLSX file only.</ModalHeader>
+
+                </Modal>}
                   </Form>
                 </CardBody>
               </Card>

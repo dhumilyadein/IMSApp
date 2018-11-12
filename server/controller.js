@@ -121,7 +121,7 @@ module.exports = function(app) {
     })
   ];
 
-  const importValidation = [];
+ 
 
   function search(req, res) {
     console.log("\n SEARCH ENTER - " + req.body.username);
@@ -176,7 +176,7 @@ module.exports = function(app) {
   }
 
   function register(req, res) {
-    console.log("in Register" + JSON.stringify(req.body));
+    console.log("in Register" + req);
 
     var errors = validationResult(req);
 
@@ -235,20 +235,30 @@ module.exports = function(app) {
             if (err) {
               return res.json({ error_code: 1, err_desc: err, data: null });
             }
-            var roles=[]
+           
 for(let i=0;i<result.length;i++)
-{
-roles.push(result[i].role1);
+{ var roles=[];
+if(result[i].role1)
+  roles.push(result[i].role1);
+  if(result[i].role2)
 roles.push(result[i].role2);
+if(result[i].role3)
 roles.push(result[i].role3);
+console.log("roles: "+roles);
 var newrole="role";
 result[i][newrole]=roles;
-delete result[i][role1];
-delete result[i][role2];
-delete result[i][role3];
+var  {role1, ...temp}=result[i];
+var {role2, ...temp}=temp;
+var {role3, ...temp}=temp;
+
+result[i]=temp;
+
+
+//console.log("result "+i+" : "+ JSON.stringify(result[i]));
+
 }
 
-console.log("New result: " + result);
+//console.log("New result: " + result);
 
             var warning = [];
 
@@ -256,7 +266,7 @@ console.log("New result: " + result);
             for (let i = 0; i < result.length; i++) {
 
               let user = new User(result[i]);
-              console.log(" result.username: " + result[i].username);
+              //console.log(" result.username: " + result[i].username);
               User.findOne(
                 {
                   $or: [
@@ -272,7 +282,7 @@ console.log("New result: " + result);
                     );
 
                     console.log("User: " + user);
-                    var errors = validationResult(user);
+                   
                     user.password = user.hashPassword(user.password);
 
                     user
@@ -308,8 +318,7 @@ console.log("New result: " + result);
                 }
               );
 
-              //log
-              console.log("In loop k " + k++);
+              
             }
 
 
@@ -322,7 +331,7 @@ console.log("New result: " + result);
     });
   }
 
-  app.post("/api/importExcel", importValidation, importExcel);
+  app.post("/api/importExcel", importExcel);
   app.post("/api/register", regValidation, register);
   app.post("/api/search", serValidation, search);
   app.get("/", (req, res) => res.json("sdasdsa"));
