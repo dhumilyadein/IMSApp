@@ -174,19 +174,21 @@ class RegisterUser extends Component {
   fileHandler = e => {
     e.preventDefault() // Stop form submit
     const data = new FormData();
-         if(this.state.file===null)
+    console.log("file"+ this.state.file);
+         if(!this.state.file)
     
     this.setState({
 
       noFile: true,
-      modalSuccess:true
+      modalSuccess:true,
+      corruptFile: false
       
     });
    else
    { data.append('file', this.state.file,this.state.file.name);
     axios
     .post("http://localhost:8001/api/importExcel", data)
-    .then(res => {
+    .then(res => { 
       console.log("in Res "+JSON.stringify(res.data));
      if(res.data.error_code===1)
 {   document.getElementById("file").value = "";
@@ -194,6 +196,7 @@ class RegisterUser extends Component {
 
       corruptFile: true,
       modalSuccess:true,
+      file:null
       
       
     });}
