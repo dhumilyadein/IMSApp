@@ -176,7 +176,7 @@ module.exports = function(app) {
   }
 
   function register(req, res) {
-    console.log("in Register" + req);
+    console.log("req.body: "+ JSON.stringify(req.body));
 
     var errors = validationResult(req);
 
@@ -253,7 +253,13 @@ var {role3, ...temp}=temp;
 
 result[i]=temp;
 
+req.body=result[i];
+console.log("req.body: "+ JSON.stringify(req.body));
+var errors = validationResult(req);
 
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.mapped() });
+    }
 //console.log("result "+i+" : "+ JSON.stringify(result[i]));
 
 }

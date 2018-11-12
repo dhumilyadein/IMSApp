@@ -201,6 +201,7 @@ class RegisterUser extends Component {
       
     });}
          else{
+          document.getElementById("file").value = "";
       return this.setState({
 
         errors: null,
@@ -484,7 +485,7 @@ fileChange = event =>{
                     {this.state.impSuccess &&
 
 <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Excel sheet Imported Successfully!</ModalHeader>
+                  <ModalHeader toggle={this.toggleSuccess}>Excel sheet {this.state.file.name} Imported Successfully!</ModalHeader>
 
                 </Modal>}
 
