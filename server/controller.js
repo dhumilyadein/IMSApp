@@ -235,11 +235,26 @@ module.exports = function(app) {
             if (err) {
               return res.json({ error_code: 1, err_desc: err, data: null });
             }
+            var roles=[]
+for(let i=0;i<result.length;i++)
+{
+roles.push(result[i].role1);
+roles.push(result[i].role2);
+roles.push(result[i].role3);
+var newrole="role";
+result[i][newrole]=roles;
+delete result[i][role1];
+delete result[i][role2];
+delete result[i][role3];
+}
+
+console.log("New result: " + result);
+
             var warning = [];
-            var j = 1;
-            var k = 1;
+
             var counter = 0;
             for (let i = 0; i < result.length; i++) {
+
               let user = new User(result[i]);
               console.log(" result.username: " + result[i].username);
               User.findOne(
@@ -250,18 +265,16 @@ module.exports = function(app) {
                   ]
                 },
                 function(err, doc) {
-                  //log
-                  console.log("find one j " + j++);
+
                   if (doc === null) {
                     console.log(
                       "result: " + i + " :" + JSON.stringify(result[i])
                     );
-                    if (result[i].role1) user.role.push(result[i].role1);
-                    if (result[i].role2) user.role.push(result[i].role2);
-                    if (result[i].role3) user.role.push(result[i].role3);
-                    console.log("User: " + user);
 
+                    console.log("User: " + user);
+                    var errors = validationResult(user);
                     user.password = user.hashPassword(user.password);
+
                     user
                       .save()
                       .then(user => {
