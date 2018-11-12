@@ -204,7 +204,7 @@ module.exports = function (app) {
 
         return;
       }
-      /** Check the extension of the incoming file and 
+      /** Check the extension of the incoming file and
        *  use the appropriate module
        */
       if (req.file.originalname.split('.')[req.file.originalname.split('.').length - 1] === 'xlsx') {
@@ -222,24 +222,21 @@ module.exports = function (app) {
           if (err) {
             return res.json({ error_code: 1, err_desc: err, data: null });
           }
-          // resultHolder=result;
-         
-         
-resu=result;
-console.log("result: " + resu);
-          for (i = 0; i < resu.length; i++) {
+let warning=[];
+          for (let i = 0; i < result.length; i++) {
 
-            var user = new User(resu[i]);
-            console.log(" result.username: " + resu[i].username);
-            User.findOne({ username: resu[i].username }, function (err, doc) {
+            let user = new User(result[i]);
+            console.log(" result.username: " + result[i].username);
+            User.findOne({$or: [{username: result[i].username},{email:result[i].email}] }, function (err, doc ) {
               if(doc===null) {
-                if (resu[i].role1)
-                  user.role.push(resu[i].role1);
-                if (resu[i].role2)
-                  user.role.push(resu[i].role2);
-                if (resu[i].role3)
-                  user.role.push(resu[i].role3);
-                // console.log("User: " + user);
+                console.log("result: "+i+" :" + JSON.stringify(result[i]) );
+                if (result[i].role1)
+                  user.role.push(result[i].role1);
+                if (result[i].role2)
+                  user.role.push(result[i].role2);
+                if (result[i].role3)
+                  user.role.push(result[i].role3);
+                console.log("User: " + user);
 
                 user.password = user.hashPassword(user.password);
                 user
@@ -252,15 +249,16 @@ console.log("result: " + resu);
                   });
               }
 
-              else if(doc) {
-                console.log("Username: " + resu[i].username + " already exists...Skipping the same");
+              else if(doc) {warning.push("Username: "+ result[i].username + " OR Email: "+result[i].email+" already exists");
+
+                console.log("Username: " + result[i].username + " already exists...Skipping the same");
               }
 
-             
+
             });}
 
-            res.json({ error_code: 0, err_desc: null, data: result });
-          
+            res.json({ error_code: 0, err_desc: null, data: result,warn:warning });
+
           });}
 
                 catch (e) {
@@ -269,7 +267,7 @@ console.log("result: " + resu);
             }
 
           } );
-      
+
   }
 
 
