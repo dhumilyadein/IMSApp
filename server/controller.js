@@ -1,39 +1,47 @@
-
 var { check, validationResult } = require("express-validator/check");
 
 const User = require("./models/User");
 
-var multer = require('multer');
+var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
-var resu = null;
 
-var storage = multer.diskStorage({ //multers disk storage settings
-  destination: function (req, file, cb) {
-    cb(null, './uploads/')
+
+var storage = multer.diskStorage({
+  //multers disk storage settings
+  destination: function(req, file, cb) {
+    cb(null, "./uploads/");
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     var datetimestamp = Date.now();
-    cb(null, file.fieldname + '-' + datetimestamp + '.' +
-      file.originalname.split('.')[file.originalname.split('.').length - 1])
+    cb(
+      null,
+      file.fieldname +
+        "-" +
+        datetimestamp +
+        "." +
+        file.originalname.split(".")[file.originalname.split(".").length - 1]
+    );
   }
 });
 
-var upload = multer({ //multer settings
+var upload = multer({
+  //multer settings
   storage: storage,
-  fileFilter: function (req, file, callback) { //file filter
-    if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length - 1]) === -1) {
-      return callback(new Error('Wrong extension type'));
+  fileFilter: function(req, file, callback) {
+    //file filter
+    if (
+      ["xls", "xlsx"].indexOf(
+        file.originalname.split(".")[file.originalname.split(".").length - 1]
+      ) === -1
+    ) {
+      return callback(new Error("Wrong extension type"));
     }
     callback(null, true);
   }
-}).single('file');
+}).single("file");
 
-
-module.exports = function (app) {
-
-
-
+module.exports = function(app) {
   const serValidation = [
     check("username")
       .not()
@@ -47,9 +55,8 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Email is required")
       .isEmail()
-      .withMessage("Please enter a valid email address"),
+      .withMessage("Please enter a valid email address")
   ];
-
 
   const regValidation = [
     check("role")
@@ -92,21 +99,21 @@ module.exports = function (app) {
     check(
       "password_con",
       "Password confirmation  is required or should be the same as password"
-    ).custom(function (value, { req }) {
+    ).custom(function(value, { req }) {
       if (value !== req.body.password) {
         throw new Error("Password don't match");
       }
       return value;
     }),
     check("email").custom(value => {
-      return User.findOne({ email: value }).then(function (user) {
+      return User.findOne({ email: value }).then(function(user) {
         if (user) {
           throw new Error("This email is already in use");
         }
       });
     }),
     check("username").custom(value => {
-      return User.findOne({ username: value }).then(function (user) {
+      return User.findOne({ username: value }).then(function(user) {
         if (user) {
           throw new Error("This username is already in use");
         }
@@ -117,7 +124,6 @@ module.exports = function (app) {
   const importValidation = [];
 
   function search(req, res) {
-
     console.log("\n SEARCH ENTER - " + req.body.username);
 
     var resMsg = null;
@@ -133,19 +139,19 @@ module.exports = function (app) {
       return res.send({ errors: errors.mapped() });
     }
     // Terminating flow as validation fails.
-
     else {
       //Fetching user from Mongo after initial validation is done
       User.findOne({
         username: req.body.username,
         email: req.body.email
       })
-        .then(function (userData) {
-
+        .then(function(userData) {
           console.log("userData - " + userData);
           if (!userData) {
-            resMsg = { error: true, message: "User does not exist! Please check the username." }
-
+            resMsg = {
+              error: true,
+              message: "User does not exist! Please check the username."
+            };
           } else {
             req.session.user = userData;
             req.session.isLoggedIn = true;
@@ -156,19 +162,21 @@ module.exports = function (app) {
             return res.send(resMsg);
           } else {
             console.log("No response from the loginUser service");
-            return res.send({ error: true, message: "Login failed.. something went wrong." });
+            return res.send({
+              error: true,
+              message: "Login failed.. something went wrong."
+            });
           }
           console.log("userData - " + userData + " resMsg - " + resMsg);
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.log(error);
         });
     }
   }
 
   function register(req, res) {
-
-    console.log("in Register" + JSON.stringify(req));
+    console.log("in Register" + JSON.stringify(req.body));
 
     var errors = validationResult(req);
 
@@ -185,15 +193,14 @@ module.exports = function (app) {
         return res.json(user);
       })
       .catch(err => {
-        return res.send(err)
+        return res.send(err);
       });
   }
   function importExcel(req, res) {
     console.log("in import  " + !req.file);
 
     var exceltojson;
-    upload(req, res,
-       function (err) {
+    upload(req, res, function(err) {
       if (err) {
         res.json({ error_code: 1, err_desc: err });
         return;
@@ -207,75 +214,100 @@ module.exports = function (app) {
       /** Check the extension of the incoming file and
        *  use the appropriate module
        */
-      if (req.file.originalname.split('.')[req.file.originalname.split('.').length - 1] === 'xlsx') {
+      if (
+        req.file.originalname.split(".")[
+          req.file.originalname.split(".").length - 1
+        ] === "xlsx"
+      ) {
         exceltojson = xlsxtojson;
       } else {
         exceltojson = xlstojson;
       }
       console.log(req.file.path);
       try {
-        exceltojson({
-          input: req.file.path,
-          output: null, //since we don't need output.json
-          lowerCaseHeaders: true
-        }, function (err, result) {
-          if (err) {
-            return res.json({ error_code: 1, err_desc: err, data: null });
-          }
-let warning=[];
-          for (let i = 0; i < result.length; i++) {
+        exceltojson(
+          {
+            input: req.file.path,
+            output: null, //since we don't need output.json
+            lowerCaseHeaders: true
+          },
+          function(err, result) {
+            if (err) {
+              return res.json({ error_code: 1, err_desc: err, data: null });
+            }
+            var warning = [];
+            var j = 1;
+            var k = 1;
+            var counter = 0;
+            for (let i = 0; i < result.length; i++) {
+              let user = new User(result[i]);
+              console.log(" result.username: " + result[i].username);
+              User.findOne(
+                {
+                  $or: [
+                    { username: result[i].username },
+                    { email: result[i].email }
+                  ]
+                },
+                function(err, doc) {
+                  //log
+                  console.log("find one j " + j++);
+                  if (doc === null) {
+                    console.log(
+                      "result: " + i + " :" + JSON.stringify(result[i])
+                    );
+                    if (result[i].role1) user.role.push(result[i].role1);
+                    if (result[i].role2) user.role.push(result[i].role2);
+                    if (result[i].role3) user.role.push(result[i].role3);
+                    console.log("User: " + user);
 
-            let user = new User(result[i]);
-            console.log(" result.username: " + result[i].username);
-            User.findOne({$or: [{username: result[i].username},{email:result[i].email}] }, function (err, doc ) {
-              if(doc===null) {
-                console.log("result: "+i+" :" + JSON.stringify(result[i]) );
-                if (result[i].role1)
-                  user.role.push(result[i].role1);
-                if (result[i].role2)
-                  user.role.push(result[i].role2);
-                if (result[i].role3)
-                  user.role.push(result[i].role3);
-                console.log("User: " + user);
+                    user.password = user.hashPassword(user.password);
+                    user
+                      .save()
+                      .then(user => {
+                        return res.json(user);
+                      })
+                      .catch(err => {
+                        return res.send(err);
+                      });
+                  } else if (doc) {
+                    warning.push(
+                      "#" + i + " Username: " +
+                        result[i].username +
+                        " or Email: " +
+                        result[i].email +
+                        " already exists"
+                    );
 
-                user.password = user.hashPassword(user.password);
-                user
-                  .save()
-                  .then(user => {
-                    return res.json(user);
-                  })
-                  .catch(err => {
-                    return res.send(err)
-                  });
-              }
+                    console.log(
+                      "Record Number " + i + " Username: " +
+                        result[i].username +
+                        " already exists...Skipping the same"
+                    );
+                    console.log("warn: " + warning);
+                  }
+                  counter++;
 
-              else if(doc) {warning.push("Username: "+ result[i].username + " OR Email: "+result[i].email+" already exists");
+                  if(counter === result.length) {
 
-                console.log("Username: " + result[i].username + " already exists...Skipping the same");
-              }
+                    return res.json({ error_code: 0, err_desc: null, data: result, warn: warning });
+                  }
+                }
+              );
 
-
-            });}
-
-            res.json({ error_code: 0, err_desc: null, data: result,warn:warning });
-
-          });}
-
-                catch (e) {
-              console.log(e);
-              res.json({ error_code: 2, err_desc: "Corupted excel file" });
+              //log
+              console.log("In loop k " + k++);
             }
 
-          } );
 
+          }
+        );
+      } catch (e) {
+        console.log(e);
+        res.json({ error_code: 2, err_desc: "Corupted excel file" });
+      }
+    });
   }
-
-
-
-
-
-
-
 
   app.post("/api/importExcel", importValidation, importExcel);
   app.post("/api/register", regValidation, register);
@@ -299,8 +331,9 @@ let warning=[];
    * @param {*} res
    */
   function loginUser(req, res) {
-
-    console.log("\n\nloginUser ENTER - " + req.body.username + " " + req.body.password);
+    console.log(
+      "\n\nloginUser ENTER - " + req.body.username + " " + req.body.password
+    );
 
     var resMsg = null;
     var userData = null;
@@ -308,7 +341,6 @@ let warning=[];
     //Initial validation like fields empty check
     var valResult = validationResult(req);
     if (!valResult.isEmpty()) {
-
       //Mapping the value to the same object
       valResult = valResult.mapped();
 
@@ -320,7 +352,10 @@ let warning=[];
       } else if (valResult.password && valResult.password.msg) {
         resMsg = { error: true, message: valResult.password.msg };
       } else {
-        resMsg = { error: true, message: "Login validation failed... Something went wrong!" };
+        resMsg = {
+          error: true,
+          message: "Login validation failed... Something went wrong!"
+        };
       }
 
       // Terminating flow as validation fails.
@@ -330,28 +365,39 @@ let warning=[];
       User.findOne({
         username: req.body.username
       })
-        .then(function (userData) {
-
+        .then(function(userData) {
           console.log("userData - " + userData);
           if (!userData) {
-            resMsg = { error: true, message: "User does not exist! Please check the username." }
-          } else if (!userData.comparePassword(req.body.password, userData.password)) {
-            resMsg = { error: true, message: "Wrong password! Try again." }
+            resMsg = {
+              error: true,
+              message: "User does not exist! Please check the username."
+            };
+          } else if (
+            !userData.comparePassword(req.body.password, userData.password)
+          ) {
+            resMsg = { error: true, message: "Wrong password! Try again." };
           } else {
             req.session.user = userData;
             req.session.isLoggedIn = true;
-            resMsg = { error: false, message: "Authentication Successful.. You are signed in.", userData };
+            resMsg = {
+              error: false,
+              message: "Authentication Successful.. You are signed in.",
+              userData
+            };
           }
 
           if (resMsg) {
             return res.send(resMsg);
           } else {
             console.log("No response from the loginUser service");
-            return res.send({ error: true, message: "Login failed.. something went wrong." });
+            return res.send({
+              error: true,
+              message: "Login failed.. something went wrong."
+            });
           }
           console.log("userData - " + userData + " resMsg - " + resMsg);
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.log(error);
         });
     }
@@ -369,9 +415,6 @@ let warning=[];
   app.get("/api/isloggedin", isLoggedIn);
 
   //--------------------------------------
-
-
-
 
   app.get("/api/logout", (req, res) => {
     req.session.destroy();

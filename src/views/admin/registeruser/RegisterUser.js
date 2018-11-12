@@ -43,7 +43,7 @@ class RegisterUser extends Component {
    visible:true,
    modalSuccess:true,
    file:null,
-  
+
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
@@ -51,9 +51,9 @@ class RegisterUser extends Component {
     this.resetForm = this.resetForm.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
-    
-    this.fileHandler = this.fileHandler.bind(this); 
-     this.fileChange = this.fileChange.bind(this); 
+
+    this.fileHandler = this.fileHandler.bind(this);
+     this.fileChange = this.fileChange.bind(this);
 
 
   }
@@ -98,11 +98,13 @@ class RegisterUser extends Component {
   submitHandler(e) {
 
     e.preventDefault();
-    console.log(this.state);
+    console.log(JSON.stringify(this.state));
+
     axios
       .post("http://localhost:8001/api/register", this.state)
-      .then(result => {
+      .then(result => {console.log("result.data "+result.data);
         if (result.data.errors) {
+
           return this.setState(result.data);
         }
 
@@ -181,15 +183,15 @@ class RegisterUser extends Component {
      alert("Please choose only XLS or XLSX file");
          else{
       return this.setState({
-        
+
         errors: null,
         impSuccess: true,
         modalSuccess:true
       });}
-    
+
     })}}
-   
-  
+
+
 
 fileChange = event =>{
   const file = event.target.files[0];
@@ -203,7 +205,7 @@ fileChange = event =>{
   render() {
     return (
       <div>
-         
+
         <Container>
           <Row  lg="2">
             <Col md="6">
@@ -470,18 +472,18 @@ fileChange = event =>{
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                       
+
                       </InputGroupAddon>
                       <h3>upload excel file(XLS,XLSX)</h3>
                       <Input
                         type="file"
                         name="file"
                         id="file"
-                                         
+
                         onChange={this.fileChange}
                       />
                     </InputGroup>
-                    
+
                     <Row className="align-items-center">
                     <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
                 <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
@@ -491,11 +493,11 @@ fileChange = event =>{
                   </Form>
                 </CardBody>
               </Card>
-            
+
              </Col>
 
 
-            
+
           </Row>
         </Container>
       </div>
