@@ -1,3 +1,5 @@
+var util = require('util')
+
 var { check, validationResult } = require("express-validator/check");
 
 const User = require("./models/User");
@@ -5,7 +7,6 @@ const User = require("./models/User");
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
-
 
 var storage = multer.diskStorage({
   //multers disk storage settings
@@ -43,20 +44,11 @@ var upload = multer({
 
 module.exports = function(app) {
   const serValidation = [
-    check("username")
+    check("find")
       .not()
       .isEmpty()
-      .withMessage("Username is required")
-      .isLength({ min: 3 })
-      .withMessage("Username should be at least 6 letters"),
-
-    check("email")
-      .not()
-      .isEmpty()
-      .withMessage("Email is required")
-      .isEmail()
-      .withMessage("Please enter a valid email address")
-  ];
+      .withMessage("Please enter Search Text")
+       ];
 
   const regValidation = [
     check("role")
@@ -121,8 +113,6 @@ module.exports = function(app) {
     })
   ];
 
- 
-
   function search(req, res) {
     console.log("\n SEARCH ENTER - " + req.body.username);
 
@@ -176,14 +166,14 @@ module.exports = function(app) {
   }
 
   function register(req, res) {
-    console.log("req.body: "+ JSON.stringify(req.body));
+    console.log("\n\nREGISTER req.body: " + JSON.stringify(req.body) + "\n");
 
     var errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return res.send({ errors: errors.mapped() });
     }
-    console.log("req body  = " + req.body);
+
     var user = new User(req.body);
     console.log("user = " + user);
     user.password = user.hashPassword(user.password);
@@ -235,42 +225,41 @@ module.exports = function(app) {
             if (err) {
               return res.json({ error_code: 1, err_desc: err, data: null });
             }
-           
-for(let i=0;i<result.length;i++)
-{ var roles=[];
-if(result[i].role1)
-  roles.push(result[i].role1);
-  if(result[i].role2)
-roles.push(result[i].role2);
-if(result[i].role3)
-roles.push(result[i].role3);
-console.log("roles: "+roles);
-var newrole="role";
-result[i][newrole]=roles;
-var  {role1, ...temp}=result[i];
-var {role2, ...temp}=temp;
-var {role3, ...temp}=temp;
 
-result[i]=temp;
+            for (let i = 0; i < result.length; i++) {
+              var roles = [];
+              if (result[i].role1) roles.push(result[i].role1);
+              if (result[i].role2) roles.push(result[i].role2);
+              if (result[i].role3) roles.push(result[i].role3);
+              console.log("roles: " + roles);
+              var newrole = "role";
+              result[i][newrole] = roles;
+              var { role1, ...temp } = result[i];
+              var { role2, ...temp } = temp;
+              var { role3, ...temp } = temp;
 
-req.body=result[i];
-console.log("req.body: "+ JSON.stringify(req.body));
-var errors = validationResult(req);
+              result[i] = temp;
 
-    if (!errors.isEmpty()) {
-      return res.json({ errors: errors.mapped() });
-    }
-//console.log("result "+i+" : "+ JSON.stringify(result[i]));
+             /*  console.log("\n\n\n\n\n\nBEFORE req: " + util.inspect(req));
+              //console.log("\n\nBEFORE req.body: " + JSON.stringify(req) + "\n");
+              req.body = result[i];
+              console.log("\n\n\n\n\n\nAFTER req.body: " + JSON.stringify(req.body) + "\n");
+              console.log("\n\n\n\n\n\nAFTER req.body: " + JSON.stringify(req.body) + "\n");
+              console.log("\n\nIMPORT EXCEL req.body: " + JSON.stringify(req.body) + "\n");
+              var errors = validationResult(req);
 
-}
+              if (!errors.isEmpty()) {
+                return res.json({ errors: errors.mapped() });
+              } */
+              console.log("result "+i+" : "+ JSON.stringify(result[i]));
+            }
 
-//console.log("New result: " + result);
+            //console.log("New result: " + result);
 
             var warning = [];
 
             var counter = 0;
             for (let i = 0; i < result.length; i++) {
-
               let user = new User(result[i]);
               //console.log(" result.username: " + result[i].username);
               User.findOne(
@@ -281,14 +270,13 @@ var errors = validationResult(req);
                   ]
                 },
                 function(err, doc) {
-
                   if (doc === null) {
                     console.log(
                       "result: " + i + " :" + JSON.stringify(result[i])
                     );
 
                     console.log("User: " + user);
-                   
+
                     user.password = user.hashPassword(user.password);
 
                     user
@@ -301,33 +289,31 @@ var errors = validationResult(req);
                       });
                   } else if (doc) {
                     warning.push(
-                      "#" + i + " Username: " +
+                      "#" +
+                        i +
+                        " Username: " +
                         result[i].username +
                         " or Email: " +
                         result[i].email +
                         " already exists"
                     );
 
-                    console.log(
-                      "Record Number " + i + " Username: " +
-                        result[i].username +
-                        " already exists...Skipping the same"
-                    );
+
                     console.log("warn: " + warning);
                   }
                   counter++;
 
-                  if(counter === result.length) {
-
-                    return res.json({ error_code: 0, err_desc: null, data: result, warn: warning });
+                  if (counter === result.length) {
+                    return res.json({
+                      error_code: 0,
+                      err_desc: null,
+                      data: result,
+                      warn: warning
+                    });
                   }
                 }
               );
-
-              
             }
-
-
           }
         );
       } catch (e) {
@@ -337,7 +323,7 @@ var errors = validationResult(req);
     });
   }
 
-  app.post("/api/importExcel", importExcel);
+  app.post("/api/importExcel", regValidation, importExcel);
   app.post("/api/register", regValidation, register);
   app.post("/api/search", serValidation, search);
   app.get("/", (req, res) => res.json("sdasdsa"));

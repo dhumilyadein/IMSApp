@@ -45,7 +45,8 @@ class RegisterUser extends Component {
    file:null,
    noFile:false,
    corruptFile:false,
-   
+   filename:null
+
 
 
     };
@@ -118,7 +119,7 @@ class RegisterUser extends Component {
           regSuccess: true,
           modalSuccess:true
         });
-        
+
       });
   }
 
@@ -176,19 +177,20 @@ class RegisterUser extends Component {
     const data = new FormData();
     console.log("file"+ this.state.file);
          if(!this.state.file)
-    
+
     this.setState({
 
       noFile: true,
       modalSuccess:true,
-      corruptFile: false
-      
+      corruptFile: false,
+      impSuccess:false
+
     });
    else
-   { data.append('file', this.state.file,this.state.file.name);
+   { data.append('file', this.state.file,this.state.filename);
     axios
     .post("http://localhost:8001/api/importExcel", data)
-    .then(res => { 
+    .then(res => {
       console.log("in Res "+JSON.stringify(res.data));
      if(res.data.error_code===1)
 {   document.getElementById("file").value = "";
@@ -196,9 +198,10 @@ class RegisterUser extends Component {
 
       corruptFile: true,
       modalSuccess:true,
-      file:null
-      
-      
+      file:null,
+      noFile:false
+
+
     });}
          else{
           document.getElementById("file").value = "";
@@ -206,7 +209,10 @@ class RegisterUser extends Component {
 
         errors: null,
         impSuccess: true,
-        modalSuccess:true
+        modalSuccess:true,
+        noFile:false,
+        corruptFile: false,
+        file:null
       });}
 
     })}}
@@ -215,7 +221,7 @@ class RegisterUser extends Component {
 
 fileChange = event =>{
   const file = event.target.files[0];
-  this.setState({ file: file }, () => console.log("file:  "+ this.state.file.name));
+  this.setState({ file: file,noFile:false,corruptFile:false,filename:file.name }, () => console.log("file:  "+ this.state.file.name));
 
 
 
@@ -485,16 +491,10 @@ fileChange = event =>{
                     {this.state.impSuccess &&
 
 <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Excel sheet {this.state.file.name} Imported Successfully!</ModalHeader>
+                  <ModalHeader toggle={this.toggleSuccess}>Excel sheet {this.state.filename} Imported Successfully!</ModalHeader>
 
                 </Modal>}
 
-                {this.state.noFile &&
-
-<Modal isOpen={this.state.modalSuccess} className={'modal-danger ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Please choose the excel file before submitting.</ModalHeader>
-
-                </Modal>}
 
 
                     <InputGroup className="mb-3">
@@ -506,23 +506,25 @@ fileChange = event =>{
                         type="file"
                         name="file"
                         id="file"
-                     
+
 
                         onChange={this.fileChange}
                       />
                     </InputGroup>
 
+{this.state.noFile
+  &&  <font color="red">  <p>Please choose the excel file before submitting.</p></font>
+  }
+
+  {this.state.corruptFile
+  &&  <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
+  }
                     <Row className="align-items-center">
-                    <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
+                    <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
                 <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
               </Col>
              </Row>
-             {this.state.corruptFile &&
 
-<Modal isOpen={this.state.modalSuccess} className={'modal-danger ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Please select a valid XLS or XLSX file only.</ModalHeader>
-
-                </Modal>}
                   </Form>
                 </CardBody>
               </Card>
