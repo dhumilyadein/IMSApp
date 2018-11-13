@@ -82,10 +82,10 @@ class SearchUser extends Component {
                 <CardBody className="p-4">
                   <Form>
                     <h1>Search Users</h1>
-                    <InputGroup className="mb-3">
+                    <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <b>Find:</b>
+                        <InputGroupText width="30">
+                          <b>Find</b>
                         </InputGroupText>
                       </InputGroupAddon>
 
@@ -99,16 +99,16 @@ class SearchUser extends Component {
                       />
                     </InputGroup>
 
-                    {this.state.errors &&
+
+ {this.state.errors &&
                       this.state.errors.find && (
                         <font color="red">  <p>{this.state.errors.find.msg}</p></font>
                       )}
 
-
-                    <InputGroup className="mb-2">
+                    <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>
-                          <b>Using:</b>
+                          <b>Using</b>
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
@@ -126,10 +126,10 @@ class SearchUser extends Component {
                       </Input>
                     </InputGroup>
 
-                    <InputGroup className="mb-2">
+                    <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>
-                          <b>in Role:</b>
+                          <b>in Role</b>
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
