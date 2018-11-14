@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const bodyparser = require("body-parser");
 const session = require("express-session");
 const cors = require("cors");
-const controller = require("./controller");
 
+const adminRegister = require("./src/admin/registerUser");
+const adminSearch = require("./src/admin/searchUser");
+const login = require("./src/login");
 const app = express();
 
 app.use(bodyparser.json());
@@ -30,6 +32,9 @@ app.use(
 
 
 
-controller(app);
+
+adminRegister(app);
+adminSearch(app);
+login(app);
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
