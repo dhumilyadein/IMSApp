@@ -44,52 +44,70 @@ var upload = multer({
 
 module.exports = function(app) {
  function importValidation(request)
- { errors =[];
+ { error ={};
   console.log("in IMPORT VAL  "+ request.username);
   var unExp = /^[0-9a-zA-Z]+$/;
   var fnExp = /^[a-zA-Z]+$/;
 
-
+//password validaion
+//  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)) 
+//  error[password]="Password should contain atleast 6 characters, inclding 1 special symbol and 1 number";
 
   if(!request.username)
-  error[username]="Username can't be empty";
+  error["username"]="Username can't be empty";
   else if(!request.username.match(unExp))
-  error[username]="Username should be alphanumeric";
+  error["username"]="Username should be alphanumeric";
+  else{
+    User.findOne({ username: request.username }).then(function(user) {
+      if (user) {
+        error["user-exists"]="This username is already in use";
+      }
+    });
+  }
+
 
   if(!request.firstname)
-  error[firstname]="firstname can't be empty";
+  error["firstname"]="firstname can't be empty";
   else if(!request.firstname.match(fnExp))
-  error[firstname]="firstname should contain only letters";
+  error["firstname"]="firstname should contain only letters";
 
-  if(!request.lasttname)
-  error[lasttname]="firstname can't be empty";
-  else if(!request.lasttname.match(fnExp))
-  error[lasttname]="firstname should contain only letters";
+  
+  if(!request.lastname)
+  error["lastname"]="lastname can't be empty";
+  else if(!request.lastname.match(fnExp))
+  error["lastname"]="lastname should contain only letters";
 
-  if(!emailRegex({exact: true}).test(request.email))
-  error[email]="Email is not valid";
+  if(!request.email)
+  error["email"]="Email can't be empty";
+ else if(!emailRegex({exact: true}).test(request.email))
+  error["email"]="Email is not valid";
+  else
+  { User.findOne({ email: request.email }).then(function(user) {
+    if (user) {
+      error["email-exists"]="This email is already in use";
+    }
+  });
 
-  if(request.role.length)
+  }
 
+  
+  if(request.role.length===0)
+  error["role"]="role can't be empty";
+  else{
+    for(let i=0;i<request.role.length;i++)
+    {if (!/^(admin|teacher|student|parent)$/.exec(request.role[i]))
+      error["role"]="role(s) are not defined correctly";
 
+    }
+  }
+//console.log("Import error: "+JSON.stringify(error));
+return error;
 
 
  }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-  const regValidation = [
+const regValidation = [
     check("role")
       .not()
       .isEmpty()
@@ -173,8 +191,12 @@ module.exports = function(app) {
         return res.send(err);
       });
   }
+
+  function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
   function importExcel(req, res) {
-    console.log("in import  " + !req.file);
+   // console.log("in import  " + !req.file);
 
     var exceltojson;
     upload(req, res, function(err) {
@@ -212,110 +234,65 @@ module.exports = function(app) {
             if (err) {
               return res.json({ error_code: 1, err_desc: err, data: null });
             }
-
+            var importErrors ={};
             for (let i = 0; i < result.length; i++) {
               var roles = [];
               if (result[i].role1) roles.push(result[i].role1);
               if (result[i].role2) roles.push(result[i].role2);
               if (result[i].role3) roles.push(result[i].role3);
-              console.log("roles: " + roles);
-              var newrole = "role";
-              result[i][newrole] = roles;
+            
+              
+              result[i]["role"] = roles;
               var { role1, ...temp } = result[i];
               var { role2, ...temp } = temp;
               var { role3, ...temp } = temp;
 
               result[i] = temp;
 
+              result[i].role =  result[i].role.filter( onlyUnique );
+              
               var impValResult=importValidation(result[i]);
+             
+               
+              if (impValResult) {
 
+                importErrors["record# "+(i+1)] = impValResult;
+                
+              }
 
-            /*   request.post({
-                url: 'http://localhost:8001/api/register',
-                body: result[i],
-                json: true
-              }, function(error, response, body){
-              console.log("Response  " + JSON.stringify(response));
-            });
+              else
+              {let user = new User(result[i]);
+                //console.log(" result.username: " + result[i].username);
+                
+                  
+  
+                      console.log("User: " + user);
+  
+                      user.password = user.hashPassword(user.password);
+  
+                      user
+                        .save()
+                        .then(user => {
+                          return res.json(user);
+                        })
+                        .catch(err => {
+                          return res.send(err);
+                        });}
 
-            return res.json({ errors: errors.mapped() }); */
-
-             /*  console.log("\n\n\n\n\n\nBEFORE req: " + util.inspect(req));
-              //console.log("\n\nBEFORE req.body: " + JSON.stringify(req) + "\n");
-              req.body = result[i];
-              console.log("\n\n\n\n\n\nAFTER req.body: " + JSON.stringify(req.body) + "\n");
-              console.log("\n\n\n\n\n\nAFTER req.body: " + JSON.stringify(req.body) + "\n");
-              console.log("\n\nIMPORT EXCEL req.body: " + JSON.stringify(req.body) + "\n");
-              var errors = validationResult(req);
-
-              if (!errors.isEmpty()) {
-                return res.json({ errors: errors.mapped() });
-              } */
-              console.log("result "+i+" : "+ JSON.stringify(result[i]));
-            }
-
-            //console.log("New result: " + result);
-
-            var warning = [];
-
-            var counter = 0;
-            for (let i = 0; i < result.length; i++) {
-              let user = new User(result[i]);
-              //console.log(" result.username: " + result[i].username);
-              User.findOne(
-                {
-                  $or: [
-                    { username: result[i].username },
-                    { email: result[i].email }
-                  ]
-                },
-                function(err, doc) {
-                  if (doc === null) {
-                    console.log(
-                      "result: " + i + " :" + JSON.stringify(result[i])
-                    );
-
-                    console.log("User: " + user);
-
-                    user.password = user.hashPassword(user.password);
-
-                    user
-                      .save()
-                      .then(user => {
-                        return res.json(user);
-                      })
-                      .catch(err => {
-                        return res.send(err);
-                      });
-                  } else if (doc) {
-                    warning.push(
-                      "#" +
-                        i +
-                        " Username: " +
-                        result[i].username +
-                        " or Email: " +
-                        result[i].email +
-                        " already exists"
-                    );
-
-
-                    console.log("warn: " + warning);
-                  }
-                  counter++;
-
-                  if (counter === result.length) {
-                    return res.json({
-                      error_code: 0,
-                      err_desc: null,
-                      data: result,
-                      warn: warning
-                    });
-                  }
+              
+         
+                          }
+                          console.log("IMPORT ERRORS: "+ JSON.stringify(importErrors));
+                          return res.send({errors:importErrors});
+           
+                      
+                 
+                 
                 }
               );
-            }
-          }
-        );
+            
+          
+        
       } catch (e) {
         console.log(e);
         res.json({ error_code: 2, err_desc: "Corupted excel file" });
