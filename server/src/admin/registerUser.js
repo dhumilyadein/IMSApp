@@ -7,7 +7,7 @@ const User = require("../../models/User");
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
-const emailRegex = require('email-regex');
+var regex = require('regex-email');
 var storage = multer.diskStorage({
   //multers disk storage settings
   destination: function(req, file, cb) {
@@ -79,7 +79,7 @@ module.exports = function(app) {
 
   if(!request.email)
   error["email"]="Email can't be empty";
- else if(!emailRegex({exact: true}).test(request.email))
+ else if(!regex.test(String(request.email).toLowerCase()))
   error["email"]="Email is not valid";
   else
   { User.findOne({ email: request.email }).then(function(user) {
