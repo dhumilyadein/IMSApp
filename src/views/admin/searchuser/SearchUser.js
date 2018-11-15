@@ -84,7 +84,7 @@ class SearchUser extends Component {
                     <h1>Search Users</h1>
                     <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
-                        <InputGroupText width="30">
+                        <InputGroupText  >
                           <b>Find</b>
                         </InputGroupText>
                       </InputGroupAddon>

@@ -7,7 +7,7 @@ const User = require("../../models/User");
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
-
+const emailRegex = require('email-regex');
 var storage = multer.diskStorage({
   //multers disk storage settings
   destination: function(req, file, cb) {
@@ -43,7 +43,51 @@ var upload = multer({
 }).single("file");
 
 module.exports = function(app) {
- 
+ function importValidation(request)
+ { errors =[];
+  console.log("in IMPORT VAL  "+ request.username);
+  var unExp = /^[0-9a-zA-Z]+$/;
+  var fnExp = /^[a-zA-Z]+$/;
+
+
+
+  if(!request.username)
+  error[username]="Username can't be empty";
+  else if(!request.username.match(unExp))
+  error[username]="Username should be alphanumeric";
+
+  if(!request.firstname)
+  error[firstname]="firstname can't be empty";
+  else if(!request.firstname.match(fnExp))
+  error[firstname]="firstname should contain only letters";
+
+  if(!request.lasttname)
+  error[lasttname]="firstname can't be empty";
+  else if(!request.lasttname.match(fnExp))
+  error[lasttname]="firstname should contain only letters";
+
+  if(!emailRegex({exact: true}).test(request.email))
+  error[email]="Email is not valid";
+
+  if(request.role.length)
+
+
+
+
+ }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const regValidation = [
     check("role")
@@ -183,6 +227,19 @@ module.exports = function(app) {
 
               result[i] = temp;
 
+              var impValResult=importValidation(result[i]);
+
+
+            /*   request.post({
+                url: 'http://localhost:8001/api/register',
+                body: result[i],
+                json: true
+              }, function(error, response, body){
+              console.log("Response  " + JSON.stringify(response));
+            });
+
+            return res.json({ errors: errors.mapped() }); */
+
              /*  console.log("\n\n\n\n\n\nBEFORE req: " + util.inspect(req));
               //console.log("\n\nBEFORE req.body: " + JSON.stringify(req) + "\n");
               req.body = result[i];
@@ -268,11 +325,11 @@ module.exports = function(app) {
 
   app.post("/api/importExcel", regValidation, importExcel);
   app.post("/api/register", regValidation, register);
- 
+
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
- 
 
- 
- 
+
+
+
 };
