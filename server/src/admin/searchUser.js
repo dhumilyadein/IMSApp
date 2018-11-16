@@ -1,9 +1,10 @@
 var util = require('util');
 
-var { check, validationResult } = require("express-validator/check");
+var { check } = require("express-validator/check");
 
 const User = require("../../models/User");
 
+<<<<<<< HEAD
 module.exports = function (app) {
   const serValidation = [
     check("find")
@@ -65,6 +66,18 @@ module.exports = function (app) {
     }
   }
 
+=======
+module.exports = function(app) {
+    const serValidation = [
+        check("find")
+          .not()
+          .isEmpty()
+          .withMessage("Please enter Search Text")
+           ];
+
+           
+  
+>>>>>>> 8faecca394416d5fb9bcfc01dfd2b1b961c93168
   //---------------------------------------------
 
   /**
