@@ -256,7 +256,7 @@ const regValidation = [
                
               if (impValResult) {
 
-                importErrors["record# "+(i+1)] = impValResult;
+                importErrors["record# "+(i+1)+" of user: "+result[i].username  ] = impValResult;
                 
               }
 
