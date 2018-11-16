@@ -4,15 +4,15 @@ var { check, validationResult } = require("express-validator/check");
 
 const User = require("../../models/User");
 
-module.exports = function(app) {
-    const serValidation = [
-        check("find")
-          .not()
-          .isEmpty()
-          .withMessage("Please enter Search Text")
-           ];
+module.exports = function (app) {
+  const serValidation = [
+    check("find")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Search Text")
+  ];
 
-           
+
   function search(req, res) {
     console.log("\n SEARCH ENTER - " + req.body.username);
 
@@ -35,7 +35,7 @@ module.exports = function(app) {
         username: req.body.username,
         email: req.body.email
       })
-        .then(function(userData) {
+        .then(function (userData) {
           console.log("userData - " + userData);
           if (!userData) {
             resMsg = {
@@ -59,58 +59,60 @@ module.exports = function(app) {
           }
           console.log("userData - " + userData + " resMsg - " + resMsg);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.log(error);
         });
     }
   }
 
   //---------------------------------------------
- 
+
   /**
      * @description Post method for SearchUser service
      */
-    function searchUsers(req, res) {
+  function searchUsers(req, res) {
 
-      console.log("SEARCH USER ENTRY");
-  
-      var findValue = req.body.findValue;
-      var findIn = req.body.findIn;
-      var searchCriteria = req.body.searchCriteria;
-      console.log("findIn - " + findIn + " findValue - " + findValue + " searchCriteria - " + searchCriteria);
-  
-      if ("contains" === searchCriteria) {    
-  
-        User.find({[findIn]:/[findValue]/})
+    console.log("SEARCH USER ENTRY");
+
+    var using = req.body.using;
+    var find = req.body.find;
+    var searchCriteria = req.body.searchCriteria;
+    console.log("find - " + find + " using - " + using + " searchCriteria - " + searchCriteria);
+
+    if ("contains" === searchCriteria) {
+
+      User.find({ [using]: /[find]/ })
         .then(function (userData) {
-  
-          console.log("SEARCH USER RESULT - \n" + userData);
+
+          console.log("SEARCH USER RESULT CONTAINS- \n" + userData);
           res.send(userData);
-  
+
         })
         .catch(function (error) {
           console.log(error);
         });
-  
-      } else {
-  
-        User.find({[findIn]:[findValue]})
+
+    } else {
+
+      console.log("find - " + find + " using - " + using + " searchCriteria - " + searchCriteria);
+
+      User.find({ [using]: [find] })
         .then(function (userData) {
-  
-          console.log("SEARCH USER RESULT - \n" + userData);
+
+          console.log("SEARCH USER RESULT EQUALS - \n" + userData);
           res.send(userData);
-  
+
         })
         .catch(function (error) {
           console.log(error);
         });
-      }
-  
-      //console.log("searchString - " + JSON.stringify(searchString));
-  
-      console.log("SEARCH USER EXIT");
     }
 
-    app.post("/api/searchUsers", serValidation, searchUsers);
+    //console.log("searchString - " + JSON.stringify(searchString));
+
+    console.log("SEARCH USER EXIT");
+  }
+
+  app.post("/api/searchUsers", serValidation, searchUsers);
   app.get("/", (req, res) => res.json("sdasdsa"));
 };
