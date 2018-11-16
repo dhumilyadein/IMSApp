@@ -27,7 +27,7 @@ class RegisterUser extends Component {
     super(props);
     this.state = {
       username: null,
-      email:null,
+      email: null,
       firstname: null,
       lastname: null,
       password: null,
@@ -35,17 +35,22 @@ class RegisterUser extends Component {
       role: ["student"],
       userdata: null,
       regSuccess: false,
-      impSuccess:false,
+      impSuccess: false,
       errors: null,
       status: "Active",
-   disabled: true,
-   checked: true,
-   visible:true,
-   modalSuccess:true,
-   file:null,
-   noFile:false,
-   corruptFile:false,
-   filename:null
+      disabled: true,
+      checked: {
+        adminChecked: false,
+        teacherChecked: false,
+        studentChecked: true,
+        parentChecked: false
+      },
+      visible: true,
+      modalSuccess: true,
+      file: null,
+      noFile: false,
+      corruptFile: false,
+      filename: null
 
 
 
@@ -58,7 +63,7 @@ class RegisterUser extends Component {
     this.toggleSuccess = this.toggleSuccess.bind(this);
 
     this.fileHandler = this.fileHandler.bind(this);
-     this.fileChange = this.fileChange.bind(this);
+    this.fileChange = this.fileChange.bind(this);
 
 
   }
@@ -69,10 +74,10 @@ class RegisterUser extends Component {
     });
   }
 
-    /**
-   * @description Dismisses the alert
-   * @param {*} e
-   */
+  /**
+ * @description Dismisses the alert
+ * @param {*} e
+ */
   onDismiss() {
     this.setState({ visible: false });
   }
@@ -85,12 +90,12 @@ class RegisterUser extends Component {
   resetForm = (e) => {
     this.setState({
       username: "",
-      email:"",
+      email: "",
       firstname: "",
       lastname: "",
       password: "",
       password_con: "",
-      errors:null
+      errors: null
     });
 
   }
@@ -107,7 +112,8 @@ class RegisterUser extends Component {
 
     axios
       .post("http://localhost:8001/api/register", this.state)
-      .then(result => {console.log("result.data "+result.data);
+      .then(result => {
+        console.log("result.data " + result.data);
         if (result.data.errors) {
 
           return this.setState(result.data);
@@ -117,7 +123,7 @@ class RegisterUser extends Component {
           userdata: result.data,
           errors: null,
           regSuccess: true,
-          modalSuccess:true
+          modalSuccess: true
         });
 
       });
@@ -138,94 +144,123 @@ class RegisterUser extends Component {
    * @param {*} e
    */
   roleHandler = e => {
-      if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
+
+    if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
       const temp = this.state.role;
       temp.push(e.target.name);
 
       this.setState({ role: temp }, () => console.log(this.state.role));
+
     }
-     else if(!e.target.checked && this.state.role.indexOf(e.target.name) !== -1) {
+    else if (!e.target.checked && this.state.role.indexOf(e.target.name) !== -1) {
       const temp = this.state.role;
       temp.splice(this.state.role.indexOf(e.target.name), 1);
 
       this.setState({ role: temp }, () => console.log(this.state.role));
     }
 
-    if(e.target.name==="student"&& e.target.checked)
-    { console.log("Checked");
+    // Checked status
+    var checkedStatus = e.target.checked;
+    const tempCheckedStatus = this.state.checked;
+
+    if (e.target.name === 'admin') {
+      tempCheckedStatus.adminChecked = true;
+      this.setState({ checked: tempCheckedStatus });
+    }
+    if (e.target.name === 'teacher') {
+      tempCheckedStatus.teacherChecked = true;
+      this.setState({ checked: tempCheckedStatus });
+    }
+    if (e.target.name === 'parent') {
+      tempCheckedStatus.parentChecked = true;
+      this.setState({ checked: tempCheckedStatus });
+    }
+
+    if (e.target.name === "student" && e.target.checked) {
       this.setState({
-        checked:!this.state.checked,
-       disabled: true,
-       role:["student"]
+        checked: { studentChecked: true, adminChecked: false, teacherChecked: false, parentChecked: false },
+        disabled: true,
+        role: ["student"]
 
-      },  () => console.log(this.state.role+" checked: " +this.state.checked));}
+      });
 
+    } else if (e.target.name === "student" && !e.target.checked) {
+      console.log("not checked");
+      this.setState({
+        checked: { studentChecked: false, adminChecked: false, teacherChecked: false, parentChecked: false },
+        disabled: false
+      });
+    }
 
-     else if(e.target.name==="student" && !e.target.checked)
-    { console.log("not checked");
-      this.setState({ checked:!this.state.checked, disabled: false
-        },  () => console.log(this.state.role+" checked: " +this.state.checked));}
+    console.log("studentChecked - " + this.state.checked.studentChecked
+      + " adminChecked - " + this.state.checked.adminChecked
+      + " teacherChecked - " + this.state.checked.teacherChecked
+      + " parentChecked - " + this.state.checked.parentChecked);
 
   }
 
-/**
-   * @description handles the file upload
-   * @param {*} e
-   */
+  /**
+     * @description handles the file upload
+     * @param {*} e
+     */
   fileHandler = e => {
     e.preventDefault() // Stop form submit
     const data = new FormData();
-    console.log("file"+ this.state.file);
-         if(!this.state.file)
+    console.log("file" + this.state.file);
+    if (!this.state.file)
 
-    this.setState({
+      this.setState({
 
-      noFile: true,
-      modalSuccess:true,
-      corruptFile: false,
-      impSuccess:false
-
-    });
-   else
-   { data.append('file', this.state.file,this.state.filename);
-    axios
-    .post("http://localhost:8001/api/importExcel", data)
-    .then(res => {
-      console.log("in Res "+JSON.stringify(res.data));
-     if(res.data.error_code===1)
-{   document.getElementById("file").value = "";
-     this.setState({
-
-      corruptFile: true,
-      modalSuccess:true,
-      file:null,
-      noFile:false
-
-
-    });}
-         else{
-          document.getElementById("file").value = "";
-      return this.setState({
-
-        errors: null,
-        impSuccess: true,
-        modalSuccess:true,
-        noFile:false,
+        noFile: true,
+        modalSuccess: true,
         corruptFile: false,
-        file:null
-      });}
+        impSuccess: false
 
-    })}}
+      });
+    else {
+      data.append('file', this.state.file, this.state.filename);
+      axios
+        .post("http://localhost:8001/api/importExcel", data)
+        .then(res => {
+          console.log("in Res " + JSON.stringify(res.data));
+          if (res.data.error_code === 1) {
+            document.getElementById("file").value = "";
+            this.setState({
+
+              corruptFile: true,
+              modalSuccess: true,
+              file: null,
+              noFile: false
+
+
+            });
+          }
+          else {
+            document.getElementById("file").value = "";
+            return this.setState({
+
+              errors: null,
+              impSuccess: true,
+              modalSuccess: true,
+              noFile: false,
+              corruptFile: false,
+              file: null
+            });
+          }
+
+        })
+    }
+  }
 
 
 
-fileChange = event =>{
-  const file = event.target.files[0];
-  this.setState({ file: file,noFile:false,corruptFile:false,filename:file.name }, () => console.log("file:  "+ this.state.file.name));
+  fileChange = event => {
+    const file = event.target.files[0];
+    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name }, () => console.log("file:  " + this.state.file.name));
 
 
 
-}
+  }
 
 
   render() {
@@ -233,18 +268,18 @@ fileChange = event =>{
       <div>
 
         <Container>
-          <Row  lg="2">
+          <Row lg="2">
             <Col md="6">
               <Card className="mx-4">
                 <CardBody className="p-4">
                   <Form >
                     <h1>Register</h1>
-                      {this.state.regSuccess &&
+                    {this.state.regSuccess &&
 
-<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.userdata.username} Registered Successfully!</ModalHeader>
+                      <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
+                        <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.userdata.username} Registered Successfully!</ModalHeader>
 
-                </Modal>}
+                      </Modal>}
 
 
                     <InputGroup className="mb-3">
@@ -400,6 +435,9 @@ fileChange = event =>{
                             <tr>
                               <td>Admin</td>
                               <td>
+
+
+
                                 <AppSwitch
                                   name="admin"
                                   id="admin"
@@ -409,7 +447,7 @@ fileChange = event =>{
                                   size={"sm"}
                                   onChange={this.roleHandler}
                                   disabled={this.state.disabled}
-                                  checked={this.state.checked}
+                                  checked={this.state.checked.adminChecked}
                                 />
                               </td>
                             </tr>
@@ -425,7 +463,7 @@ fileChange = event =>{
                                   size={"sm"}
                                   onChange={this.roleHandler}
                                   disabled={this.state.disabled}
-                                  checked={this.state.checked}
+                                  checked={this.state.checked.teacherChecked}
                                 />
                               </td>
                             </tr>
@@ -438,11 +476,9 @@ fileChange = event =>{
                                   className={"mx-1"}
                                   variant={"3d"}
                                   color={"primary"}
-                                  checked={this.state.checked}
                                   size={"sm"}
                                   onChange={this.roleHandler}
-
-
+                                  checked={this.state.checked.studentChecked}
                                 />
                               </td>
                             </tr>
@@ -458,7 +494,7 @@ fileChange = event =>{
                                   size={"sm"}
                                   onChange={this.roleHandler}
                                   disabled={this.state.disabled}
-                                  checked={this.state.checked}
+                                  checked={this.state.checked.parentChecked}
                                 />
                               </td>
                             </tr>
@@ -471,12 +507,12 @@ fileChange = event =>{
                         <font color="red"> <p>{this.state.errors.role.msg}</p></font>
                       )}
                     <Row className="align-items-center">
-                    <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                <Button type="submit" onClick={this.submitHandler} block color="success"> Register</Button>
-              </Col>
-              <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                <Button block onClick={this.resetForm} color="info">Reset</Button>
-              </Col></Row>
+                      <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
+                        <Button type="submit" onClick={this.submitHandler} block color="success"> Register</Button>
+                      </Col>
+                      <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
+                        <Button block onClick={this.resetForm} color="info">Reset</Button>
+                      </Col></Row>
 
                   </Form>
                 </CardBody>
@@ -484,16 +520,16 @@ fileChange = event =>{
             </Col>
 
             <Col md="6">
-            <Card className="mx-4">
+              <Card className="mx-4">
                 <CardBody className="p-4">
                   <Form  >
                     <h1>Import Users</h1>
                     {this.state.impSuccess &&
 
-<Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                  <ModalHeader toggle={this.toggleSuccess}>Excel sheet {this.state.filename} Imported Successfully!</ModalHeader>
+                      <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
+                        <ModalHeader toggle={this.toggleSuccess}>Excel sheet {this.state.filename} Imported Successfully!</ModalHeader>
 
-                </Modal>}
+                      </Modal>}
 
 
 
@@ -512,24 +548,24 @@ fileChange = event =>{
                       />
                     </InputGroup>
 
-{this.state.noFile
-  &&  <font color="red">  <p>Please choose the excel file before submitting.</p></font>
-  }
+                    {this.state.noFile
+                      && <font color="red">  <p>Please choose the excel file before submitting.</p></font>
+                    }
 
-  {this.state.corruptFile
-  &&  <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
-  }
+                    {this.state.corruptFile
+                      && <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
+                    }
                     <Row className="align-items-center">
-                    <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
-                <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
-              </Col>
-             </Row>
+                      <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
+                        <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
+                      </Col>
+                    </Row>
 
                   </Form>
                 </CardBody>
               </Card>
 
-             </Col>
+            </Col>
 
 
 

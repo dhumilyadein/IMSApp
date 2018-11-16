@@ -65,13 +65,52 @@ module.exports = function(app) {
     }
   }
 
- 
-
-  app.post("/api/search", serValidation, search);
-  app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
  
+  /**
+     * @description Post method for SearchUser service
+     */
+    function searchUsers(req, res) {
 
- 
- 
+      console.log("SEARCH USER ENTRY");
+  
+      var findValue = req.body.findValue;
+      var findIn = req.body.findIn;
+      var searchCriteria = req.body.searchCriteria;
+      console.log("findIn - " + findIn + " findValue - " + findValue + " searchCriteria - " + searchCriteria);
+  
+      if ("contains" === searchCriteria) {    
+  
+        User.find({[findIn]:/[findValue]/})
+        .then(function (userData) {
+  
+          console.log("SEARCH USER RESULT - \n" + userData);
+          res.send(userData);
+  
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+  
+      } else {
+  
+        User.find({[findIn]:[findValue]})
+        .then(function (userData) {
+  
+          console.log("SEARCH USER RESULT - \n" + userData);
+          res.send(userData);
+  
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      }
+  
+      //console.log("searchString - " + JSON.stringify(searchString));
+  
+      console.log("SEARCH USER EXIT");
+    }
+
+    app.post("/api/searchUsers", serValidation, searchUsers);
+  app.get("/", (req, res) => res.json("sdasdsa"));
 };

@@ -44,7 +44,7 @@ class SearchUser extends Component {
 
     e.preventDefault();
 
-    axios.post("http://localhost:8001/api/search", this.state).then(res => {
+    axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
       console.log("response - " + JSON.stringify(res.data));
       console.log("response errors - " + res.data.errors);
       console.log("response message - " + res.data.message);
@@ -96,11 +96,11 @@ class SearchUser extends Component {
                         autoComplete="find"
                         placeholder="Enter Search text"
                         onChange={this.changeHandler}
-                      />
+                        value={this.state.find} />
                     </InputGroup>
 
 
- {this.state.errors &&
+                    {this.state.errors &&
                       this.state.errors.find && (
                         <font color="red">  <p>{this.state.errors.find.msg}</p></font>
                       )}
@@ -112,11 +112,11 @@ class SearchUser extends Component {
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
-                      name="using"
-                      id="using"
-                       type="select"
-                       onChange={this.changeHandler}
-                       value={this.state.using}>
+                        name="using"
+                        id="using"
+                        type="select"
+                        onChange={this.changeHandler}
+                        value={this.state.using}>
 
 
                         <option value="username">User Name</option>
