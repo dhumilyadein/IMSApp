@@ -252,6 +252,14 @@ const regValidation = [
             console.log("Total records: "+Object.keys(result).length);
             var importErrors ={};
             for (let i = 0; i < result.length; i++) {
+              console.log("record length: "+Object.keys(result[i]).length);
+              var counter=0;
+              for(var key in result[i])
+              {if(result[i][key]==="")
+              counter++;
+                  }
+                  if(counter===result[i].length)
+                  continue;
               var roles = [];
               if (result[i].role1) roles.push(result[i].role1);
               if (result[i].role2) roles.push(result[i].role2);
@@ -301,10 +309,10 @@ const regValidation = [
          
                           }
                           console.log("IMPORT ERRORS: "+ JSON.stringify(importErrors));
-                          if(Object.keys(importErrors).length===0)
-                          return res.send("Imported Successfully");
-                          else
+                          if(Object.keys(importErrors).length>0)
                           return res.send({errors:importErrors});
+                          else
+                          return res.send("Imported Successfully");
            
                       
                  
