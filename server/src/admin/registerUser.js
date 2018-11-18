@@ -43,8 +43,8 @@ var upload = multer({
 }).single("file");
 
 module.exports = function(app) {
- function importValidation(request)
- { error ={};
+ async function importValidation(request)
+ {var valError={};
   console.log("in IMPORT VAL  "+ request.username);
   var unExp = /^[0-9a-zA-Z]+$/;
   var fnExp = /^[a-zA-Z]+$/;
@@ -52,56 +52,70 @@ module.exports = function(app) {
 //password validaion
 //  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)) 
 //  error[password]="Password should contain atleast 6 characters, inclding 1 special symbol and 1 number";
-
+try{
   if(!request.username)
-  error["username"]="Username can't be empty";
+  valError['username']="Username can't be empty";
   else if(!request.username.match(unExp))
-  error["username"]="Username should be alphanumeric";
-  else{
-    User.findOne({ username: request.username }).then(function(user) {
-      if (user) {
-        error["user-exists"]="This username is already in use";
-      }
-    });
+  ValError['username']="Username should be alphanumeric";
+ else{
+  const usernameCheck = await User.findOne({ username: request.username });
+ 
+  if(usernameCheck)
+  valError['userexists']="username: "+request.username+" is already in use";
+  console.log("unexists: "+valError['userexists']);
+ 
   }
 
+  if(!request.email)
+  valError["email"]="Email can't be empty";
+ else if(!regex.test(String(request.email).toLowerCase()))
+ valError["email"]="Email is not valid";
+  else
+  { const emailCheck = await User.findOne({ email: request.email });
+  
+  if(emailCheck)
+  valError['emailexists']="email: "+request.email+" is already in use";
+  console.log("emailexists: "+valError['emailexists']);
+  }
 
+}
+catch(e){console.log(e);}
   if(!request.firstname)
-  error["firstname"]="firstname can't be empty";
+  valError["firstname"]="firstname can't be empty";
   else if(!request.firstname.match(fnExp))
-  error["firstname"]="firstname should contain only letters";
+  valError["firstname"]="firstname should contain only letters";
 
   
   if(!request.lastname)
-  error["lastname"]="lastname can't be empty";
+  valError["lastname"]="lastname can't be empty";
   else if(!request.lastname.match(fnExp))
-  error["lastname"]="lastname should contain only letters";
-
-  if(!request.email)
-  error["email"]="Email can't be empty";
- else if(!regex.test(String(request.email).toLowerCase()))
-  error["email"]="Email is not valid";
-  else
-  { User.findOne({ email: request.email }).then(function(user) {
-    if (user) {
-      error["email-exists"]="This email is already in use";
-    }
-  });
-
-  }
+  valError["lastname"]="lastname should contain only letters";
 
   
+
+  console.log("request.role: "+ request.role);
   if(request.role.length===0)
-  error["role"]="role can't be empty";
+  valError["role"]="role can't be empty";
+  else if(request.role.length>1 && request.role.indexOf("student") !== -1 )
+  valError["role"]="Student can't have multiple roles";
+   
   else{
     for(let i=0;i<request.role.length;i++)
     {if (!/^(admin|teacher|student|parent)$/.exec(request.role[i]))
-      error["role"]="role(s) are not defined correctly";
+      valError["role"]="role(s) are not defined correctly";
 
     }
   }
-//console.log("Import error: "+JSON.stringify(error));
-return error;
+
+  
+    console.log("Import error: "+JSON.stringify(valError));
+//var obj = JSON.parse(error);
+var errorLen = Object.keys(valError).length;
+console.log("ValErrorLen: "+errorLen);
+
+return valError;
+  
+
 
 
  }
@@ -195,7 +209,7 @@ const regValidation = [
   function onlyUnique(value, index, self) { 
     return self.indexOf(value) === index;
 }
-  function importExcel(req, res) {
+ function  importExcel(req, res) {
    // console.log("in import  " + !req.file);
 
     var exceltojson;
@@ -230,10 +244,12 @@ const regValidation = [
             output: null, //since we don't need output.json
             lowerCaseHeaders: true
           },
-          function(err, result) {
+         async function(err, result) {
             if (err) {
               return res.json({ error_code: 1, err_desc: err, data: null });
             }
+
+            console.log("Total records: "+Object.keys(result).length);
             var importErrors ={};
             for (let i = 0; i < result.length; i++) {
               var roles = [];
@@ -251,38 +267,43 @@ const regValidation = [
 
               result[i].role =  result[i].role.filter( onlyUnique );
               
-              var impValResult=importValidation(result[i]);
-             
-               
-              if (impValResult) {
-
-                importErrors["record# "+(i+1)+" of user: "+result[i].username  ] = impValResult;
-                
-              }
-
-              else
-              {let user = new User(result[i]);
+              var impValResult= await importValidation(result[i]);
+              console.log("impValResultLength: "+Object.keys(impValResult).length);
+          
+                             if (Object.keys(impValResult).length===0) {
+                             
+                let user = new User(result[i]);
                 //console.log(" result.username: " + result[i].username);
                 
                   
   
-                      console.log("User: " + user);
+                     // console.log("User: " + user);
   
                       user.password = user.hashPassword(user.password);
   
                       user
                         .save()
                         .then(user => {
-                          return res.json(user);
+                          //return res.json(user);
                         })
                         .catch(err => {
                           return res.send(err);
-                        });}
+                        });
+              }
+
+              else
+              { 
+              importErrors["record# "+(i+1)+" of user: "+result[i].username  ] = impValResult;
+              
+                }
 
               
          
                           }
                           console.log("IMPORT ERRORS: "+ JSON.stringify(importErrors));
+                          if(Object.keys(importErrors).length===0)
+                          return res.send("Imported Successfully");
+                          else
                           return res.send({errors:importErrors});
            
                       

@@ -33,5 +33,33 @@ export default {
        {
       divider: true,
     },
+
+
+    {
+      title: true,
+      name: 'Manage Fees',
+      wrapper: {            // optional wrapper object
+        element: '',        // required valid HTML5 element tag
+        attributes: {}        // optional valid JS object with JS API naming ex: { className: "my-class", style: { fontFamily: "Verdana" }, id: "my-id"}
+      },
+      class: ''             // optional class names space delimited list for title item ex: "text-center"
+    },
+    {
+      name: 'Add Fees',
+      url: '/admin/finance/AddFees',
+      icon: 'fa fa-money',
+    },
+    {
+      name: 'Fees Status ',
+      url: '/admin/finance/FeesView',
+      icon: 'fa fa-money',
+    },
+
+
+
+       {
+      divider: true,
+    },
+  
   ],
 };

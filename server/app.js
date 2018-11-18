@@ -6,6 +6,8 @@ const cors = require("cors");
 
 const adminRegister = require("./src/admin/registerUser");
 const adminSearch = require("./src/admin/searchUser");
+const studentSearch = require("./src/admin/searchStudent");
+
 const login = require("./src/login");
 const app = express();
 
@@ -35,6 +37,7 @@ app.use(
 
 adminRegister(app);
 adminSearch(app);
+studentSearch(app);
 login(app);
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
