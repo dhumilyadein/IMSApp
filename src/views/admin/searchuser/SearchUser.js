@@ -96,7 +96,7 @@ class SearchUser extends Component {
                         autoComplete="find"
                         placeholder="Enter Search text"
                         onChange={this.changeHandler}
-                        value={this.state.find} />
+                         />
                     </InputGroup>
 
 
@@ -116,7 +116,7 @@ class SearchUser extends Component {
                         id="using"
                         type="select"
                         onChange={this.changeHandler}
-                        value={this.state.using}>
+                        >
 
 
                         <option value="username">User Name</option>
