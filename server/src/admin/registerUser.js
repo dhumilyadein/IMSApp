@@ -257,8 +257,12 @@ const regValidation = [
               for(var key in result[i])
               {if(result[i][key]==="")
               counter++;
+
+             
+              
                   }
-                  if(counter===result[i].length)
+                  console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
+                  if(counter===Object.keys(result[i]).length)
                   continue;
               var roles = [];
               if (result[i].role1) roles.push(result[i].role1);
