@@ -235,7 +235,7 @@ class RegisterUser extends Component {
 
             });
           }
-          else {
+          else if(JSON.stringify(res.data)==="Imported Successfully") {
             document.getElementById("file").value = "";
             return this.setState({
 
@@ -247,6 +247,21 @@ class RegisterUser extends Component {
               file: null
             });
           }
+          else
+{
+           this.setState({
+
+            errors: res.data.errors,
+           
+            noFile: false,
+            corruptFile: false,
+            file: null
+            
+          },() =>{
+           // console.log("errors length: "+Object.keys(this.state.errors).length)
+          });
+          
+        }
 
         })
     }
@@ -560,6 +575,20 @@ class RegisterUser extends Component {
                         <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
                       </Col>
                     </Row>
+
+                    { this.state.errors && 
+                    <Row className="align-items-center">
+                      <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
+                      <font color="red">  <p>{Object.keys(this.state.errors).length} record(s) failed to import. For errors, click Errors</p></font>
+                        <Button type="submit" block color="danger" onClick={
+()=>{var data = "<p>This is 'myWindow'</p>";
+var myWindow = window.open("data:text/json," + encodeURIComponent(this.state.errors),
+                       "_blank");
+myWindow.focus();
+
+                        }}> Errors</Button>
+                      </Col>
+                    </Row>}
 
                   </Form>
                 </CardBody>
