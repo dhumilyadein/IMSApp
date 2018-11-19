@@ -199,6 +199,11 @@ const RegisterUser = Loadable({
   loading: Loading
 });
 
+const ImportUser = Loadable({
+  loader: () => import("./views/admin/importuser/ImportUser"),
+  loading: Loading
+});
+
 const SearchUser = Loadable({
   loader: () => import("./views/admin/searchuser/SearchUser"),
   loading: Loading
@@ -211,6 +216,12 @@ const routes = [
     path: "/admin/registeruser",
     name: "Register User",
     component: RegisterUser
+  },
+
+  {
+    path: "/admin/importuser",
+    name: "Import User",
+    component: ImportUser
   },
   {
     path: "/admin/finance/addfees",

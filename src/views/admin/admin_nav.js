@@ -27,6 +27,11 @@ export default {
       url: '/admin/searchUser',
       icon: 'icon-magnifier',
     },
+    {
+      name: 'Import Users',
+      url: '/admin/importUser',
+      icon: 'icon-people',
+    },
 
 
 

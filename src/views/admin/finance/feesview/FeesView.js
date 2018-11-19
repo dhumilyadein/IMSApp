@@ -19,7 +19,7 @@ import {
 import { AppSwitch } from "@coreui/react";
 import axios from "axios";
 
-class SearchUser extends Component {
+class FeesView extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -163,4 +163,4 @@ class SearchUser extends Component {
   }
 }
 
-export default SearchUser;
+export default FeesView;

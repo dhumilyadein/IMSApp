@@ -983,68 +983,7 @@ class RegisterUser extends Component {
               </Card>
             </Col>
 
-            <Col md="2">
-              <Card className="mx-4">
-                <CardBody className="p-4">
-                  <Form  >
-                    <h1>Import Users</h1>
-                    {this.state.impSuccess &&
-
-                      <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
-                        <ModalHeader toggle={this.toggleSuccess}>Excel sheet {this.state.filename} Imported Successfully!</ModalHeader>
-
-                      </Modal>}
-
-
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-
-                      </InputGroupAddon>
-                      <h3>upload excel file(XLS,XLSX)</h3>
-                      <Input
-                        type="file"
-                        name="file"
-                        id="file"
-
-
-                        onChange={this.fileChange}
-                      />
-                    </InputGroup>
-
-                    {this.state.noFile
-                      && <font color="red">  <p>Please choose the excel file before submitting.</p></font>
-                    }
-
-                    {this.state.corruptFile
-                      && <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
-                    }
-                    <Row className="align-items-center">
-                      <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
-                        <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
-                      </Col>
-                    </Row>
-
-                    { this.state.importErrors &&
-                    <Row className="align-items-center">
-                      <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
-                      <font color="red">  <p>{Object.keys(this.state.errors).length} record(s) failed to import. For errors, click Errors</p></font>
-                        <Button type="submit" block color="danger" onClick={
-()=>{var data = "<p>This is 'myWindow'</p>";
-var myWindow = window.open("data:text/json," + encodeURIComponent(this.state.errors),
-                       "_blank");
-myWindow.focus();
-
-                        }}> Errors</Button>
-                      </Col>
-                    </Row>}
-
-                  </Form>
-                </CardBody>
-              </Card>
-
-            </Col>
-
+            
 
 
           </Row>
