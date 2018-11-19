@@ -235,7 +235,9 @@ class RegisterUser extends Component {
 
             });
           }
-          else if(JSON.stringify(res.data)==="Imported Successfully") {
+          else if(res.data==="Imported Successfully") {
+
+            //console.log("in sucess: "+res.data);
             document.getElementById("file").value = "";
             return this.setState({
 
@@ -252,15 +254,15 @@ class RegisterUser extends Component {
            this.setState({
 
             errors: res.data.errors,
-           
+
             noFile: false,
             corruptFile: false,
             file: null
-            
+
           },() =>{
            // console.log("errors length: "+Object.keys(this.state.errors).length)
           });
-          
+
         }
 
         })
@@ -271,7 +273,7 @@ class RegisterUser extends Component {
 
   fileChange = event => {
     const file = event.target.files[0];
-    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name }, () => console.log("file:  " + this.state.file.name));
+    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, errors:null }, () => console.log("file:  " + this.state.file.name));
 
 
 
@@ -576,7 +578,7 @@ class RegisterUser extends Component {
                       </Col>
                     </Row>
 
-                    { this.state.errors && 
+                    { this.state.errors &&
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
                       <font color="red">  <p>{Object.keys(this.state.errors).length} record(s) failed to import. For errors, click Errors</p></font>
