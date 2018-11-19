@@ -50,7 +50,7 @@ module.exports = function(app) {
   var fnExp = /^[a-zA-Z]+$/;
 
 //password validaion
-//  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)) 
+//  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/))
 //  error[password]="Password should contain atleast 6 characters, inclding 1 special symbol and 1 number";
 try{
   if(!request.username)
@@ -59,11 +59,11 @@ try{
   ValError['username']="Username should be alphanumeric";
  else{
   const usernameCheck = await User.findOne({ username: request.username });
- 
+
   if(usernameCheck)
   valError['userexists']="username: "+request.username+" is already in use";
   console.log("unexists: "+valError['userexists']);
- 
+
   }
 
   if(!request.email)
@@ -72,10 +72,10 @@ try{
  valError["email"]="Email is not valid";
   else
   { const emailCheck = await User.findOne({ email: request.email });
-  
+
   if(emailCheck)
   valError['emailexists']="email: "+request.email+" is already in use";
-  console.log("emailexists: "+valError['emailexists']);
+ // console.log("emailexists: "+valError['emailexists']);
   }
 
 }
@@ -85,20 +85,20 @@ catch(e){console.log(e);}
   else if(!request.firstname.match(fnExp))
   valError["firstname"]="firstname should contain only letters";
 
-  
+
   if(!request.lastname)
   valError["lastname"]="lastname can't be empty";
   else if(!request.lastname.match(fnExp))
   valError["lastname"]="lastname should contain only letters";
 
-  
 
-  console.log("request.role: "+ request.role);
+
+  //console.log("request.role: "+ request.role);
   if(request.role.length===0)
   valError["role"]="role can't be empty";
   else if(request.role.length>1 && request.role.indexOf("student") !== -1 )
   valError["role"]="Student can't have multiple roles";
-   
+
   else{
     for(let i=0;i<request.role.length;i++)
     {if (!/^(admin|teacher|student|parent)$/.exec(request.role[i]))
@@ -107,14 +107,14 @@ catch(e){console.log(e);}
     }
   }
 
-  
+
     console.log("Import error: "+JSON.stringify(valError));
 //var obj = JSON.parse(error);
-var errorLen = Object.keys(valError).length;
-console.log("ValErrorLen: "+errorLen);
+//var errorLen = Object.keys(valError).length;
+//console.log("ValErrorLen: "+errorLen);
 
 return valError;
-  
+
 
 
 
@@ -194,7 +194,7 @@ const regValidation = [
     }
 
     var user = new User(req.body);
-    console.log("user = " + user);
+   // console.log("user = " + user);
     user.password = user.hashPassword(user.password);
     user
       .save()
@@ -206,7 +206,7 @@ const regValidation = [
       });
   }
 
-  function onlyUnique(value, index, self) { 
+  function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
  function  importExcel(req, res) {
@@ -258,8 +258,8 @@ const regValidation = [
               {if(result[i][key]==="")
               counter++;
 
-             
-              
+
+
                   }
                   console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
                   if(counter===Object.keys(result[i]).length)
@@ -268,8 +268,8 @@ const regValidation = [
               if (result[i].role1) roles.push(result[i].role1);
               if (result[i].role2) roles.push(result[i].role2);
               if (result[i].role3) roles.push(result[i].role3);
-            
-              
+
+
               result[i]["role"] = roles;
               var { role1, ...temp } = result[i];
               var { role2, ...temp } = temp;
@@ -278,21 +278,21 @@ const regValidation = [
               result[i] = temp;
 
               result[i].role =  result[i].role.filter( onlyUnique );
-              
+
               var impValResult= await importValidation(result[i]);
               console.log("impValResultLength: "+Object.keys(impValResult).length);
-          
+
                              if (Object.keys(impValResult).length===0) {
-                             
+
                 let user = new User(result[i]);
                 //console.log(" result.username: " + result[i].username);
-                
-                  
-  
+
+
+
                      // console.log("User: " + user);
-  
+
                       user.password = user.hashPassword(user.password);
-  
+
                       user
                         .save()
                         .then(user => {
@@ -304,28 +304,28 @@ const regValidation = [
               }
 
               else
-              { 
+              {
               importErrors["record# "+(i+1)+" of user: "+result[i].username  ] = impValResult;
-              
+
                 }
 
-              
-         
+
+
                           }
                           console.log("IMPORT ERRORS: "+ JSON.stringify(importErrors));
                           if(Object.keys(importErrors).length>0)
                           return res.send({errors:importErrors});
                           else
                           return res.send("Imported Successfully");
-           
-                      
-                 
-                 
+
+
+
+
                 }
               );
-            
-          
-        
+
+
+
       } catch (e) {
         console.log(e);
         res.json({ error_code: 2, err_desc: "Corupted excel file" });

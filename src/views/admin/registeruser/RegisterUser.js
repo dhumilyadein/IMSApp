@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import 'bootstrap/dist/css/bootstrap.css';
+import ReactPhoneInput from 'react-phone-input-2';
+import { StateDropdown, RegionDropdown } from 'react-indian-state-region-selector';
 import {
   Button,
   Card,
@@ -8,6 +10,7 @@ import {
   Col,
   Container,
   Form,
+  CardHeader,
   Input,
   InputGroup,
   InputGroupAddon,
@@ -16,7 +19,9 @@ import {
   Table,
   Alert,
   Modal,
-  ModalHeader
+  ModalHeader,
+  FormGroup,
+  Label
 
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
@@ -37,6 +42,7 @@ class RegisterUser extends Component {
       regSuccess: false,
       impSuccess: false,
       errors: null,
+      importErrors:null,
       status: "Active",
       disabled: true,
       checked: {
@@ -241,7 +247,7 @@ class RegisterUser extends Component {
             document.getElementById("file").value = "";
             return this.setState({
 
-              errors: null,
+              importErrors: null,
               impSuccess: true,
               modalSuccess: true,
               noFile: false,
@@ -273,7 +279,7 @@ class RegisterUser extends Component {
 
   fileChange = event => {
     const file = event.target.files[0];
-    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, errors:null }, () => console.log("file:  " + this.state.file.name));
+    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, importErrors:null }, () => console.log("file:  " + this.state.file.name));
 
 
 
@@ -285,167 +291,25 @@ class RegisterUser extends Component {
       <div>
 
         <Container>
+
           <Row lg="2">
-            <Col md="6">
-              <Card className="mx-4">
+            <Col md="12">
+                 <Card className="mx-4">
+
                 <CardBody className="p-4">
                   <Form >
-                    <h1>Register</h1>
+
                     {this.state.regSuccess &&
 
                       <Modal isOpen={this.state.modalSuccess} className={'modal-success ' + this.props.className} toggle={this.toggleSuccess}>
                         <ModalHeader toggle={this.toggleSuccess}>Username: {this.state.userdata.username} Registered Successfully!</ModalHeader>
 
                       </Modal>}
-
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-user" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="username"
-                        id="username"
-                        value={this.state.username}
-                        placeholder="Username"
-                        autoComplete="username"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-                    {this.state.errors &&
-                      this.state.errors.username && (
-                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
-                      )}
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-menu" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="firstname"
-                        id="firstname"
-                        value={this.state.firstname}
-                        placeholder="First Name"
-                        autoComplete="firstname"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-
-                    {this.state.errors &&
-                      this.state.errors.firstname && (
-                        <font color="red">  <p>{this.state.errors.firstname.msg}</p></font>
-                      )}
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-menu" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="lastname"
-                        id="lastname"
-                        value={this.state.lastname}
-                        placeholder="Last Name"
-                        autoComplete="lastname"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-                    {this.state.errors &&
-                      this.state.errors.lastname && (
-                        <font color="red"> <p>{this.state.errors.lastname.msg}</p></font>
-                      )}
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>@</InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="email"
-                        id="email"
-                        value={this.state.email}
-                        placeholder="Email"
-                        autoComplete="email"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-
-                    {this.state.errors &&
-                      this.state.errors.email && (
-                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
-                      )}
-
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="password"
-                        name="password"
-                        id="password"
-                        placeholder="Password"
-                        value={this.state.password}
-                        autoComplete="new-password"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-                    {this.state.errors &&
-                      this.state.errors.password && (
-                        <font color="red">   <p>{this.state.errors.password.msg}</p></font>
-                      )}
-
-                    <InputGroup className="mb-4">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="password"
-                        name="password_con"
-                        id="password_con"
-                        placeholder="Confirm Password"
-                        value={this.state.password_con}
-                        autoComplete="new-password"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-                    {this.state.errors &&
-                      this.state.errors.password_con && (
-                        <font color="red"><p>{this.state.errors.password_con.msg}</p></font>
-                      )}
-
+                      <Row lg="2">
+            <Col md="6">
                     <Card className="mx-1">
                       <CardBody className="p-2">
-                        <InputGroup className="mb-2">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText>
-                              <i className="icon-badge" />
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="label"
-                            defaultValue="Select User Roles"
-                            autoComplete="role"
-                            disabled="disabled"
-                            readOnly="true"
-                          />
-                        </InputGroup>
+                      <h5>Select User Roles</h5>
 
                         <Table responsive size="sm" hover>
                           <tbody>
@@ -523,6 +387,423 @@ class RegisterUser extends Component {
                       this.state.errors.role && (
                         <font color="red"> <p>{this.state.errors.role.msg}</p></font>
                       )}
+
+                      <Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Basic Details</h5>
+                      <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        First Name
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="firstname"
+                        id="firstname"
+                        value={this.state.firstname}
+
+                        autoComplete="firstname"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+
+                    {this.state.errors &&
+                      this.state.errors.firstname && (
+                        <font color="red">  <p>{this.state.errors.firstname.msg}</p></font>
+                      )}
+ <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Last Name
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="lastname"
+                        id="lastname"
+                        value={this.state.lastname}
+
+                        autoComplete="lastname"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.lastname && (
+                        <font color="red"> <p>{this.state.errors.lastname.msg}</p></font>
+                      )}
+<InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Date of Brith
+                        </InputGroupText>
+                      </InputGroupAddon>
+
+                      <Input
+                        type="date"
+                        name="dob"
+                        id="dob"
+                        value={this.state.dob}
+                        placeholder="Date of Birth"
+                        autoComplete="Date of Brith"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Gender
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Col md="9">
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="male" name="male" value="option1" />
+                        <Label className="form-check-label" check htmlFor="inline-radio1">Male</Label>
+                      </FormGroup>
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="female" name="female" value="option1" />
+                        <Label className="form-check-label" check htmlFor="inline-radio1">Female</Label>
+                      </FormGroup>
+
+                    </Col>
+                    </InputGroup>
+
+                     <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          Blood Group
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="bloodgroup"
+                        id="bloodgroup"
+                        type="select"
+                        onChange={this.changeHandler}
+                        >
+
+                        <option value="select">Select</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="A1+">A1+</option>
+                        <option value="A1-">A1-</option>
+                        <option value="A1B+">A1B+</option>
+                        <option value="A1B-">A1B-</option>
+                        <option value="A2+">A2+</option>
+                        <option value="A2-">A2-</option>
+                        <option value="A2B+">A2B+</option>
+                        <option value="A2B-">A2B-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="B1+">B1+</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+
+                      </Input>
+                    </InputGroup>
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Nationality
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="bloodgroup"
+                        id="bloodgroup"
+                        type="select"
+                        onChange={this.changeHandler}
+                        >
+
+                        <option value="select">Select</option>
+                        <option value="indian">Indian</option>
+                        <option value="foreign">Foreign</option>
+
+
+                      </Input>
+                    </InputGroup>
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Religion
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="religion"
+                        id="religion"
+                        type="select"
+                        onChange={this.changeHandler}
+                        >
+
+                        <option value="select">Select</option>
+                        <option value="indian">Hindu</option>
+                        <option value="foreign">Muslim</option>
+                        <option value="foreign">Christian</option>
+                        <option value="foreign">Sikh</option>
+                        <option value="foreign">Jain</option>
+                        <option value="foreign">Other</option>
+
+
+                      </Input>
+                    </InputGroup>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+
+                        <InputGroupText>Photo</InputGroupText>
+
+                        <Input
+                        type="file"
+                        name="photo"
+                        id="photo"
+                        style={ {paddingLeft: "20px"}}
+
+
+                        onChange={this.fileChange}
+                      />
+                      </InputGroupAddon>
+                    </InputGroup>
+
+
+
+                      </CardBody>
+                    </Card>
+
+
+
+
+
+
+ <Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Login Details</h5>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-user" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="username"
+                        id="username"
+                        value={this.state.username}
+                        placeholder="Username"
+                        autoComplete="username"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.username && (
+                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      )}
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>@</InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="email"
+                        id="email"
+                        value={this.state.email}
+                        placeholder="Email"
+                        autoComplete="email"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+
+                    {this.state.errors &&
+                      this.state.errors.email && (
+                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
+                      )}
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-lock" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Password"
+                        value={this.state.password}
+                        autoComplete="new-password"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.password && (
+                        <font color="red">   <p>{this.state.errors.password.msg}</p></font>
+                      )}
+
+                    <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-lock" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="password"
+                        name="password_con"
+                        id="password_con"
+                        placeholder="Confirm Password"
+                        value={this.state.password_con}
+                        autoComplete="new-password"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.password_con && (
+                        <font color="red"><p>{this.state.errors.password_con.msg}</p></font>
+                      )}
+                      </CardBody>
+                      </Card>
+</Col>
+<Col>
+<Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Contact Details</h5>
+
+                      <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          Phone Number
+                        </InputGroupText>
+                        <ReactPhoneInput defaultCountry='in' placeholder="Phone Number" />
+                      </InputGroupAddon>
+
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.username && (
+                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      )}
+
+<Card className="mx-1">
+
+              <CardBody className="p-2">
+              <b >Address</b>
+                <FormGroup>
+
+                  <Input type="text" id="street" placeholder="House No, Area" />
+                </FormGroup>
+                <FormGroup row className="my-0">
+                  <Col xs="8">
+                    <FormGroup>
+
+                      <Input type="text" id="city" placeholder="City" />
+                    </FormGroup>
+                  </Col>
+                  <Col xs="4">
+                    <FormGroup>
+
+                      <Input type="text" id="postal-code" placeholder="Postal Code" />
+                    </FormGroup>
+                  </Col>
+                </FormGroup>
+                <FormGroup>
+
+                  <Input type="text" id="statename" placeholder="State" />
+                </FormGroup>
+
+
+              </CardBody>
+            </Card>
+
+
+                    {this.state.errors &&
+                      this.state.errors.email && (
+                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
+                      )}
+
+
+
+                      </CardBody>
+                      </Card>
+                      <Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Official Details</h5>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Admission No
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="admissionno"
+                        id="admissionno"
+
+
+                        autoComplete="admissionno"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.username && (
+                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      )}
+
+
+                  <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Date of Joining
+                        </InputGroupText>
+                      </InputGroupAddon>
+
+                      <Input
+                        type="date"
+                        name="doj"
+                        id="doj"
+                        value={this.state.doj}
+
+                        autoComplete="Date of Joining"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+
+                    {this.state.errors &&
+                      this.state.errors.email && (
+                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
+                      )}
+<InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                        Roll No
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="rollno"
+                        id="rollno"
+
+
+                        autoComplete="rollno"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                      </CardBody>
+                      </Card>
+                      </Col></Row>
+
+
+
                     <Row className="align-items-center">
                       <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
                         <Button type="submit" onClick={this.submitHandler} block color="success"> Register</Button>
@@ -578,7 +859,7 @@ class RegisterUser extends Component {
                       </Col>
                     </Row>
 
-                    { this.state.errors &&
+                    { this.state.importErrors &&
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
                       <font color="red">  <p>{Object.keys(this.state.errors).length} record(s) failed to import. For errors, click Errors</p></font>
