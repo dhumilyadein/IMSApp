@@ -21,7 +21,8 @@ import {
   Modal,
   ModalHeader,
   FormGroup,
-  Label
+  Label,
+
 
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
@@ -40,7 +41,7 @@ class RegisterUser extends Component {
       role: ["student"],
       userdata: null,
       regSuccess: false,
-      impSuccess: false,
+
       errors: null,
       importErrors:null,
       status: "Active",
@@ -51,12 +52,52 @@ class RegisterUser extends Component {
         studentChecked: true,
         parentChecked: false
       },
+      employeeno:null,
       visible: true,
       modalSuccess: true,
-      file: null,
-      noFile: false,
-      corruptFile: false,
-      filename: null
+      parentfirstname:null,
+      parentlastname:null,
+      parentemail:null,
+      parentphone1:null,
+      parentphone2:null,
+      parentaddress:null,
+      parentcity:null,
+      parentpostalcode:null,
+      parentstate:null,
+      address:null,
+      city:null,
+      postalcode:null,
+      state:null,
+      admissionno:null,
+      rollno:null,
+      doj:null,
+      type:null,
+      experiencedetails:null,
+      department:null,
+      designation:null,
+      dob:null,
+      gender:null,
+      maritalstatus:null,
+      qualification:null,
+      photo:null,
+      religion:null,
+      nationality:null,
+      bloodgroup:null,
+      phonebumber:null,
+      category:null,
+      nophoto: false,
+      corruptphoto: false,
+      photoname: null,
+      phone:null,
+      relation:null,
+      occupation:null
+
+
+
+
+
+
+
 
 
 
@@ -70,6 +111,8 @@ class RegisterUser extends Component {
 
     this.fileHandler = this.fileHandler.bind(this);
     this.fileChange = this.fileChange.bind(this);
+    this.phonechangeHandler = this.phonechangeHandler.bind(this);
+    this.copyAddress = this.copyAddress.bind(this);
 
 
   }
@@ -95,13 +138,63 @@ class RegisterUser extends Component {
 
   resetForm = (e) => {
     this.setState({
-      username: "",
-      email: "",
-      firstname: "",
-      lastname: "",
-      password: "",
-      password_con: "",
-      errors: null
+      username: null,
+      email: null,
+      firstname: null,
+      lastname: null,
+      password: null,
+      password_con: null,
+      role: ["student"],
+      userdata: null,
+      regSuccess: false,
+      employeeno:null,
+      errors: null,
+      importErrors:null,
+      status: "Active",
+      disabled: true,
+      checked: {
+        adminChecked: false,
+        teacherChecked: false,
+        studentChecked: true,
+        parentChecked: false
+      },
+      visible: true,
+      modalSuccess: true,
+      parentfirstname:null,
+      parentlastname:null,
+      parentrelation:null,
+      parentoccupation:null,
+      parentemail:null,
+      parentphone1:null,
+      parentphone2:null,
+      parentaddress:null,
+      parentcity:null,
+      parentpostalcode:null,
+      parentstate:null,
+      address:null,
+      city:null,
+      postalcode:null,
+      state:null,
+      admissionno:null,
+      rollno:null,
+      doj:null,
+      type:null,
+      experiencedetails:null,
+      department:null,
+      designation:null,
+      dob:null,
+      gender:null,
+      maritalstatus:null,
+      qualification:null,
+      photo:null,
+      religion:null,
+      nationality:null,
+      bloodgroup:null,
+      category:null,
+      nophoto: false,
+      corruptphoto: false,
+      photoname: null,
+
     });
 
   }
@@ -140,10 +233,36 @@ class RegisterUser extends Component {
    * @param {*} e
    */
   changeHandler(e) {
+
+    console.log("Name: "+e.target.name +" Value: "+e.target.value);
     this.setState({
       [e.target.name]: e.target.value
     });
+
   }
+
+  copyAddress(e)
+  { if(e.target.checked)
+    {
+    this.setState({
+      parentaddress:this.state.address,
+      parentcity:this.state.city,
+      parentpostalcode:this.state.postalcode,
+      parentstate:this.state.state,
+   });}
+
+
+  }
+
+
+   phonechangeHandler(value) {
+   console.log("phone :"+value);
+
+    this.setState({
+       phone: value
+    });
+
+ }
 
   /**
    * @description Called when the role(s) are selected. To update role Array
@@ -279,7 +398,7 @@ class RegisterUser extends Component {
 
   fileChange = event => {
     const file = event.target.files[0];
-    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, importErrors:null }, () => console.log("file:  " + this.state.file.name));
+    this.setState({ photo: file, nophoto: false, photomname: file.name, }, () => console.log("file:  " + this.state.photo.name));
 
 
 
@@ -454,23 +573,62 @@ class RegisterUser extends Component {
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                        <InputGroupText style={{width:"120px"}}>
+                        <InputGroupText style={{width:"80px"}}>
                         Gender
                         </InputGroupText>
                       </InputGroupAddon>
                       <Col md="9">
                       <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="male" name="male" value="option1" />
+                        <Input className="form-check-input" type="radio" id="gender" name="gender" value="Male"  onChange={this.changeHandler} />
                         <Label className="form-check-label" check htmlFor="inline-radio1">Male</Label>
                       </FormGroup>
                       <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="female" name="female" value="option1" />
+                        <Input className="form-check-input" type="radio" id="gender" name="gender" value="Female"  onChange={this.changeHandler} />
                         <Label className="form-check-label" check htmlFor="inline-radio1">Female</Label>
                       </FormGroup>
 
                     </Col>
                     </InputGroup>
+{ (this.state.role.indexOf("teacher")!==-1 || this.state.role.indexOf("admin")!==-1 ) &&  <p>
+                   <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}}>
+                        Marital Status
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="relation"
+                        id="relation"
+                        type="select"
+                        onChange={this.changeHandler}
+                        >
 
+                        <option value="">Select</option>
+                        <option value="Father">Single</option>
+                        <option value="Mother">Married</option>
+                        <option value="Guardian">Divorced</option>
+                        <option value="Guardian">Widowed</option>
+
+
+                      </Input>
+                      </InputGroup>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}} >
+                        Qualification
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="qualification"
+                        id="qualification"
+                        value={this.state.qualification}
+
+                        autoComplete="qualification"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+</p>}
                      <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}}>
@@ -481,6 +639,7 @@ class RegisterUser extends Component {
                         name="bloodgroup"
                         id="bloodgroup"
                         type="select"
+                        value={this.state.bloodgroup}
                         onChange={this.changeHandler}
                         >
 
@@ -513,15 +672,16 @@ class RegisterUser extends Component {
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
-                        name="bloodgroup"
-                        id="bloodgroup"
+                        name="nationality"
+                        id="nationality"
                         type="select"
                         onChange={this.changeHandler}
+                        value={this.state.nationality}
                         >
 
                         <option value="select">Select</option>
-                        <option value="indian">Indian</option>
-                        <option value="foreign">Foreign</option>
+                        <option value="Indian">Indian</option>
+                        <option value="Foreign">Foreign</option>
 
 
                       </Input>
@@ -539,15 +699,42 @@ class RegisterUser extends Component {
                         id="religion"
                         type="select"
                         onChange={this.changeHandler}
+                        value={this.state.religion}
+
                         >
 
-                        <option value="select">Select</option>
-                        <option value="indian">Hindu</option>
-                        <option value="foreign">Muslim</option>
-                        <option value="foreign">Christian</option>
-                        <option value="foreign">Sikh</option>
-                        <option value="foreign">Jain</option>
-                        <option value="foreign">Other</option>
+                        <option value="">Select</option>
+                        <option value="Hindu">Hindu</option>
+                        <option value="Muslim">Muslim</option>
+                        <option value="Christian">Christian</option>
+                        <option value="Sikh">Sikh</option>
+                        <option value="Jain">Jain</option>
+                        <option value="Other">Other</option>
+
+
+                      </Input>
+                    </InputGroup>
+
+                     <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}}>
+                        Category
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="category"
+                        id="category"
+                        type="select"
+                        onChange={this.changeHandler}
+                        value={this.state.category}
+                        >
+
+                        <option value="">Select</option>
+                        <option value="General">General</option>
+                        <option value="ST">ST</option>
+                        <option value="SC">SC</option>
+                        <option value="OBC">OBC</option>
+                        <option value="Other">Other</option>
 
 
                       </Input>
@@ -579,6 +766,9 @@ class RegisterUser extends Component {
                       <Card className="mx-1">
                       <CardBody className="p-2">
                       <h5>Official Details</h5>
+
+{ (this.state.role.indexOf("teacher")===-1 && this.state.role.indexOf("admin")===-1 ) &&  <p>
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}}>
@@ -593,15 +783,31 @@ class RegisterUser extends Component {
 
                         autoComplete="admissionno"
                         onChange={this.changeHandler}
+                        value={this.state.admissionno}
                       />
                     </InputGroup>
                     {this.state.errors &&
                       this.state.errors.username && (
                         <font color="red">  <p>{this.state.errors.username.msg}</p></font>
                       )}
+ <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}}>
+                        Roll No
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="rollno"
+                        id="rollno"
+                        value={this.state.rollno}
 
-
-                  <InputGroup className="mb-3">
+                        autoComplete="rollno"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+                    </p>}
+                      <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}}>
                         Date of Joining
@@ -619,27 +825,120 @@ class RegisterUser extends Component {
                       />
                     </InputGroup>
 
+{ (this.state.role.indexOf("teacher")!==-1 || this.state.role.indexOf("admin")!==-1 ) &&  <p>
 
-                    {this.state.errors &&
-                      this.state.errors.email && (
-                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
-                      )}
-<InputGroup className="mb-3">
+
+                    <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}}>
-                        Roll No
+                        Employee No
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
                         type="text"
-                        name="rollno"
-                        id="rollno"
+                        name="employeeno"
+                        id="employeeno"
+                        value={this.state.employeeno}
 
-
-                        autoComplete="rollno"
+                        autoComplete="employeeno"
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
+ <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"100px"}}>
+                        Type
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Col md="9">
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="male" name="type" value="Fresher" onChange={this.changeHandler} />
+                        <Label className="form-check-label" check htmlFor="inline-radio1">Fresher</Label>
+                      </FormGroup>
+                      <FormGroup check inline>
+                        <Input className="form-check-input" type="radio" id="female" name="type" value="Experienced" onChange={this.changeHandler} />
+                        <Label className="form-check-label" check htmlFor="inline-radio1">Experienced</Label>
+                      </FormGroup>
+
+                    </Col>
+                    </InputGroup>
+
+
+                    {(this.state.type==="Experienced") && (
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"150px"}}>
+                        Experience Details
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <textarea
+                       style={{width:"200px"}}
+                       name="experiencedetails"
+                       value={this.state.experiencedetails}
+                       onChange={this.changeHandler}/>
+
+
+
+
+
+                    </InputGroup>
+                    )}
+
+
+                     <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}}>
+                        Department
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="department"
+                        id="department"
+                        type="select"
+                        onChange={this.changeHandler}
+                        value={this.state.department}
+                        >
+
+                        <option value="">Select</option>
+                        <option value="Department1">Department1</option>
+                        <option value="Department2">Department2</option>
+                        <option value="Department3">Department3</option>
+                        <option value="Department4">Department4</option>
+
+
+                      </Input>
+                    </InputGroup>
+
+                    <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}}>
+                        Designation
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="designation"
+                        id="designation"
+                        type="select"
+                        onChange={this.changeHandler}
+                        value={this.state.designation}
+                        >
+
+                        <option value="">Select</option>
+                        <option value="designation1">designation1</option>
+                        <option value="designation2">designation2</option>
+                        <option value="designation3">designation3</option>
+                        <option value="designation4">designation4</option>
+
+
+                      </Input>
+                    </InputGroup>
+
+</p>}
+                    {this.state.errors &&
+                      this.state.errors.email && (
+                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
+                      )}
+
 
                       </CardBody>
                       </Card>
@@ -652,7 +951,7 @@ class RegisterUser extends Component {
                         <InputGroupText style={{width:"125px"}}>
                           Phone Number
                         </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' id="phone"name ="phone" placeholder="Phone Number" />
+                        <ReactPhoneInput defaultCountry='in' id="phone"name ="phone"  />
                       </InputGroupAddon>
 
                     </InputGroup>
@@ -668,25 +967,25 @@ class RegisterUser extends Component {
               <b >Address</b>
                 <FormGroup>
 
-                  <Input type="text" id="street" placeholder="House No, Area" />
+                  <Input type="text" id="street" placeholder="House No, Area" name="address" value={this.state.address}  onChange={this.changeHandler}   />
                 </FormGroup>
                 <FormGroup row className="my-0">
                   <Col xs="8">
                     <FormGroup>
 
-                      <Input type="text" id="city" placeholder="City" />
+                      <Input type="text" id="city" placeholder="City" name="city" value={this.state.city}  onChange={this.changeHandler} />
                     </FormGroup>
                   </Col>
                   <Col xs="4">
                     <FormGroup>
 
-                      <Input type="text" id="postal-code" placeholder="Postal Code" />
+                      <Input type="text" id="postal-code" placeholder="Postal Code"  name="postalcode" value={this.state.postalcode}  onChange={this.changeHandler}  />
                     </FormGroup>
                   </Col>
                 </FormGroup>
                 <FormGroup>
 
-                  <Input type="text" id="statename" placeholder="State" />
+                  <Input type="text" id="statename" placeholder="State" name="state" value={this.state.state}  onChange={this.changeHandler} />
                 </FormGroup>
 
 
@@ -707,7 +1006,177 @@ class RegisterUser extends Component {
 
 
 
- <Card className="mx-1">
+
+
+
+                      </Col>
+                      <Col>
+
+            { (this.state.role.indexOf("student")!==-1 )&& <p>
+                      <Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Parent Details</h5>
+                      <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"110px"}}>
+                        First Name
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="parentfirstname"
+                        id="parentfirstname"
+                        value={this.state.parentfirstname}
+
+                        autoComplete="parentfirstname"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+
+                    {this.state.errors &&
+                      this.state.errors.firstname && (
+                        <font color="red">  <p>{this.state.errors.firstname.msg}</p></font>
+                      )}
+ <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"110px"}}>
+                        Last Name
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="parentlastname"
+                        id="parentlastname"
+                        value={this.state.parentlastname}
+
+                        autoComplete="parentlastname"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.lastname && (
+                        <font color="red"> <p>{this.state.errors.lastname.msg}</p></font>
+                      )}
+
+
+
+                     <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"110px"}}>
+                          Relation
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="relation"
+                        id="relation"
+                        type="select"
+                        onChange={this.changeHandler}
+                        value={this.state.relation}
+                        >
+
+                        <option value="">Select</option>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Guardian">Guardian</option>
+
+
+                      </Input>
+                    </InputGroup>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"110px"}}>
+                        Occupation
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="occupation"
+                        id="occupation"
+                        value={this.state.occupation}
+
+                        autoComplete="occupation"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+
+                   <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend"  >
+                        <InputGroupText style={{width:"110px"}}>Email</InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="parentemail"
+                        id="parentemail"
+                        value={this.state.parentemail}
+
+                        autoComplete="parentemail"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"150px"}}>
+                          Phone Number 1
+                        </InputGroupText>
+                        <ReactPhoneInput defaultCountry='in' id="parentphone1"name ="parentphone1"    />
+                      </InputGroupAddon>
+
+                    </InputGroup>
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend" >
+                        <InputGroupText style={{width:"150px"}}>
+                          Phone Number 2
+                        </InputGroupText>
+                        <ReactPhoneInput defaultCountry='in' id="parentphone2"name ="parentphone2" />
+                      </InputGroupAddon>
+
+                    </InputGroup>
+
+                    <Card className="mx-1">
+                    <FormGroup check inline>
+                        <Input className="form-check-input" type="checkbox" id="parentaddress" name="parentaddresscheck" onChange={this.copyAddress} />
+                        <Label className="form-check-label" check htmlFor="inline-checkbox1">Address same as Student Address</Label>
+                      </FormGroup>
+<CardBody className="p-2">
+<b >Address</b>
+  <FormGroup>
+
+    <Input type="text" id="parentaddress" placeholder="House No, Area" name="parentaddress" value={this.state.parentaddress} onChange={this.changeHandler} />
+  </FormGroup>
+  <FormGroup row className="my-0">
+    <Col xs="8">
+      <FormGroup>
+
+        <Input type="text" id="city" placeholder="City" />
+      </FormGroup>
+    </Col>
+    <Col xs="4">
+      <FormGroup>
+
+        <Input type="text" id="postal-code" placeholder="Postal Code" />
+      </FormGroup>
+    </Col>
+  </FormGroup>
+  <FormGroup>
+
+    <Input type="text" id="statename" placeholder="State" />
+  </FormGroup>
+
+
+</CardBody>
+</Card>
+
+
+
+
+                      </CardBody>
+                    </Card>
+                      </p>}
+                    <Card className="mx-1">
                       <CardBody className="p-2">
                       <h5>Login Details</h5>
                     <InputGroup className="mb-3">
@@ -800,171 +1269,6 @@ class RegisterUser extends Component {
                       </CardBody>
                       </Card>
 
-                      
-                      </Col>
-                      <Col>
-                      <Card className="mx-1">
-                      <CardBody className="p-2">
-                      <h5>Parent Details</h5>
-                      <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText style={{width:"110px"}}>
-                        First Name
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="firstname"
-                        id="firstname"
-                        value={this.state.firstname}
-
-                        autoComplete="firstname"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-
-                    {this.state.errors &&
-                      this.state.errors.firstname && (
-                        <font color="red">  <p>{this.state.errors.firstname.msg}</p></font>
-                      )}
- <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText style={{width:"110px"}}>
-                        Last Name
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="lastname"
-                        id="lastname"
-                        value={this.state.lastname}
-
-                        autoComplete="lastname"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-                    {this.state.errors &&
-                      this.state.errors.lastname && (
-                        <font color="red"> <p>{this.state.errors.lastname.msg}</p></font>
-                      )}
-
-
-
-                     <InputGroup className="mb-4">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText style={{width:"110px"}}>
-                          Relation
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        name="relation"
-                        id="relation"
-                        type="select"
-                        onChange={this.changeHandler}
-                        >
-
-                        <option value="">Select</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Guardian">Guardian</option>
-                        
-
-                      </Input>
-                    </InputGroup>
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText style={{width:"110px"}}>
-                        Occupation
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="occupation"
-                        id="occupation"
-                        value={this.state.occupation}
-
-                        autoComplete="occupation"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-                    
-
-                   <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend"  >
-                        <InputGroupText style={{width:"110px"}}>Email</InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="parentemail"
-                        id="parentemail"
-                        value={this.state.parentemail}
-                       
-                        autoComplete="parentemail"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText style={{width:"150px"}}>
-                          Phone Number 1
-                        </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' id="parentphone1"name ="parentphone1" />
-                      </InputGroupAddon>
-
-                    </InputGroup>
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend" >
-                        <InputGroupText style={{width:"150px"}}>
-                          Phone Number 2
-                        </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' id="parentphone2"name ="parentphone2" />
-                      </InputGroupAddon>
-
-                    </InputGroup>
-                  
-                    <Card className="mx-1">
-                    <FormGroup check inline>
-                        <Input className="form-check-input" type="checkbox" id="parentaddress" name="parentaddress"  />
-                        <Label className="form-check-label" check htmlFor="inline-checkbox1">Address same as Student Address</Label>
-                      </FormGroup>
-<CardBody className="p-2">
-<b >Address</b>
-  <FormGroup>
-
-    <Input type="text" id="street" placeholder="House No, Area" />
-  </FormGroup>
-  <FormGroup row className="my-0">
-    <Col xs="8">
-      <FormGroup>
-
-        <Input type="text" id="city" placeholder="City" />
-      </FormGroup>
-    </Col>
-    <Col xs="4">
-      <FormGroup>
-
-        <Input type="text" id="postal-code" placeholder="Postal Code" />
-      </FormGroup>
-    </Col>
-  </FormGroup>
-  <FormGroup>
-
-    <Input type="text" id="statename" placeholder="State" />
-  </FormGroup>
-
-
-</CardBody>
-</Card>
-
-
-
-
-                      </CardBody>
-                    </Card>
-
                       </Col>
                       </Row>
 
@@ -983,7 +1287,7 @@ class RegisterUser extends Component {
               </Card>
             </Col>
 
-            
+
 
 
           </Row>
