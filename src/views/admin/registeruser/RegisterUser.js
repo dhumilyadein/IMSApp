@@ -92,16 +92,8 @@ class RegisterUser extends Component {
       relation:null,
       occupation:null
 
-
-
-
-
-
-
-
-
-
     };
+
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
     this.roleHandler = this.roleHandler.bind(this);
@@ -111,7 +103,9 @@ class RegisterUser extends Component {
 
     this.fileHandler = this.fileHandler.bind(this);
     this.fileChange = this.fileChange.bind(this);
-    this.phonechangeHandler = this.phonechangeHandler.bind(this);
+    this.phoneChangeHandler = this.phoneChangeHandler.bind(this);
+    this.parentPhone1ChangeHandler = this.parentPhone1ChangeHandler.bind(this);
+    this.parentPhone2ChangeHandler = this.parentPhone2ChangeHandler.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
 
 
@@ -194,6 +188,7 @@ class RegisterUser extends Component {
       nophoto: false,
       corruptphoto: false,
       photoname: null,
+      phone:null
 
     });
 
@@ -242,20 +237,32 @@ class RegisterUser extends Component {
   }
 
   copyAddress(e)
-  { if(e.target.checked)
-    {
+  {
+   
+    if(e.target.checked===true)
+    {console.log("address check true: "+e.target.checked) ;
     this.setState({
       parentaddress:this.state.address,
       parentcity:this.state.city,
       parentpostalcode:this.state.postalcode,
       parentstate:this.state.state,
    });}
+   else if(e.target.checked===false)
+   {console.log("address check false: "+e.target.checked) ;
+      this.setState({
+    parentaddress:"",
+    parentcity:"",
+    parentpostalcode:"",
+    parentstate:"",
+ });
+
+   }
 
 
   }
 
 
-   phonechangeHandler(value) {
+   phoneChangeHandler(value) {
    console.log("phone :"+value);
 
     this.setState({
@@ -263,6 +270,25 @@ class RegisterUser extends Component {
     });
 
  }
+
+ parentPhone1ChangeHandler(value) {
+  console.log("phone1 :"+value);
+
+   this.setState({
+      parentphone1: value
+   });
+
+}
+
+parentPhone2ChangeHandler(value) {
+  console.log("phone2 :"+value);
+
+   this.setState({
+      parentphone1: value
+   });
+
+}
+ 
 
   /**
    * @description Called when the role(s) are selected. To update role Array
@@ -571,6 +597,11 @@ class RegisterUser extends Component {
                       />
                     </InputGroup>
 
+                     {this.state.errors &&
+                      this.state.errors.dob && (
+                        <font color="red">  <p>{this.state.errors.dob.msg}</p></font>
+                      )}
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"80px"}}>
@@ -589,6 +620,11 @@ class RegisterUser extends Component {
 
                     </Col>
                     </InputGroup>
+
+                     {this.state.errors &&
+                      this.state.errors.gender && (
+                        <font color="red">  <p>{this.state.errors.gender.msg}</p></font>
+                      )}
 { (this.state.role.indexOf("teacher")!==-1 || this.state.role.indexOf("admin")!==-1 ) &&  <p>
                    <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
@@ -597,21 +633,28 @@ class RegisterUser extends Component {
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
-                        name="relation"
-                        id="relation"
+                        name="maritalstatus"
+                        id="maritalstatus"
                         type="select"
                         onChange={this.changeHandler}
+                        value={this.state.maritalstatus}
                         >
 
                         <option value="">Select</option>
-                        <option value="Father">Single</option>
-                        <option value="Mother">Married</option>
-                        <option value="Guardian">Divorced</option>
-                        <option value="Guardian">Widowed</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
 
 
                       </Input>
                       </InputGroup>
+                      {this.state.errors &&
+                      this.state.errors.maritalstatus && (
+                        <font color="red">  <p>{this.state.errors.maritalstatus.msg}</p></font>
+                      )}
+
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}} >
@@ -628,6 +671,10 @@ class RegisterUser extends Component {
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.qualification && (
+                        <font color="red">  <p>{this.state.errors.qualification.msg}</p></font>
+                      )}
 </p>}
                      <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
@@ -664,6 +711,10 @@ class RegisterUser extends Component {
 
                       </Input>
                     </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.bloodgroup && (
+                        <font color="red">  <p>{this.state.errors.bloodgroup.msg}</p></font>
+                      )}
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -686,7 +737,10 @@ class RegisterUser extends Component {
 
                       </Input>
                     </InputGroup>
-
+{this.state.errors &&
+  this.state.errors.nationality && (
+    <font color="red">  <p>{this.state.errors.nationality.msg}</p></font>
+  )}
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -715,6 +769,11 @@ class RegisterUser extends Component {
                       </Input>
                     </InputGroup>
 
+                    {this.state.errors &&
+  this.state.errors.religion && (
+    <font color="red">  <p>{this.state.errors.religion.msg}</p></font>
+  )}
+
                      <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}}>
@@ -739,6 +798,11 @@ class RegisterUser extends Component {
 
                       </Input>
                     </InputGroup>
+                    {this.state.errors &&
+  this.state.errors.category && (
+    <font color="red">  <p>{this.state.errors.category.msg}</p></font>
+  )}
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
 
@@ -756,6 +820,10 @@ class RegisterUser extends Component {
                       </InputGroupAddon>
                     </InputGroup>
 
+ {this.state.errors &&
+  this.state.errors.photo && (
+    <font color="red">  <p>{this.state.errors.photo.msg}</p></font>
+  )}
 
 
                       </CardBody>
@@ -786,9 +854,10 @@ class RegisterUser extends Component {
                         value={this.state.admissionno}
                       />
                     </InputGroup>
+
                     {this.state.errors &&
-                      this.state.errors.username && (
-                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      this.state.errors.admissionno && (
+                        <font color="red">  <p>{this.state.errors.admissionno.msg}</p></font>
                       )}
  <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -806,6 +875,10 @@ class RegisterUser extends Component {
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.rollno && (
+                        <font color="red">  <p>{this.state.errors.rollno.msg}</p></font>
+                      )}
                     </p>}
                       <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -824,6 +897,10 @@ class RegisterUser extends Component {
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.doj && (
+                        <font color="red">  <p>{this.state.errors.doj.msg}</p></font>
+                      )}
 
 { (this.state.role.indexOf("teacher")!==-1 || this.state.role.indexOf("admin")!==-1 ) &&  <p>
 
@@ -844,6 +921,11 @@ class RegisterUser extends Component {
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
+{this.state.errors &&
+  this.state.errors.employeeno && (
+    <font color="red">  <p>{this.state.errors.employeeno.msg}</p></font>
+  )}
+
  <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"100px"}}>
@@ -863,6 +945,11 @@ class RegisterUser extends Component {
                     </Col>
                     </InputGroup>
 
+                    {this.state.errors &&
+  this.state.errors.type && (
+    <font color="red">  <p>{this.state.errors.type.msg}</p></font>
+  )}
+
 
                     {(this.state.type==="Experienced") && (
                     <InputGroup className="mb-3">
@@ -876,7 +963,11 @@ class RegisterUser extends Component {
                        name="experiencedetails"
                        value={this.state.experiencedetails}
                        onChange={this.changeHandler}/>
-
+                       
+                       {this.state.errors &&
+                        this.state.errors.experiencedetails && (
+                          <font color="red">  <p>{this.state.errors.experiencedetails.msg}</p></font>
+                        )}
 
 
 
@@ -909,6 +1000,11 @@ class RegisterUser extends Component {
                       </Input>
                     </InputGroup>
 
+                     {this.state.errors &&
+                        this.state.errors.department && (
+                          <font color="red">  <p>{this.state.errors.department.msg}</p></font>
+                        )}
+
                     <InputGroup className="mb-4">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"120px"}}>
@@ -932,12 +1028,13 @@ class RegisterUser extends Component {
 
                       </Input>
                     </InputGroup>
+                    {this.state.errors &&
+                        this.state.errors.designation && (
+                          <font color="red">  <p>{this.state.errors.designation.msg}</p></font>
+                        )}
 
 </p>}
-                    {this.state.errors &&
-                      this.state.errors.email && (
-                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
-                      )}
+                   
 
 
                       </CardBody>
@@ -951,14 +1048,16 @@ class RegisterUser extends Component {
                         <InputGroupText style={{width:"125px"}}>
                           Phone Number
                         </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' id="phone"name ="phone"  />
+                        <ReactPhoneInput defaultCountry='in' 
+                       
+                         onChange ={this.phoneChangeHandler} />
                       </InputGroupAddon>
 
                     </InputGroup>
 
                     {this.state.errors &&
-                      this.state.errors.username && (
-                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      this.state.errors.phone && (
+                        <font color="red">  <p>{this.state.errors.phone.msg}</p></font>
                       )}
 
 <Card className="mx-1">
@@ -969,18 +1068,30 @@ class RegisterUser extends Component {
 
                   <Input type="text" id="street" placeholder="House No, Area" name="address" value={this.state.address}  onChange={this.changeHandler}   />
                 </FormGroup>
+                {this.state.errors &&
+                        this.state.errors.address && (
+                          <font color="red">  <p>{this.state.errors.address.msg}</p></font>
+                        )}
                 <FormGroup row className="my-0">
                   <Col xs="8">
                     <FormGroup>
 
                       <Input type="text" id="city" placeholder="City" name="city" value={this.state.city}  onChange={this.changeHandler} />
                     </FormGroup>
+                    {this.state.errors &&
+                        this.state.errors.city && (
+                          <font color="red">  <p>{this.state.errors.city.msg}</p></font>
+                        )}
                   </Col>
                   <Col xs="4">
                     <FormGroup>
 
                       <Input type="text" id="postal-code" placeholder="Postal Code"  name="postalcode" value={this.state.postalcode}  onChange={this.changeHandler}  />
                     </FormGroup>
+                    {this.state.errors &&
+                        this.state.errors.postalcode && (
+                          <font color="red">  <p>{this.state.errors.postalcode.msg}</p></font>
+                        )}
                   </Col>
                 </FormGroup>
                 <FormGroup>
@@ -988,15 +1099,15 @@ class RegisterUser extends Component {
                   <Input type="text" id="statename" placeholder="State" name="state" value={this.state.state}  onChange={this.changeHandler} />
                 </FormGroup>
 
-
+{this.state.errors &&
+  this.state.errors.state && (
+    <font color="red">  <p>{this.state.errors.state.msg}</p></font>
+  )}
               </CardBody>
             </Card>
 
 
-                    {this.state.errors &&
-                      this.state.errors.email && (
-                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
-                      )}
+                   
 
 
 
@@ -1035,8 +1146,8 @@ class RegisterUser extends Component {
 
 
                     {this.state.errors &&
-                      this.state.errors.firstname && (
-                        <font color="red">  <p>{this.state.errors.firstname.msg}</p></font>
+                      this.state.errors.parentfirstname && (
+                        <font color="red">  <p>{this.state.errors.parentfirstname.msg}</p></font>
                       )}
  <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
@@ -1056,13 +1167,13 @@ class RegisterUser extends Component {
                     </InputGroup>
 
                     {this.state.errors &&
-                      this.state.errors.lastname && (
-                        <font color="red"> <p>{this.state.errors.lastname.msg}</p></font>
+                      this.state.errors.parentlastname && (
+                        <font color="red"> <p>{this.state.errors.parentlastname.msg}</p></font>
                       )}
 
 
 
-                     <InputGroup className="mb-4">
+                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"110px"}}>
                           Relation
@@ -1084,6 +1195,11 @@ class RegisterUser extends Component {
 
                       </Input>
                     </InputGroup>
+{this.state.errors &&
+  this.state.errors.relation && (
+    <font color="red">  <p>{this.state.errors.relation.msg}</p></font>
+  )}
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"110px"}}>
@@ -1100,7 +1216,10 @@ class RegisterUser extends Component {
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
-
+{this.state.errors &&
+  this.state.errors.occupation && (
+    <font color="red">  <p>{this.state.errors.occupation.msg}</p></font>
+  )}
 
                    <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend"  >
@@ -1116,56 +1235,91 @@ class RegisterUser extends Component {
                         onChange={this.changeHandler}
                       />
                     </InputGroup>
+{this.state.errors &&
+  this.state.errors.parentemail && (
+    <font color="red">  <p>{this.state.errors.parentemail.msg}</p></font>
+  )}
+
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText style={{width:"150px"}}>
                           Phone Number 1
                         </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' id="parentphone1"name ="parentphone1"    />
+                        <ReactPhoneInput defaultCountry='in'
+                        
+                        onChange={this.parentPhone1ChangeHandler}   />
                       </InputGroupAddon>
 
                     </InputGroup>
+
+                    {this.state.errors &&
+                        this.state.errors.parentphone1 && (
+                          <font color="red">  <p>{this.state.errors.parentphone1.msg}</p></font>
+                        )}
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend" >
                         <InputGroupText style={{width:"150px"}}>
                           Phone Number 2
                         </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' id="parentphone2"name ="parentphone2" />
+                        <ReactPhoneInput defaultCountry='in' 
+                  
+                        onChange={this.parentPhone2ChangeHandler} />
                       </InputGroupAddon>
 
                     </InputGroup>
 
                     <Card className="mx-1">
                     <FormGroup check inline>
-                        <Input className="form-check-input" type="checkbox" id="parentaddress" name="parentaddresscheck" onChange={this.copyAddress} />
+                        <Input className="form-check-input" type="checkbox" id="parentaddresscheck" name="parentaddresscheck" onChange={this.copyAddress} />
                         <Label className="form-check-label" check htmlFor="inline-checkbox1">Address same as Student Address</Label>
                       </FormGroup>
 <CardBody className="p-2">
 <b >Address</b>
   <FormGroup>
 
-    <Input type="text" id="parentaddress" placeholder="House No, Area" name="parentaddress" value={this.state.parentaddress} onChange={this.changeHandler} />
+    <Input type="text" id="parentaddress" placeholder="House No, Area"
+     name="parentaddress" value={this.state.parentaddress} onChange={this.changeHandler} />
   </FormGroup>
+
+  {this.state.errors &&
+                        this.state.errors.parentaddress && (
+                          <font color="red">  <p>{this.state.errors.parentaddress.msg}</p></font>
+                        )}
   <FormGroup row className="my-0">
     <Col xs="8">
       <FormGroup>
 
-        <Input type="text" id="city" placeholder="City" />
+        <Input type="text" id="parentcity" placeholder="City" 
+        name="parentcity" value={this.state.parentcity } onChange={this.changeHandler}/>
       </FormGroup>
+
+      {this.state.errors &&
+                        this.state.errors.parentcity && (
+                          <font color="red">  <p>{this.state.errors.parentcity.msg}</p></font>
+                        )}
     </Col>
     <Col xs="4">
       <FormGroup>
 
-        <Input type="text" id="postal-code" placeholder="Postal Code" />
+        <Input type="text" id="parentpostalcode" placeholder="Postal Code"
+         name="parentpostalcode" value={this.state.parentpostalcode } onChange={this.changeHandler}  />
       </FormGroup>
+      {this.state.errors &&
+                        this.state.errors.postalcode && (
+                          <font color="red">  <p>{this.state.errors.postalcode.msg}</p></font>
+                        )}
     </Col>
   </FormGroup>
   <FormGroup>
 
-    <Input type="text" id="statename" placeholder="State" />
+    <Input type="text" id="parentstate" placeholder="State" name="parentstate"
+     value={this.state.parentstate } onChange={this.changeHandler}/>
   </FormGroup>
-
+{this.state.errors &&
+  this.state.errors.parentstate && (
+    <font color="red">  <p>{this.state.errors.parentstate.msg}</p></font>
+  )}
 
 </CardBody>
 </Card>
