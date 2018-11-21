@@ -58,8 +58,8 @@ class RegisterUser extends Component {
       parentfirstname:null,
       parentlastname:null,
       parentemail:null,
-      parentphone1:null,
-      parentphone2:null,
+      parentphone1:"",
+      parentphone2:"",
       parentaddress:null,
       parentcity:null,
       parentpostalcode:null,
@@ -88,7 +88,7 @@ class RegisterUser extends Component {
       nophoto: false,
       corruptphoto: false,
       photoname: null,
-      phone:null,
+      phone:"",
       relation:null,
       occupation:null
 
@@ -103,11 +103,7 @@ class RegisterUser extends Component {
 
     this.fileHandler = this.fileHandler.bind(this);
     this.fileChange = this.fileChange.bind(this);
-    this.phoneChangeHandler = this.phoneChangeHandler.bind(this);
-    this.parentPhone1ChangeHandler = this.parentPhone1ChangeHandler.bind(this);
-    this.parentPhone2ChangeHandler = this.parentPhone2ChangeHandler.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
-
 
   }
 
@@ -238,7 +234,7 @@ class RegisterUser extends Component {
 
   copyAddress(e)
   {
-   
+
     if(e.target.checked===true)
     {console.log("address check true: "+e.target.checked) ;
     this.setState({
@@ -262,33 +258,8 @@ class RegisterUser extends Component {
   }
 
 
-   phoneChangeHandler(value) {
-   console.log("phone :"+value);
 
-    this.setState({
-       phone: value
-    });
 
- }
-
- parentPhone1ChangeHandler(value) {
-  console.log("phone1 :"+value);
-
-   this.setState({
-      parentphone1: value
-   });
-
-}
-
-parentPhone2ChangeHandler(value) {
-  console.log("phone2 :"+value);
-
-   this.setState({
-      parentphone1: value
-   });
-
-}
- 
 
   /**
    * @description Called when the role(s) are selected. To update role Array
@@ -963,7 +934,7 @@ parentPhone2ChangeHandler(value) {
                        name="experiencedetails"
                        value={this.state.experiencedetails}
                        onChange={this.changeHandler}/>
-                       
+
                        {this.state.errors &&
                         this.state.errors.experiencedetails && (
                           <font color="red">  <p>{this.state.errors.experiencedetails.msg}</p></font>
@@ -1034,7 +1005,7 @@ parentPhone2ChangeHandler(value) {
                         )}
 
 </p>}
-                   
+
 
 
                       </CardBody>
@@ -1048,9 +1019,10 @@ parentPhone2ChangeHandler(value) {
                         <InputGroupText style={{width:"125px"}}>
                           Phone Number
                         </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' 
-                       
-                         onChange ={this.phoneChangeHandler} />
+                        <ReactPhoneInput defaultCountry='in'
+value={this.state.phone}
+                          name="phone"
+                         onChange ={(phone) =>{ console.log("phone value: "+ phone); this.setState({ phone })  } } />
                       </InputGroupAddon>
 
                     </InputGroup>
@@ -1107,7 +1079,7 @@ parentPhone2ChangeHandler(value) {
             </Card>
 
 
-                   
+
 
 
 
@@ -1246,8 +1218,10 @@ parentPhone2ChangeHandler(value) {
                           Phone Number 1
                         </InputGroupText>
                         <ReactPhoneInput defaultCountry='in'
-                        
-                        onChange={this.parentPhone1ChangeHandler}   />
+value={this.state.parentphone1}
+name="parentphone1"
+onChange ={(parentphone1) =>{ console.log("parentphone1 value: "+ parentphone1); this.setState({ parentphone1 })  } }
+  />
                       </InputGroupAddon>
 
                     </InputGroup>
@@ -1262,9 +1236,11 @@ parentPhone2ChangeHandler(value) {
                         <InputGroupText style={{width:"150px"}}>
                           Phone Number 2
                         </InputGroupText>
-                        <ReactPhoneInput defaultCountry='in' 
-                  
-                        onChange={this.parentPhone2ChangeHandler} />
+                        <ReactPhoneInput defaultCountry='in'
+
+value={this.state.parentphone2}
+name="parentphone2"
+onChange ={(parentphone2) =>{ console.log("parentphone2 value: "+ parentphone2); this.setState({ parentphone2 })  } } />
                       </InputGroupAddon>
 
                     </InputGroup>
@@ -1290,7 +1266,7 @@ parentPhone2ChangeHandler(value) {
     <Col xs="8">
       <FormGroup>
 
-        <Input type="text" id="parentcity" placeholder="City" 
+        <Input type="text" id="parentcity" placeholder="City"
         name="parentcity" value={this.state.parentcity } onChange={this.changeHandler}/>
       </FormGroup>
 
