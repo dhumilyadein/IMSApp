@@ -6,20 +6,20 @@ import {
   Button,
   Card,
   CardBody,
-  
+
   Col,
   Container,
   Form,
-  
+
   Input,
   InputGroup,
   InputGroupAddon,
-  
+
   Row,
-  
+
   Modal,
   ModalHeader,
-  
+
 
 } from "reactstrap";
 
@@ -29,9 +29,9 @@ class ImportUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      
+
       userdata: null,
-     
+
       impSuccess: false,
       errors: null,
       importErrors:null,
@@ -45,7 +45,7 @@ class ImportUser extends Component {
 
 
     };
-   
+
     this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
 
@@ -154,7 +154,7 @@ class ImportUser extends Component {
         <Container style={{width:"2500px"}} >
 
           <Row lg="4" style={{width:"2500px"}}>
-           
+
 
             <Col md="2">
               <Card className="mx-4">
@@ -204,7 +204,7 @@ class ImportUser extends Component {
                       <font color="red">  <p>{Object.keys(this.state.importErrors).length} record(s) failed to import. For errors, click Errors</p></font>
                         <Button type="submit" block color="danger" onClick={
 ()=>{var data = "<p>This is 'myWindow'</p>";
-var myWindow = window.open("data:text/json," + encodeURIComponent(this.state.errors),
+var myWindow = window.open("","data:html/json," + this.state.errors,
                        "_blank");
 myWindow.focus();
 

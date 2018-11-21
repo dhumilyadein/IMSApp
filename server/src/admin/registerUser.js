@@ -50,7 +50,7 @@ module.exports = function(app) {
   var fnExp = /^[a-zA-Z]+$/;
 
 //password validaion
-//  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)) 
+//  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/))
 //  error[password]="Password should contain atleast 6 characters, inclding 1 special symbol and 1 number";
 try{
   if(!request.username)
@@ -59,11 +59,11 @@ try{
   ValError['username']="Username should be alphanumeric";
  else{
   const usernameCheck = await User.findOne({ username: request.username });
- 
+
   if(usernameCheck)
   valError['userexists']="username: "+request.username+" is already in use";
   console.log("unexists: "+valError['userexists']);
- 
+
   }
 
   if(!request.email)
@@ -72,7 +72,7 @@ try{
  valError["email"]="Email is not valid";
   else
   { const emailCheck = await User.findOne({ email: request.email });
-  
+
   if(emailCheck)
   valError['emailexists']="email: "+request.email+" is already in use";
   console.log("emailexists: "+valError['emailexists']);
@@ -85,20 +85,20 @@ catch(e){console.log(e);}
   else if(!request.firstname.match(fnExp))
   valError["firstname"]="firstname should contain only letters";
 
-  
+
   if(!request.lastname)
   valError["lastname"]="lastname can't be empty";
   else if(!request.lastname.match(fnExp))
   valError["lastname"]="lastname should contain only letters";
 
-  
+
 
   console.log("request.role: "+ request.role);
   if(request.role.length===0)
   valError["role"]="role can't be empty";
   else if(request.role.length>1 && request.role.indexOf("student") !== -1 )
   valError["role"]="Student can't have multiple roles";
-   
+
   else{
     for(let i=0;i<request.role.length;i++)
     {if (!/^(admin|teacher|student|parent)$/.exec(request.role[i]))
@@ -107,14 +107,14 @@ catch(e){console.log(e);}
     }
   }
 
-  
+
     console.log("Import error: "+JSON.stringify(valError));
 //var obj = JSON.parse(error);
 var errorLen = Object.keys(valError).length;
 console.log("ValErrorLen: "+errorLen);
 
 return valError;
-  
+
 
 
 
@@ -133,12 +133,185 @@ const regValidation = [
       .withMessage("Username is required")
       .isLength({ min: 3 })
       .withMessage("Username should be at least 6 letters"),
+
+      check("bloodgroup")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Bloodgroup"),
+
+      check("gender")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Gender"),
+
+      check("nationality")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Nationality"),
+
+      check("dob")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Date of Birth"),
+
+      check("doj")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Date of Joining"),
+
+      check("religion")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Religion"),
+
+      check("category")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Category"),
+
+      check("phone")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Phone No")
+      .isLength({ min: 15 })
+      .withMessage("Incorrect Phone No"),
+
+      check("parentphone1")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Phone No")
+      .isLength({ min: 15 })
+      .withMessage("Incorrect Phone No"),
+
+      check("address")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Address"),
+
+      check("city")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter City"),
+
+      check("postalcode")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Postal Code"),
+
+      check("state")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter State"),
+
+
+      check("parentaddress")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Address"),
+
+      check("parentcity")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter City"),
+
+      check("parentpostalcode")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Postal Code"),
+
+      check("parentstate")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter State"),
+
+      check("parentphone2")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Phone No")
+      .isLength({ min: 15 })
+      .withMessage("Incorrect Phone No"),
+
+      check("qualification")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Qualification"),
+
+      check("maritalstatus")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Marital Status"),
+
+      check("photo")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Photo"),
+
+      check("relation")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Relation"),
+
+      check("occupation")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Occupation"),
+
+      check("type")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Type of Employee"),
+
+      check("department")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Department"),
+
+      check("designation")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Designation"),
+
+      check("experiencedetails")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Experience Details"),
+
+      check("admissionno")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Admission No")
+      .isNumeric()
+      .withMessage("Admission No should be Numeric"),
+
+      check("employeeno")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Employee No")
+      .isNumeric()
+      .withMessage("Employee No should be Numeric"),
+
+      check("rollno")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Roll No")
+      .isNumeric()
+      .withMessage("Roll No should be Numeric"),
+
     check("email")
       .not()
       .isEmpty()
       .withMessage("Email is required")
       .isEmail()
       .withMessage("Please enter a valid email address"),
+
+      check("parentemail")
+      .not()
+      .isEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Please enter a valid email address"),
+
+
     check("firstname")
       .not()
       .isEmpty()
@@ -146,13 +319,35 @@ const regValidation = [
       .isLength({ min: 2 })
       .withMessage("Name should be at least 2 letters")
       .matches(/^([A-z]|\s)+$/)
-      .withMessage("Name cannot have numbers"),
+      .withMessage("Number(s) not allowed here"),
+
     check("lastname")
       .not()
       .isEmpty()
       .withMessage("Last name is required")
       .isLength({ min: 1 })
-      .withMessage("Last name should be at least 2 letters"),
+      .withMessage("Last name should be at least 2 letters")
+      .matches(/^([A-z]|\s)+$/)
+      .withMessage("Number(s) not allowed here"),
+
+      check("parentfirstname")
+      .not()
+      .isEmpty()
+      .withMessage("First name is required")
+      .isLength({ min: 2 })
+      .withMessage("Name should be at least 2 letters")
+      .matches(/^([A-z]|\s)+$/)
+      .withMessage("Number(s) not allowed here"),
+
+    check("parentlastname")
+      .not()
+      .isEmpty()
+      .withMessage("Last name is required")
+      .isLength({ min: 1 })
+      .withMessage("Last name should be at least 2 letters")
+      .matches(/^([A-z]|\s)+$/)
+      .withMessage("Number(s) not allowed here"),
+
     check("password")
       .not()
       .isEmpty()
@@ -190,6 +385,7 @@ const regValidation = [
     var errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+      console.log("ERRORS"+ errors.mapped());
       return res.send({ errors: errors.mapped() });
     }
 
@@ -206,7 +402,7 @@ const regValidation = [
       });
   }
 
-  function onlyUnique(value, index, self) { 
+  function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
  function  importExcel(req, res) {
@@ -258,8 +454,8 @@ const regValidation = [
               {if(result[i][key]==="")
               counter++;
 
-             
-              
+
+
                   }
                  // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
                   if(counter===Object.keys(result[i]).length)
@@ -268,8 +464,8 @@ const regValidation = [
               if (result[i].role1) roles.push(result[i].role1);
               if (result[i].role2) roles.push(result[i].role2);
               if (result[i].role3) roles.push(result[i].role3);
-            
-              
+
+
               result[i]["role"] = roles;
               var { role1, ...temp } = result[i];
               var { role2, ...temp } = temp;
@@ -278,21 +474,21 @@ const regValidation = [
               result[i] = temp;
 
               result[i].role =  result[i].role.filter( onlyUnique );
-              
+
               var impValResult= await importValidation(result[i]);
               console.log("impValResultLength: "+Object.keys(impValResult).length);
-          
+
                              if (Object.keys(impValResult).length===0) {
-                             
+
                 let user = new User(result[i]);
                 //console.log(" result.username: " + result[i].username);
-                
-                  
-  
+
+
+
                      // console.log("User: " + user);
-  
+
                       user.password = user.hashPassword(user.password);
-  
+
                       user
                         .save()
                         .then(user => {
@@ -304,28 +500,28 @@ const regValidation = [
               }
 
               else
-              { 
+              {
               importErrors["record# "+(i+1)+" of user: "+result[i].username  ] = impValResult;
-              
+
                 }
 
-              
-         
+
+
                           }
                           console.log("IMPORT ERRORS: "+ JSON.stringify(importErrors));
                           if(Object.keys(importErrors).length>0)
                           return res.send({errors:importErrors});
                           else
                           return res.send("Imported Successfully");
-           
-                      
-                 
-                 
+
+
+
+
                 }
               );
-            
-          
-        
+
+
+
       } catch (e) {
         console.log(e);
         res.json({ error_code: 2, err_desc: "Corupted excel file" });

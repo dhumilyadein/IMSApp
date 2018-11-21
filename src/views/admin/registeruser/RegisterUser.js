@@ -32,12 +32,8 @@ class RegisterUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: null,
-      email: null,
-      firstname: null,
-      lastname: null,
-      password: null,
-      password_con: null,
+
+
       role: ["student"],
       userdata: null,
       regSuccess: false,
@@ -52,45 +48,20 @@ class RegisterUser extends Component {
         studentChecked: true,
         parentChecked: false
       },
-      employeeno:null,
+
       visible: true,
       modalSuccess: true,
-      parentfirstname:null,
-      parentlastname:null,
-      parentemail:null,
-      parentphone1:"",
-      parentphone2:"",
-      parentaddress:null,
-      parentcity:null,
-      parentpostalcode:null,
-      parentstate:null,
-      address:null,
-      city:null,
-      postalcode:null,
-      state:null,
-      admissionno:null,
-      rollno:null,
-      doj:null,
-      type:null,
-      experiencedetails:null,
-      department:null,
-      designation:null,
-      dob:null,
-      gender:null,
-      maritalstatus:null,
-      qualification:null,
-      photo:null,
-      religion:null,
-      nationality:null,
-      bloodgroup:null,
-      phonebumber:null,
-      category:null,
+
+
+
+
+
+
+
       nophoto: false,
       corruptphoto: false,
-      photoname: null,
-      phone:"",
-      relation:null,
-      occupation:null
+      photoname: "",
+
 
     };
 
@@ -203,7 +174,7 @@ class RegisterUser extends Component {
     axios
       .post("http://localhost:8001/api/register", this.state)
       .then(result => {
-        console.log("result.data " + result.data);
+        console.log("result.data " + JSON.stringify(result.data));
         if (result.data.errors) {
 
           return this.setState(result.data);
@@ -228,7 +199,17 @@ class RegisterUser extends Component {
     console.log("Name: "+e.target.name +" Value: "+e.target.value);
     this.setState({
       [e.target.name]: e.target.value
-    });
+    }, ()=> {
+      console.log("STATE VALUE - " + JSON.stringify(this.state));
+
+
+
+      });
+
+
+
+
+
 
   }
 
@@ -299,6 +280,8 @@ class RegisterUser extends Component {
     }
 
     if (e.target.name === "student" && e.target.checked) {
+
+
       this.setState({
         checked: { studentChecked: true, adminChecked: false, teacherChecked: false, parentChecked: false },
         disabled: true,
@@ -308,6 +291,7 @@ class RegisterUser extends Component {
 
     } else if (e.target.name === "student" && !e.target.checked) {
       console.log("not checked");
+
       this.setState({
         checked: { studentChecked: false, adminChecked: false, teacherChecked: false, parentChecked: false },
         disabled: false
@@ -395,7 +379,7 @@ class RegisterUser extends Component {
 
   fileChange = event => {
     const file = event.target.files[0];
-    this.setState({ photo: file, nophoto: false, photomname: file.name, }, () => console.log("file:  " + this.state.photo.name));
+    this.setState({ photo: file, nophoto: false, photoname: file.name, }, () => console.log("file:  " + this.state.photo.name));
 
 
 
@@ -404,7 +388,7 @@ class RegisterUser extends Component {
 
   render() {
     return (
-      <div style={{width:"1000px"}} >
+      <div   style={{width:"1000px"}}>
 
         <Container style={{width:"2500px"}} >
 
@@ -581,11 +565,15 @@ class RegisterUser extends Component {
                       </InputGroupAddon>
                       <Col md="9">
                       <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="gender" name="gender" value="Male"  onChange={this.changeHandler} />
+                        <Input className="form-check-input" type="radio" id="gender" name="gender" value="Male"
+                        style={{height:"35px", width:"25px"}  }
+                        onChange={this.changeHandler} />
                         <Label className="form-check-label" check htmlFor="inline-radio1">Male</Label>
                       </FormGroup>
                       <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="gender" name="gender" value="Female"  onChange={this.changeHandler} />
+                        <Input className="form-check-input" type="radio" id="gender" name="gender" value="Female"
+                         style={{height:"35px", width:"25px"}  }
+                          onChange={this.changeHandler} />
                         <Label className="form-check-label" check htmlFor="inline-radio1">Female</Label>
                       </FormGroup>
 
@@ -905,11 +893,15 @@ class RegisterUser extends Component {
                       </InputGroupAddon>
                       <Col md="9">
                       <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="male" name="type" value="Fresher" onChange={this.changeHandler} />
+                        <Input className="form-check-input" type="radio" id="male" name="type" value="Fresher"
+                        style={{height:"35px", width:"25px"} }
+                         onChange={this.changeHandler} />
                         <Label className="form-check-label" check htmlFor="inline-radio1">Fresher</Label>
                       </FormGroup>
                       <FormGroup check inline>
-                        <Input className="form-check-input" type="radio" id="female" name="type" value="Experienced" onChange={this.changeHandler} />
+                        <Input className="form-check-input" type="radio" id="female" name="type" value="Experienced"
+                        style={{height:"35px", width:"25px"} }
+                        onChange={this.changeHandler} />
                         <Label className="form-check-label" check htmlFor="inline-radio1">Experienced</Label>
                       </FormGroup>
 
@@ -1244,7 +1236,10 @@ onChange ={(parentphone2) =>{ console.log("parentphone2 value: "+ parentphone2);
                       </InputGroupAddon>
 
                     </InputGroup>
-
+                    {this.state.errors &&
+                        this.state.errors.parentphone2 && (
+                          <font color="red">  <p>{this.state.errors.parentphone2.msg}</p></font>
+                        )}
                     <Card className="mx-1">
                     <FormGroup check inline>
                         <Input className="form-check-input" type="checkbox" id="parentaddresscheck" name="parentaddresscheck" onChange={this.copyAddress} />
@@ -1282,8 +1277,8 @@ onChange ={(parentphone2) =>{ console.log("parentphone2 value: "+ parentphone2);
          name="parentpostalcode" value={this.state.parentpostalcode } onChange={this.changeHandler}  />
       </FormGroup>
       {this.state.errors &&
-                        this.state.errors.postalcode && (
-                          <font color="red">  <p>{this.state.errors.postalcode.msg}</p></font>
+                        this.state.errors.parentpostalcode && (
+                          <font color="red">  <p>{this.state.errors.parentpostalcode.msg}</p></font>
                         )}
     </Col>
   </FormGroup>

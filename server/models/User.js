@@ -5,7 +5,6 @@ var UserSchema = new Schema({
   username: {
     type: String,
     required: true,
-    dropDups: true,
     unique:true
   },
   firstname: {
@@ -16,10 +15,146 @@ var UserSchema = new Schema({
     type: String,
     required: true
   },
+
+  parentfirstname: {
+    type: String,
+    required: true
+  },
+  parentlastname: {
+    type: String,
+    required: true
+  },
+
+  dob: {
+    type: Date,
+    required: true
+  },
+
+  gender: {
+    type: String,
+    required: true
+  },
+
+  relation: {
+    type: String,
+    required: true
+  },
+
+  occupation: {
+    type: String,
+    required: true
+  },
+
+  parentemail: {
+    type: String,
+    required: true
+  },
+
+  parentphone1: {
+    type: String,
+    required: true
+  },
+
+  parentphone2: {
+    type: String,
+    required: true
+  },
+
+  parentaddress: {
+    type: String,
+    required: true
+  },
+
+  parentcity: {
+    type: String,
+    required: true
+  },
+
+  parentstate: {
+    type: String,
+    required: true
+  },
+
+  parentpostalcode: {
+    type: String,
+    required: true
+  },
+
+
+
+
+  bloodgroup: {
+    type: String,
+    required: true
+  },
+
+  nationality: {
+    type: String,
+    required: true
+  },
+
+  religion: {
+    type: String,
+    required: true
+  },
+
+  category: {
+    type: String,
+    required: true
+  },
+
+  photo: {
+    type: String,
+    data: Buffer,
+    required: true
+  },
+
+  admissionno: {
+    type: String,
+    required: true
+  },
+
+  rollno: {
+    type: String,
+    required: true
+  },
+
+  doj: {
+    type: Date,
+    required: true
+  },
+
+
+  phone: {
+    type: String,
+    required: true
+  },
+
+  address: {
+    type: String,
+    required: true
+  },
+
+  city: {
+    type: String,
+    required: true
+  },
+
+  postalcode: {
+    type: String,
+    required: true
+  },
+
+  state: {
+    type: String,
+    required: true
+  },
+
+
+
     email: {
     type: String,
     required: true,
-    dropDups: true,
     unique:true
   },
   password: {
@@ -40,7 +175,9 @@ var UserSchema = new Schema({
     type: Array,
     required: true
   },
-  status: {type: String}
+  status: {
+    type: String,
+    required: true}
 
 });
 
