@@ -183,8 +183,24 @@ const User = Loadable({
 });
 
 // IMS app changes
+const AddFees = Loadable({
+  loader: () => import("./views/admin/finance/addfees/AddFees"),
+  loading: Loading
+});
+
+const FeesView = Loadable({
+  loader: () => import("./views/admin/finance/feesview/FeesView"),
+  loading: Loading
+});
+
+
 const RegisterUser = Loadable({
   loader: () => import("./views/admin/registeruser/RegisterUser"),
+  loading: Loading
+});
+
+const ImportUser = Loadable({
+  loader: () => import("./views/admin/importuser/ImportUser"),
   loading: Loading
 });
 
@@ -200,6 +216,22 @@ const routes = [
     path: "/admin/registeruser",
     name: "Register User",
     component: RegisterUser
+  },
+
+  {
+    path: "/admin/importuser",
+    name: "Import User",
+    component: ImportUser
+  },
+  {
+    path: "/admin/finance/addfees",
+    name: "Add Fees",
+    component: AddFees
+  },
+  {
+    path: "/admin/finance/feesview",
+    name: "Fees Status",
+    component: FeesView
   },
   {
     path: "/admin/searchuser",

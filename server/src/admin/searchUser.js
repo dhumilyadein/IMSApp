@@ -66,6 +66,7 @@ module.exports = function (app) {
     }
   }
 
+
   /**
      * @description Post method for SearchUser service
      */
