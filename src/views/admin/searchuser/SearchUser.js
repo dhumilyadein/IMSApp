@@ -18,6 +18,7 @@ import {
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
 import axios from "axios";
+import { Redirect } from 'react-router-dom'
 
 class SearchUser extends Component {
   constructor(props) {
@@ -26,10 +27,12 @@ class SearchUser extends Component {
       find: null,
       using: "username",
       role: "student",
+      searchCriteria: "equalsSearchCriteria",
       status: null,
       erorrs: null,
       success: null,
-      userdata: null
+      userdata: null,
+      redirectSearchUserToUsers: false
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.searchHandler = this.searchHandler.bind(this);
@@ -46,17 +49,28 @@ class SearchUser extends Component {
 
     axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
       console.log("response - " + JSON.stringify(res.data));
-      console.log("response errors - " + res.data.errors);
-      console.log("response message - " + res.data.message);
+      console.log("res.data.errors - " + res.data.errors);
+      console.log("res.data.message - " + res.data.message);
+      console.log("res.data.error - " + res.data.errors);
 
-      if (res.data.error) {
-        return this.setState({ error: res.data.message });
-      }
-      if (res.data.errors) {
-        return this.setState({ errors: res.data.errors });
+      if(res.data.errors) {
+      return this.setState({ errors: res.data.errors });
+      } else {
+        this.setState({
+          redirectSearchUserToUsers: true
+        })
       }
     });
   }
+
+  renderRedirect = () => {
+    if(this.state.redirectSearchUserToUsers) {
+    return <Redirect to={{
+      pathname: "/users",
+      state: { referrer: currentLocation }
+    }} />
+    }
+}
 
   /**
    * @description Called when the change event is triggered.
@@ -82,27 +96,26 @@ class SearchUser extends Component {
                 <CardBody className="p-4">
                   <Form>
                     <h1>Search Users</h1>
+
                     <InputGroup className="mb-4">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText  >
-                          <b>Find</b>
-                        </InputGroupText>
-                      </InputGroupAddon>
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText  >
+                              <b>Find</b>
+                            </InputGroupText>
+                          </InputGroupAddon>
 
-                      <Input
-                        type="text"
-                        name="find"
-                        id="find"
-                        autoComplete="find"
-                        placeholder="Enter Search text"
-                        onChange={this.changeHandler}
-                         />
-                    </InputGroup>
-
-
+                          <Input
+                            type="text"
+                            name="find"
+                            id="find"
+                            autoComplete="find"
+                            placeholder="Enter Search text"
+                            onChange={this.changeHandler}
+                          />
+                        </InputGroup>
                     {this.state.errors &&
                       this.state.errors.find && (
-                        <font color="red">  <p>{this.state.errors.find.msg}</p></font>
+                        <div className="mb-4"><font color="red"><p>{this.state.errors.find.msg}</p></font></div>
                       )}
 
                     <InputGroup className="mb-4">
@@ -116,7 +129,7 @@ class SearchUser extends Component {
                         id="using"
                         type="select"
                         onChange={this.changeHandler}
-                        >
+                      >
 
 
                         <option value="username">User Name</option>
@@ -138,7 +151,6 @@ class SearchUser extends Component {
                         name="role"
                         value={this.state.role}
                         onChange={this.changeHandler}
-
                       >
 
                         <option value="admin">Admin</option>
@@ -149,6 +161,40 @@ class SearchUser extends Component {
                       </Input>
                     </InputGroup>
 
+                    <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <b>Search Criteria</b>
+                        </InputGroupText>
+                      </InputGroupAddon>
+
+                      <Col md="9">
+                        <FormGroup check inline>
+                          <Input className="form-check-input"
+                            type="radio"
+                            id="searchCriteria"
+                            name="searchCriteria"
+                            value="equalsSearchCriteria"
+                            onChange={this.changeHandler}
+                            defaultChecked />
+                          <Label className="form-check-label"
+                            check htmlFor="equalsSearchCriteria">Equals</Label>
+                        </FormGroup>
+                        <FormGroup check inline>
+                          <Input className="form-check-input"
+                            type="radio"
+                            id="searchCriteria"
+                            name="searchCriteria"
+                            value="containsSearchCriteria"
+                            onChange={this.changeHandler} />
+                          <Label className="form-check-label"
+                            check htmlFor="containsSearchCriteria">Contains</Label>
+                        </FormGroup>
+                      </Col>
+
+                    </InputGroup>
+
+{this.renderRedirect()}
                     <Button color="success" block onClick={this.searchHandler}>
                       Search
                     </Button>
