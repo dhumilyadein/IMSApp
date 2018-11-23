@@ -18,7 +18,8 @@ import {
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
 import axios from "axios";
-import { Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom';
+import Suggestions from './Suggestions';
 
 class SearchUser extends Component {
   constructor(props) {
@@ -32,7 +33,10 @@ class SearchUser extends Component {
       erorrs: null,
       success: null,
       userdata: null,
-      redirectSearchUserToUsers: false
+      redirectSearchUserToUsers: false,
+
+      query: '',
+      results: []
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.searchHandler = this.searchHandler.bind(this);
@@ -47,30 +51,22 @@ class SearchUser extends Component {
 
     e.preventDefault();
 
-    axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
-      console.log("response - " + JSON.stringify(res.data));
-      console.log("res.data.errors - " + res.data.errors);
-      console.log("res.data.message - " + res.data.message);
-      console.log("res.data.error - " + res.data.errors);
+    // axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
+    //   console.log("response - " + JSON.stringify(res.data));
+    //   console.log("res.data.errors - " + res.data.errors);
+    //   console.log("res.data.message - " + res.data.message);
+    //   console.log("res.data.error - " + res.data.errors);
 
-      if(res.data.errors) {
-      return this.setState({ errors: res.data.errors });
-      } else {
-        this.setState({
-          redirectSearchUserToUsers: true
-        })
-      }
-    });
+    //   if(res.data.errors) {
+    //   return this.setState({ errors: res.data.errors });
+    //   } else {
+
+    //     this.props.history.push("/users");
+
+    //   }
+    // });
   }
 
-  renderRedirect = () => {
-    if(this.state.redirectSearchUserToUsers) {
-    return <Redirect to={{
-      pathname: "/users",
-      state: { referrer: currentLocation }
-    }} />
-    }
-}
 
   /**
    * @description Called when the change event is triggered.
@@ -78,12 +74,24 @@ class SearchUser extends Component {
    */
   changeHandler(e) {
 
-    this.setState(
-      {
-        [e.target.name]: e.target.value
-      },
+    // this.setState(
+    //   {
+    //     [e.target.name]: e.target.value
+    //   },
 
-    );
+    // );
+
+    this.setState({
+      query: this.search.value
+    }, () => {
+      if (this.state.query && this.state.query.length > 1) {
+        if (this.state.query.length % 2 === 0) {
+          //this.getInfo()
+          this.state.results.push({"id":"1" ,"name":"kapil"});
+        }
+      } else if (!this.state.query) {
+      }
+    });
   }
 
   render() {
@@ -104,15 +112,23 @@ class SearchUser extends Component {
                             </InputGroupText>
                           </InputGroupAddon>
 
-                          <Input
+        <input
+          placeholder="Search for..."
+          ref={input => this.search = input}
+          onChange={this.changeHandler}
+        />
+        
+                          {/*<Input
                             type="text"
                             name="find"
                             id="find"
                             autoComplete="find"
                             placeholder="Enter Search text"
-                            onChange={this.changeHandler}
+                            onChange={this.changeHandler} 
                           />
+                          */}
                         </InputGroup>
+                        <Suggestions results={this.state.results} />
                     {this.state.errors &&
                       this.state.errors.find && (
                         <div className="mb-4"><font color="red"><p>{this.state.errors.find.msg}</p></font></div>
@@ -194,7 +210,7 @@ class SearchUser extends Component {
 
                     </InputGroup>
 
-{this.renderRedirect()}
+{/*{this.renderRedirect()} */}
                     <Button color="success" block onClick={this.searchHandler}>
                       Search
                     </Button>
