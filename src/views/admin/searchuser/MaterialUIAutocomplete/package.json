@@ -1,0 +1,6 @@
+{
+  "name": "MaterialUIAutocomplete",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./MaterialUIAutocomplete.js"
+}

@@ -20,6 +20,7 @@ import { AppSwitch } from "@coreui/react";
 import axios from "axios";
 import { Redirect } from 'react-router-dom';
 import Suggestions from './Suggestions';
+import MaterialUIAutocomplete from './MaterialUIAutocomplete/MaterialUIAutocomplete';
 
 class SearchUser extends Component {
   constructor(props) {
@@ -112,11 +113,12 @@ class SearchUser extends Component {
                             </InputGroupText>
                           </InputGroupAddon>
 
-        <input
+<MaterialUIAutocomplete></MaterialUIAutocomplete>
+{/*}        <input
           placeholder="Search for..."
           ref={input => this.search = input}
           onChange={this.changeHandler}
-        />
+        />*?}
         
                           {/*<Input
                             type="text"
