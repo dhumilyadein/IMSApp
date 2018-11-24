@@ -53,8 +53,12 @@ class MaterialUIAutocomplete extends Component {
   render() {
     return (<MuiThemeProvider muiTheme={getMuiTheme()}>
     <AutoComplete
+    hintText="Enter Search text"
       dataSource    = {this.state.dataSource}
-      onUpdateInput = {this.onUpdateInput} />
+      onUpdateInput = {this.onUpdateInput}
+      floatingLabelText="Find"
+          fullWidth={true}
+           />
     </MuiThemeProvider>);
   }
 }

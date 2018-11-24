@@ -88,7 +88,7 @@ class SearchUser extends Component {
       if (this.state.query && this.state.query.length > 1) {
         if (this.state.query.length % 2 === 0) {
           //this.getInfo()
-          this.state.results.push({"id":"1" ,"name":"kapil"});
+          this.state.results.push({ "id": "1", "name": "kapil" });
         }
       } else if (!this.state.query) {
       }
@@ -107,14 +107,14 @@ class SearchUser extends Component {
                     <h1>Search Users</h1>
 
                     <InputGroup className="mb-4">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText  >
-                              <b>Find</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-
-<MaterialUIAutocomplete></MaterialUIAutocomplete>
-{/*}        <input
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText  >
+                          <b>Find</b>
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <MaterialUIAutocomplete />
+                      
+                      {/*}        <input
           placeholder="Search for..."
           ref={input => this.search = input}
           onChange={this.changeHandler}
@@ -129,8 +129,7 @@ class SearchUser extends Component {
                             onChange={this.changeHandler} 
                           />
                           */}
-                        </InputGroup>
-                        <Suggestions results={this.state.results} />
+                    </InputGroup>
                     {this.state.errors &&
                       this.state.errors.find && (
                         <div className="mb-4"><font color="red"><p>{this.state.errors.find.msg}</p></font></div>
@@ -212,7 +211,7 @@ class SearchUser extends Component {
 
                     </InputGroup>
 
-{/*{this.renderRedirect()} */}
+                    {/*{this.renderRedirect()} */}
                     <Button color="success" block onClick={this.searchHandler}>
                       Search
                     </Button>
