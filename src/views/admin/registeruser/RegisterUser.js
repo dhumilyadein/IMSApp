@@ -51,7 +51,7 @@ class RegisterUser extends Component {
 
       visible: true,
       modalSuccess: true,
-
+      admintype:"Office Admin",
 
 
 
@@ -266,16 +266,33 @@ class RegisterUser extends Component {
     var checkedStatus = e.target.checked;
     const tempCheckedStatus = this.state.checked;
 
-    if (e.target.name === 'admin') {
+    if (e.target.name === 'admin' && e.target.checked) {
       tempCheckedStatus.adminChecked = true;
       this.setState({ checked: tempCheckedStatus });
     }
-    if (e.target.name === 'teacher') {
+
+   else if (e.target.name === 'admin' && !e.target.checked) {
+      tempCheckedStatus.adminChecked = false;
+      this.setState({ checked: tempCheckedStatus });
+    }
+
+    if (e.target.name === 'teacher' && e.target.checked) {
       tempCheckedStatus.teacherChecked = true;
       this.setState({ checked: tempCheckedStatus });
     }
-    if (e.target.name === 'parent') {
+    else if (e.target.name === 'teacher' && !e.target.checked) {
+      tempCheckedStatus.teacherChecked = false;
+      this.setState({ checked: tempCheckedStatus });
+    }
+
+
+    if (e.target.name === 'parent' && e.target.checked) {
       tempCheckedStatus.parentChecked = true;
+      this.setState({ checked: tempCheckedStatus });
+    }
+
+    else if (e.target.name === 'parent' && !e.target.checked) {
+      tempCheckedStatus.parentChecked = false;
       this.setState({ checked: tempCheckedStatus });
     }
 
@@ -297,6 +314,8 @@ class RegisterUser extends Component {
         disabled: false
       });
     }
+
+    
 
     console.log("studentChecked - " + this.state.checked.studentChecked
       + " adminChecked - " + this.state.checked.adminChecked
@@ -432,6 +451,36 @@ class RegisterUser extends Component {
                                 />
                               </td>
                             </tr>
+                           { this.state.checked.adminChecked && <tr>
+                              <td>
+                              <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText style={{width:"120px"}}>
+                        Admin Type
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        name="admintype"
+                        id="admintype"
+                        type="select"
+                        onChange={this.changeHandler}
+                        value={this.state.admintype}
+                        >
+
+                        <option value="Office Admin">Office Admin</option>
+                        <option value="Library Admin">Library Admin</option>
+                        <option value="Transport Admin">Transport Admin</option>
+
+
+                      </Input>
+                    </InputGroup>
+
+
+                              </td>
+                             
+                            </tr>}
+
+
                             <tr>
                               <td>Teacher</td>
                               <td>
@@ -1078,6 +1127,98 @@ value={this.state.phone}
                       </CardBody>
                       </Card>
 
+ <Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Login Details</h5>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-user" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="username"
+                        id="username"
+                        value={this.state.username}
+                        placeholder="Username"
+                        autoComplete="username"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.username && (
+                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
+                      )}
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>@</InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="email"
+                        id="email"
+                        value={this.state.email}
+                        placeholder="Email"
+                        autoComplete="email"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+
+                    {this.state.errors &&
+                      this.state.errors.email && (
+                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
+                      )}
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-lock" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Password"
+                        value={this.state.password}
+                        autoComplete="new-password"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.password && (
+                        <font color="red">   <p>{this.state.errors.password.msg}</p></font>
+                      )}
+
+                    <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-lock" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="password"
+                        name="password_con"
+                        id="password_con"
+                        placeholder="Confirm Password"
+                        value={this.state.password_con}
+                        autoComplete="new-password"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.password_con && (
+                        <font color="red"><p>{this.state.errors.password_con.msg}</p></font>
+                      )}
+                      </CardBody>
+                      </Card>
 
 
 
@@ -1301,99 +1442,7 @@ onChange ={(parentphone2) =>{ console.log("parentphone2 value: "+ parentphone2);
                       </CardBody>
                     </Card>
                       </p>}
-                    <Card className="mx-1">
-                      <CardBody className="p-2">
-                      <h5>Login Details</h5>
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-user" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="username"
-                        id="username"
-                        value={this.state.username}
-                        placeholder="Username"
-                        autoComplete="username"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-                    {this.state.errors &&
-                      this.state.errors.username && (
-                        <font color="red">  <p>{this.state.errors.username.msg}</p></font>
-                      )}
-
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>@</InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="text"
-                        name="email"
-                        id="email"
-                        value={this.state.email}
-                        placeholder="Email"
-                        autoComplete="email"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-
-                    {this.state.errors &&
-                      this.state.errors.email && (
-                        <font color="red">  <p>{this.state.errors.email.msg}</p></font>
-                      )}
-
-
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="password"
-                        name="password"
-                        id="password"
-                        placeholder="Password"
-                        value={this.state.password}
-                        autoComplete="new-password"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-                    {this.state.errors &&
-                      this.state.errors.password && (
-                        <font color="red">   <p>{this.state.errors.password.msg}</p></font>
-                      )}
-
-                    <InputGroup className="mb-4">
-                      <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                          <i className="icon-lock" />
-                        </InputGroupText>
-                      </InputGroupAddon>
-                      <Input
-                        type="password"
-                        name="password_con"
-                        id="password_con"
-                        placeholder="Confirm Password"
-                        value={this.state.password_con}
-                        autoComplete="new-password"
-                        onChange={this.changeHandler}
-                      />
-                    </InputGroup>
-
-                    {this.state.errors &&
-                      this.state.errors.password_con && (
-                        <font color="red"><p>{this.state.errors.password_con.msg}</p></font>
-                      )}
-                      </CardBody>
-                      </Card>
-
+                   
                       </Col>
                       </Row>
 
