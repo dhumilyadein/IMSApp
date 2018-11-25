@@ -3,6 +3,9 @@ var util = require('util')
 var { check, validationResult } = require("express-validator/check");
 
 const User = require("../../models/User");
+const Student = require("../../models/Student");
+const Parent = require("../../models/Parent");
+const Employee = require("../../models/Employee");
 
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
@@ -121,13 +124,17 @@ return valError;
  }
 
 
-const regValidation = [
-    check("role")
-      .not()
-      .isEmpty()
-      .withMessage("Please select atleast one Role"),
+const studentRegValidation = [
+   
 
     check("username")
+      .not()
+      .isEmpty()
+      .withMessage("Username is required")
+      .isLength({ min: 3 })
+      .withMessage("Username should be at least 6 letters"),
+
+      check("parentusername")
       .not()
       .isEmpty()
       .withMessage("Username is required")
@@ -231,15 +238,9 @@ const regValidation = [
       .isLength({ min: 15 })
       .withMessage("Incorrect Phone No"),
 
-      check("qualification")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter Qualification"),
+      
 
-      check("maritalstatus")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter Marital Status"),
+      
 
       check("photo")
       .not()
@@ -256,25 +257,9 @@ const regValidation = [
       .isEmpty()
       .withMessage("Please enter Occupation"),
 
-      check("type")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Type of Employee"),
+    
 
-      check("department")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Department"),
 
-      check("designation")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Designation"),
-
-      check("experiencedetails")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter Experience Details"),
 
       check("admissionno")
       .not()
@@ -283,12 +268,7 @@ const regValidation = [
       .isNumeric()
       .withMessage("Admission No should be Numeric"),
 
-      check("employeeno")
-      .not()
-      .isEmpty()
-      .withMessage("Please enter Employee No")
-      .isNumeric()
-      .withMessage("Employee No should be Numeric"),
+
 
       check("rollno")
       .not()
@@ -363,6 +343,226 @@ const regValidation = [
       }
       return value;
     }),
+
+    check("parentpassword")
+    .not()
+    .isEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 4 })
+    .withMessage("Password should be at least 6 characters"),
+  check(
+    "parentpassword_con",
+    "Password confirmation  is required or should be the same as password"
+  ).custom(function(value, { req }) {
+    if (value !== req.body.parentpassword) {
+      throw new Error("Password don't match");
+    }
+    return value;
+  }),
+    
+    check("email").custom(value => {
+      return User.findOne({ email: value }).then(function(user) {
+        if (user) {
+          throw new Error("This email is already in use");
+        }
+      });
+    }),
+    check("parentemail").custom(value => {
+      return User.findOne({ email: value }).then(function(user) {
+        if (user) {
+          throw new Error("This email is already in use");
+        }
+      });
+    }),
+
+    check("username").custom(value => {
+      return User.findOne({ username: value }).then(function(user) {
+        if (user) {
+          throw new Error("This username is already in use");
+        }
+      });
+    }),
+
+    check("parentusername").custom(value => {
+      return User.findOne({ username: value }).then(function(user) {
+        if (user) {
+          throw new Error("This username is already in use");
+        }
+      });
+    })
+    
+  ];
+
+  const empRegValidation = [
+    
+
+    check("username")
+      .not()
+      .isEmpty()
+      .withMessage("Username is required")
+      .isLength({ min: 3 })
+      .withMessage("Username should be at least 6 letters"),
+
+      check("bloodgroup")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Bloodgroup"),
+
+      check("gender")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Gender"),
+
+      check("nationality")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Nationality"),
+
+      check("dob")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Date of Birth"),
+
+      check("doj")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Date of Joining"),
+
+      check("religion")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Religion"),
+
+      check("category")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Category"),
+
+      check("phone")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Phone No")
+      .isLength({ min: 15 })
+      .withMessage("Incorrect Phone No"),
+
+    
+
+      check("address")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Address"),
+
+      check("city")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter City"),
+
+      check("postalcode")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Postal Code"),
+
+      check("state")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter State"),
+
+
+      
+
+      check("qualification")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Qualification"),
+
+      check("maritalstatus")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Marital Status"),
+
+      check("photo")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Photo"),
+
+      
+
+      check("type")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Type of Employee"),
+
+      check("department")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Department"),
+
+      check("designation")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Designation"),
+
+      check("experiencedetails")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Experience Details"),
+
+      
+
+      check("employeeno")
+      .not()
+      .isEmpty()
+      .withMessage("Please enter Employee No")
+      .isNumeric()
+      .withMessage("Employee No should be Numeric"),
+
+    
+
+    check("email")
+      .not()
+      .isEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Please enter a valid email address"),
+
+
+
+
+    check("firstname")
+      .not()
+      .isEmpty()
+      .withMessage("First name is required")
+      .isLength({ min: 2 })
+      .withMessage("Name should be at least 2 letters")
+      .matches(/^([A-z]|\s)+$/)
+      .withMessage("Number(s) not allowed here"),
+
+    check("lastname")
+      .not()
+      .isEmpty()
+      .withMessage("Last name is required")
+      .isLength({ min: 1 })
+      .withMessage("Last name should be at least 2 letters")
+      .matches(/^([A-z]|\s)+$/)
+      .withMessage("Number(s) not allowed here"),
+
+  
+
+    check("password")
+      .not()
+      .isEmpty()
+      .withMessage("Password is required")
+      .isLength({ min: 4 })
+      .withMessage("Password should be at least 6 characters"),
+    check(
+      "password_con",
+      "Password confirmation  is required or should be the same as password"
+    ).custom(function(value, { req }) {
+      if (value !== req.body.password) {
+        throw new Error("Password don't match");
+      }
+      return value;
+    }),
     check("email").custom(value => {
       return User.findOne({ email: value }).then(function(user) {
         if (user) {
@@ -379,8 +579,73 @@ const regValidation = [
     })
   ];
 
-  function register(req, res) {
-    console.log("\n\nREGISTER req.body: " + JSON.stringify(req.body) + "\n");
+
+  async function studentRegister(req, res) {
+    console.log("\n\nstudentREGISTER req.body: " + JSON.stringify(req.body) + "\n");
+
+    var errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      console.log("ERRORS"+ errors.mapped());
+      return res.send({ errors: errors.mapped() });
+    }
+var parentUser={"username":req.body.parentusername, "firstname":req.body.parentfirstname, "lastname":req.body.parentlastname,
+                "email":req.body.parentemail,"password":req.body.parentpassword, "role":"Parent","status":"Active"};
+    var user = new User(parentUser);
+    console.log("user = " + user);
+    user.password = user.hashPassword(user.password);
+   await user
+      .save()
+      .then(user => {
+      //  return res.json(user);
+      })
+      .catch(err => {
+        return res.send(err);
+      });
+
+       var studentUser={"username":req.body.username, "firstname":req.body.firstname, "lastname":req.body.lastname,
+                "email":req.body.email,"password":req.body.password,"role":"Student", "status":"Active"};
+     user = new User(studentUser);
+    console.log("user = " + user);
+    user.password = user.hashPassword(user.password);
+  await  user
+      .save()
+      .then(user => {
+       // return res.json(user);
+      })
+      .catch(err => {
+        return res.send(err);
+      }); 
+
+
+     user = new Parent(req.body);
+    console.log("user = " + user);
+    user.parentpassword = user.hashPassword(user.parentpassword);
+   await user
+      .save()
+      .then(user => {
+      //  return res.json(user);
+      })
+      .catch(err => {
+        return res.send(err);
+      });
+
+      user = new Student(req.body);
+    console.log("user = " + user);
+    user.password = user.hashPassword(user.password);
+   await user
+      .save()
+      .then(user => {
+      //  return res.json(user);
+      })
+      .catch(err => {
+        return res.send(err);
+      });
+
+  }
+
+  function empRegister(req, res) {
+    console.log("\n\nempREGISTER req.body: " + JSON.stringify(req.body) + "\n");
 
     var errors = validationResult(req);
 
@@ -529,8 +794,9 @@ const regValidation = [
     });
   }
 
-  app.post("/api/importExcel", regValidation, importExcel);
-  app.post("/api/register", regValidation, register);
+  app.post("/api/importExcel", importExcel);
+  app.post("/api/empRegister", empRegValidation, empRegister);
+  app.post("/api/studentRegister", studentRegValidation, studentRegister);
 
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------

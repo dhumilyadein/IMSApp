@@ -45,8 +45,7 @@ class RegisterUser extends Component {
       checked: {
         adminChecked: false,
         teacherChecked: false,
-        studentChecked: true,
-        parentChecked: false
+        studentChecked: true
       },
 
       visible: true,
@@ -61,6 +60,7 @@ class RegisterUser extends Component {
       nophoto: false,
       corruptphoto: false,
       photoname: "",
+      roleerror:false
 
 
     };
@@ -168,11 +168,23 @@ class RegisterUser extends Component {
    */
   submitHandler(e) {
 
+    var tempdata = {"role":["student"],"userdata":null,"regSuccess":false,"errors":null,"importErrors":null,"status":"Active","disabled":true,"checked":{"adminChecked":false,"teacherChecked":false,"studentChecked":true},"visible":true,"modalSuccess":true,"admintype":"Office Admin","nophoto":false,"corruptphoto":false,"photoname":"Book1.xlsx","roleerror":false,"firstname":"dfdfd","lastname":"dfdf","dob":"2018-11-08","gender":"Female","bloodgroup":"B-","nationality":"Indian","religion":"Sikh","category":"OBC","photo":"tempphotodata","admissionno":"4545","rollno":"56565","doj":"2018-11-20","phone":"+91 56565-56565","address":"dfdf","city":"dfdf","postalcode":"dfdf","state":"dfdfdf","username":"yuyg","email":"fdfdf@df.co","password":"pass","password_con":"pass","parentfirstname":"fgfg","parentlastname":"hjhjhj","relation":"Father","occupation":"fgfgfg","parentemail":"dfdf@gh.cd","parentphone1":"+91 56656-56565","parentphone2":"+91 45454-54545","parentaddress":"dfdf","parentcity":"dfdf","parentpostalcode":"dfdf","parentstate":"dfdfdf","parentusername":"gngngn","parentpassword":"pass","parentpassword_con":"pass"};
+    
     e.preventDefault();
-    console.log(JSON.stringify(this.state));
+   // console.log(JSON.stringify(this.state));
+   console.log("in STUDENT" + tempdata.role[0]);
 
+    if(tempdata.role.length===0)
+    {
+      this.setState({roleerror:true});
+    }
+
+
+   else if(tempdata.role[0]==="student")
+{ console.log("in STUDENT");
+  this.setState({roleerror:false});
     axios
-      .post("http://localhost:8001/api/register", this.state)
+      .post("http://localhost:8001/api/studentRegister", tempdata)
       .then(result => {
         console.log("result.data " + JSON.stringify(result.data));
         if (result.data.errors) {
@@ -188,6 +200,28 @@ class RegisterUser extends Component {
         });
 
       });
+    }
+
+    else
+    {  this.setState({roleerror:false});
+      axios
+      .post("http://localhost:8001/api/empRegister", this.state)
+      .then(result => {
+        console.log("result.data " + JSON.stringify(result.data));
+        if (result.data.errors) {
+
+          return this.setState(result.data);
+        }
+        this.resetForm();
+        return this.setState({
+          userdata: result.data,
+          errors: null,
+          regSuccess: true,
+          modalSuccess: true
+        });
+
+      });}
+
   }
 
   /**
@@ -196,15 +230,10 @@ class RegisterUser extends Component {
    */
   changeHandler(e) {
 
-    console.log("Name: "+e.target.name +" Value: "+e.target.value);
+   // console.log("Name: "+e.target.name +" Value: "+e.target.value);
     this.setState({
       [e.target.name]: e.target.value
-    }, ()=> {
-      console.log("STATE VALUE - " + JSON.stringify(this.state));
-
-
-
-      });
+    });
 
 
 
@@ -286,21 +315,13 @@ class RegisterUser extends Component {
     }
 
 
-    if (e.target.name === 'parent' && e.target.checked) {
-      tempCheckedStatus.parentChecked = true;
-      this.setState({ checked: tempCheckedStatus });
-    }
-
-    else if (e.target.name === 'parent' && !e.target.checked) {
-      tempCheckedStatus.parentChecked = false;
-      this.setState({ checked: tempCheckedStatus });
-    }
+   
 
     if (e.target.name === "student" && e.target.checked) {
 
 
       this.setState({
-        checked: { studentChecked: true, adminChecked: false, teacherChecked: false, parentChecked: false },
+        checked: { studentChecked: true, adminChecked: false, teacherChecked: false,},
         disabled: true,
         role: ["student"]
 
@@ -310,7 +331,7 @@ class RegisterUser extends Component {
       console.log("not checked");
 
       this.setState({
-        checked: { studentChecked: false, adminChecked: false, teacherChecked: false, parentChecked: false },
+        checked: { studentChecked: false, adminChecked: false, teacherChecked: false },
         disabled: false
       });
     }
@@ -320,7 +341,7 @@ class RegisterUser extends Component {
     console.log("studentChecked - " + this.state.checked.studentChecked
       + " adminChecked - " + this.state.checked.adminChecked
       + " teacherChecked - " + this.state.checked.teacherChecked
-      + " parentChecked - " + this.state.checked.parentChecked);
+      );
 
   }
 
@@ -512,29 +533,14 @@ class RegisterUser extends Component {
                                 />
                               </td>
                             </tr>
-                            <tr>
-                              <td>Parent</td>
-                              <td>
-                                <AppSwitch
-                                  name="parent"
-                                  id="parent"
-                                  className={"mx-1"}
-                                  variant={"3d"}
-                                  color={"primary"}
-                                  size={"sm"}
-                                  onChange={this.roleHandler}
-                                  disabled={this.state.disabled}
-                                  checked={this.state.checked.parentChecked}
-                                />
-                              </td>
-                            </tr>
+                           
                           </tbody>
                         </Table>
                       </CardBody>
                     </Card>
-                    {this.state.errors &&
-                      this.state.errors.role && (
-                        <font color="red"> <p>{this.state.errors.role.msg}</p></font>
+                    {
+                      this.state.roleerror && (
+                        <font color="red"> <p>Please select atleast one role</p></font>
                       )}
 
                       <Card className="mx-1">
@@ -1441,6 +1447,81 @@ onChange ={(parentphone2) =>{ console.log("parentphone2 value: "+ parentphone2);
 
                       </CardBody>
                     </Card>
+
+                    <Card className="mx-1">
+                      <CardBody className="p-2">
+                      <h5>Parent Login Details</h5>
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-user" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="text"
+                        name="parentusername"
+                        id="parentusername"
+                        value={this.state.parentusername}
+                        placeholder="Username"
+                        autoComplete="username"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+                    {this.state.errors &&
+                      this.state.errors.parentusername && (
+                        <font color="red">  <p>{this.state.errors.parentusername.msg}</p></font>
+                      )}
+
+
+                   
+
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-lock" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="password"
+                        name="parentpassword"
+                        id="parentpassword"
+                        placeholder="Password"
+                        value={this.state.parentpassword}
+                        autoComplete="new-password"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.parentpassword && (
+                        <font color="red">   <p>{this.state.errors.parentpassword.msg}</p></font>
+                      )}
+
+                    <InputGroup className="mb-4">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="icon-lock" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        type="password"
+                        name="parentpassword_con"
+                        id="parentpassword_con"
+                        placeholder="Confirm Password"
+                        value={this.state.parentpassword_con}
+                        autoComplete="new-password"
+                        onChange={this.changeHandler}
+                      />
+                    </InputGroup>
+
+                    {this.state.errors &&
+                      this.state.errors.parentpassword_con && (
+                        <font color="red"><p>{this.state.errors.parentpassword_con.msg}</p></font>
+                      )}
+                      </CardBody>
+                      </Card>
+
                       </p>}
                    
                       </Col>
