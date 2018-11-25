@@ -581,7 +581,7 @@ const studentRegValidation = [
 
 
   async function studentRegister(req, res) {
-    console.log("\n\nstudentREGISTER req.body: " + JSON.stringify(req.body) + "\n");
+    console.log("\n\n studentREGISTER req.body: " + JSON.stringify(req.body) + "\n");
 
     var errors = validationResult(req);
 
@@ -641,6 +641,7 @@ var parentUser={"username":req.body.parentusername, "firstname":req.body.parentf
       .catch(err => {
         return res.send(err);
       });
+return res.send("Registerd!!");
 
   }
 
