@@ -16,6 +16,10 @@ var TeacherSchema = new Schema({
     required: true
   },
 
+  type: {
+    type: String,
+    required: true
+  },
     dob: {
     type: Date,
     required: true

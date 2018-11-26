@@ -130,6 +130,11 @@ class RegisterUser extends Component {
    */
 
   resetForm = e => {
+    document.getElementById("photo").value = "";
+    document.getElementById("gender1").checked = false;
+    document.getElementById("gender2").checked = false;
+
+
     this.setState({
       admintype: "Office Admin",
       empRegSuccess: false,
@@ -224,11 +229,14 @@ class RegisterUser extends Component {
             return this.setState(result.data);
           }
           this.resetForm();
+
           return this.setState({
             userdata: result.data.data,
             errors: null,
             studentRegSuccess: true,
-            modalSuccess: true
+            modalSuccess: true,
+
+
           });
         });
     } else {
@@ -246,6 +254,7 @@ class RegisterUser extends Component {
             errors: null,
             empRegSuccess: true,
             modalSuccess: true
+
           });
         });
     }
@@ -601,7 +610,7 @@ class RegisterUser extends Component {
                                   <Input
                                     className="form-check-input"
                                     type="radio"
-                                    id="gender"
+                                    id="gender1"
                                     name="gender"
                                     value="Male"
                                     style={{ height: "35px", width: "25px" }}
@@ -619,7 +628,7 @@ class RegisterUser extends Component {
                                   <Input
                                     className="form-check-input"
                                     type="radio"
-                                    id="gender"
+                                    id="gender2"
                                     name="gender"
                                     value="Female"
                                     style={{ height: "35px", width: "25px" }}
@@ -971,7 +980,7 @@ class RegisterUser extends Component {
                                       <Input
                                         className="form-check-input"
                                         type="radio"
-                                        id="male"
+                                        id="type1"
                                         name="type"
                                         value="Fresher"
                                         style={{
@@ -992,7 +1001,7 @@ class RegisterUser extends Component {
                                       <Input
                                         className="form-check-input"
                                         type="radio"
-                                        id="female"
+                                        id="type2"
                                         name="type"
                                         value="Experienced"
                                         style={{
