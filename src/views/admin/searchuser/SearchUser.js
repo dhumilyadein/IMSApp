@@ -113,20 +113,20 @@ class SearchUser extends Component {
                         </InputGroupText>
                       </InputGroupAddon>
                       <MaterialUIAutocomplete />
-                      
+
                       {/*}        <input
           placeholder="Search for..."
           ref={input => this.search = input}
           onChange={this.changeHandler}
         />*?}
-        
+
                           {/*<Input
                             type="text"
                             name="find"
                             id="find"
                             autoComplete="find"
                             placeholder="Enter Search text"
-                            onChange={this.changeHandler} 
+                            onChange={this.changeHandler}
                           />
                           */}
                     </InputGroup>

@@ -64,9 +64,9 @@ var ParentSchema = new Schema({
     required: true
   },
 
-   
 
-  
+
+
   parentpassword: {
     type: String,
     required: true
@@ -81,9 +81,9 @@ var ParentSchema = new Schema({
     required: true,
     default: Date.now
   },
- 
 
-});
+
+},  { collection: 'parent' });
 
 ParentSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);

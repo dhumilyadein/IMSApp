@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
-var EmployeeSchema = new Schema({
+var TeacherSchema = new Schema({
   username: {
     type: String,
     required: true,
@@ -25,7 +25,7 @@ var EmployeeSchema = new Schema({
     type: String,
     required: true
   },
-  
+
 
    bloodgroup: {
     type: String,
@@ -53,7 +53,7 @@ var EmployeeSchema = new Schema({
     required: true
   },
 
-    empoloyeeno: {
+    employeeno: {
     type: String,
     required: true
   },
@@ -110,15 +110,15 @@ var EmployeeSchema = new Schema({
     required: true,
     default: Date.now
   },
- 
 
-});
 
-EmployeeSchema.methods.hashPassword = function(password) {
+},  { collection: 'teacher' });
+
+TeacherSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
 };
-EmployeeSchema.methods.comparePassword = function(password, hashedPassword) {
+TeacherSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = Employee = mongoose.model("employee", EmployeeSchema);
+module.exports = Teacher = mongoose.model("teacher", TeacherSchema);

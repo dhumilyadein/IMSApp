@@ -1,13 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
-var StudentSchema = new Schema({
+var AdminSchema = new Schema({
   username: {
-    type: String,
-    required: true,
-    unique:true
-  },
-  parentusername: {
     type: String,
     required: true,
     unique:true
@@ -21,16 +16,7 @@ var StudentSchema = new Schema({
     required: true
   },
 
-  parentfirstname: {
-    type: String,
-    required: true
-  },
-  parentlastname: {
-    type: String,
-    required: true
-  },
-
-  dob: {
+    dob: {
     type: Date,
     required: true
   },
@@ -40,12 +26,10 @@ var StudentSchema = new Schema({
     required: true
   },
 
-
-  parentemail: {
+  admintype: {
     type: String,
     required: true
   },
-
 
    bloodgroup: {
     type: String,
@@ -73,12 +57,7 @@ var StudentSchema = new Schema({
    // required: true
   },
 
-  admissionno: {
-    type: String,
-    required: true
-  },
-
-  rollno: {
+    employeeno: {
     type: String,
     required: true
   },
@@ -114,8 +93,16 @@ var StudentSchema = new Schema({
     required: true
   },
 
+  type: {
+    type: String,
+    required: true
+  },
 
-
+  experiencedetails: {
+    type: String,
+    required: true,
+    default:"NA"
+  },
     email: {
     type: String,
     required: true,
@@ -134,17 +121,16 @@ var StudentSchema = new Schema({
     type: Date,
     required: true,
     default: Date.now
-  }
+  },
 
 
+},  { collection: 'admin' });
 
-},  { collection: 'student' });
-
-StudentSchema.methods.hashPassword = function(password) {
+AdminSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
 };
-StudentSchema.methods.comparePassword = function(password, hashedPassword) {
+AdminSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = User = mongoose.model("student", StudentSchema);
+module.exports = Admin = mongoose.model("admin", AdminSchema);

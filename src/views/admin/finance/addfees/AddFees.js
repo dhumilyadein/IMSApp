@@ -85,7 +85,7 @@ class AddFees extends Component {
                 return this.setState({
                     userdata: result.data,
                     errors: null,
-                    regSuccess: true,
+                    studentRegSuccess: true,
                     modalSuccess: true
                 });
 

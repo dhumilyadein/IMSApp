@@ -5,16 +5,18 @@ var { check, validationResult } = require("express-validator/check");
 const User = require("../../models/User");
 const Student = require("../../models/Student");
 const Parent = require("../../models/Parent");
-const Employee = require("../../models/Employee");
+const Teacher = require("../../models/Teacher");
+const Admin = require("../../models/Admin");
 
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
 var xlsxtojson = require("xlsx-to-json-lc");
 var regex = require('regex-email');
-var storage = multer.diskStorage({
+
+var excelStorage = multer.diskStorage({
   //multers disk storage settings
   destination: function(req, file, cb) {
-    cb(null, "./uploads/");
+    cb(null, "./ExcelUploads/");
   },
   filename: function(req, file, cb) {
     var datetimestamp = Date.now();
@@ -29,9 +31,9 @@ var storage = multer.diskStorage({
   }
 });
 
-var upload = multer({
+var excelUpload = multer({
   //multer settings
-  storage: storage,
+  storage: excelStorage,
   fileFilter: function(req, file, callback) {
     //file filter
     if (
@@ -44,6 +46,42 @@ var upload = multer({
     callback(null, true);
   }
 }).single("file");
+
+/* var photoStorage = multer.diskStorage({
+  //multers disk storage settings
+  destination: function(req, file, cb) {
+    cb(null, "./PhotoUploads/");
+  },
+  filename: function(req, file, cb) {
+    var datetimestamp = Date.now();
+    cb(
+      null,
+      file.fieldname +
+        "-" +
+        datetimestamp +
+        "." +
+        file.originalname.split(".")[file.originalname.split(".").length - 1]
+    );
+  }
+}); */
+
+
+
+/* var photoUpload = multer({
+  //multer settings
+  storage: photoStorage,
+  fileFilter: function(req, file, callback) {
+    //file filter
+    if (
+      ["jpg", "jpeg"].indexOf(
+        file.originalname.split(".")[file.originalname.split(".").length - 1]
+      ) === -1
+    ) {
+      return callback(new Error("Wrong extension type"));
+    }
+    callback(null, true);
+  }
+}).single("file"); */
 
 module.exports = function(app) {
  async function importValidation(request)
@@ -125,7 +163,7 @@ return valError;
 
 
 const studentRegValidation = [
-   
+
 
     check("username")
       .not()
@@ -238,9 +276,9 @@ const studentRegValidation = [
       .isLength({ min: 15 })
       .withMessage("Incorrect Phone No"),
 
-      
 
-      
+
+
 
       check("photo")
       .not()
@@ -257,7 +295,7 @@ const studentRegValidation = [
       .isEmpty()
       .withMessage("Please enter Occupation"),
 
-    
+
 
 
 
@@ -359,7 +397,7 @@ const studentRegValidation = [
     }
     return value;
   }),
-    
+
     check("email").custom(value => {
       return User.findOne({ email: value }).then(function(user) {
         if (user) {
@@ -390,11 +428,11 @@ const studentRegValidation = [
         }
       });
     })
-    
+
   ];
 
   const empRegValidation = [
-    
+
 
     check("username")
       .not()
@@ -445,7 +483,7 @@ const studentRegValidation = [
       .isLength({ min: 15 })
       .withMessage("Incorrect Phone No"),
 
-    
+
 
       check("address")
       .not()
@@ -468,7 +506,7 @@ const studentRegValidation = [
       .withMessage("Please enter State"),
 
 
-      
+
 
       check("qualification")
       .not()
@@ -485,7 +523,7 @@ const studentRegValidation = [
       .isEmpty()
       .withMessage("Please select Photo"),
 
-      
+
 
       check("type")
       .not()
@@ -507,7 +545,7 @@ const studentRegValidation = [
       .isEmpty()
       .withMessage("Please enter Experience Details"),
 
-      
+
 
       check("employeeno")
       .not()
@@ -516,7 +554,7 @@ const studentRegValidation = [
       .isNumeric()
       .withMessage("Employee No should be Numeric"),
 
-    
+
 
     check("email")
       .not()
@@ -546,7 +584,7 @@ const studentRegValidation = [
       .matches(/^([A-z]|\s)+$/)
       .withMessage("Number(s) not allowed here"),
 
-  
+
 
     check("password")
       .not()
@@ -589,8 +627,21 @@ const studentRegValidation = [
       console.log("ERRORS"+ errors.mapped());
       return res.send({ errors: errors.mapped() });
     }
+
+    // photoUpload(req.body.photo, res, function(err) {
+    //   if (err) {
+    //     res.json({ error_code: 1, err_desc: err });
+    //     return;
+    //   }
+    //   /** Multer gives us file info in req.file object */
+    //   if (!req.body.photo) {
+    //     res.json({ error_code: 1, err_desc: "No file passed" });
+
+    //     return;
+    //   }})
+
 var parentUser={"username":req.body.parentusername, "firstname":req.body.parentfirstname, "lastname":req.body.parentlastname,
-                "email":req.body.parentemail,"password":req.body.parentpassword, "role":"Parent","status":"Active"};
+                "email":req.body.parentemail,"password":req.body.parentpassword, "role":"Parent",status:req.body.status};
     var user = new User(parentUser);
     console.log("user = " + user);
     user.password = user.hashPassword(user.password);
@@ -604,7 +655,7 @@ var parentUser={"username":req.body.parentusername, "firstname":req.body.parentf
       });
 
        var studentUser={"username":req.body.username, "firstname":req.body.firstname, "lastname":req.body.lastname,
-                "email":req.body.email,"password":req.body.password,"role":"Student", "status":"Active"};
+                "email":req.body.email,"password":req.body.password,"role":"Student", "status":req.body.status};
      user = new User(studentUser);
     console.log("user = " + user);
     user.password = user.hashPassword(user.password);
@@ -615,7 +666,7 @@ var parentUser={"username":req.body.parentusername, "firstname":req.body.parentf
       })
       .catch(err => {
         return res.send(err);
-      }); 
+      });
 
 
      user = new Parent(req.body);
@@ -641,12 +692,12 @@ var parentUser={"username":req.body.parentusername, "firstname":req.body.parentf
       .catch(err => {
         return res.send(err);
       });
-return res.send("Registerd!!");
+return res.send({data:req.body, message:"Registered Successfully"});
 
   }
 
-  function empRegister(req, res) {
-    console.log("\n\nempREGISTER req.body: " + JSON.stringify(req.body) + "\n");
+  async function empRegister(req, res) {
+    console.log("\n\n EmpREGISTER req.body: " + JSON.stringify(req.body) + "\n");
 
     var errors = validationResult(req);
 
@@ -655,17 +706,54 @@ return res.send("Registerd!!");
       return res.send({ errors: errors.mapped() });
     }
 
-    var user = new User(req.body);
-    console.log("user = " + user);
+    var empUser={"username":req.body.username, "firstname":req.body.firstname, "lastname":req.body.lastname,
+    "email":req.body.email,"password":req.body.password,"role":req.body.role, "status":req.body.status};
+user = new User(empUser);
+console.log("empUser = " + user);
+user.password = user.hashPassword(user.password);
+await  user
+.save()
+.then(user => {
+// return res.json(user);
+})
+.catch(err => {
+return res.send(err);
+});
+
+
+if(req.body.role.indexOf("admin")!==-1)
+{
+     user = new Admin(req.body);
+    console.log("Admin = " + user);
     user.password = user.hashPassword(user.password);
-    user
+   await user
       .save()
       .then(user => {
-        return res.json(user);
+      //  return res.json(user);
       })
       .catch(err => {
         return res.send(err);
       });
+    }
+
+    if(req.body.role.indexOf("teacher")!==-1)
+{
+     user = new Teacher(req.body);
+    console.log("Teacher = " + user);
+    user.password = user.hashPassword(user.password);
+   await user
+      .save()
+      .then(user => {
+      //  return res.json(user);
+      })
+      .catch(err => {
+        return res.send(err);
+      });
+    }
+
+
+
+return res.send({data:req.body, message:"Registered Successfully"});
   }
 
   function onlyUnique(value, index, self) {
@@ -675,7 +763,7 @@ return res.send("Registerd!!");
    // console.log("in import  " + !req.file);
 
     var exceltojson;
-    upload(req, res, function(err) {
+    excelUpload(req, res, function(err) {
       if (err) {
         res.json({ error_code: 1, err_desc: err });
         return;

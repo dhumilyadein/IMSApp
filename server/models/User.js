@@ -16,7 +16,7 @@ var UserSchema = new Schema({
     required: true
   },
 
- 
+
       email: {
     type: String,
     required: true,
@@ -44,7 +44,7 @@ var UserSchema = new Schema({
     type: String,
     required: true}
 
-});
+},  { collection: 'user' });
 
 UserSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
