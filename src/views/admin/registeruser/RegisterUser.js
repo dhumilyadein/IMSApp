@@ -1537,6 +1537,7 @@ class RegisterUser extends Component {
                                       className="form-check-input"
                                       type="checkbox"
                                       id="parentaddresscheck"
+                                      style={{ height: "35px", width: "25px" }}
                                       name="parentaddresscheck"
                                       checked={this.state.parentaddresscheck}
                                       onChange={this.copyAddress}

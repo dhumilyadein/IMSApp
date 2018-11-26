@@ -15,6 +15,10 @@ var TeacherSchema = new Schema({
     type: String,
     required: true
   },
+  maritalstatus: {
+    type: Date,
+    required: true
+  },
 
   type: {
     type: String,

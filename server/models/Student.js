@@ -73,6 +73,7 @@ var StudentSchema = new Schema({
    // required: true
   },
 
+  
   admissionno: {
     type: String,
     required: true
@@ -94,6 +95,15 @@ var StudentSchema = new Schema({
     required: true
   },
 
+  parentphone1: {
+    type: String,
+    required: true
+  },
+
+  parentphone2: {
+    type: String,
+    required: true
+  },
   address: {
     type: String,
     required: true
