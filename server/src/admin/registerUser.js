@@ -102,7 +102,7 @@ module.exports = function (app) {
 
         if (usernameCheck)
           valError['UserExists'] = "UserName: " + request.username + " is already in use";
-        console.log("unexists: " + valError['UserExists']);
+      //  console.log("unexists: " + valError['UserExists']);
 
       }
 
@@ -115,7 +115,7 @@ module.exports = function (app) {
 
         if (emailCheck)
           valError['EmailExists'] = "email: " + request.email + " is already in use";
-        console.log("emailexists: " + valError['EmailExists']);
+        //console.log("emailexists: " + valError['EmailExists']);
       }
 
     }
@@ -247,7 +247,7 @@ module.exports = function (app) {
         const emailCheck = await User.findOne({ email: request.parentemail });
         if (emailCheck)
           valError['ParentEmailExists'] = "email: " + request.parentemail + " is already in use";
-        console.log("emailexists: " + valError['EmailExists']);
+       // console.log("emailexists: " + valError['EmailExists']);
       }
 
     }
@@ -261,9 +261,9 @@ module.exports = function (app) {
 
       if (!request.employeeno)
         valError["EmployeeNo"] = "Employee No can't be empty";
-
-      if (!request.experiencedetails)
-        valError["ExperienceDetails"] = "Experience Details can't be empty";
+if(request.type.toLowerCase==="experienced")
+     { if (!request.experiencedetails)
+        valError["ExperienceDetails"] = "Experience Details can't be empty";}
 
       if (!request.type)
         valError["EmployeeType"] = "Employee Type can't be empty";
@@ -933,11 +933,12 @@ module.exports = function (app) {
             console.log("Total records: " + Object.keys(result).length);
             var importErrors = {};
             for (let i = 0; i < result.length; i++) {
+              console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
               //console.log("record length: "+Object.keys(result[i]).length);
               var counter = 0;
               for (var key in result[i]) {
-               
-                console.log("key "+  result[i][key]  );
+
+                //console.log("key "+  result[i][key]  );
                 if (result[i][key] === "")
                   counter++;
 
@@ -961,6 +962,7 @@ module.exports = function (app) {
               result[i] = temp;
 
               result[i].role = result[i].role.filter(onlyUnique);
+
 
               var impValResult = await importValidation(result[i]);
               console.log("impValResultLength: " + Object.keys(impValResult).length);
@@ -1043,8 +1045,8 @@ module.exports = function (app) {
                   .catch(err => {
                     return res.send(err);
                   });
-            
-            
+
+
                 if (result[i].role.indexOf("admin") !== -1) {
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
@@ -1058,7 +1060,7 @@ module.exports = function (app) {
                       return res.send(err);
                     });
                 }
-            
+
                 if (result[i].role.indexOf("teacher") !== -1) {
                   user = new Teacher(result[i]);
                   console.log("Teacher = " + user);
@@ -1072,9 +1074,9 @@ module.exports = function (app) {
                       return res.send(err);
                     });
                 }
-            
-            
-            
+
+
+
 
                 }
               }

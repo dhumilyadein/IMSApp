@@ -273,7 +273,11 @@ class RegisterUser extends Component {
     this.setState({experiencedetails:""});
     if(e.target.value==="Fresher")
     this.setState({experiencedetails:"NA"});
-  }
+if(e.target.name==="username"||e.target.name==="parentusername")
+this.setState({
+  [e.target.name]:  String(e.target.value).toLowerCase()
+  });
+}
 
   copyAddress(e) {
     if (e.target.checked === true) {
