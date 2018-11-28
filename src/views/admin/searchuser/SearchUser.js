@@ -116,9 +116,9 @@ class SearchUser extends Component {
           var i = 1;
           res.data.forEach(function (item) {
 
-            console.log("Fetched lastname - " + item.lastname);
+            console.log("Fetched username - " + item.username);
 
-            fetchedUsernames.push(item.lastname);
+            fetchedUsernames.push(item.username);
 
           });
 
@@ -202,14 +202,14 @@ class SearchUser extends Component {
           ref={input => this.search = input}
           onChange={this.changeHandler}
         />*?}
-        
+
                           {/*<Input
                             type="text"
                             name="find"
                             id="find"
                             autoComplete="find"
                             placeholder="Enter Search text"
-                            onChange={this.changeHandler} 
+                            onChange={this.changeHandler}
                           />
                           */}
                     </InputGroup>
