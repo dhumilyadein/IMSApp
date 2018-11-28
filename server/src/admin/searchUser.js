@@ -86,14 +86,17 @@ module.exports = function (app) {
     var find = req.body.find;
     var searchCriteria = req.body.searchCriteria;
     var role = req.body.role;
+
     console.log("find - " + find + " using - " + using + " role - " + role + " searchCriteria - " + searchCriteria);
 
     if ("containsSearchCriteria" === searchCriteria) {
 
-      User.find({ [using]: /[find]/ })
+      find = '/' + find + '/i';
+
+      User.find({ [using]: {$regex:eval(find)} })
         .then(function (userData) {
 
-          console.log("SEARCH USER RESULT CONTAINS- \n" + userData);
+          console.log("SEARCH USER RESULT CONTAINS- \n" + userData + " find - " + find);
           res.send(userData);
         })
         .catch(function (error) {
@@ -102,10 +105,12 @@ module.exports = function (app) {
 
     } else {
 
-      User.find({ [using]: [find] })
+      find = '/^' + find + '$/i';
+
+      User.find({ [using]: {$regex:eval(find)} })
         .then(function (userData) {
 
-          console.log("SEARCH USER RESULT EQUALS - \n" + userData);
+          console.log("SEARCH USER RESULT EQUALS - \n" + userData + " find - " + find);
           
           res.send(userData);
         })
