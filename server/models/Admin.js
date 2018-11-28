@@ -22,7 +22,7 @@ var AdminSchema = new Schema({
   },
 
   maritalstatus: {
-    type: Date,
+    type: String,
     required: true
   },
 
