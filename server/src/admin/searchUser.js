@@ -91,7 +91,7 @@ module.exports = function (app) {
 
     if ("containsSearchCriteria" === searchCriteria) {
 
-      find = '/' + find + '/i';
+      find = "/" + find + "/i";
 
       User.find({ [using]: {$regex:eval(find)} })
         .then(function (userData) {
@@ -105,7 +105,7 @@ module.exports = function (app) {
 
     } else {
 
-      find = '/^' + find + '$/i';
+      find = "/^" + find + "$/i";
 
       User.find({ [using]: {$regex:eval(find)} })
         .then(function (userData) {
