@@ -34,7 +34,11 @@ var TeacherSchema = new Schema({
     required: true
   },
 
+  experiencedetails: {
+    type: String,
+    required: true,
 
+  },
    bloodgroup: {
     type: String,
     required: true

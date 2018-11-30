@@ -133,7 +133,7 @@ module.exports = function (app) {
 
 
 
-    console.log("request.role: " + request.role);
+
     if (request.role.length === 0)
       valError["EmptyRole"] = "role can't be empty";
     else if (request.role.length > 1 && request.role.indexOf("student") !== -1)
@@ -261,7 +261,7 @@ module.exports = function (app) {
 
       if (!request.employeeno)
         valError["EmployeeNo"] = "Employee No can't be empty";
-if(request.type.toLowerCase==="experienced")
+if(request.type.toLowerCase()==="experienced")
      { if (!request.experiencedetails)
         valError["ExperienceDetails"] = "Experience Details can't be empty";}
 
@@ -961,21 +961,28 @@ if(request.type.toLowerCase==="experienced")
 
               result[i] = temp;
 
-              result[i].role = result[i].role.filter(onlyUnique);
+              result[i].role = await result[i].role.filter(onlyUnique);
+              console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
+              console.log("Fresher Yes : " + result[i].type.toLowerCase);
+              if(result[i].type.toLowerCase()==="fresher")
+              {
 
-
+                result[i].experiencedetails="NA";
+            }
               var impValResult = await importValidation(result[i]);
               console.log("impValResultLength: " + Object.keys(impValResult).length);
 
-              if (Object.keys(impValResult).length === 0) {
+              // impValResult length check
 
-                if (result[i].role.indexOf("student" !== -1)) {
+              if (Object.keys(impValResult).length === 0) {
+                console.log("result[i].role: " + result[i].role);
+                if (result[i].role.indexOf("student")!== -1) {
                   var parentUser = {
                     "username": result[i].parentusername, "firstname": result[i].parentfirstname, "lastname": result[i].parentlastname,
                     "email": result[i].parentemail, "password": result[i].parentpassword, "role": "Parent", status: result[i].status
                   };
-                  var user = new User(parentUser);
-                  console.log("user = " + user);
+                  var user = await new User(parentUser);
+                  console.log("user  = " + user);
                   user.password = user.hashPassword(user.password);
                   await user
                     .save()
@@ -990,7 +997,7 @@ if(request.type.toLowerCase==="experienced")
                     "username": result[i].username, "firstname": result[i].firstname, "lastname": result[i].lastname,
                     "email": result[i].email, "password": result[i].password, "role": "Student", "status": result[i].status
                   };
-                  user = new User(studentUser);
+                  user = await new User(result[i]);
                   console.log("user = " + user);
                   user.password = user.hashPassword(user.password);
                   await user

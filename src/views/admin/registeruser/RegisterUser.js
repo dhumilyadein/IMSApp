@@ -141,6 +141,8 @@ class RegisterUser extends Component {
       modalSuccess: true,
       parentpassword_con: "",
       parentusername: "",
+      occupation:"",
+      relation:"",
       parentpassword: "",
       username: "",
       email: "",
