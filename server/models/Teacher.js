@@ -33,6 +33,11 @@ var TeacherSchema = new Schema({
     type: String,
     required: true
   },
+  userid: {
+    type: Number,
+    required: true,
+    unique:true
+  },
 
   experiencedetails: {
     type: String,

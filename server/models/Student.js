@@ -73,7 +73,7 @@ var StudentSchema = new Schema({
    // required: true
   },
 
-  
+
   admissionno: {
     type: String,
     required: true
@@ -144,8 +144,12 @@ var StudentSchema = new Schema({
     type: Date,
     required: true,
     default: Date.now
+  },
+  userid: {
+    type: Number,
+    required: true,
+    unique:true
   }
-
 
 
 },  { collection: 'student' });

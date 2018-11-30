@@ -25,6 +25,11 @@ var AdminSchema = new Schema({
     type: String,
     required: true
   },
+  userid: {
+    type: Number,
+    required: true,
+    unique:true
+  },
 
   gender: {
     type: String,
@@ -106,7 +111,7 @@ var AdminSchema = new Schema({
   experiencedetails: {
     type: String,
     required: true,
-    default:"NA"
+
   },
     email: {
     type: String,

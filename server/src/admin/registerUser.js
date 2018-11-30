@@ -981,8 +981,9 @@ if(request.type.toLowerCase()==="experienced")
                     "username": result[i].parentusername, "firstname": result[i].parentfirstname, "lastname": result[i].parentlastname,
                     "email": result[i].parentemail, "password": result[i].parentpassword, "role": "Parent", status: result[i].status
                   };
+                  //Saving Parent user
                   var user = await new User(parentUser);
-                  console.log("user  = " + user);
+
                   user.password = user.hashPassword(user.password);
                   await user
                     .save()
@@ -992,13 +993,26 @@ if(request.type.toLowerCase()==="experienced")
                     .catch(err => {
                       return res.send(err);
                     });
+                    console.log("Parent user  = " + user);
+                    result[i]["userid"]= user.userid;
 
-                  var studentUser = {
-                    "username": result[i].username, "firstname": result[i].firstname, "lastname": result[i].lastname,
-                    "email": result[i].email, "password": result[i].password, "role": "Student", "status": result[i].status
-                  };
+                    user = new Parent(result[i]);
+
+                    user.parentpassword = user.hashPassword(user.parentpassword);
+                    await user
+                      .save()
+                      .then(user => {
+                        //  return res.json(user);
+                      })
+                      .catch(err => {
+                        return res.send(err);
+                      });
+                      console.log("Parent = " + user);
+
+
+                  //Saving Student user
                   user = await new User(result[i]);
-                  console.log("user = " + user);
+
                   user.password = user.hashPassword(user.password);
                   await user
                     .save()
@@ -1009,21 +1023,11 @@ if(request.type.toLowerCase()==="experienced")
                       return res.send(err);
                     });
 
-
-                  user = new Parent(result[i]);
-                  console.log("parent user = " + user);
-                  user.parentpassword = user.hashPassword(user.parentpassword);
-                  await user
-                    .save()
-                    .then(user => {
-                      //  return res.json(user);
-                    })
-                    .catch(err => {
-                      return res.send(err);
-                    });
+                    console.log(" Student user = " + user);
+                    result[i]["userid"]= user.userid;
 
                   user = new Student(result[i]);
-                  console.log("Student user = " + user);
+                  console.log("Student = " + user);
                   user.password = user.hashPassword(user.password);
                   await user
                     .save()
@@ -1053,7 +1057,7 @@ if(request.type.toLowerCase()==="experienced")
                     return res.send(err);
                   });
 
-
+                  result[i]["userid"]= user.userid;
                 if (result[i].role.indexOf("admin") !== -1) {
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
