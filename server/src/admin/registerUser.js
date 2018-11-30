@@ -933,7 +933,7 @@ if(request.type.toLowerCase()==="experienced")
             console.log("Total records: " + Object.keys(result).length);
             var importErrors = {};
             for (let i = 0; i < result.length; i++) {
-              console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
+             // console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
               //console.log("record length: "+Object.keys(result[i]).length);
               var counter = 0;
               for (var key in result[i]) {
@@ -945,7 +945,7 @@ if(request.type.toLowerCase()==="experienced")
 
 
               }
-              console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
+             // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
               if (counter === Object.keys(result[i]).length)
                 continue;
               var roles = [];
@@ -963,7 +963,7 @@ if(request.type.toLowerCase()==="experienced")
 
               result[i].role = await result[i].role.filter(onlyUnique);
               console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
-              console.log("Fresher Yes : " + result[i].type.toLowerCase);
+             // console.log("Fresher Yes : " + result[i].type.toLowerCase);
               if(result[i].type.toLowerCase()==="fresher")
               {
 
@@ -975,27 +975,28 @@ if(request.type.toLowerCase()==="experienced")
               // impValResult length check
 
               if (Object.keys(impValResult).length === 0) {
-                console.log("result[i].role: " + result[i].role);
+               // console.log("result[i].role: " + result[i].role);
+               var user=null;
                 if (result[i].role.indexOf("student")!== -1) {
                   var parentUser = {
                     "username": result[i].parentusername, "firstname": result[i].parentfirstname, "lastname": result[i].parentlastname,
                     "email": result[i].parentemail, "password": result[i].parentpassword, "role": "Parent", status: result[i].status
                   };
-                  //Saving Parent user
-                  var user = await new User(parentUser);
+                  //Saving Parent in users
+                  user = await new User(parentUser);
 
                   user.password = user.hashPassword(user.password);
-                  await user
+                  await  user
                     .save()
                     .then(user => {
-                      //  return res.json(user);
+                      
                     })
                     .catch(err => {
                       return res.send(err);
                     });
                     console.log("Parent user  = " + user);
-                    result[i]["userid"]= user.userid;
-
+                    
+result[i]["userid"]= user.userid;
                     user = new Parent(result[i]);
 
                     user.parentpassword = user.hashPassword(user.parentpassword);
@@ -1009,15 +1010,18 @@ if(request.type.toLowerCase()==="experienced")
                       });
                       console.log("Parent = " + user);
 
+                      var { userid, ...temp } = result[i];
+              
+              result[i] = temp;
 
-                  //Saving Student user
+                  //Saving Student in users
                   user = await new User(result[i]);
 
                   user.password = user.hashPassword(user.password);
-                  await user
+                    await user
                     .save()
                     .then(user => {
-                      // return res.json(user);
+                     
                     })
                     .catch(err => {
                       return res.send(err);
@@ -1026,10 +1030,10 @@ if(request.type.toLowerCase()==="experienced")
                     console.log(" Student user = " + user);
                     result[i]["userid"]= user.userid;
 
-                  user = new Student(result[i]);
+                  user = await new Student(result[i]);
                   console.log("Student = " + user);
                   user.password = user.hashPassword(user.password);
-                  await user
+                   await user
                     .save()
                     .then(user => {
                       //  return res.json(user);
@@ -1041,28 +1045,28 @@ if(request.type.toLowerCase()==="experienced")
 
                 }
                 else
-                {var empUser = {
+                {/* var empUser = {
                   "username": result[i].username, "firstname": result[i].firstname, "lastname": result[i].lastname,
                   "email": result[i].email, "password": result[i].password, "role": result[i].role, "status": result[i].status
-                };
-                user = new User(empUser);
-                console.log("empUser = " + user);
+                }; */
+                user = new User(result[i]);
+               
                 user.password = user.hashPassword(user.password);
-                await user
+                 await  user
                   .save()
                   .then(user => {
-                    // return res.json(user);
+                    result[i]["userid"]= user.userid;
                   })
                   .catch(err => {
                     return res.send(err);
                   });
-
-                  result[i]["userid"]= user.userid;
+                  console.log("empUser = " + user);
+                 
                 if (result[i].role.indexOf("admin") !== -1) {
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
                   user.password = user.hashPassword(user.password);
-                  await user
+                     await user
                     .save()
                     .then(user => {
                       //  return res.json(user);
@@ -1076,7 +1080,7 @@ if(request.type.toLowerCase()==="experienced")
                   user = new Teacher(result[i]);
                   console.log("Teacher = " + user);
                   user.password = user.hashPassword(user.password);
-                  await user
+                      await   user
                     .save()
                     .then(user => {
                       //  return res.json(user);
