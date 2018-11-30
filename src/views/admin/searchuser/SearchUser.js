@@ -19,12 +19,21 @@ import {
 import { AppSwitch } from "@coreui/react";
 import axios from "axios";
 import { Redirect } from 'react-router-dom';
-import Suggestions from './Suggestions';
-import MaterialUIAutocomplete from './MaterialUIAutocomplete/MaterialUIAutocomplete';
+import { AutoComplete } from 'material-ui';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import JSONP from 'jsonp';
+
+var Promise = require('promise');
 
 class SearchUser extends Component {
   constructor(props) {
     super(props);
+
+    this.onUpdateInput = this.onUpdateInput.bind(this);
+    this.changeHandler = this.changeHandler.bind(this);
+    this.searchHandler = this.searchHandler.bind(this);
+
     this.state = {
       find: null,
       using: "username",
@@ -36,11 +45,9 @@ class SearchUser extends Component {
       userdata: null,
       redirectSearchUserToUsers: false,
 
-      query: '',
-      results: []
+      dataSource: []
     };
-    this.changeHandler = this.changeHandler.bind(this);
-    this.searchHandler = this.searchHandler.bind(this);
+
   }
 
   /**
@@ -52,20 +59,98 @@ class SearchUser extends Component {
 
     e.preventDefault();
 
-    // axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
-    //   console.log("response - " + JSON.stringify(res.data));
-    //   console.log("res.data.errors - " + res.data.errors);
-    //   console.log("res.data.message - " + res.data.message);
-    //   console.log("res.data.error - " + res.data.errors);
+    axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
+      console.log("response - " + JSON.stringify(res.data));
+      console.log("res.data.errors - " + res.data.errors);
+      console.log("res.data.message - " + res.data.message);
+      console.log("res.data.error - " + res.data.errors);
 
-    //   if(res.data.errors) {
-    //   return this.setState({ errors: res.data.errors });
-    //   } else {
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
 
-    //     this.props.history.push("/users");
+        this.props.history.push("/users");
 
-    //   }
-    // });
+      }
+    });
+  }
+
+  onUpdateInput(inputValue) {
+    const self = this;
+    this.setState({
+      find: inputValue
+    }, function () {
+      self.performSearch();
+    });
+  }
+
+  performSearch() {
+
+    var fetchedUsernames = [];
+
+    const googleAutoSuggestURL = `
+  //suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=`;
+
+    const
+      self = this,
+      url = googleAutoSuggestURL + this.state.find;
+
+
+    if (this.state.find !== '') {
+
+      console.log("response - " + JSON.stringify(this.state));
+
+      axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
+
+        console.log("res.data.errors - " + res.data.errors);
+        console.log("res.data.message - " + res.data.message);
+        console.log("res.data.error - " + res.data.errors);
+
+        if (res.data.errors) {
+          return this.setState({ errors: res.data.errors });
+        } else {
+
+          //this.props.history.push("/users");
+          console.log("final response - " + JSON.stringify(res.data));
+
+          var i = 1;
+          res.data.forEach(function (item) {
+
+            console.log("Fetched username - " + item.username);
+
+            fetchedUsernames.push(item.username);
+
+          });
+
+          console.log("Fetched usernames on search - " + fetchedUsernames);
+
+          this.setState({
+            dataSource: fetchedUsernames
+          });
+
+          console.log("this.state.dataSource - " + this.state.dataSource);
+        }
+      });
+
+      // JSONP(url, function (error, data) {
+      //   let searchResults, retrievedSearchTerms;
+
+      //   if (error) return error;
+
+      //   searchResults = data[1];
+
+      //   retrievedSearchTerms = searchResults.map(function (result) {
+      //     return result[0];
+      //   });
+
+      //   console.log("autosearch result - " + retrievedSearchTerms);
+
+      //   self.setState({
+      //     dataSource: retrievedSearchTerms
+      //   });
+      // });
+
+    }
   }
 
 
@@ -75,24 +160,14 @@ class SearchUser extends Component {
    */
   changeHandler(e) {
 
-    // this.setState(
-    //   {
-    //     [e.target.name]: e.target.value
-    //   },
+    this.setState(
+      {
+        [e.target.name]: e.target.value
+      },
 
-    // );
+    );
 
-    this.setState({
-      query: this.search.value
-    }, () => {
-      if (this.state.query && this.state.query.length > 1) {
-        if (this.state.query.length % 2 === 0) {
-          //this.getInfo()
-          this.state.results.push({ "id": "1", "name": "kapil" });
-        }
-      } else if (!this.state.query) {
-      }
-    });
+    console.log("state in react - " + JSON.stringify(this.state));
   }
 
   render() {
@@ -112,7 +187,15 @@ class SearchUser extends Component {
                           <b>Find</b>
                         </InputGroupText>
                       </InputGroupAddon>
-                      <MaterialUIAutocomplete />
+                      <MuiThemeProvider muiTheme={getMuiTheme()}>
+                        <AutoComplete
+                          hintText="Enter Search text"
+                          dataSource={this.state.dataSource}
+                          onUpdateInput={this.onUpdateInput}
+                          floatingLabelText="Find"
+                          fullWidth={true}
+                        />
+                      </MuiThemeProvider>
 
                       {/*}        <input
           placeholder="Search for..."
