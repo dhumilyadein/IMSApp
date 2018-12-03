@@ -96,7 +96,7 @@ class RegisterUser extends Component {
       phone: "",
       parentaddresscheck: false,
       roleerror: false,
-      photoerror:""
+      photoerror:null
     };
 
     this.changeHandler = this.changeHandler.bind(this);
@@ -138,7 +138,7 @@ class RegisterUser extends Component {
 
 
     this.setState({
-      photoerror:"",
+      photoerror:null,
       admintype: "Office Admin",
       empRegSuccess: false,
       modalSuccess: true,
@@ -201,7 +201,7 @@ class RegisterUser extends Component {
       bloodgroup: "",
       category: "",
 
-      corruptphoto: "",
+      corruptphoto: false,
       photoname: "",
       phone: "",
       parentaddresscheck: false,
