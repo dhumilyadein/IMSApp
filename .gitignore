@@ -3,7 +3,7 @@
 # dependencies
 /node_modules
 /server/node_modules
-/server/Exceluploads
+/server/ExcelUploads
 /server/PhotoUploads
 package-lock.json
 

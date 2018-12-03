@@ -738,11 +738,16 @@ if(request.type.toLowerCase()==="experienced")
     console.log("\n\n studentREGISTER req.body: " + JSON.stringify(req.body) + "\n");
 
     var errors = validationResult(req);
+// if(req.body.photoerror||req.body.corruptphoto)
+
+// return res.send({ photoerror: "Photo is corrupt or not selected" });
 
     if (!errors.isEmpty()) {
       console.log("ERRORS" + errors.mapped());
       return res.send({ errors: errors.mapped() });
     }
+
+
 
 
     var parentUser = {
@@ -819,7 +824,9 @@ req.body["userid"]=user.userid;
     console.log("\n\n EmpREGISTER req.body: " + JSON.stringify(req.body) + "\n");
 
     var errors = validationResult(req);
+    // if(req.body.photoerror||req.body.corruptphoto)
 
+    // return res.send({ photoerrors: "Photo is corrupt or not selected" });
     if (!errors.isEmpty()) {
       console.log("ERRORS" + errors.mapped());
       return res.send({ errors: errors.mapped() });
@@ -1119,23 +1126,25 @@ result[i]["userid"]= user.userid;
 
 
 
-function photoUploading(req,res)
+async function photoUploading(req,res)
 {
  console.log("in Photo Upload");
 
- photoUpload(req, res, function (err) {
+ await photoUpload(req, res, function (err) {
   if (err) {
-    res.json({ error_code: 1, err_desc: err });
-    return;
+     res.json({ error_code: 1, err_desc: err });
   }
   /** Multer gives us file info in req.file object */
-  if (!req.file) {
-    res.json({ error_code: 1, err_desc: "No file passed" });
-
-    return;
-  }
- console.log(req.file.path);
+  else if (!req.file)
+     res.json({ error_code: 1, err_desc: "No file passed" });
+else{
+  console.log(req.file.path);
 photoPath = req.file.path;
+res.json({message:"photo uploaded to " +photoPath});
+}
+
+
+
 });
 
 
