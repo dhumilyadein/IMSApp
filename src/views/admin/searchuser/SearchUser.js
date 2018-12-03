@@ -27,12 +27,14 @@ import JSONP from 'jsonp';
 var Promise = require('promise');
 
 class SearchUser extends Component {
+
   constructor(props) {
     super(props);
 
     this.onUpdateInput = this.onUpdateInput.bind(this);
     this.changeHandler = this.changeHandler.bind(this);
     this.searchHandler = this.searchHandler.bind(this);
+    this.selectedItem = this.selectedItem.bind(this);
 
     this.state = {
       find: null,
@@ -44,6 +46,8 @@ class SearchUser extends Component {
       success: null,
       userdata: null,
       redirectSearchUserToUsers: false,
+      
+      chosenRequest: null,
 
       dataSource: []
     };
@@ -117,8 +121,10 @@ class SearchUser extends Component {
           res.data.forEach(function (item) {
 
             console.log("Fetched username - " + item.username);
+            console.log("Fetched Full Name - " + item.firstname + " " + item.lastname);
 
-            fetchedUsernames.push(item.username);
+            let displayText = item.firstname + " " + item.lastname + " (" + item.username + ")";
+            fetchedUsernames.push(displayText);
 
           });
 
@@ -170,6 +176,14 @@ class SearchUser extends Component {
     console.log("state in react - " + JSON.stringify(this.state));
   }
 
+  /**
+   * @description For getting search bar selected value
+   */
+  selectedItem(chosenRequest, index) {
+    this.setState({ chosenRequest: chosenRequest });
+    console.log("this.state.chosenRequest - " + this.state.chosenRequest);
+  }
+
   render() {
     return (
       <div>
@@ -194,6 +208,9 @@ class SearchUser extends Component {
                           onUpdateInput={this.onUpdateInput}
                           floatingLabelText="Find"
                           fullWidth={true}
+                          filter={AutoComplete.noFilter}
+                          maxSearchResults={5}
+                          onNewRequest={this.selectedItem}
                         />
                       </MuiThemeProvider>
 
