@@ -33,8 +33,17 @@ var TeacherSchema = new Schema({
     type: String,
     required: true
   },
+  userid: {
+    type: Number,
+    required: true,
+    unique:true
+  },
 
+  experiencedetails: {
+    type: String,
+    required: true,
 
+  },
    bloodgroup: {
     type: String,
     required: true
@@ -56,9 +65,10 @@ var TeacherSchema = new Schema({
   },
 
   photo: {
-    type: String,
     data: Buffer,
-    required: true
+     contentType: String,
+
+
   },
 
     employeeno: {

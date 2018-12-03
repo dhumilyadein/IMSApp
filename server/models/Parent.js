@@ -53,7 +53,11 @@ var ParentSchema = new Schema({
     type: String,
     required: true
   },
-
+  userid: {
+    type: Number,
+    required: true,
+    unique:true
+  },
   parentstate: {
     type: String,
     required: true

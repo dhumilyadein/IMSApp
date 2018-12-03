@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import 'bootstrap/dist/css/bootstrap.css';
+import ReactLoading from 'react-loading';
 
 
 import {
@@ -40,7 +41,8 @@ class ImportUser extends Component {
       file: null,
       noFile: false,
       corruptFile: false,
-      filename: null
+      filename: null,
+      loader:false
 
 
 
@@ -74,6 +76,7 @@ class ImportUser extends Component {
     e.preventDefault() // Stop form submit
     const data = new FormData();
     console.log("file" + this.state.file);
+    this.setState({loader:true});
     if (!this.state.file)
 
       this.setState({
@@ -81,7 +84,8 @@ class ImportUser extends Component {
         noFile: true,
         modalSuccess: true,
         corruptFile: false,
-        impSuccess: false
+        impSuccess: false,
+        loader:false
 
       });
     else {
@@ -97,7 +101,8 @@ class ImportUser extends Component {
               corruptFile: true,
               modalSuccess: true,
               file: null,
-              noFile: false
+              noFile: false,
+              loader:false
 
 
             });
@@ -113,18 +118,20 @@ class ImportUser extends Component {
               modalSuccess: true,
               noFile: false,
               corruptFile: false,
-              file: null
+              file: null,
+              loader:false
             });
           }
           else
-{
+{document.getElementById("file").value = "";
            this.setState({
 
             importErrors: res.data.errors,
 
             noFile: false,
             corruptFile: false,
-            file: null
+            file: null,
+            loader:false
 
           },() =>{
            // console.log("errors length: "+Object.keys(this.state.errors).length)
@@ -197,6 +204,13 @@ class ImportUser extends Component {
                         <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
                       </Col>
                     </Row>
+
+ {this.state.loader &&<font color="Green">  <h5>Importing sheet...</h5></font>}
+                    {this.state.loader &&
+                     <ReactLoading type="bars"
+                      color="	#006400"
+    height='2%' width='100%' />
+                      }
 
                     { this.state.importErrors &&
                     <Row className="align-items-center">

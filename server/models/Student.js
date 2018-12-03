@@ -68,12 +68,13 @@ var StudentSchema = new Schema({
   },
 
   photo: {
-    type: String,
-   // data: Buffer,
-   // required: true
-  },
+     data: Buffer,
+     contentType: String,
 
-  
+
+    },
+
+
   admissionno: {
     type: String,
     required: true
@@ -144,8 +145,12 @@ var StudentSchema = new Schema({
     type: Date,
     required: true,
     default: Date.now
+  },
+  userid: {
+    type: Number,
+    required: true,
+    unique:true
   }
-
 
 
 },  { collection: 'student' });

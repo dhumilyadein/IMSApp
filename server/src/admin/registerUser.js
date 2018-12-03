@@ -1,7 +1,7 @@
-var util = require('util')
 
+var fs = require('fs');
 var { check, validationResult } = require("express-validator/check");
-
+let photoPath=null;
 const User = require("../../models/User");
 const Student = require("../../models/Student");
 const Parent = require("../../models/Parent");
@@ -47,7 +47,7 @@ var excelUpload = multer({
   }
 }).single("file");
 
-/* var photoStorage = multer.diskStorage({
+ var photoStorage = multer.diskStorage({
   //multers disk storage settings
   destination: function(req, file, cb) {
     cb(null, "./PhotoUploads/");
@@ -63,17 +63,17 @@ var excelUpload = multer({
         file.originalname.split(".")[file.originalname.split(".").length - 1]
     );
   }
-}); */
+});
 
 
 
-/* var photoUpload = multer({
+ var photoUpload = multer({
   //multer settings
   storage: photoStorage,
   fileFilter: function(req, file, callback) {
     //file filter
     if (
-      ["jpg", "jpeg"].indexOf(
+      ["jpg", "jpeg","png","JPG","PNG","JPEG"].indexOf(
         file.originalname.split(".")[file.originalname.split(".").length - 1]
       ) === -1
     ) {
@@ -81,7 +81,7 @@ var excelUpload = multer({
     }
     callback(null, true);
   }
-}).single("file"); */
+}).single("file");
 
 module.exports = function (app) {
   async function importValidation(request) {
@@ -133,7 +133,7 @@ module.exports = function (app) {
 
 
 
-    console.log("request.role: " + request.role);
+
     if (request.role.length === 0)
       valError["EmptyRole"] = "role can't be empty";
     else if (request.role.length > 1 && request.role.indexOf("student") !== -1)
@@ -261,7 +261,7 @@ module.exports = function (app) {
 
       if (!request.employeeno)
         valError["EmployeeNo"] = "Employee No can't be empty";
-if(request.type.toLowerCase==="experienced")
+if(request.type.toLowerCase()==="experienced")
      { if (!request.experiencedetails)
         valError["ExperienceDetails"] = "Experience Details can't be empty";}
 
@@ -407,12 +407,7 @@ if(request.type.toLowerCase==="experienced")
       .isEmpty()
       .withMessage("Please enter State"),
 
-    check("photo")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Photo"),
-
-    check("relation")
+      check("relation")
       .not()
       .isEmpty()
       .withMessage("Please select Relation"),
@@ -645,12 +640,6 @@ if(request.type.toLowerCase==="experienced")
       .isEmpty()
       .withMessage("Please enter Marital Status"),
 
-    check("photo")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Photo"),
-
-
 
     check("type")
       .not()
@@ -755,17 +744,6 @@ if(request.type.toLowerCase==="experienced")
       return res.send({ errors: errors.mapped() });
     }
 
-    // photoUpload(req.body.photo, res, function(err) {
-    //   if (err) {
-    //     res.json({ error_code: 1, err_desc: err });
-    //     return;
-    //   }
-    //   /** Multer gives us file info in req.file object */
-    //   if (!req.body.photo) {
-    //     res.json({ error_code: 1, err_desc: "No file passed" });
-
-    //     return;
-    //   }})
 
     var parentUser = {
       "username": req.body.parentusername, "firstname": req.body.parentfirstname, "lastname": req.body.parentlastname,
@@ -782,6 +760,22 @@ if(request.type.toLowerCase==="experienced")
       .catch(err => {
         return res.send(err);
       });
+
+req.body["userid"]=user.userid;
+      user = new Parent(req.body);
+      console.log("user = " + user);
+      user.parentpassword = user.hashPassword(user.parentpassword);
+      await user
+        .save()
+        .then(user => {
+          //  return res.json(user);
+        })
+        .catch(err => {
+          return res.send(err);
+        });
+
+        var {userid, ...temp}=req.body;
+        req.body=temp;
 
     var studentUser = {
       "username": req.body.username, "firstname": req.body.firstname, "lastname": req.body.lastname,
@@ -800,21 +794,15 @@ if(request.type.toLowerCase==="experienced")
       });
 
 
-    user = new Parent(req.body);
-    console.log("user = " + user);
-    user.parentpassword = user.hashPassword(user.parentpassword);
-    await user
-      .save()
-      .then(user => {
-        //  return res.json(user);
-      })
-      .catch(err => {
-        return res.send(err);
-      });
+      req.body["userid"]=user.userid;
+
 
     user = new Student(req.body);
     console.log("user = " + user);
     user.password = user.hashPassword(user.password);
+    user.photo.data = fs.readFileSync(photoPath);
+    user.photo.contentType = 'image/png';
+
     await user
       .save()
       .then(user => {
@@ -853,11 +841,13 @@ if(request.type.toLowerCase==="experienced")
         return res.send(err);
       });
 
-
+req.body["userid"]=user.userid;
     if (req.body.role.indexOf("admin") !== -1) {
       user = new Admin(req.body);
       console.log("Admin = " + user);
       user.password = user.hashPassword(user.password);
+      user.photo.data = fs.readFileSync(photoPath);
+    user.photo.contentType = 'image/png';
       await user
         .save()
         .then(user => {
@@ -872,6 +862,8 @@ if(request.type.toLowerCase==="experienced")
       user = new Teacher(req.body);
       console.log("Teacher = " + user);
       user.password = user.hashPassword(user.password);
+      user.photo.data = fs.readFileSync(photoPath);
+    user.photo.contentType = 'image/png';
       await user
         .save()
         .then(user => {
@@ -933,7 +925,7 @@ if(request.type.toLowerCase==="experienced")
             console.log("Total records: " + Object.keys(result).length);
             var importErrors = {};
             for (let i = 0; i < result.length; i++) {
-              console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
+             // console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
               //console.log("record length: "+Object.keys(result[i]).length);
               var counter = 0;
               for (var key in result[i]) {
@@ -945,7 +937,7 @@ if(request.type.toLowerCase==="experienced")
 
 
               }
-              console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
+             // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
               if (counter === Object.keys(result[i]).length)
                 continue;
               var roles = [];
@@ -961,64 +953,79 @@ if(request.type.toLowerCase==="experienced")
 
               result[i] = temp;
 
-              result[i].role = result[i].role.filter(onlyUnique);
+              result[i].role = await result[i].role.filter(onlyUnique);
+              console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
+             // console.log("Fresher Yes : " + result[i].type.toLowerCase);
+              if(result[i].type.toLowerCase()==="fresher")
+              {
 
-
+                result[i].experiencedetails="NA";
+            }
               var impValResult = await importValidation(result[i]);
               console.log("impValResultLength: " + Object.keys(impValResult).length);
 
-              if (Object.keys(impValResult).length === 0) {
+              // impValResult length check
 
-                if (result[i].role.indexOf("student" !== -1)) {
+              if (Object.keys(impValResult).length === 0) {
+               // console.log("result[i].role: " + result[i].role);
+               var user=null;
+                if (result[i].role.indexOf("student")!== -1) {
                   var parentUser = {
                     "username": result[i].parentusername, "firstname": result[i].parentfirstname, "lastname": result[i].parentlastname,
                     "email": result[i].parentemail, "password": result[i].parentpassword, "role": "Parent", status: result[i].status
                   };
-                  var user = new User(parentUser);
-                  console.log("user = " + user);
+                  //Saving Parent in users
+                  user = await new User(parentUser);
+
                   user.password = user.hashPassword(user.password);
-                  await user
+                  await  user
                     .save()
                     .then(user => {
-                      //  return res.json(user);
+
+                    })
+                    .catch(err => {
+                      return res.send(err);
+                    });
+                    console.log("Parent user  = " + user);
+
+result[i]["userid"]= user.userid;
+                    user = new Parent(result[i]);
+
+                    user.parentpassword = user.hashPassword(user.parentpassword);
+                    await user
+                      .save()
+                      .then(user => {
+                        //  return res.json(user);
+                      })
+                      .catch(err => {
+                        return res.send(err);
+                      });
+                      console.log("Parent = " + user);
+
+                      var { userid, ...temp } = result[i];
+
+              result[i] = temp;
+
+                  //Saving Student in users
+                  user = await new User(result[i]);
+
+                  user.password = user.hashPassword(user.password);
+                    await user
+                    .save()
+                    .then(user => {
+
                     })
                     .catch(err => {
                       return res.send(err);
                     });
 
-                  var studentUser = {
-                    "username": result[i].username, "firstname": result[i].firstname, "lastname": result[i].lastname,
-                    "email": result[i].email, "password": result[i].password, "role": "Student", "status": result[i].status
-                  };
-                  user = new User(studentUser);
-                  console.log("user = " + user);
+                    console.log(" Student user = " + user);
+                    result[i]["userid"]= user.userid;
+
+                  user = await new Student(result[i]);
+                  console.log("Student = " + user);
                   user.password = user.hashPassword(user.password);
-                  await user
-                    .save()
-                    .then(user => {
-                      // return res.json(user);
-                    })
-                    .catch(err => {
-                      return res.send(err);
-                    });
-
-
-                  user = new Parent(result[i]);
-                  console.log("parent user = " + user);
-                  user.parentpassword = user.hashPassword(user.parentpassword);
-                  await user
-                    .save()
-                    .then(user => {
-                      //  return res.json(user);
-                    })
-                    .catch(err => {
-                      return res.send(err);
-                    });
-
-                  user = new Student(result[i]);
-                  console.log("Student user = " + user);
-                  user.password = user.hashPassword(user.password);
-                  await user
+                   await user
                     .save()
                     .then(user => {
                       //  return res.json(user);
@@ -1030,28 +1037,28 @@ if(request.type.toLowerCase==="experienced")
 
                 }
                 else
-                {var empUser = {
+                {/* var empUser = {
                   "username": result[i].username, "firstname": result[i].firstname, "lastname": result[i].lastname,
                   "email": result[i].email, "password": result[i].password, "role": result[i].role, "status": result[i].status
-                };
-                user = new User(empUser);
-                console.log("empUser = " + user);
+                }; */
+                user = new User(result[i]);
+
                 user.password = user.hashPassword(user.password);
-                await user
+                 await  user
                   .save()
                   .then(user => {
-                    // return res.json(user);
+                    result[i]["userid"]= user.userid;
                   })
                   .catch(err => {
                     return res.send(err);
                   });
-
+                  console.log("empUser = " + user);
 
                 if (result[i].role.indexOf("admin") !== -1) {
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
                   user.password = user.hashPassword(user.password);
-                  await user
+                     await user
                     .save()
                     .then(user => {
                       //  return res.json(user);
@@ -1065,7 +1072,7 @@ if(request.type.toLowerCase==="experienced")
                   user = new Teacher(result[i]);
                   console.log("Teacher = " + user);
                   user.password = user.hashPassword(user.password);
-                  await user
+                      await   user
                     .save()
                     .then(user => {
                       //  return res.json(user);
@@ -1110,9 +1117,36 @@ if(request.type.toLowerCase==="experienced")
     });
   }
 
+
+
+function photoUploading(req,res)
+{
+ console.log("in Photo Upload");
+
+ photoUpload(req, res, function (err) {
+  if (err) {
+    res.json({ error_code: 1, err_desc: err });
+    return;
+  }
+  /** Multer gives us file info in req.file object */
+  if (!req.file) {
+    res.json({ error_code: 1, err_desc: "No file passed" });
+
+    return;
+  }
+ console.log(req.file.path);
+photoPath = req.file.path;
+});
+
+
+
+}
+
   app.post("/api/importExcel", importExcel);
   app.post("/api/empRegister", empRegValidation, empRegister);
   app.post("/api/studentRegister", studentRegValidation, studentRegister);
+  app.post("/api/photoUploading", photoUploading);
+
 
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------

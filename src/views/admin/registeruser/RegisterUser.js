@@ -91,11 +91,12 @@ class RegisterUser extends Component {
       bloodgroup: "",
       category: "",
       nophoto: "",
-      corruptphoto: "",
+      corruptphoto: false,
       photoname: "",
       phone: "",
       parentaddresscheck: false,
-      roleerror: false
+      roleerror: false,
+      photoerror:""
     };
 
     this.changeHandler = this.changeHandler.bind(this);
@@ -108,6 +109,7 @@ class RegisterUser extends Component {
 
     this.fileChange = this.fileChange.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
+    this.photoUpload = this.photoUpload.bind(this);
   }
 
   toggleSuccess() {
@@ -141,6 +143,8 @@ class RegisterUser extends Component {
       modalSuccess: true,
       parentpassword_con: "",
       parentusername: "",
+      occupation:"",
+      relation:"",
       parentpassword: "",
       username: "",
       email: "",
@@ -208,12 +212,40 @@ class RegisterUser extends Component {
    * @description Handles the form submit request
    * @param {*} e
    */
+photoUpload()
+{const data = new FormData();  //photo upload
+  data.append('file', this.state.photo, this.state.photoname);
+  data.append("role", this.state.role);
+
+  axios
+  .post("http://localhost:8001/api/photoUploading", data)
+  .then(res => {
+    console.log("in Photo Res " + JSON.stringify(res.data));
+    if (res.data.error_code === 1) {
+
+      this.setState({
+        corruptphoto:true
+
+
+
+      });
+    }
+
+
+  })
+
+}
+
   submitHandler(e) {
     //var tempdata = {"role":["student"],"userdata":null,"studentRegSuccess":false,"errors":null,"importErrors":null,"status":"Active","disabled":true,"checked":{"adminChecked":false,"teacherChecked":false,"studentChecked":true},"visible":true,"studentmodalSuccess":true,"admintype":"Office Admin","nophoto":false,"corruptphoto":false,"photoname":"Book1.xlsx","roleerror":false,"firstname":"dfdfd","lastname":"dfdf","dob":"2018-11-08","gender":"Female","bloodgroup":"B-","nationality":"Indian","religion":"Sikh","category":"OBC","photo":"tempphotodata","admissionno":"4545","rollno":"56565","doj":"2018-11-20","phone":"+91 56565-56565","address":"dfdf","city":"dfdf","postalcode":"dfdf","state":"dfdfdf","username":"yuyg","email":"fdfdf@df.co","password":"pass","password_con":"pass","parentfirstname":"fgfg","parentlastname":"hjhjhj","relation":"Father","occupation":"fgfgfg","parentemail":"dfdf@gh.cd","parentphone1":"+91 56656-56565","parentphone2":"+91 45454-54545","parentaddress":"dfdf","parentcity":"dfdf","parentpostalcode":"dfdf","parentstate":"dfdfdf","parentusername":"gngngn","parentpassword":"pass","parentpassword_con":"pass"};
 
     e.preventDefault();
     // console.log(JSON.stringify(this.state));
     console.log("in STUDENT" + this.state.role[0]);
+if(this.state.photo)
+   this.photoUpload();
+   else
+   this.setState({photoerror: "Please select Photo"})
 
     if (this.state.role.length === 0) {
       this.setState({ roleerror: true });
@@ -383,7 +415,7 @@ this.setState({
   fileChange = event => {
     const file = event.target.files[0];
     this.setState(
-      { photo: "tempphotodata", nophoto: false, photoname: file.name },
+      { photo: file, nophoto: false, photoname: file.name, photoerror:null, corruptphoto:false },
       () => console.log("file:  " + this.state.photo)
     );
   };
@@ -391,6 +423,7 @@ this.setState({
   render() {
     return (
       <div style={{ width: "1000px" }}>
+
         <Container style={{ width: "2500px" }}>
           <Row lg="4" style={{ width: "2500px" }}>
             <Col md="7">
@@ -854,12 +887,17 @@ this.setState({
                               </InputGroupAddon>
                             </InputGroup>
 
-                            {this.state.errors && this.state.errors.photo && (
+                            {this.state.photoerror && (
                               <font color="red">
                                 {" "}
-                                <p>{this.state.errors.photo.msg}</p>
+                                <p>{this.state.photoerror}</p>
                               </font>
                             )}
+                            {this.state.corruptphoto
+                              && <font color="red">  <p>Please select JPEG/PNG/JPG file format </p></font>
+                            }
+
+
                           </CardBody>
                         </Card>
                       </Col>
