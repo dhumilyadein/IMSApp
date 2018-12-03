@@ -42,7 +42,10 @@ class ImportUser extends Component {
       noFile: false,
       corruptFile: false,
       filename: null,
-      loader:false
+      loader:false,
+      zipFile:null,
+      noZipFile:false,
+      corruptZipFile:false
 
 
 
@@ -147,7 +150,14 @@ class ImportUser extends Component {
 
   fileChange = event => {
     const file = event.target.files[0];
-    this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, importErrors:null }, () => console.log("file:  " + this.state.file.name));
+    if(event.target.name==="file")
+    this.setState({ file: file, noFile: false, corruptFile: false,
+       filename: file.name, importErrors:null },
+        () => console.log("file:  " + this.state.file.name));
+        else
+        this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false,
+          ZipFilename: file.name, importErrors:null },
+           () => console.log("file:  " + this.state.zipFile.name));
 
 
 
@@ -199,6 +209,29 @@ class ImportUser extends Component {
                     {this.state.corruptFile
                       && <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
                     }
+
+                    <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+
+                      </InputGroupAddon>
+                      <h3>upload Photos Zip</h3>
+                      <Input
+                        type="file"
+                        name="zipfile"
+                        id="zipfile"
+
+
+                        onChange={this.fileChange}
+                      />
+                    </InputGroup>
+                    {this.state.noZipFile
+                      && <font color="red">  <p>Please choose the Photos zip file before submitting.</p></font>
+                    }
+
+                    {this.state.corruptZipFile
+                      && <font color="red">  <p>Please select a valid zip file only.</p></font>
+                    }
+                    
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
                         <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>

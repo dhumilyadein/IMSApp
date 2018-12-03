@@ -215,6 +215,7 @@ class RegisterUser extends Component {
    */
  photoUpload()
 {const data = new FormData();  //photo upload
+  this.setState({photoname:this.state.photo.name});
   data.append('file', this.state.photo, this.state.photoname);
     axios
   .post("http://localhost:8001/api/photoUploading", data)
@@ -419,7 +420,7 @@ this.setState({
   fileChange = event => {
     const file = event.target.files[0];
     this.setState(
-      { photo: file, nophoto: false, photoname: file.name, photoerror:null, corruptphoto:false },
+      { photo: file, nophoto: false, photoerror:null, corruptphoto:false },
       () => console.log("file:  " + this.state.photo)
     );
   };
