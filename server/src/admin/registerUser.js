@@ -47,7 +47,7 @@ var excelUpload = multer({
   }
 }).single("file");
 
-/* var photoStorage = multer.diskStorage({
+ var photoStorage = multer.diskStorage({
   //multers disk storage settings
   destination: function(req, file, cb) {
     cb(null, "./PhotoUploads/");
@@ -63,11 +63,11 @@ var excelUpload = multer({
         file.originalname.split(".")[file.originalname.split(".").length - 1]
     );
   }
-}); */
+}); 
 
 
 
-/* var photoUpload = multer({
+ var photoUpload = multer({
   //multer settings
   storage: photoStorage,
   fileFilter: function(req, file, callback) {
@@ -81,7 +81,7 @@ var excelUpload = multer({
     }
     callback(null, true);
   }
-}).single("file"); */
+}).single("file"); 
 
 module.exports = function (app) {
   async function importValidation(request) {

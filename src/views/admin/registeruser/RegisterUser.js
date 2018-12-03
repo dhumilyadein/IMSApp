@@ -385,7 +385,7 @@ this.setState({
   fileChange = event => {
     const file = event.target.files[0];
     this.setState(
-      { photo: "tempphotodata", nophoto: false, photoname: file.name },
+      { photo: file, nophoto: false, photoname: file.name },
       () => console.log("file:  " + this.state.photo)
     );
   };
@@ -393,6 +393,7 @@ this.setState({
   render() {
     return (
       <div style={{ width: "1000px" }}>
+      
         <Container style={{ width: "2500px" }}>
           <Row lg="4" style={{ width: "2500px" }}>
             <Col md="7">
