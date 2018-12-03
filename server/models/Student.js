@@ -68,8 +68,11 @@ var StudentSchema = new Schema({
   },
 
   photo: {
-     data: Buffer, contentType: String 
-  },
+     data: Buffer,
+     contentType: String,
+
+
+    },
 
 
   admissionno: {

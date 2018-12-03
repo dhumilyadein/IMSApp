@@ -62,9 +62,10 @@ var AdminSchema = new Schema({
   },
 
   photo: {
-    type: String,
-   // data: Buffer,
-   // required: true
+    data: Buffer,
+     contentType: String,
+
+
   },
 
     employeeno: {

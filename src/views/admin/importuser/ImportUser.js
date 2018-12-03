@@ -206,7 +206,7 @@ class ImportUser extends Component {
                     </Row>
 
  {this.state.loader &&<font color="Green">  <h5>Importing sheet...</h5></font>}
-                    {this.state.loader && 
+                    {this.state.loader &&
                      <ReactLoading type="bars"
                       color="	#006400"
     height='2%' width='100%' />

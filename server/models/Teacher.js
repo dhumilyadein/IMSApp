@@ -65,9 +65,10 @@ var TeacherSchema = new Schema({
   },
 
   photo: {
-    type: String,
     data: Buffer,
-    required: true
+     contentType: String,
+
+
   },
 
     employeeno: {

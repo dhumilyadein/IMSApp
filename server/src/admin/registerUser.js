@@ -1,7 +1,7 @@
-var util = require('util')
 
+var fs = require('fs');
 var { check, validationResult } = require("express-validator/check");
-
+let photoPath=null;
 const User = require("../../models/User");
 const Student = require("../../models/Student");
 const Parent = require("../../models/Parent");
@@ -63,7 +63,7 @@ var excelUpload = multer({
         file.originalname.split(".")[file.originalname.split(".").length - 1]
     );
   }
-}); 
+});
 
 
 
@@ -73,7 +73,7 @@ var excelUpload = multer({
   fileFilter: function(req, file, callback) {
     //file filter
     if (
-      ["jpg", "jpeg"].indexOf(
+      ["jpg", "jpeg","png","JPG","PNG","JPEG"].indexOf(
         file.originalname.split(".")[file.originalname.split(".").length - 1]
       ) === -1
     ) {
@@ -81,7 +81,7 @@ var excelUpload = multer({
     }
     callback(null, true);
   }
-}).single("file"); 
+}).single("file");
 
 module.exports = function (app) {
   async function importValidation(request) {
@@ -407,12 +407,7 @@ if(request.type.toLowerCase()==="experienced")
       .isEmpty()
       .withMessage("Please enter State"),
 
-    check("photo")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Photo"),
-
-    check("relation")
+      check("relation")
       .not()
       .isEmpty()
       .withMessage("Please select Relation"),
@@ -645,12 +640,6 @@ if(request.type.toLowerCase()==="experienced")
       .isEmpty()
       .withMessage("Please enter Marital Status"),
 
-    check("photo")
-      .not()
-      .isEmpty()
-      .withMessage("Please select Photo"),
-
-
 
     check("type")
       .not()
@@ -755,17 +744,6 @@ if(request.type.toLowerCase()==="experienced")
       return res.send({ errors: errors.mapped() });
     }
 
-    // photoUpload(req.body.photo, res, function(err) {
-    //   if (err) {
-    //     res.json({ error_code: 1, err_desc: err });
-    //     return;
-    //   }
-    //   /** Multer gives us file info in req.file object */
-    //   if (!req.body.photo) {
-    //     res.json({ error_code: 1, err_desc: "No file passed" });
-
-    //     return;
-    //   }})
 
     var parentUser = {
       "username": req.body.parentusername, "firstname": req.body.parentfirstname, "lastname": req.body.parentlastname,
@@ -782,6 +760,22 @@ if(request.type.toLowerCase()==="experienced")
       .catch(err => {
         return res.send(err);
       });
+
+req.body["userid"]=user.userid;
+      user = new Parent(req.body);
+      console.log("user = " + user);
+      user.parentpassword = user.hashPassword(user.parentpassword);
+      await user
+        .save()
+        .then(user => {
+          //  return res.json(user);
+        })
+        .catch(err => {
+          return res.send(err);
+        });
+
+        var {userid, ...temp}=req.body;
+        req.body=temp;
 
     var studentUser = {
       "username": req.body.username, "firstname": req.body.firstname, "lastname": req.body.lastname,
@@ -800,21 +794,15 @@ if(request.type.toLowerCase()==="experienced")
       });
 
 
-    user = new Parent(req.body);
-    console.log("user = " + user);
-    user.parentpassword = user.hashPassword(user.parentpassword);
-    await user
-      .save()
-      .then(user => {
-        //  return res.json(user);
-      })
-      .catch(err => {
-        return res.send(err);
-      });
+      req.body["userid"]=user.userid;
+
 
     user = new Student(req.body);
     console.log("user = " + user);
     user.password = user.hashPassword(user.password);
+    user.photo.data = fs.readFileSync(photoPath);
+    user.photo.contentType = 'image/png';
+
     await user
       .save()
       .then(user => {
@@ -853,11 +841,13 @@ if(request.type.toLowerCase()==="experienced")
         return res.send(err);
       });
 
-
+req.body["userid"]=user.userid;
     if (req.body.role.indexOf("admin") !== -1) {
       user = new Admin(req.body);
       console.log("Admin = " + user);
       user.password = user.hashPassword(user.password);
+      user.photo.data = fs.readFileSync(photoPath);
+    user.photo.contentType = 'image/png';
       await user
         .save()
         .then(user => {
@@ -872,6 +862,8 @@ if(request.type.toLowerCase()==="experienced")
       user = new Teacher(req.body);
       console.log("Teacher = " + user);
       user.password = user.hashPassword(user.password);
+      user.photo.data = fs.readFileSync(photoPath);
+    user.photo.contentType = 'image/png';
       await user
         .save()
         .then(user => {
@@ -989,13 +981,13 @@ if(request.type.toLowerCase()==="experienced")
                   await  user
                     .save()
                     .then(user => {
-                      
+
                     })
                     .catch(err => {
                       return res.send(err);
                     });
                     console.log("Parent user  = " + user);
-                    
+
 result[i]["userid"]= user.userid;
                     user = new Parent(result[i]);
 
@@ -1011,7 +1003,7 @@ result[i]["userid"]= user.userid;
                       console.log("Parent = " + user);
 
                       var { userid, ...temp } = result[i];
-              
+
               result[i] = temp;
 
                   //Saving Student in users
@@ -1021,7 +1013,7 @@ result[i]["userid"]= user.userid;
                     await user
                     .save()
                     .then(user => {
-                     
+
                     })
                     .catch(err => {
                       return res.send(err);
@@ -1050,7 +1042,7 @@ result[i]["userid"]= user.userid;
                   "email": result[i].email, "password": result[i].password, "role": result[i].role, "status": result[i].status
                 }; */
                 user = new User(result[i]);
-               
+
                 user.password = user.hashPassword(user.password);
                  await  user
                   .save()
@@ -1061,7 +1053,7 @@ result[i]["userid"]= user.userid;
                     return res.send(err);
                   });
                   console.log("empUser = " + user);
-                 
+
                 if (result[i].role.indexOf("admin") !== -1) {
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
@@ -1125,9 +1117,36 @@ result[i]["userid"]= user.userid;
     });
   }
 
+
+
+function photoUploading(req,res)
+{
+ console.log("in Photo Upload");
+
+ photoUpload(req, res, function (err) {
+  if (err) {
+    res.json({ error_code: 1, err_desc: err });
+    return;
+  }
+  /** Multer gives us file info in req.file object */
+  if (!req.file) {
+    res.json({ error_code: 1, err_desc: "No file passed" });
+
+    return;
+  }
+ console.log(req.file.path);
+photoPath = req.file.path;
+});
+
+
+
+}
+
   app.post("/api/importExcel", importExcel);
   app.post("/api/empRegister", empRegValidation, empRegister);
   app.post("/api/studentRegister", studentRegValidation, studentRegister);
+  app.post("/api/photoUploading", photoUploading);
+
 
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
