@@ -1198,7 +1198,7 @@ else{
   console.log(req.file.path);
 zipPath = req.file.path;
 
-fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: './ZipUploads/'}));
+fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads\\output'}));
 
 res.json({success:true, message:"zip "+ req.file.originalname +  " uploaded to " +zipPath});
 }
