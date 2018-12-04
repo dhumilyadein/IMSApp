@@ -5,7 +5,7 @@ var { check, validationResult } = require("express-validator/check");
 const User = require("../../models/User");
 
 module.exports = function (app) {
-  
+
   const serValidation = [
     check("find")
       .not()
@@ -74,6 +74,7 @@ module.exports = function (app) {
 
     console.log("SEARCH USER ENTRY");
 
+    var searchJSON = {};
     //Initial validation like fields empty check
     var errors = validationResult(req);
 
@@ -84,8 +85,8 @@ module.exports = function (app) {
 
     var using = req.body.using;
     var find = req.body.find;
-    var searchCriteria = req.body.searchCriteria;
     var role = req.body.role;
+    var searchCriteria = req.body.searchCriteria;
 
     console.log("find - " + find + " using - " + using + " role - " + role + " searchCriteria - " + searchCriteria);
 
@@ -93,31 +94,38 @@ module.exports = function (app) {
 
       find = "/" + find + "/i";
 
-      User.find({ [using]: {$regex:eval(find)} })
-        .then(function (userData) {
-
-          console.log("SEARCH USER RESULT CONTAINS- \n" + userData + " find - " + find);
-          res.send(userData);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+      
 
     } else {
 
       find = "/^" + find + "$/i";
 
-      User.find({ [using]: {$regex:eval(find)} })
-        .then(function (userData) {
-
-          console.log("SEARCH USER RESULT EQUALS - \n" + userData + " find - " + find);
-          
-          res.send(userData);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+     
     }
+
+    if (role.indexOf("anyRole")!= -1) {
+      searchJSON = {
+        [using]: { $regex: eval(find) }
+        //role: { $all: role }
+      }
+    } else {
+      searchJSON = {
+        [using]: { $regex: eval(find) },
+        role: { $in: role }
+      }
+    }
+
+console.log("searchJSON - " + JSON.stringify(searchJSON));
+
+    User.find(searchJSON)
+      .then(function (userData) {
+
+        console.log("SEARCH USER RESULT CONTAINS- \n" + userData + " find - " + find);
+        res.send(userData);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
 
     //console.log("searchString - " + JSON.stringify(searchString));
 
@@ -126,7 +134,7 @@ module.exports = function (app) {
 
   app.post("/api/searchUsers", serValidation, searchUsers, (req, res) => {
     console.log("REDIRECTING TO USERS PAGE");
-    
+
   });
   app.get("/", (req, res) => res.json("sdasdsa"));
 };

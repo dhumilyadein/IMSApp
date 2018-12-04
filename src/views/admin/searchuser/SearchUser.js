@@ -169,7 +169,7 @@ class SearchUser extends Component {
     this.setState(
       {
         [e.target.name]: e.target.value
-      },
+      }
 
     );
 
@@ -195,18 +195,17 @@ class SearchUser extends Component {
                   <Form>
                     <h1>Search Users</h1>
 
-                    <InputGroup className="mb-4">
+                    <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText  >
                           <b>Find</b>
                         </InputGroupText>
                       </InputGroupAddon>
-                      <MuiThemeProvider muiTheme={getMuiTheme()}>
+                      <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
                         <AutoComplete
                           hintText="Enter Search text"
                           dataSource={this.state.dataSource}
                           onUpdateInput={this.onUpdateInput}
-                          floatingLabelText="Find"
                           fullWidth={true}
                           filter={AutoComplete.noFilter}
                           maxSearchResults={5}
@@ -274,7 +273,7 @@ class SearchUser extends Component {
                         <option value="teacher">Teacher</option>
                         <option value="parent">Parent</option>
                         <option value="student">Student</option>
-
+                        <option value="anyRole">Any Role</option>
                       </Input>
                     </InputGroup>
 
