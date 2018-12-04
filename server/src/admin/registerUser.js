@@ -1,4 +1,5 @@
-
+var util = require('util');
+var unzipper=require('unzipper');
 var fs = require('fs');
 var { check, validationResult } = require("express-validator/check");
 let photoPath=null;
@@ -74,6 +75,38 @@ var excelUpload = multer({
     //file filter
     if (
       ["jpg", "jpeg","png","JPG","PNG","JPEG"].indexOf(
+        file.originalname.split(".")[file.originalname.split(".").length - 1]
+      ) === -1
+    ) {
+      return callback(new Error("Wrong extension type"));
+    }
+    callback(null, true);
+  }
+}).single("file");
+
+
+var zipStorage = multer.diskStorage({
+  //multers disk storage settings
+  destination: function (req, file, cb) {
+    cb(null, "./ZipUploads/");
+  },
+  filename: function (req, file, cb) {
+    var datetimestamp = new Date();
+    cb(
+      null,
+
+      datetimestamp.toLocaleDateString()+"_"+file.originalname
+    );
+  }
+});
+
+var zipUpload = multer({
+  //multer settings
+  storage: zipStorage,
+  fileFilter: function (req, file, callback) {
+    //file filter
+    if (
+      ["zip", "ZIP"].indexOf(
         file.originalname.split(".")[file.originalname.split(".").length - 1]
       ) === -1
     ) {
@@ -890,10 +923,11 @@ req.body["userid"]=user.userid;
     return self.indexOf(value) === index;
   }
   function importExcel(req, res) {
-    // console.log("in import  " + !req.file);
+     console.log("in import  " );
 
     var exceltojson;
-    excelUpload(req, res, function (err) {
+
+      excelUpload(req, res, function (err) {
       if (err) {
         res.json({ error_code: 1, err_desc: err });
         return;
@@ -1145,16 +1179,40 @@ res.json({message:"photo uploaded to " +photoPath});
 
 
 
-});
+});}
 
 
 
+async function photoZipUploading(req,res)
+{
+ console.log("in Photo ZipUpload");
+
+ await zipUpload(req, res, function (err) {
+  if (err) {
+     res.json({ error_code: 1, err_desc: err });
+  }
+  /** Multer gives us file info in req.file object */
+  else if (!req.file)
+     res.json({ error_code: 1, err_desc: "No file passed" });
+else{
+  console.log(req.file.path);
+zipPath = req.file.path;
+
+fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads\\output'}));
+
+res.json({success:true, message:"zip "+ req.file.originalname +  " uploaded to " +zipPath});
 }
+
+
+
+
+});}
 
   app.post("/api/importExcel", importExcel);
   app.post("/api/empRegister", empRegValidation, empRegister);
   app.post("/api/studentRegister", studentRegValidation, studentRegister);
   app.post("/api/photoUploading", photoUploading);
+  app.post("/api/photoZipUploading", photoZipUploading);
 
 
   app.get("/", (req, res) => res.json("sdasdsa"));

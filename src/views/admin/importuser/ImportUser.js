@@ -42,7 +42,13 @@ class ImportUser extends Component {
       noFile: false,
       corruptFile: false,
       filename: null,
-      loader:false
+      loader:false,
+      zipFile: null,
+      noZipFile: false,
+      corruptZipFile: false,
+      zipFilename:null
+
+
 
 
 
@@ -74,7 +80,8 @@ class ImportUser extends Component {
 
   fileHandler = e => {
     e.preventDefault() // Stop form submit
-    const data = new FormData();
+    const excel = new FormData();
+    const zip = new FormData();
     console.log("file" + this.state.file);
     this.setState({loader:true});
     if (!this.state.file)
@@ -88,10 +95,51 @@ class ImportUser extends Component {
         loader:false
 
       });
-    else {
-      data.append('file', this.state.file, this.state.filename);
+ if(!this.state.zipFile)
+
+this.setState({
+
+  noZipFile: true,
+  modalSuccess: true,
+  corruptZipFile: false,
+  impSuccess: false,
+  loader:false
+
+});
+
+    if(this.state.noZipFile===false && this.state.corruptZipFile===false && this.state.noFile===false && this.state.corruptFile===false)
+
+    {
+      excel.append('file', this.state.file, this.state.filename);
+      zip.append('file', this.state.zipFile, this.state.zipFilename);
+
       axios
-        .post("http://localhost:8001/api/importExcel", data)
+      .post("http://localhost:8001/api/photoZipUploading", zip)
+      .then(res => {
+        console.log("in Res " + JSON.stringify(res.data));
+        if (res.data.error_code === 1) {
+          document.getElementById("zipfile").value = "";
+          this.setState({
+
+            corruptZipFile: true,
+            modalSuccess: true,
+            zipFile: null,
+            noZipFile: false,
+            loader:false
+
+
+          });
+        }});
+
+
+
+
+
+
+
+
+     /*  axios
+        .post("http://localhost:8001/api/importExcel", excel)
         .then(res => {
           console.log("in Res " + JSON.stringify(res.data));
           if (res.data.error_code === 1) {
@@ -139,7 +187,7 @@ class ImportUser extends Component {
 
         }
 
-        })
+        }) */
     }
   }
 
@@ -147,9 +195,10 @@ class ImportUser extends Component {
 
   fileChange = event => {
     const file = event.target.files[0];
+if(event.target.name==="file")
     this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, importErrors:null }, () => console.log("file:  " + this.state.file.name));
-
-
+else
+this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilename: file.name, importErrors:null }, () => console.log("zipfile:  " + this.state.zipFile.name));
 
   }
 
@@ -158,9 +207,9 @@ class ImportUser extends Component {
     return (
       <div style={{width:"1000px"}} >
 
-        <Container style={{width:"2500px"}} >
+        <Container style={{width:"3500px"}} >
 
-          <Row lg="4" style={{width:"2500px"}}>
+          <Row lg="4" style={{width:"6000px"}}>
 
 
             <Col md="2">
@@ -179,9 +228,9 @@ class ImportUser extends Component {
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-
+                      <font color="red">  <p>Please make sure the number of records in excel sheet matches the total number of photos in zip file</p></font>
                       </InputGroupAddon>
-                      <h3>upload excel file(XLS,XLSX)</h3>
+                      <h5>Upload excel file(XLS,XLSX)</h5>
                       <Input
                         type="file"
                         name="file"
@@ -193,15 +242,40 @@ class ImportUser extends Component {
                     </InputGroup>
 
                     {this.state.noFile
-                      && <font color="red">  <p>Please choose the excel file before submitting.</p></font>
+                      && <font color="red">  <p>Please choose the Excel file</p></font>
                     }
 
                     {this.state.corruptFile
                       && <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
                     }
+
+ <InputGroup className="mb-3">
+                      <InputGroupAddon addonType="prepend">
+
+                      </InputGroupAddon>
+                      <h5>Upload Photos Zip</h5>
+                      <Input
+                        type="file"
+                        name="zipfile"
+                        id="zipfile"
+
+
+                        onChange={this.fileChange}
+                      />
+                    </InputGroup>
+
+ {this.state.noZipFile
+                      && <font color="red">  <p>Please choose the Photos Zip file</p></font>
+                    }
+
+                    {this.state.corruptZipFile
+                      && <font color="red">  <p>Please select a valid Zip file only.</p></font>
+                    }
+
+
                     <Row className="align-items-center">
-                      <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
-                        <Button type="submit" block color="success" onClick={this.fileHandler}> Import sheet</Button>
+                      <Col col="6" sm="2" md="3" xl className="mb-3 mb-xl-0">
+                        <Button type="submit" block color="success" onClick={this.fileHandler}  style={{width:"200px"}}> Import sheet</Button>
                       </Col>
                     </Row>
 
