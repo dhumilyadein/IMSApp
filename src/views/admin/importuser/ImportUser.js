@@ -80,7 +80,8 @@ class ImportUser extends Component {
 
   fileHandler = e => {
     e.preventDefault() // Stop form submit
-    const data = new FormData();
+    const excel = new FormData();
+    const zip = new FormData();
     console.log("file" + this.state.file);
     this.setState({loader:true});
     if (!this.state.file)
@@ -109,12 +110,36 @@ this.setState({
     if(this.state.noZipFile===false && this.state.corruptZipFile===false && this.state.noFile===false && this.state.corruptFile===false)
 
     {
-      data.append('file', this.state.file, this.state.filename);
-      data.append('zipfile', this.state.zipFile, this.state.zipFilename);
+      excel.append('file', this.state.file, this.state.filename);
+      zip.append('file', this.state.zipFile, this.state.zipFilename);
 
-      console.log("data: "+ data);
       axios
-        .post("http://localhost:8001/api/importExcel", data)
+      .post("http://localhost:8001/api/photoZipUploading", zip)
+      .then(res => {
+        console.log("in Res " + JSON.stringify(res.data));
+        if (res.data.error_code === 1) {
+          document.getElementById("zipfile").value = "";
+          this.setState({
+
+            corruptZipFile: true,
+            modalSuccess: true,
+            zipFile: null,
+            noZipFile: false,
+            loader:false
+
+
+          });
+        }});
+
+
+
+
+
+
+
+
+     /*  axios
+        .post("http://localhost:8001/api/importExcel", excel)
         .then(res => {
           console.log("in Res " + JSON.stringify(res.data));
           if (res.data.error_code === 1) {
@@ -162,7 +187,7 @@ this.setState({
 
         }
 
-        })
+        }) */
     }
   }
 

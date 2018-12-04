@@ -86,18 +86,18 @@ var excelUpload = multer({
 
 var zipStorage = multer.diskStorage({
   //multers disk storage settings
-  destination: function (req, zipfile, cb) {
+  destination: function (req, file, cb) {
     cb(null, "./ZipUploads/");
   },
-  filename: function (req, zipfile, cb) {
+  filename: function (req, file, cb) {
     var datetimestamp = Date.now();
     cb(
       null,
-      zipfile.fieldname +
+      file.fieldname +
       "-" +
       datetimestamp +
       "." +
-      zipfile.originalname.split(".")[zipfile.originalname.split(".").length - 1]
+      file.originalname.split(".")[file.originalname.split(".").length - 1]
     );
   }
 });
@@ -105,18 +105,18 @@ var zipStorage = multer.diskStorage({
 var zipUpload = multer({
   //multer settings
   storage: zipStorage,
-  fileFilter: function (req, zipfile, callback) {
+  fileFilter: function (req, file, callback) {
     //file filter
     if (
       ["zip", "ZIP"].indexOf(
-        zipfile.originalname.split(".")[zipfile.originalname.split(".").length - 1]
+        file.originalname.split(".")[file.originalname.split(".").length - 1]
       ) === -1
     ) {
       return callback(new Error("Wrong extension type"));
     }
     callback(null, true);
   }
-}).single("zipfile");
+}).single("file");
 
 module.exports = function (app) {
   async function importValidation(request) {
@@ -925,25 +925,11 @@ req.body["userid"]=user.userid;
     return self.indexOf(value) === index;
   }
   function importExcel(req, res) {
-     console.log("in import  " + util.inspect(req));
+     console.log("in import  " );
 
     var exceltojson;
 
-    zipUpload(req, res, function (err) {
-      if (err) {
-        res.json({ error_code: 1, err_desc: err });
-        return;
-      }
-      /** Multer gives us file info in req.file object */
-      if (!req.zipfile) {
-        res.json({ error_code: 1, err_desc: "No file passed" });
-
-        return;
-      }});
-
-
-
-    excelUpload(req, res, function (err) {
+      excelUpload(req, res, function (err) {
       if (err) {
         res.json({ error_code: 1, err_desc: err });
         return;
@@ -1195,16 +1181,36 @@ res.json({message:"photo uploaded to " +photoPath});
 
 
 
-});
+});}
 
 
 
+async function photoZipUploading(req,res)
+{
+ console.log("in Photo ZipUpload");
+
+ await zipUpload(req, res, function (err) {
+  if (err) {
+     res.json({ error_code: 1, err_desc: err });
+  }
+  /** Multer gives us file info in req.file object */
+  else if (!req.file)
+     res.json({ error_code: 1, err_desc: "No file passed" });
+else{
+  console.log(req.file.path);
+photoPath = req.file.path;
+res.json({success:true, message:"zip uploaded to " +photoPath});
 }
+
+
+
+});}
 
   app.post("/api/importExcel", importExcel);
   app.post("/api/empRegister", empRegValidation, empRegister);
   app.post("/api/studentRegister", studentRegValidation, studentRegister);
   app.post("/api/photoUploading", photoUploading);
+  app.post("/api/photoZipUploading", photoZipUploading);
 
 
   app.get("/", (req, res) => res.json("sdasdsa"));
