@@ -1,4 +1,4 @@
-
+var util = require('util');
 var fs = require('fs');
 var { check, validationResult } = require("express-validator/check");
 let photoPath=null;
@@ -82,6 +82,41 @@ var excelUpload = multer({
     callback(null, true);
   }
 }).single("file");
+
+
+var zipStorage = multer.diskStorage({
+  //multers disk storage settings
+  destination: function (req, zipfile, cb) {
+    cb(null, "./ZipUploads/");
+  },
+  filename: function (req, zipfile, cb) {
+    var datetimestamp = Date.now();
+    cb(
+      null,
+      zipfile.fieldname +
+      "-" +
+      datetimestamp +
+      "." +
+      zipfile.originalname.split(".")[zipfile.originalname.split(".").length - 1]
+    );
+  }
+});
+
+var zipUpload = multer({
+  //multer settings
+  storage: zipStorage,
+  fileFilter: function (req, zipfile, callback) {
+    //file filter
+    if (
+      ["zip", "ZIP"].indexOf(
+        zipfile.originalname.split(".")[zipfile.originalname.split(".").length - 1]
+      ) === -1
+    ) {
+      return callback(new Error("Wrong extension type"));
+    }
+    callback(null, true);
+  }
+}).single("zipfile");
 
 module.exports = function (app) {
   async function importValidation(request) {
@@ -890,9 +925,24 @@ req.body["userid"]=user.userid;
     return self.indexOf(value) === index;
   }
   function importExcel(req, res) {
-    // console.log("in import  " + !req.file);
+     console.log("in import  " + util.inspect(req));
 
     var exceltojson;
+
+    zipUpload(req, res, function (err) {
+      if (err) {
+        res.json({ error_code: 1, err_desc: err });
+        return;
+      }
+      /** Multer gives us file info in req.file object */
+      if (!req.zipfile) {
+        res.json({ error_code: 1, err_desc: "No file passed" });
+
+        return;
+      }});
+
+
+
     excelUpload(req, res, function (err) {
       if (err) {
         res.json({ error_code: 1, err_desc: err });
