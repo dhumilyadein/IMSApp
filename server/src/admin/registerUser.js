@@ -1,4 +1,5 @@
 var util = require('util');
+var unzipper=require('unzipper');
 var fs = require('fs');
 var { check, validationResult } = require("express-validator/check");
 let photoPath=null;
@@ -90,14 +91,11 @@ var zipStorage = multer.diskStorage({
     cb(null, "./ZipUploads/");
   },
   filename: function (req, file, cb) {
-    var datetimestamp = Date.now();
+    var datetimestamp = new Date();
     cb(
       null,
-      file.fieldname +
-      "-" +
-      datetimestamp +
-      "." +
-      file.originalname.split(".")[file.originalname.split(".").length - 1]
+
+      file.originalname+"-"+datetimestamp.toLocaleDateString()
     );
   }
 });
@@ -1198,9 +1196,13 @@ async function photoZipUploading(req,res)
      res.json({ error_code: 1, err_desc: "No file passed" });
 else{
   console.log(req.file.path);
-photoPath = req.file.path;
-res.json({success:true, message:"zip uploaded to " +photoPath});
+zipPath = req.file.path;
+
+fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: './ZipUploads/'}));
+
+res.json({success:true, message:"zip "+ req.file.originalname +  " uploaded to " +zipPath});
 }
+
 
 
 
