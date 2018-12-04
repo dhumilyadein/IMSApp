@@ -49,7 +49,9 @@ class SearchUser extends Component {
       
       chosenRequest: null,
 
-      dataSource: []
+      dataSource: [],
+
+      searchUserResponse: {}
     };
 
   }
@@ -62,9 +64,11 @@ class SearchUser extends Component {
     console.log("searchHandler ENTER:  " + JSON.stringify(this.state));
 
     e.preventDefault();
+    console.log("Submit Request - " + JSON.stringify(this.state));
 
     axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
-      console.log("response - " + JSON.stringify(res.data));
+      
+      console.log("submit response data - " + JSON.stringify(res.data));
       console.log("res.data.errors - " + res.data.errors);
       console.log("res.data.message - " + res.data.message);
       console.log("res.data.error - " + res.data.errors);
@@ -73,7 +77,17 @@ class SearchUser extends Component {
         return this.setState({ errors: res.data.errors });
       } else {
 
-        this.props.history.push("/users");
+        console.log("Final response submit - " + JSON.stringify(res.data));
+        
+        // this.setState({searchUserResponse: res.data}, function() {
+        //   console.log("username again again - " + this.state.searchUserResponse[0].username);
+        // });
+        
+        this.props.history.push(
+          {
+          pathname : '/admin/users',
+          state : res.data
+          });
 
       }
     });
@@ -102,7 +116,7 @@ class SearchUser extends Component {
 
     if (this.state.find !== '') {
 
-      console.log("response - " + JSON.stringify(this.state));
+      console.log("search bar request - " + JSON.stringify(this.state));
 
       axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
 
@@ -115,7 +129,7 @@ class SearchUser extends Component {
         } else {
 
           //this.props.history.push("/users");
-          console.log("final response - " + JSON.stringify(res.data));
+          console.log("final response search bar - " + JSON.stringify(res.data));
 
           var i = 1;
           res.data.forEach(function (item) {
@@ -137,28 +151,8 @@ class SearchUser extends Component {
           console.log("this.state.dataSource - " + this.state.dataSource);
         }
       });
-
-      // JSONP(url, function (error, data) {
-      //   let searchResults, retrievedSearchTerms;
-
-      //   if (error) return error;
-
-      //   searchResults = data[1];
-
-      //   retrievedSearchTerms = searchResults.map(function (result) {
-      //     return result[0];
-      //   });
-
-      //   console.log("autosearch result - " + retrievedSearchTerms);
-
-      //   self.setState({
-      //     dataSource: retrievedSearchTerms
-      //   });
-      // });
-
     }
   }
-
 
   /**
    * @description Called when the change event is triggered.
@@ -170,9 +164,7 @@ class SearchUser extends Component {
       {
         [e.target.name]: e.target.value
       }
-
     );
-
     console.log("state in react - " + JSON.stringify(this.state));
   }
 

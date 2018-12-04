@@ -91,19 +91,12 @@ module.exports = function (app) {
     console.log("find - " + find + " using - " + using + " role - " + role + " searchCriteria - " + searchCriteria);
 
     if ("containsSearchCriteria" === searchCriteria) {
-
       find = "/" + find + "/i";
-
-      
-
     } else {
-
       find = "/^" + find + "$/i";
-
-     
     }
 
-    if (role.indexOf("anyRole")!= -1) {
+    if (role.indexOf("anyRole") != -1) {
       searchJSON = {
         [using]: { $regex: eval(find) }
         //role: { $all: role }
@@ -115,12 +108,12 @@ module.exports = function (app) {
       }
     }
 
-console.log("searchJSON - " + JSON.stringify(searchJSON));
+    console.log("searchJSON - " + JSON.stringify(searchJSON));
 
     User.find(searchJSON)
       .then(function (userData) {
 
-        console.log("SEARCH USER RESULT CONTAINS- \n" + userData + " find - " + find);
+        console.log("SEARCH USER RESULT " + searchCriteria + "\n" + userData + " find - " + find);
         res.send(userData);
       })
       .catch(function (error) {

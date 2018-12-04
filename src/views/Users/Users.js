@@ -3,6 +3,10 @@ import { Badge, Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
 
 import usersData from './UsersData'
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 function UserRow(props) {
   const user = props.user
   const userLink = `#/users/${user.id}`
@@ -16,17 +20,26 @@ function UserRow(props) {
   }
 
   return (
-    <tr key={user.id.toString()}>
-        <th scope="row"><a href={userLink}>{user.id}</a></th>
-        <td><a href={userLink}>{user.name}</a></td>
-        <td>{user.registered}</td>
-        <td>{user.role}</td>
+    <tr key={user.username}>
+        <th scope="row"><a href={userLink}>{user.username}</a></th>
+        <td>{user.firstname + " " + user.lastname}</td>
+        <td>{user.createdAt}</td>
+        {/* <td>{user.role}</td> */}
+        <td>
+        {user.role.map((role, index) =>
+                      capitalizeFirstLetter(role) + " "
+                    )}
+                    </td>
         <td><Badge href={userLink} color={getBadge(user.status)}>{user.status}</Badge></td>
     </tr>
   )
 }
 
 class Users extends Component {
+
+  constructor(props) {
+    super(props);
+  }
 
   render() {
 
@@ -43,18 +56,23 @@ class Users extends Component {
               <CardBody>
                 <Table responsive hover>
                   <thead>
-                    <tr>
-                      <th scope="col">id</th>
-                      <th scope="col">name</th>
-                      <th scope="col">registered</th>
-                      <th scope="col">role</th>
-                      <th scope="col">status</th>
+                  <tr>
+                      <th scope="col">Username</th>
+                      <th scope="col">Full name</th>
+                      <th scope="col">Registeration Date</th>
+                      <th scope="col">Role(s)</th>
+                      <th scope="col">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {userList.map((user, index) =>
+                    {/* {userList.map((user, index) =>
+                      <UserRow key={index} user={user}/>
+                    )} */}
+
+                    {this.props.location.state.map((user, index) =>
                       <UserRow key={index} user={user}/>
                     )}
+                    
                   </tbody>
                 </Table>
               </CardBody>

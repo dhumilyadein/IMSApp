@@ -172,16 +172,6 @@ const Widgets = Loadable({
   loading: Loading
 });
 
-const Users = Loadable({
-  loader: () => import("./views/Users/Users"),
-  loading: Loading
-});
-
-const User = Loadable({
-  loader: () => import("./views/Users/User"),
-  loading: Loading
-});
-
 // IMS app changes
 const AddFees = Loadable({
   loader: () => import("./views/admin/finance/addfees/AddFees"),
@@ -206,6 +196,11 @@ const ImportUser = Loadable({
 
 const SearchUser = Loadable({
   loader: () => import("./views/admin/searchuser/SearchUser"),
+  loading: Loading
+});
+
+const Users = Loadable({
+  loader: () => import("./views/admin/users/Users"),
   loading: Loading
 });
 
@@ -237,6 +232,11 @@ const routes = [
     path: "/admin/searchuser",
     name: "Search User",
     component: SearchUser
+  },
+  {
+    path: "/admin/users",
+    name: "Users",
+    component: Users
   },
   { path: "/", exact: true, name: "Home", component: DefaultLayout },
   { path: "/dashboard", name: "Dashboard", component: Dashboard },
@@ -298,8 +298,6 @@ const routes = [
   { path: "/notifications/modals", name: "Modals", component: Modals },
   { path: "/widgets", name: "Widgets", component: Widgets },
   { path: "/charts", name: "Charts", component: Charts },
-  { path: "/users", exact: true, name: "Users", component: Users },
-  { path: "/users/:id", exact: true, name: "User Details", component: User }
 ];
 
 export default routes;

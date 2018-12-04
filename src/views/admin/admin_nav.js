@@ -28,17 +28,19 @@ export default {
       icon: 'icon-magnifier',
     },
     {
+      name: 'Users',
+      url: '/admin/users',
+      icon: 'icon-magnifier',
+    },
+    {
       name: 'Import Users',
       url: '/admin/importUser',
       icon: 'icon-people',
     },
 
-
-
-       {
+    {
       divider: true,
     },
-
 
     {
       title: true,
@@ -60,11 +62,9 @@ export default {
       icon: 'fa fa-money',
     },
 
-
-
-       {
+    {
       divider: true,
     },
-  
+
   ],
 };
