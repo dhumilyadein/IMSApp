@@ -95,7 +95,7 @@ var zipStorage = multer.diskStorage({
     cb(
       null,
 
-      file.originalname+"-"+datetimestamp.toLocaleDateString()
+      datetimestamp.toLocaleDateString()+"_"+file.originalname
     );
   }
 });
