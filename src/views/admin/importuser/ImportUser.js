@@ -110,7 +110,7 @@ this.setState({
     if(this.state.noZipFile===false && this.state.corruptZipFile===false && this.state.noFile===false && this.state.corruptFile===false)
 
     {
-      excel.append('file', this.state.file, this.state.filename);
+
       zip.append('file', this.state.zipFile, this.state.zipFilename);
 
       axios
@@ -129,65 +129,86 @@ this.setState({
 
 
           });
-        }});
-
-
-
-
-
-
-
-
-     /*  axios
-        .post("http://localhost:8001/api/importExcel", excel)
-        .then(res => {
-          console.log("in Res " + JSON.stringify(res.data));
-          if (res.data.error_code === 1) {
-            document.getElementById("file").value = "";
-            this.setState({
-
-              corruptFile: true,
-              modalSuccess: true,
-              file: null,
-              noFile: false,
-              loader:false
-
-
-            });
-          }
-          else if(res.data==="Imported Successfully") {
-
-            //console.log("in sucess: "+res.data);
-            document.getElementById("file").value = "";
-            return this.setState({
-
-              importErrors: null,
-              impSuccess: true,
-              modalSuccess: true,
-              noFile: false,
-              corruptFile: false,
-              file: null,
-              loader:false
-            });
-          }
-          else
-{document.getElementById("file").value = "";
-           this.setState({
-
-            importErrors: res.data.errors,
-
-            noFile: false,
-            corruptFile: false,
-            file: null,
-            loader:false
-
-          },() =>{
-           // console.log("errors length: "+Object.keys(this.state.errors).length)
-          });
-
         }
+      if(res.data.success===true)
+      {
+        this.setState({
 
-        }) */
+          corruptZipFile: false,
+          modalSuccess: true,
+          zipFile: null,
+          noZipFile: false,
+          loader:false
+            });
+            excel.append('file', this.state.file, this.state.filename);
+            //excel.append('zipfilename', this.state.zipFilename.replace(/\.[^/.]+$/, ""));
+            axios
+            .post("http://localhost:8001/api/importExcel", excel)
+            .then(res => {
+              console.log("in Res " + JSON.stringify(res.data));
+              if (res.data.error_code === 1) {
+                document.getElementById("file").value = "";
+                this.setState({
+
+                  corruptFile: true,
+                  modalSuccess: true,
+                  file: null,
+                  noFile: false,
+                  loader:false
+
+
+                });
+              }
+              else if(res.data==="Imported Successfully") {
+
+                //console.log("in sucess: "+res.data);
+                document.getElementById("file").value = "";
+                return this.setState({
+
+                  importErrors: null,
+                  impSuccess: true,
+                  modalSuccess: true,
+                  noFile: false,
+                  corruptFile: false,
+                  file: null,
+                  loader:false
+                });
+              }
+              else
+    {document.getElementById("file").value = "";
+    document.getElementById("zipfile").value = "";
+
+               this.setState({
+
+                importErrors: res.data.errors,
+
+                noFile: false,
+                corruptFile: false,
+                file: null,
+                loader:false
+
+              },() =>{
+               // console.log("errors length: "+Object.keys(this.state.errors).length)
+              });
+
+            }
+
+            })
+
+
+      }
+
+
+      });
+
+
+
+
+
+
+
+
+
     }
   }
 
@@ -228,7 +249,14 @@ this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilen
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                      <font color="red">  <p>Please make sure the number of records in excel sheet matches the total number of photos in zip file</p></font>
+                     <div> <font color="red">  Please make sure the number of records in excel sheet matches the total number of photos in zip file. </font>
+                     <br />
+                      <font color="red">  Please make sure the photo name matches the username in the excel sheet.</font>
+                      <br />
+                      <font color="red">  Please make sure Photos.zip contains only photo(s) and no folder(s).</font>
+                      <br /><br />
+                      </div>
+
                       </InputGroupAddon>
                       <h5>Upload excel file(XLS,XLSX)</h5>
                       <Input
