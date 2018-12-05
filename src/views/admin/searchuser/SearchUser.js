@@ -46,12 +46,12 @@ class SearchUser extends Component {
       success: null,
       userdata: null,
       redirectSearchUserToUsers: false,
-      
-      chosenRequest: null,
+
+      chosenSearchValue: null,
 
       dataSource: [],
 
-      searchUserResponse: {}
+      searchBarResponse: null
     };
 
   }
@@ -67,7 +67,7 @@ class SearchUser extends Component {
     console.log("Submit Request - " + JSON.stringify(this.state));
 
     axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
-      
+
       console.log("submit response data - " + JSON.stringify(res.data));
       console.log("res.data.errors - " + res.data.errors);
       console.log("res.data.message - " + res.data.message);
@@ -78,27 +78,32 @@ class SearchUser extends Component {
       } else {
 
         console.log("Final response submit - " + JSON.stringify(res.data));
-        
-        // this.setState({searchUserResponse: res.data}, function() {
-        //   console.log("username again again - " + this.state.searchUserResponse[0].username);
+
+        console.log("this.state.searchBarResponse 3 - " + JSON.stringify(this.state.searchBarResponse));
+
+
+        // this.setState({searchBarResponse: res.data}, function() {
+        //   console.log("username again again - " + this.state.searchBarResponse[0].username);
         // });
-        
+
         this.props.history.push(
           {
-          pathname : '/admin/users',
-          state : res.data
+            pathname: '/admin/users',
+            state: res.data
           });
 
       }
     });
   }
 
-  onUpdateInput(inputValue) {
-    const self = this;
+  onUpdateInput(inputValue, datasource, params) {
+
+    if (params.source == 'touchTap' || params.source == 'click') return;
+
     this.setState({
       find: inputValue
     }, function () {
-      self.performSearch();
+      this.performSearch();
     });
   }
 
@@ -128,6 +133,12 @@ class SearchUser extends Component {
           return this.setState({ errors: res.data.errors });
         } else {
 
+          var resData = res.data;
+
+          // Setting response data in state so that it can be used in the onclick event of search bar items (selectedItem method)
+          console.log("Setting searchBarResponse with " + JSON.stringify(resData));
+          this.setState({ searchBarResponse: resData });
+
           //this.props.history.push("/users");
           console.log("final response search bar - " + JSON.stringify(res.data));
 
@@ -149,9 +160,54 @@ class SearchUser extends Component {
           });
 
           console.log("this.state.dataSource - " + this.state.dataSource);
+
+          console.log("this.state.searchBarResponse 1 - " + JSON.stringify(this.state.searchBarResponse));
+
+          console.log("this.state before - " + JSON.stringify(this.state));
         }
       });
     }
+  }
+
+  /**
+   * @description For getting search bar selected value
+   */
+  async selectedItem(chosenSearchValue, index) {
+
+    var searchBarResponse;
+    var selectedUsername;
+
+    this.setState({ chosenSearchValue: chosenSearchValue });
+    console.log("this.state.chosenSearchValue - " + this.statechosenSearchValue);
+
+    selectedUsername = chosenSearchValue.split("(")[1].split(")")[0];
+    console.log("username retrieved from chosen field after removing () " + selectedUsername);
+
+    searchBarResponse = this.state.searchBarResponse;
+    console.log("this.state.searchBarResponse 2 - " + JSON.stringify(searchBarResponse));
+
+    var tempArrayForUser = [];
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    for (var i = 0; i < searchBarResponse.length; i++) {
+
+      console.log("searchBarResponse[i][\"username\"] - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername + " searchBarResponse.length - " + searchBarResponse.length);
+      console.log("searchBarResponse[i] - " + JSON.stringify(searchBarResponse));
+
+      if (searchBarResponse[i]["username"].toLowerCase() === String(selectedUsername).toLowerCase()) {
+
+        console.log("searchBarResponse[i][\"username\"] BBBBBBBBBBBBBBBBBBB - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername);
+
+        tempArrayForUser.push(searchBarResponse[i]);
+        this.props.history.push(
+          {
+            pathname: '/admin/users',
+            state: tempArrayForUser
+          });
+        return searchBarResponse[i];
+      }
+    }
+
+
   }
 
   /**
@@ -166,14 +222,6 @@ class SearchUser extends Component {
       }
     );
     console.log("state in react - " + JSON.stringify(this.state));
-  }
-
-  /**
-   * @description For getting search bar selected value
-   */
-  selectedItem(chosenRequest, index) {
-    this.setState({ chosenRequest: chosenRequest });
-    console.log("this.state.chosenRequest - " + this.state.chosenRequest);
   }
 
   render() {
