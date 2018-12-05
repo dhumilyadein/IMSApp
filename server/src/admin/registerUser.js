@@ -20,7 +20,7 @@ var excelStorage = multer.diskStorage({
     cb(null, "./ExcelUploads/");
   },
   filename: function (req, file, cb) {
-    var datetimestamp = Date.now();
+    var datetimestamp =  Date.now();
     cb(
       null,
       file.fieldname +
@@ -39,7 +39,7 @@ var excelUpload = multer({
     //file filter
     if (
       ["xls", "xlsx"].indexOf(
-        file.originalname.split(".")[file.originalname.split(".").length - 1]
+        file.originalname.split(".")[file.originalname.split(".").length - 1].toLowerCase()
       ) === -1
     ) {
       return callback(new Error("Wrong extension type"));
@@ -54,7 +54,7 @@ var excelUpload = multer({
     cb(null, "./PhotoUploads/");
   },
   filename: function(req, file, cb) {
-    var datetimestamp = Date.now();
+    var datetimestamp =  Date.now();
     cb(
       null,
       file.fieldname +
@@ -74,8 +74,8 @@ var excelUpload = multer({
   fileFilter: function(req, file, callback) {
     //file filter
     if (
-      ["jpg", "jpeg","png","JPG","PNG","JPEG"].indexOf(
-        file.originalname.split(".")[file.originalname.split(".").length - 1]
+      ["jpg"].indexOf(
+        file.originalname.split(".")[file.originalname.split(".").length - 1].toLowerCase()
       ) === -1
     ) {
       return callback(new Error("Wrong extension type"));
@@ -106,8 +106,8 @@ var zipUpload = multer({
   fileFilter: function (req, file, callback) {
     //file filter
     if (
-      ["zip", "ZIP"].indexOf(
-        file.originalname.split(".")[file.originalname.split(".").length - 1]
+      ["zip"].indexOf(
+        file.originalname.split(".")[file.originalname.split(".").length - 1].toLowerCase()
       ) === -1
     ) {
       return callback(new Error("Wrong extension type"));
@@ -203,8 +203,7 @@ module.exports = function (app) {
       valError["Category"] = "category can't be empty";
 
 
-    if (!request.photo)
-      valError["Photo"] = "Photo can't be empty";
+
 
     if (!request.address)
       valError["Address"] = "Address can't be empty";
@@ -923,7 +922,7 @@ req.body["userid"]=user.userid;
     return self.indexOf(value) === index;
   }
   function importExcel(req, res) {
-     console.log("in import  " );
+     console.log("in import Excel  "+ req.filename );
 
     var exceltojson;
 
@@ -1019,6 +1018,7 @@ req.body["userid"]=user.userid;
                   user = await new User(parentUser);
 
                   user.password = user.hashPassword(user.password);
+
                   await  user
                     .save()
                     .then(user => {
@@ -1066,6 +1066,10 @@ result[i]["userid"]= user.userid;
                   user = await new Student(result[i]);
                   console.log("Student = " + user);
                   user.password = user.hashPassword(user.password);
+                  try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
+                catch(err)
+                {return res.send({errors:err.path+ " not found"});}
+                  user.photo.contentType = 'image/png';
                    await user
                     .save()
                     .then(user => {
@@ -1099,6 +1103,10 @@ result[i]["userid"]= user.userid;
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
                   user.password = user.hashPassword(user.password);
+                  try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
+                  catch(err)
+                  {return res.send({error:err});}
+                  user.photo.contentType = 'image/png';
                      await user
                     .save()
                     .then(user => {
@@ -1113,6 +1121,11 @@ result[i]["userid"]= user.userid;
                   user = new Teacher(result[i]);
                   console.log("Teacher = " + user);
                   user.password = user.hashPassword(user.password);
+                try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
+                catch(err)
+                {return res.send({error:err});}
+
+                  user.photo.contentType = 'image/png';
                       await   user
                     .save()
                     .then(user => {
@@ -1198,7 +1211,7 @@ else{
   console.log(req.file.path);
 zipPath = req.file.path;
 
-fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads\\output'}));
+fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads'}));
 
 res.json({success:true, message:"zip "+ req.file.originalname +  " uploaded to " +zipPath});
 }
