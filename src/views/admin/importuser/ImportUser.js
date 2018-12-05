@@ -37,7 +37,7 @@ class ImportUser extends Component {
       errors: null,
       importErrors:null,
       visible: true,
-      modalSuccess: true,
+      modalSuccess: false,
       file: null,
       noFile: false,
       corruptFile: false,
@@ -46,7 +46,8 @@ class ImportUser extends Component {
       zipFile: null,
       noZipFile: false,
       corruptZipFile: false,
-      zipFilename:null
+      zipFilename:null,
+      showErrors:false
 
 
 
@@ -107,9 +108,11 @@ this.setState({
 
 });
 
-    if(this.state.noZipFile===false && this.state.corruptZipFile===false && this.state.noFile===false && this.state.corruptFile===false)
+    if(this.state.noZipFile===false && this.state.corruptZipFile===false
+       && this.state.noFile===false && this.state.corruptFile===false)
 
     {
+      console.log("in Zip");
 
       zip.append('file', this.state.zipFile, this.state.zipFilename);
 
@@ -138,7 +141,7 @@ this.setState({
           modalSuccess: true,
           zipFile: null,
           noZipFile: false,
-          loader:false
+          loader:true
             });
             excel.append('file', this.state.file, this.state.filename);
             //excel.append('zipfilename', this.state.zipFilename.replace(/\.[^/.]+$/, ""));
@@ -320,13 +323,11 @@ this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilen
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
                       <font color="red">  <p>{Object.keys(this.state.importErrors).length} record(s) failed to import. For errors, click Errors</p></font>
-                        <Button type="submit" block color="danger" onClick={
-()=>{var data = "<p>This is 'myWindow'</p>";
-var myWindow = window.open("","data:html/json," + this.state.errors,
-                       "_blank");
-myWindow.focus();
+                        <Button type="submit" block color="danger" onClick={()=>{this.setState({showErrors:true})}
+}> Errors</Button>
 
-                        }}> Errors</Button>
+{this.state.showErrors && 
+<font color="red">  <p>{this.state.importErrors}</p></font>}
                       </Col>
                     </Row>}
 

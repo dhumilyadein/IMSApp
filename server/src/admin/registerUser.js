@@ -91,11 +91,11 @@ var zipStorage = multer.diskStorage({
     cb(null, "./ZipUploads/");
   },
   filename: function (req, file, cb) {
-    var datetimestamp = new Date();
+    var date = Date.now();
     cb(
       null,
 
-      datetimestamp.toLocaleDateString()+"_"+file.originalname
+      date+"-"+file.originalname
     );
   }
 });
@@ -1068,7 +1068,7 @@ result[i]["userid"]= user.userid;
                   user.password = user.hashPassword(user.password);
                   try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
-                {return res.send({errors:err.path+ " not found"});}
+                {return res.send({errors:{Error: err.path+ " not found"}});}
                   user.photo.contentType = 'image/png';
                    await user
                     .save()
@@ -1105,7 +1105,7 @@ result[i]["userid"]= user.userid;
                   user.password = user.hashPassword(user.password);
                   try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                   catch(err)
-                  {return res.send({error:err});}
+                  {return res.send({errors:{Error: err.path+ " not found"}});}
                   user.photo.contentType = 'image/png';
                      await user
                     .save()
@@ -1123,7 +1123,7 @@ result[i]["userid"]= user.userid;
                   user.password = user.hashPassword(user.password);
                 try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
-                {return res.send({error:err});}
+                {return res.send({errors:{Error: err.path+ " not found"}});}
 
                   user.photo.contentType = 'image/png';
                       await   user
