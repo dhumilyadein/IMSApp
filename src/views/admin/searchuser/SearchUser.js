@@ -46,10 +46,12 @@ class SearchUser extends Component {
       success: null,
       userdata: null,
       redirectSearchUserToUsers: false,
-      
-      chosenRequest: null,
 
-      dataSource: []
+      chosenSearchValue: null,
+
+      dataSource: [],
+
+      searchBarResponse: null
     };
 
   }
@@ -62,9 +64,11 @@ class SearchUser extends Component {
     console.log("searchHandler ENTER:  " + JSON.stringify(this.state));
 
     e.preventDefault();
+    console.log("Submit Request - " + JSON.stringify(this.state));
 
     axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
-      console.log("response - " + JSON.stringify(res.data));
+
+      console.log("submit response data - " + JSON.stringify(res.data));
       console.log("res.data.errors - " + res.data.errors);
       console.log("res.data.message - " + res.data.message);
       console.log("res.data.error - " + res.data.errors);
@@ -73,18 +77,33 @@ class SearchUser extends Component {
         return this.setState({ errors: res.data.errors });
       } else {
 
-        this.props.history.push("/users");
+        console.log("Final response submit - " + JSON.stringify(res.data));
+
+        console.log("this.state.searchBarResponse 3 - " + JSON.stringify(this.state.searchBarResponse));
+
+
+        // this.setState({searchBarResponse: res.data}, function() {
+        //   console.log("username again again - " + this.state.searchBarResponse[0].username);
+        // });
+
+        this.props.history.push(
+          {
+            pathname: '/admin/users',
+            state: res.data
+          });
 
       }
     });
   }
 
-  onUpdateInput(inputValue) {
-    const self = this;
+  onUpdateInput(inputValue, datasource, params) {
+
+    if (params.source == 'touchTap' || params.source == 'click') return;
+
     this.setState({
       find: inputValue
     }, function () {
-      self.performSearch();
+      this.performSearch();
     });
   }
 
@@ -102,7 +121,7 @@ class SearchUser extends Component {
 
     if (this.state.find !== '') {
 
-      console.log("response - " + JSON.stringify(this.state));
+      console.log("search bar request - " + JSON.stringify(this.state));
 
       axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
 
@@ -114,8 +133,14 @@ class SearchUser extends Component {
           return this.setState({ errors: res.data.errors });
         } else {
 
+          var resData = res.data;
+
+          // Setting response data in state so that it can be used in the onclick event of search bar items (selectedItem method)
+          console.log("Setting searchBarResponse with " + JSON.stringify(resData));
+          this.setState({ searchBarResponse: resData });
+
           //this.props.history.push("/users");
-          console.log("final response - " + JSON.stringify(res.data));
+          console.log("final response search bar - " + JSON.stringify(res.data));
 
           var i = 1;
           res.data.forEach(function (item) {
@@ -135,30 +160,55 @@ class SearchUser extends Component {
           });
 
           console.log("this.state.dataSource - " + this.state.dataSource);
+
+          console.log("this.state.searchBarResponse 1 - " + JSON.stringify(this.state.searchBarResponse));
+
+          console.log("this.state before - " + JSON.stringify(this.state));
         }
       });
-
-      // JSONP(url, function (error, data) {
-      //   let searchResults, retrievedSearchTerms;
-
-      //   if (error) return error;
-
-      //   searchResults = data[1];
-
-      //   retrievedSearchTerms = searchResults.map(function (result) {
-      //     return result[0];
-      //   });
-
-      //   console.log("autosearch result - " + retrievedSearchTerms);
-
-      //   self.setState({
-      //     dataSource: retrievedSearchTerms
-      //   });
-      // });
-
     }
   }
 
+  /**
+   * @description For getting search bar selected value
+   */
+  async selectedItem(chosenSearchValue, index) {
+
+    var searchBarResponse;
+    var selectedUsername;
+
+    this.setState({ chosenSearchValue: chosenSearchValue });
+    console.log("this.state.chosenSearchValue - " + this.statechosenSearchValue);
+
+    selectedUsername = chosenSearchValue.split("(")[1].split(")")[0];
+    console.log("username retrieved from chosen field after removing () " + selectedUsername);
+
+    searchBarResponse = this.state.searchBarResponse;
+    console.log("this.state.searchBarResponse 2 - " + JSON.stringify(searchBarResponse));
+
+    var tempArrayForUser = [];
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    for (var i = 0; i < searchBarResponse.length; i++) {
+
+      console.log("searchBarResponse[i][\"username\"] - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername + " searchBarResponse.length - " + searchBarResponse.length);
+      console.log("searchBarResponse[i] - " + JSON.stringify(searchBarResponse));
+
+      if (searchBarResponse[i]["username"].toLowerCase() === String(selectedUsername).toLowerCase()) {
+
+        console.log("searchBarResponse[i][\"username\"] BBBBBBBBBBBBBBBBBBB - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername);
+
+        tempArrayForUser.push(searchBarResponse[i]);
+        this.props.history.push(
+          {
+            pathname: '/admin/users',
+            state: tempArrayForUser
+          });
+        return searchBarResponse[i];
+      }
+    }
+
+
+  }
 
   /**
    * @description Called when the change event is triggered.
@@ -169,19 +219,9 @@ class SearchUser extends Component {
     this.setState(
       {
         [e.target.name]: e.target.value
-      },
-
+      }
     );
-
     console.log("state in react - " + JSON.stringify(this.state));
-  }
-
-  /**
-   * @description For getting search bar selected value
-   */
-  selectedItem(chosenRequest, index) {
-    this.setState({ chosenRequest: chosenRequest });
-    console.log("this.state.chosenRequest - " + this.state.chosenRequest);
   }
 
   render() {
@@ -195,18 +235,17 @@ class SearchUser extends Component {
                   <Form>
                     <h1>Search Users</h1>
 
-                    <InputGroup className="mb-4">
+                    <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText  >
                           <b>Find</b>
                         </InputGroupText>
                       </InputGroupAddon>
-                      <MuiThemeProvider muiTheme={getMuiTheme()}>
+                      <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
                         <AutoComplete
                           hintText="Enter Search text"
                           dataSource={this.state.dataSource}
                           onUpdateInput={this.onUpdateInput}
-                          floatingLabelText="Find"
                           fullWidth={true}
                           filter={AutoComplete.noFilter}
                           maxSearchResults={5}
@@ -274,7 +313,7 @@ class SearchUser extends Component {
                         <option value="teacher">Teacher</option>
                         <option value="parent">Parent</option>
                         <option value="student">Student</option>
-
+                        <option value="anyRole">Any Role</option>
                       </Input>
                     </InputGroup>
 

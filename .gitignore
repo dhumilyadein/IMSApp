@@ -5,6 +5,7 @@
 /server/node_modules
 /server/ExcelUploads
 /server/PhotoUploads
+/server/ZipUploads
 package-lock.json
 
 # testing

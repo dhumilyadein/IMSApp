@@ -252,7 +252,7 @@ if(this.state.photo)
     }
 
 
-    if(!this.state.photoerror && !this.state.corruptphoto)
+    if(this.state.photoerror===null && this.state.corruptphoto===false)
    {  if (this.state.role[0] === "student") {
       console.log("in STUDENT");
 
@@ -276,7 +276,7 @@ if(this.state.photo)
 
           });
         });
-    } else {
+    } else if(this.state.role.indexOf("admin")!==-1 || this.state.role.indexOf("teacher")!==-1 ){
       this.setState({ roleerror: false,  errors:null });
       axios
         .post("http://localhost:8001/api/empRegister", this.state)
