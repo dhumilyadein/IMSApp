@@ -74,7 +74,7 @@ var excelUpload = multer({
   fileFilter: function(req, file, callback) {
     //file filter
     if (
-      ["jpg", "jpeg","png"].indexOf(
+      ["jpg"].indexOf(
         file.originalname.split(".")[file.originalname.split(".").length - 1].toLowerCase()
       ) === -1
     ) {
@@ -203,8 +203,7 @@ module.exports = function (app) {
       valError["Category"] = "category can't be empty";
 
 
-    if (!request.photo)
-      valError["Photo"] = "Photo can't be empty";
+
 
     if (!request.address)
       valError["Address"] = "Address can't be empty";
@@ -1067,7 +1066,9 @@ result[i]["userid"]= user.userid;
                   user = await new Student(result[i]);
                   console.log("Student = " + user);
                   user.password = user.hashPassword(user.password);
-                  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");
+                  try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
+                catch(err)
+                {return res.send({errors:err.path+ " not found"});}
                   user.photo.contentType = 'image/png';
                    await user
                     .save()
@@ -1102,7 +1103,9 @@ result[i]["userid"]= user.userid;
                   user = new Admin(result[i]);
                   console.log("Admin = " + user);
                   user.password = user.hashPassword(user.password);
-                  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");
+                  try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
+                  catch(err)
+                  {return res.send({error:err});}
                   user.photo.contentType = 'image/png';
                      await user
                     .save()
@@ -1118,7 +1121,10 @@ result[i]["userid"]= user.userid;
                   user = new Teacher(result[i]);
                   console.log("Teacher = " + user);
                   user.password = user.hashPassword(user.password);
-                  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");
+                try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
+                catch(err)
+                {return res.send({error:err});}
+
                   user.photo.contentType = 'image/png';
                       await   user
                     .save()

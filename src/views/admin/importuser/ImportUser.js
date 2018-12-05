@@ -148,6 +148,7 @@ this.setState({
               console.log("in Res " + JSON.stringify(res.data));
               if (res.data.error_code === 1) {
                 document.getElementById("file").value = "";
+                document.getElementById("zipfile").value = "";
                 this.setState({
 
                   corruptFile: true,
@@ -163,6 +164,7 @@ this.setState({
 
                 //console.log("in sucess: "+res.data);
                 document.getElementById("file").value = "";
+                document.getElementById("zipfile").value = "";
                 return this.setState({
 
                   importErrors: null,
@@ -188,7 +190,7 @@ this.setState({
                 loader:false
 
               },() =>{
-               // console.log("errors length: "+Object.keys(this.state.errors).length)
+               console.log("errors length: "+Object.keys(this.state.importErrors).length)
               });
 
             }
