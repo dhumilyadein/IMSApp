@@ -85,7 +85,7 @@ class ImportUser extends Component {
     const excel = new FormData();
     const zip = new FormData();
     console.log("file" + this.state.file);
-    this.setState({loader:false,importErrors:false,showErrors:false});
+    this.setState({loader:false,importErrors:null,showErrors:false});
     if (!this.state.file)
 
       this.setState({
@@ -313,6 +313,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="3" xl className="mb-3 mb-xl-0">
                         <Button type="submit" block color="success" onClick={this.fileHandler}  style={{width:"200px"}}> Import sheet</Button>
+
                         {this.state.loader &&<font color="Green">  <h5>Importing sheet...</h5></font>}
                     {this.state.loader &&
                      <ReactLoading type="bars"
@@ -320,6 +321,15 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
     height='2%' width='20%' />
                       }
                       </Col>
+                      <Col><Button block onClick={()=>{
+document.getElementById("zipfile").value = null;
+document.getElementById("file").value = null;
+this.setState({showErrors:false, importErrors:null, file:null, zipFile:null})
+
+
+                      }} color="info" style={{width:"200px"}}>
+                          Reset
+                        </Button ></Col>
                     </Row>
 
 <br />
