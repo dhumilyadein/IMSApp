@@ -324,7 +324,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
                       <Col><Button block onClick={()=>{
 document.getElementById("zipfile").value = null;
 document.getElementById("file").value = null;
-this.setState({showErrors:false, importErrors:null, file:null, zipFile:null})
+this.setState({showErrors:false, importErrors:null, file:null, zipFile:null, noFile:false, noZipFile:false, corruptFile:false, corruptZipFile:false})
 
 
                       }} color="info" style={{width:"200px"}}>
