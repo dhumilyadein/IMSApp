@@ -186,7 +186,7 @@ this.setState({
 
                   importErrors: res.data.errors,
 
-                  noFile: false,
+
                   corruptFile: false,
                   loader:false
 
@@ -332,7 +332,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
 
                         <br /><br />
                         {this.state.showErrors &&
-<font color="red">  <div>Errors:  <pre> {JSON.stringify(this.state.importErrors,null,"\t")}</pre></div></font>}
+<font color="red">  <div>Errors:  <pre> <h5> {JSON.stringify(this.state.importErrors,null,"\t")}</h5></pre></div></font>}
 
                       </Col>
                     </Row>}
