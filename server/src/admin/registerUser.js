@@ -1068,7 +1068,10 @@ result[i]["userid"]= user.userid;
                   user.password = user.hashPassword(user.password);
                   try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
-                {return res.send({errors:{Error: err.path+ " not found"}});}
+                {
+                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found"
+                  }
+
                   user.photo.contentType = 'image/png';
                    await user
                     .save()
@@ -1105,7 +1108,15 @@ result[i]["userid"]= user.userid;
                   user.password = user.hashPassword(user.password);
                   try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                   catch(err)
-                  {return res.send({errors:{Error: err.path+ " not found"}});}
+
+
+                  {
+                    importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found"
+                    }
+
+
+
+
                   user.photo.contentType = 'image/png';
                      await user
                     .save()
@@ -1123,7 +1134,10 @@ result[i]["userid"]= user.userid;
                   user.password = user.hashPassword(user.password);
                 try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
-                {return res.send({errors:{Error: err.path+ " not found"}});}
+                {
+                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found"
+                  }
+
 
                   user.photo.contentType = 'image/png';
                       await   user
@@ -1143,7 +1157,7 @@ result[i]["userid"]= user.userid;
               }
 
               else {
-                importErrors["record# " + (i + 1) + " of user: " + result[i].username] = impValResult;
+                importErrors["    record# " + (i + 1) + " of user: " + result[i].username] = impValResult;
 
               }
 

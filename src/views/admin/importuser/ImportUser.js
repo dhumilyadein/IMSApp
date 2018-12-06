@@ -47,7 +47,8 @@ class ImportUser extends Component {
       noZipFile: false,
       corruptZipFile: false,
       zipFilename:null,
-      showErrors:false
+      showErrors:false,
+      zipFile:null
 
 
 
@@ -84,7 +85,7 @@ class ImportUser extends Component {
     const excel = new FormData();
     const zip = new FormData();
     console.log("file" + this.state.file);
-    this.setState({loader:true});
+    this.setState({loader:false,importErrors:false,showErrors:false});
     if (!this.state.file)
 
       this.setState({
@@ -97,7 +98,7 @@ class ImportUser extends Component {
 
       });
  if(!this.state.zipFile)
-
+{
 this.setState({
 
   noZipFile: true,
@@ -106,10 +107,10 @@ this.setState({
   impSuccess: false,
   loader:false
 
-});
+});}
 
     if(this.state.noZipFile===false && this.state.corruptZipFile===false
-       && this.state.noFile===false && this.state.corruptFile===false)
+       && this.state.noFile===false && this.state.corruptFile===false&&this.state.file&&this.state.zipFile)
 
     {
       console.log("in Zip");
@@ -121,12 +122,11 @@ this.setState({
       .then(res => {
         console.log("in Res " + JSON.stringify(res.data));
         if (res.data.error_code === 1) {
-          document.getElementById("zipfile").value = "";
+
           this.setState({
 
             corruptZipFile: true,
             modalSuccess: true,
-            zipFile: null,
             noZipFile: false,
             loader:false
 
@@ -139,66 +139,67 @@ this.setState({
 
           corruptZipFile: false,
           modalSuccess: true,
-          zipFile: null,
+
           noZipFile: false,
           loader:true
-            });
-            excel.append('file', this.state.file, this.state.filename);
-            //excel.append('zipfilename', this.state.zipFilename.replace(/\.[^/.]+$/, ""));
-            axios
-            .post("http://localhost:8001/api/importExcel", excel)
-            .then(res => {
-              console.log("in Res " + JSON.stringify(res.data));
-              if (res.data.error_code === 1) {
-                document.getElementById("file").value = "";
-                document.getElementById("zipfile").value = "";
-                this.setState({
+            },()=>{
+              excel.append('file', this.state.file, this.state.filename);
+              //excel.append('zipfilename', this.state.zipFilename.replace(/\.[^/.]+$/, ""));
+              axios
+              .post("http://localhost:8001/api/importExcel", excel)
+              .then(res => {
+                console.log("in Res " + JSON.stringify(res.data));
+                if (res.data.error_code === 1) {
 
-                  corruptFile: true,
-                  modalSuccess: true,
-                  file: null,
-                  noFile: false,
-                  loader:false
+                  //document.getElementById("zipfile").value = "";
+                  this.setState({
+
+                    corruptFile: true,
+                    modalSuccess: true,
+                    file: null,
+                    noFile: false,
+                    loader:false
 
 
-                });
-              }
-              else if(res.data==="Imported Successfully") {
+                  });
+                }
+                else if(res.data==="Imported Successfully") {
 
-                //console.log("in sucess: "+res.data);
-                document.getElementById("file").value = "";
-                document.getElementById("zipfile").value = "";
-                return this.setState({
+                  //console.log("in sucess: "+res.data);
+                  document.getElementById("file").value = "";
+                  document.getElementById("zipfile").value = "";
+                  return this.setState({
 
-                  importErrors: null,
-                  impSuccess: true,
-                  modalSuccess: true,
+                    importErrors: null,
+                    impSuccess: true,
+                    modalSuccess: true,
+                    noFile: false,
+                    corruptFile: false,
+                    file: null,
+                    loader:false
+                  });
+                }
+                else
+      {
+
+                 this.setState({
+
+                  importErrors: res.data.errors,
+
                   noFile: false,
                   corruptFile: false,
-                  file: null,
                   loader:false
+
+                },() =>{
+                 console.log("errors length: "+Object.keys(this.state.importErrors).length)
                 });
+
               }
-              else
-    {document.getElementById("file").value = "";
-    document.getElementById("zipfile").value = "";
 
-               this.setState({
+              })
 
-                importErrors: res.data.errors,
 
-                noFile: false,
-                corruptFile: false,
-                file: null,
-                loader:false
-
-              },() =>{
-               console.log("errors length: "+Object.keys(this.state.importErrors).length)
-              });
-
-            }
-
-            })
+            });
 
 
       }
@@ -219,7 +220,7 @@ this.setState({
 
 
 
-  fileChange = event => {
+  fileChange = event => {try{
     const file = event.target.files[0];
 if(event.target.name==="file")
     this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, importErrors:null }, () => console.log("file:  " + this.state.file.name));
@@ -227,6 +228,9 @@ else
 this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilename: file.name, importErrors:null }, () => console.log("zipfile:  " + this.state.zipFile.name));
 
   }
+catch(err){
+console.log("File Upload error: No file selected: "+JSON.stringify(err));}
+}
 
 
   render() {
@@ -254,11 +258,11 @@ this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilen
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                     <div> <font color="red">  Please make sure the number of records in excel sheet matches the total number of photos in zip file. </font>
+                     <div> <font color="red">  Please make sure the number of Records in Excel sheet matches the total number of Photos in zip file. </font>
                      <br />
-                      <font color="red">  Please make sure the photo name matches the username in the excel sheet.</font>
+                      <font color="red">  Please make sure the Photo name matches the Username in the Excel sheet.</font>
                       <br />
-                      <font color="red">  Please make sure Photos.zip contains only photo(s) and no folder(s).</font>
+                      <font color="red">  Please make sure Photos.zip contains only JPG format photos and no Folder(s).</font>
                       <br /><br />
                       </div>
 
@@ -309,27 +313,31 @@ this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilen
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="3" xl className="mb-3 mb-xl-0">
                         <Button type="submit" block color="success" onClick={this.fileHandler}  style={{width:"200px"}}> Import sheet</Button>
-                      </Col>
-                    </Row>
-
- {this.state.loader &&<font color="Green">  <h5>Importing sheet...</h5></font>}
+                        {this.state.loader &&<font color="Green">  <h5>Importing sheet...</h5></font>}
                     {this.state.loader &&
                      <ReactLoading type="bars"
                       color="	#006400"
-    height='2%' width='100%' />
+    height='2%' width='20%' />
                       }
+                      </Col>
+                    </Row>
+
+<br />
 
                     { this.state.importErrors &&
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="2" xl className="mb-3 mb-xl-0">
                       <font color="red">  <p>{Object.keys(this.state.importErrors).length} record(s) failed to import. For errors, click Errors</p></font>
-                        <Button type="submit" block color="danger" onClick={()=>{this.setState({showErrors:true})}
-}> Errors</Button>
+                        <Button type="submit" block color="danger" style={{width:"200px"}} onClick={(e)=>{ e.preventDefault(); this.setState({showErrors:true})}}> Errors</Button>
 
-{this.state.showErrors && 
-<font color="red">  <p>{this.state.importErrors}</p></font>}
+                        <br /><br />
+                        {this.state.showErrors &&
+<font color="red">  <div>Errors:  <pre> {JSON.stringify(this.state.importErrors,null,"\t")}</pre></div></font>}
+
                       </Col>
                     </Row>}
+
+
 
                   </Form>
                 </CardBody>
