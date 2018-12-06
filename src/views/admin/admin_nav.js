@@ -33,6 +33,11 @@ export default {
       icon: 'icon-magnifier',
     },
     {
+      name: 'User Details',
+      url: '/admin/userDetails',
+      icon: 'icon-user-follow',
+    },
+    {
       name: 'Import Users',
       url: '/admin/importUser',
       icon: 'icon-people',

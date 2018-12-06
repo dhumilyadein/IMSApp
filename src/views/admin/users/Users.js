@@ -9,7 +9,7 @@ function capitalizeFirstLetter(string) {
 
 function UserRow(props) {
   const user = props.user
-  const userLink = `#/users/${user.id}`
+  const userLink = `#/admin/userDetails/${user.username}`
 
   const getBadge = (status) => {
     return status === 'Active' ? 'success' :

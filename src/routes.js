@@ -189,6 +189,11 @@ const RegisterUser = Loadable({
   loading: Loading
 });
 
+const UserDetails = Loadable({
+  loader: () => import("./views/admin/userdetails/UserDetails"),
+  loading: Loading
+});
+
 const ImportUser = Loadable({
   loader: () => import("./views/admin/importuser/ImportUser"),
   loading: Loading
@@ -206,13 +211,25 @@ const Users = Loadable({
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
+
   { path: "/admin", exact: true, name: "Admin", component: RegisterUser },
   {
     path: "/admin/registeruser",
     name: "Register User",
     component: RegisterUser
   },
+{
+    path: "/admin/userdetails",
+    exact: true, 
+    name: "User Details",
+    component: UserDetails
+  },
 
+  { path: '/admin/userdetails/:username', 
+  exact: true, 
+  name: "User Details",
+    component: UserDetails
+   },
   {
     path: "/admin/importuser",
     name: "Import User",

@@ -40,7 +40,7 @@ class SearchUser extends Component {
       find: null,
       using: "username",
       role: "student",
-      searchCriteria: "equalsSearchCriteria",
+      searchCriteria: "containsSearchCriteria",
       status: null,
       erorrs: null,
       success: null,
@@ -332,7 +332,7 @@ class SearchUser extends Component {
                             name="searchCriteria"
                             value="equalsSearchCriteria"
                             onChange={this.changeHandler}
-                            defaultChecked />
+                             />
                           <Label className="form-check-label"
                             check htmlFor="equalsSearchCriteria">Equals</Label>
                         </FormGroup>
@@ -342,7 +342,8 @@ class SearchUser extends Component {
                             id="searchCriteria"
                             name="searchCriteria"
                             value="containsSearchCriteria"
-                            onChange={this.changeHandler} />
+                            onChange={this.changeHandler} 
+                            defaultChecked/>
                           <Label className="form-check-label"
                             check htmlFor="containsSearchCriteria">Contains</Label>
                         </FormGroup>
