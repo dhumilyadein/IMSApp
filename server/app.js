@@ -5,6 +5,7 @@ const session = require("express-session");
 const cors = require("cors");
 
 const adminRegister = require("./src/admin/registerUser");
+const adminImport = require("./src/admin/importUsers");
 const adminSearch = require("./src/admin/searchUser");
 const studentSearch = require("./src/admin/searchStudent");
 
@@ -36,6 +37,7 @@ app.use(
 
 
 adminRegister(app);
+adminImport(app);
 adminSearch(app);
 studentSearch(app);
 login(app);
