@@ -980,6 +980,14 @@ req.body["userid"]=user.userid;
              // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
               if (counter === Object.keys(result[i]).length)
                 continue;
+
+                if (Object.keys(result[i]).length!==44)
+                {  importErrors["record# " + (i + 1) ] ="  is INVALID";
+
+                       continue;
+
+              }
+
               var roles = [];
               if (result[i].role1) roles.push(result[i].role1);
               if (result[i].role2) roles.push(result[i].role2);
@@ -1069,7 +1077,7 @@ result[i]["userid"]= user.userid;
                   try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
                 {
-                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found"
+                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found";
                   }
 
                   user.photo.contentType = 'image/png';
@@ -1111,7 +1119,7 @@ result[i]["userid"]= user.userid;
 
 
                   {
-                    importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found"
+                    importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found";
                     }
 
 
@@ -1135,7 +1143,7 @@ result[i]["userid"]= user.userid;
                 try{  user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
                 {
-                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found"
+                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found";
                   }
 
 
