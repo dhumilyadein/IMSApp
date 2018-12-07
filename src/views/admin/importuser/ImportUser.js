@@ -37,7 +37,7 @@ class ImportUser extends Component {
       errors: null,
       importErrors:null,
       visible: true,
-      modalSuccess: false,
+      modalSuccess: true,
       file: null,
       noFile: false,
       corruptFile: false,
@@ -61,9 +61,39 @@ class ImportUser extends Component {
 
     this.fileHandler = this.fileHandler.bind(this);
     this.fileChange = this.fileChange.bind(this);
+    this.reset = this.reset.bind(this);
 
 
   }
+
+  reset= e =>
+    {
+      document.getElementById("zipfile").value = null;
+      document.getElementById("file").value = null;
+      this.setState({ userdata: null,
+      
+        impSuccess: false,
+        errors: null,
+        importErrors:null,
+        visible: true,
+        modalSuccess: true,
+        file: null,
+        noFile: false,
+        corruptFile: false,
+        filename: null,
+        loader:false,
+        zipFile: null,
+        noZipFile: false,
+        corruptZipFile: false,
+        zipFilename:null,
+        showErrors:false,
+        zipFile:null,
+        disableButton:false
+      })
+      
+      
+                            }
+  
 
   toggleSuccess() {
     this.setState({
@@ -85,7 +115,7 @@ class ImportUser extends Component {
     const excel = new FormData();
     const zip = new FormData();
     console.log("file" + this.state.file);
-    this.setState({loader:false,importErrors:null,showErrors:false});
+    this.setState({loader:false,importErrors:null,showErrors:false, disableButton:true});
     if (!this.state.file)
 
       this.setState({
@@ -94,7 +124,8 @@ class ImportUser extends Component {
         modalSuccess: true,
         corruptFile: false,
         impSuccess: false,
-        loader:false
+        loader:false,
+        disableButton:false
 
       });
  if(!this.state.zipFile)
@@ -105,7 +136,8 @@ this.setState({
   modalSuccess: true,
   corruptZipFile: false,
   impSuccess: false,
-  loader:false
+  loader:false,
+  disableButton:false
 
 });}
 
@@ -128,13 +160,15 @@ this.setState({
             corruptZipFile: true,
             modalSuccess: true,
             noZipFile: false,
-            loader:false
+            loader:false,
+            disableButton:false
 
 
           });
         }
       if(res.data.success===true)
       {
+       
         this.setState({
 
           corruptZipFile: false,
@@ -158,7 +192,8 @@ this.setState({
                     modalSuccess: true,
                     file: null,
                     noFile: false,
-                    loader:false
+                    loader:false,
+                     disableButton:false
 
 
                   });
@@ -166,8 +201,7 @@ this.setState({
                 else if(res.data==="Imported Successfully") {
 
                   //console.log("in sucess: "+res.data);
-                  document.getElementById("file").value = "";
-                  document.getElementById("zipfile").value = "";
+                  this.reset();
                   return this.setState({
 
                     importErrors: null,
@@ -176,19 +210,21 @@ this.setState({
                     noFile: false,
                     corruptFile: false,
                     file: null,
-                    loader:false
+                    loader:false,
+                    disableButton:false
                   });
                 }
                 else if(res.data.errors)
       {
-
+console.log("in import errors");
                  this.setState({
 
                   importErrors: res.data.errors,
 
-
+                  impSuccess:false,
                   corruptFile: false,
-                  loader:false
+                  loader:false,
+                   disableButton:false
 
                 },() =>{
                  console.log("errors length: "+Object.keys(this.state.importErrors).length)
@@ -312,7 +348,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
 
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="3" xl className="mb-3 mb-xl-0">
-                        <Button type="submit" block color="success" onClick={this.fileHandler}  style={{width:"200px"}}> Import sheet</Button>
+                        <Button type="submit" block color="success" onClick={this.fileHandler} disabled={this.state.disableButton} style={{width:"200px"}}> Import sheet</Button>
 
                         {this.state.loader &&<font color="Green">  <h5>Importing sheet...</h5></font>}
                     {this.state.loader &&
@@ -321,13 +357,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
     height='2%' width='20%' />
                       }
                       </Col>
-                      <Col><Button block onClick={()=>{
-document.getElementById("zipfile").value = null;
-document.getElementById("file").value = null;
-this.setState({showErrors:false, importErrors:null, file:null, loader:false, zipFile:null, noFile:false, noZipFile:false, corruptFile:false, corruptZipFile:false})
-
-
-                      }} color="info" style={{width:"200px"}}>
+                      <Col><Button block onClick={this.reset} color="info" style={{width:"200px"}}>
                           Reset
                         </Button ></Col>
                     </Row>

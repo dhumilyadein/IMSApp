@@ -497,7 +497,7 @@ module.exports = function (app) {
 // return res.send({ photoerror: "Photo is corrupt or not selected" });
 
     if (!errors.isEmpty()) {
-      console.log("ERRORS" + errors.mapped());
+     // console.log("ERRORS" + errors.mapped());
       return res.send({ errors: errors.mapped() });
     }
 
@@ -509,7 +509,7 @@ module.exports = function (app) {
       "email": req.body.parentemail, "password": req.body.parentpassword, "role": "Parent", status: req.body.status
     };
     var user = new User(parentUser);
-    console.log("user = " + user);
+   // console.log("user = " + user);
     user.password = user.hashPassword(user.password);
     await user
       .save()
@@ -522,7 +522,7 @@ module.exports = function (app) {
 
 req.body["userid"]=user.userid;
       user = new Parent(req.body);
-      console.log("user = " + user);
+     // console.log("user = " + user);
       user.parentpassword = user.hashPassword(user.parentpassword);
       await user
         .save()
@@ -541,7 +541,7 @@ req.body["userid"]=user.userid;
       "email": req.body.email, "password": req.body.password, "role": "Student", "status": req.body.status
     };
     user = new User(studentUser);
-    console.log("user = " + user);
+  //  console.log("user = " + user);
     user.password = user.hashPassword(user.password);
     await user
       .save()
@@ -557,7 +557,7 @@ req.body["userid"]=user.userid;
 
 
     user = new Student(req.body);
-    console.log("user = " + user);
+    //console.log("user = " + user);
     user.password = user.hashPassword(user.password);
     user.photo.data = fs.readFileSync(photoPath);
     user.photo.contentType = 'image/png';
@@ -650,33 +650,30 @@ async function photoUploading(req,res)
 {
  console.log("in Photo Upload ");
 
-await  fs.readdir("./PhotoUploads", (err, files) => {
-  if (err) throw err;
-
-  for (const file of files) {
-    fs.unlink(path.join("./PhotoUploads", file), err => {
-      if (err) throw err;
-    });
+ await rimraf('./ExcelUploads/*.*', function (e) {
+ 
+  console.log(e);
+  console.log('Register - Deleted Photo');
+  photoUpload(req, res, function (err) {
+    if (err) {
+       res.json({ error_code: 1, err_desc: err });
+    }
+    /** Multer gives us file info in req.file object */
+    else if (!req.file)
+       res.json({ error_code: 1, err_desc: "No file passed" });
+  else{
+    console.log(req.file.path);
+  photoPath = req.file.path;
+  res.json({message:"photo uploaded to " +photoPath});
   }
+  
+  
+  
+  });
 });
 
 
- await photoUpload(req, res, function (err) {
-  if (err) {
-     res.json({ error_code: 1, err_desc: err });
   }
-  /** Multer gives us file info in req.file object */
-  else if (!req.file)
-     res.json({ error_code: 1, err_desc: "No file passed" });
-else{
-  console.log(req.file.path);
-photoPath = req.file.path;
-res.json({message:"photo uploaded to " +photoPath});
-}
-
-
-
-});}
 
 
 
