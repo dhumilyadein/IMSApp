@@ -31,9 +31,12 @@ const whiteTextFieldStyle = {
 }
 
 class UserDetails extends Component {
+
   constructor(props) {
 
     super(props);
+
+    this.fetchUserDataOnPageLoad();
 
     this.state = {
       admintype: "Office Admin",
@@ -122,6 +125,36 @@ class UserDetails extends Component {
     this.fileChange = this.fileChange.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
     this.photoUpload = this.photoUpload.bind(this);
+  }
+
+  fetchUserDataOnPageLoad() {
+
+    console.log("fetchUserDataOnPageLoad ENTER: " + this.props.match.params.username);
+
+    var searchUserRequest = {
+      "find" : this.props.match.params.username,
+      "using" : "username",
+      "role" : "anyRole",
+      "searchCriteria" : "equalsSearchCriteria"
+    }
+    console.log("Submit Request - " + JSON.stringify(searchUserRequest));
+
+    axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(res => {
+
+      console.log("submit response data - " + JSON.stringify(res.data));
+      console.log("res.data.errors - " + res.data.errors);
+      console.log("res.data.message - " + res.data.message);
+      console.log("res.data.error - " + res.data.errors);
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+        console.log("Final User details - " + JSON.stringify(res.data));
+      }
+    });
+
+    console.log("fetchUserDataOnPageLoad EXIT: " + this.props.match.params.username);
+
   }
 
   toggleSuccess() {
