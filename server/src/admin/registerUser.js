@@ -1,5 +1,6 @@
 
 var fs = require('fs');
+const path = require('path');
 var { check, validationResult } = require("express-validator/check");
 let photoPath=null;
 const User = require("../../models/User");
@@ -50,7 +51,7 @@ var photoStorage = multer.diskStorage({
 
 
 module.exports = function (app) {
- 
+
 
 
   const studentRegValidation = [
@@ -569,6 +570,8 @@ req.body["userid"]=user.userid;
       .catch(err => {
         return res.send(err);
       });
+
+
     return res.send({ data: req.body, message: "Registered Successfully" });
 
   }
@@ -639,13 +642,24 @@ req.body["userid"]=user.userid;
     return res.send({ data: req.body, message: "Registered Successfully" });
   }
 
-  
+
 
 
 
 async function photoUploading(req,res)
 {
  console.log("in Photo Upload ");
+
+await  fs.readdir("./PhotoUploads", (err, files) => {
+  if (err) throw err;
+
+  for (const file of files) {
+    fs.unlink(path.join("./PhotoUploads", file), err => {
+      if (err) throw err;
+    });
+  }
+});
+
 
  await photoUpload(req, res, function (err) {
   if (err) {
@@ -670,7 +684,7 @@ res.json({message:"photo uploaded to " +photoPath});
   app.post("/api/empRegister", empRegValidation, empRegister);
   app.post("/api/studentRegister", studentRegValidation, studentRegister);
   app.post("/api/photoUploading", photoUploading);
-  
+
 
 
   app.get("/", (req, res) => res.json("sdasdsa"));

@@ -21,6 +21,7 @@
     "mongoose-auto-increment": "^5.0.1",
     "multer": "^1.4.1",
     "nodemon": "^1.18.4",
+    "path": "^0.12.7",
     "promise": "^8.0.2",
     "regex-email": "^1.0.2",
     "request": "^2.88.0",

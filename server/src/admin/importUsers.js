@@ -1,6 +1,7 @@
 
 var unzipper=require('unzipper');
 var fs = require('fs');
+const path = require('path');
 const User = require("../../models/User");
 const Student = require("../../models/Student");
 const Parent = require("../../models/Parent");
@@ -46,7 +47,7 @@ var excelUpload = multer({
   }
 }).single("file");
 
- 
+
 var zipStorage = multer.diskStorage({
   //multers disk storage settings
   destination: function (req, file, cb) {
@@ -297,12 +298,24 @@ if(request.type.toLowerCase()==="experienced")
    function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
   }
-  function importExcel(req, res) {
-     console.log("in import Excel  "+ req.filename );
+  async function importExcel(req, res) {
+     console.log("in import Excel  ");
 
     var exceltojson;
 
-      excelUpload(req, res, function (err) {
+
+     fs.readdir("./ExcelUploads", (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlink(path.join("./ExcelUploads", file), err => {
+          if (err) throw err;
+        });
+      }
+    });
+
+
+      excelUpload(req, res, await function (err) {
       if (err) {
         res.json({ error_code: 1, err_desc: err });
         return;
@@ -353,21 +366,21 @@ if(request.type.toLowerCase()==="experienced")
 
 
               }
-             // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
+            // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
               if (counter === Object.keys(result[i]).length)
                 continue;
 
-                if (Object.keys(result[i]).length!==45)
+                /* if (Object.keys(result[i]).length!==45)
                 {  importErrors["record# " + (i + 1) ] ="  is INVALID";
 
                        continue;
 
-              }
+              } */
 
               try{  var data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                 catch(err)
                 {console.log("In Photo Catch");
-                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]=err.path+ " not found";
+                  importErrors["record# " + (i + 1) + " of user: " + result[i].username]="User's Photo not found or incorrect data is passed in excel";
                   continue;
                   }
 
@@ -543,6 +556,8 @@ result[i]["userid"]= user.userid;
 
             }
             console.log("IMPORT ERRORS: " + JSON.stringify(importErrors));
+
+
             if (Object.keys(importErrors).length > 0)
               return res.send({ errors: importErrors });
             else
@@ -567,7 +582,20 @@ async function photoZipUploading(req,res)
 {
  console.log("in Photo ZipUpload");
 
- await zipUpload(req, res, function (err) {
+
+ var removeZip= await fs.readdir("./ZipUploads", (err, files) => {
+  if (err) throw err;
+
+  for (const file of files) {
+    fs.unlink(path.join("./ZipUploads", file), err => {
+      if (err) throw err;
+    });
+  }
+});
+
+
+
+  zipUpload(req, res, function (err) {
   if (err) {
      res.json({ error_code: 1, err_desc: err });
   }
@@ -578,7 +606,7 @@ else{
   console.log(req.file.path);
 zipPath = req.file.path;
 
-fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads'}));
+ fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads'}));
 
 res.json({success:true, message:"zip "+ req.file.originalname +  " uploaded to " +zipPath});
 }

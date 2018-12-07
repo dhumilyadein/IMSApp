@@ -120,7 +120,7 @@ this.setState({
       axios
       .post("http://localhost:8001/api/photoZipUploading", zip)
       .then(res => {
-        console.log("in Res " + JSON.stringify(res.data));
+        console.log("in Zip Res " + JSON.stringify(res.data));
         if (res.data.error_code === 1) {
 
           this.setState({
@@ -148,7 +148,7 @@ this.setState({
               axios
               .post("http://localhost:8001/api/importExcel", excel)
               .then(res => {
-                console.log("in Res " + JSON.stringify(res.data));
+                console.log("in Import Res " + JSON.stringify(res.data));
                 if (res.data.error_code === 1) {
 
                   //document.getElementById("zipfile").value = "";
@@ -179,7 +179,7 @@ this.setState({
                     loader:false
                   });
                 }
-                else
+                else if(res.data.errors)
       {
 
                  this.setState({
@@ -260,7 +260,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
                       <InputGroupAddon addonType="prepend">
                      <div> <font color="red">  Please make sure the number of Records in Excel sheet matches the total number of Photos in zip file. </font>
                      <br />
-                      <font color="red">  Please make sure the Photo name matches the Username in the Excel sheet.</font>
+                      <font color="red">  Please make sure each Photo's name matches the Username in the Excel sheet.</font>
                       <br />
                       <font color="red">  Please make sure Photos.zip contains only JPG format photos and no Folder(s).</font>
                       <br /><br />
@@ -324,7 +324,7 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
                       <Col><Button block onClick={()=>{
 document.getElementById("zipfile").value = null;
 document.getElementById("file").value = null;
-this.setState({showErrors:false, importErrors:null, file:null, zipFile:null, noFile:false, noZipFile:false, corruptFile:false, corruptZipFile:false})
+this.setState({showErrors:false, importErrors:null, file:null, loader:false, zipFile:null, noFile:false, noZipFile:false, corruptFile:false, corruptZipFile:false})
 
 
                       }} color="info" style={{width:"200px"}}>
