@@ -217,6 +217,8 @@ this.setState({
                 else if(res.data.errors)
       {
 console.log("in import errors");
+document.getElementById("zipfile").value = null;
+document.getElementById("file").value = null;
                  this.setState({
 
                   importErrors: res.data.errors,
@@ -298,7 +300,10 @@ console.log("File Upload error: No file selected: "+JSON.stringify(err));}
                      <br />
                       <font color="red">  Please make sure each Photo's name matches the Username in the Excel sheet.</font>
                       <br />
+                      
                       <font color="red">  Please make sure Photos.zip contains only JPG format photos and no Folder(s).</font>
+                      <br />
+                      <font color="red">  If you face any unexpected behaviour, click Reset or Refresh your browser's tab and try again.</font>
                       <br /><br />
                       </div>
 

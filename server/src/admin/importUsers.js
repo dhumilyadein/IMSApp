@@ -1,6 +1,7 @@
 
 var unzipper=require('unzipper');
 var fs = require('fs');
+var lodash=require("lodash");
 
 const rimraf = require('rimraf');
 const User = require("../../models/User");
@@ -361,16 +362,21 @@ if(request.type.toLowerCase()==="experienced")
   
   
                 }
-              // console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
+               console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
                 if (counter === Object.keys(result[i]).length)
                   continue;
   
-                  /* if (Object.keys(result[i]).length!==45)
-                  {  importErrors["record# " + (i + 1) ] ="  is INVALID";
+                  if (Object.keys(result[i]).length!==45)
+                  {  importErrors["record: " + (i + 1) +" "] =" Incomplete record as some columns are missing! ";
   
                          continue;
   
-                } */
+                }
+
+                var remoteJSON = {"allowExternalMembers": "dfdfdf", "whoCanJoin": "CAN_REQUEST_TO_JOIN"},
+   localJSON = {"whoCanJoin": "CAN_REQUEST_TO_JOIN", "allowExternalMembers": "false"};
+    
+console.log("JSON_Compare "+ lodash.isEqual(remoteJSON, localJSON) );
   
                 try{  var data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                   catch(err)
