@@ -217,7 +217,7 @@ class RegisterUser extends Component {
 {console.log("in PhotoUpload for file - "+this.state.photoname)
   
   const data = new FormData();  //photo upload
-  this.setState({photoname:this.state.photo.name, corruptphoto:false},()=>{
+  this.setState({photoname:this.state.photo.name},()=>{
 
     data.append('file', this.state.photo, this.state.photoname);
     axios
@@ -235,13 +235,7 @@ class RegisterUser extends Component {
 
       });
      }
-else
-return this.setState({
-  corruptphoto:false
 
-
-
-});
 
   })
   });
@@ -257,17 +251,17 @@ return this.setState({
     // console.log(JSON.stringify(this.state));
     //console.log("in STUDENT" + this.state.role[0]);
 
-  
+    if (this.state.role.length === 0) {
+      this.setState({ roleerror: true });
+
+    }
+
    if(this.state.photo===null)
    this.setState({photoerror: "Please select Photo"})
    else
    this.photoUpload();
 
-      if (this.state.role.length === 0) {
-      this.setState({ roleerror: true });
-
-    }
-
+     
 
     if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
    {  if (this.state.role[0] === "student") {
@@ -360,6 +354,8 @@ this.setState({
    * @param {*} e
    */
   roleHandler = e => {
+
+    this.setState({roleerror:false})
     if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
       const temp = this.state.role;
       temp.push(e.target.name);
@@ -441,7 +437,7 @@ this.setState({
       () => console.log("file:  " + this.state.photoname)
     );}
     catch (err) {
-      console.log("Photo Upload error: No file selected: " + JSON.stringify(err));
+      console.log("Photo Upload error: No file selected: " + err);
       this.setState({photo:null,photoerror:null, corruptphoto:false});
       document.getElementById("photo").value = null;
 
