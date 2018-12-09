@@ -373,10 +373,7 @@ if(request.type.toLowerCase()==="experienced")
   
                 }
 
-                var remoteJSON = {"allowExternalMembers": "dfdfdf", "whoCanJoin": "CAN_REQUEST_TO_JOIN"},
-   localJSON = {"whoCanJoin": "CAN_REQUEST_TO_JOIN", "allowExternalMembers": "false"};
-    
-console.log("JSON_Compare "+ lodash.isEqual(remoteJSON, localJSON) );
+                
   
                 try{  var data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
                   catch(err)

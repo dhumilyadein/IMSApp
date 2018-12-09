@@ -132,7 +132,7 @@ class RegisterUser extends Component {
    */
 
   resetForm = e => {
-    document.getElementById("photo").value = "";
+    document.getElementById("photo").value = null;
     document.getElementById("gender1").checked = false;
     document.getElementById("gender2").checked = false;
 
@@ -195,7 +195,7 @@ class RegisterUser extends Component {
       gender: "",
       maritalstatus: "",
       qualification: "",
-      photo: "",
+      photo: null,
       religion: "",
       nationality: "",
       bloodgroup: "",
@@ -226,15 +226,17 @@ class RegisterUser extends Component {
     console.log("in Photo Res " + JSON.stringify(res.data));
     if (res.data.error_code === 1) {
 
-      this.setState({
-        corruptphoto:true
+     return this.setState({
+        corruptphoto:true,
+
+      
 
 
 
       });
      }
 else
-this.setState({
+return this.setState({
   corruptphoto:false
 
 
@@ -254,10 +256,12 @@ this.setState({
     this.setState({ roleerror: false, errors:null});
     // console.log(JSON.stringify(this.state));
     //console.log("in STUDENT" + this.state.role[0]);
-if(this.state.photo)
-   this.photoUpload();
-   else
+
+  
+   if(this.state.photo===null)
    this.setState({photoerror: "Please select Photo"})
+   else
+   this.photoUpload();
 
       if (this.state.role.length === 0) {
       this.setState({ roleerror: true });
@@ -265,7 +269,7 @@ if(this.state.photo)
     }
 
 
-    if(this.state.photoerror===null && this.state.corruptphoto===false)
+    if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
    {  if (this.state.role[0] === "student") {
       console.log("in STUDENT");
 
@@ -431,11 +435,17 @@ this.setState({
 
 
   fileChange = event => {
-    const file = event.target.files[0];
+   try{ const file = event.target.files[0];
     this.setState(
       { photo: file, nophoto: false, photoerror:null, corruptphoto:false,photoname:file.name },
       () => console.log("file:  " + this.state.photoname)
-    );
+    );}
+    catch (err) {
+      console.log("Photo Upload error: No file selected: " + JSON.stringify(err));
+      this.setState({photo:null,photoerror:null, corruptphoto:false});
+      document.getElementById("photo").value = null;
+
+    }
   };
 
   render() {

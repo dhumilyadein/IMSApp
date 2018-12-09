@@ -1,6 +1,6 @@
 
 var fs = require('fs');
-const path = require('path');
+const rimraf = require('rimraf');
 var { check, validationResult } = require("express-validator/check");
 let photoPath=null;
 const User = require("../../models/User");
@@ -650,7 +650,7 @@ async function photoUploading(req,res)
 {
  console.log("in Photo Upload ");
 
- await rimraf('./ExcelUploads/*.*', function (e) {
+ await rimraf('./PhotoUploads/*.*', function (e) {
  
   console.log(e);
   console.log('Register - Deleted Photo');
