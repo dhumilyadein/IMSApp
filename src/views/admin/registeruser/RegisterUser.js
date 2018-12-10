@@ -215,7 +215,7 @@ class RegisterUser extends Component {
    */
  photoUpload()
 {console.log("in PhotoUpload for file - "+this.state.photoname)
-  
+
   const data = new FormData();  //photo upload
   this.setState({photoname:this.state.photo.name},()=>{
 
@@ -229,17 +229,62 @@ class RegisterUser extends Component {
      return this.setState({
         corruptphoto:true,
 
-      
+
 
 
 
       });
+
      }
+
+     else{if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
+      {  if (this.state.role[0] === "student") {
+         console.log("in STUDENT");
+
+
+         axios
+           .post("http://localhost:8001/api/studentRegister", this.state)
+           .then(result => {
+             console.log("RESULT.data " + JSON.stringify(result.data));
+             if (result.data.errors) {
+               return this.setState(result.data);
+             }
+
+             this.resetForm();
+
+             return this.setState({
+               userdata: result.data.data,
+               errors: null,
+               studentRegSuccess: true,
+               modalSuccess: true,
+
+
+             });
+           });
+       } else if(this.state.role.indexOf("admin")!==-1 || this.state.role.indexOf("teacher")!==-1 ){
+         this.setState({ roleerror: false,  errors:null });
+         axios
+           .post("http://localhost:8001/api/empRegister", this.state)
+           .then(result => {
+             console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
+             if (result.data.errors) {
+               return this.setState(result.data);
+             }
+             this.resetForm();
+             return this.setState({
+               userdata: result.data.data,
+               errors: null,
+               empRegSuccess: true,
+               modalSuccess: true
+
+             });
+           });
+       }}}
 
 
   })
   });
- 
+
 
 }
 
@@ -261,51 +306,9 @@ class RegisterUser extends Component {
    else
    this.photoUpload();
 
-     
-
-    if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
-   {  if (this.state.role[0] === "student") {
-      console.log("in STUDENT");
 
 
-      axios
-        .post("http://localhost:8001/api/studentRegister", this.state)
-        .then(result => {
-          console.log("RESULT.data " + JSON.stringify(result.data));
-          if (result.data.errors) {
-            return this.setState(result.data);
-          }
 
-          this.resetForm();
-
-          return this.setState({
-            userdata: result.data.data,
-            errors: null,
-            studentRegSuccess: true,
-            modalSuccess: true,
-
-
-          });
-        });
-    } else if(this.state.role.indexOf("admin")!==-1 || this.state.role.indexOf("teacher")!==-1 ){
-      this.setState({ roleerror: false,  errors:null });
-      axios
-        .post("http://localhost:8001/api/empRegister", this.state)
-        .then(result => {
-          console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
-          if (result.data.errors) {
-            return this.setState(result.data);
-          }
-          this.resetForm();
-          return this.setState({
-            userdata: result.data.data,
-            errors: null,
-            empRegSuccess: true,
-            modalSuccess: true
-
-          });
-        });
-    }}
   }
 
   /**
