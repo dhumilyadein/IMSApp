@@ -2,6 +2,7 @@
 var unzipper=require('unzipper');
 var fs = require('fs');
 var lodash=require("lodash");
+var path=require("path");
 
 const rimraf = require('rimraf');
 const User = require("../../models/User");
@@ -306,11 +307,11 @@ if(request.type.toLowerCase()==="experienced")
     var exceltojson;
 
    await rimraf('./ExcelUploads/*.*', function (e) {
- 
+
       console.log(e);
       console.log('Deleted Excel');
-    
-      
+
+
       excelUpload(req, res, function (err) {
         if (err) {
           res.json({ error_code: 1, err_desc: err });
@@ -319,7 +320,7 @@ if(request.type.toLowerCase()==="experienced")
         /** Multer gives us file info in req.file object */
         if (!req.file) {
           res.json({ error_code: 1, err_desc: "No file passed" });
-  
+
           return;
         }
         /** Check the extension of the incoming file and
@@ -346,7 +347,7 @@ if(request.type.toLowerCase()==="experienced")
               if (err) {
                 return res.json({ error_code: 1, err_desc: err, data: null });
               }
-  
+
              // console.log("Total records: " + Object.keys(result).length);
               var importErrors = {};
               for (let i = 0; i < result.length; i++) {
@@ -354,60 +355,68 @@ if(request.type.toLowerCase()==="experienced")
                 //console.log("record length: "+Object.keys(result[i]).length);
                 var counter = 0;
                 for (var key in result[i]) {
-  
+
                   //console.log("key "+  result[i][key]  );
                   if (result[i][key] === "")
                     counter++;
-  
-  
-  
+
+
+
                 }
                console.log("resLen counter: "+Object.keys(result[i]).length +"  "+ counter);
                 if (counter === Object.keys(result[i]).length)
                   continue;
-  
-                  if (Object.keys(result[i]).length!==45)
+
+                  if (Object.keys(result[i]).length!==44)
                   {  importErrors["record: " + (i + 1) +" "] =" Incomplete record as some columns are missing! ";
-  
+
                          continue;
-  
+
                 }
 
-                
-  
-                try{  var data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");}
-                  catch(err)
-                  {console.log("In Photo Catch");
-                    importErrors["record# " + (i + 1) + " of user: " + result[i].username]="User's Photo not found or incorrect data is passed in excel";
-                    continue;
-                    }
-  
+                  var photoPath= path.resolve(__dirname,"..//..//ZipUploads//"+result[i].username+".jpg");
+                 // var photoError=false;
+                try
+                {var data = fs.readFileSync(photoPath);}
+
+                 catch(err)
+                 {console.log("In Photo Catch: readFile Error "+err);
+                 importErrors["record# " + (i + 1) + " of user: " + result[i].username]="User's Photo not found or incorrect data is passed in excel";
+                    continue;}
+
+
+
+
+
+
+
+
                 var roles = [];
                 if (result[i].role1) roles.push(result[i].role1);
                 if (result[i].role2) roles.push(result[i].role2);
                 if (result[i].role3) roles.push(result[i].role3);
-  
-  
+
+
                 result[i]["role"] = roles;
                 var { role1, ...temp } = result[i];
                 var { role2, ...temp } = temp;
                 var { role3, ...temp } = temp;
-  
+
                 result[i] = temp;
-  
+
                 result[i].role = await result[i].role.filter(onlyUnique);
                // console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
                // console.log("Fresher Yes : " + result[i].type.toLowerCase);
                 if(result[i].type.toLowerCase()==="fresher")
                 {
-  
+
                   result[i].experiencedetails="NA";
               }
                 var impValResult = await importValidation(result[i]);
                 console.log("impValResultLength: " + Object.keys(impValResult).length);
-  
+
                 // impValResult length check
-  
+
                 if (Object.keys(impValResult).length === 0) {
                  // console.log("result[i].role: " + result[i].role);
                  var user=null;
@@ -418,22 +427,22 @@ if(request.type.toLowerCase()==="experienced")
                     };
                     //Saving Parent in users
                     user = await new User(parentUser);
-  
+
                     user.password = user.hashPassword(user.password);
-  
+
                     await  user
                       .save()
                       .then(user => {
-  
+
                       })
                       .catch(err => {
                         return res.send(err);
                       });
                      // console.log("Parent user  = " + user);
-  
+
   result[i]["userid"]= user.userid;
                       user = new Parent(result[i]);
-  
+
                       user.parentpassword = user.hashPassword(user.parentpassword);
                       await user
                         .save()
@@ -444,32 +453,32 @@ if(request.type.toLowerCase()==="experienced")
                           return res.send(err);
                         });
                        // console.log("Parent = " + user);
-  
+
                         var { userid, ...temp } = result[i];
-  
+
                 result[i] = temp;
-  
+
                     //Saving Student in users
                     user = await new User(result[i]);
-  
+
                     user.password = user.hashPassword(user.password);
                       await user
                       .save()
                       .then(user => {
-  
+
                       })
                       .catch(err => {
                         return res.send(err);
                       });
-  
+
                      // console.log(" Student user = " + user);
                       result[i]["userid"]= user.userid;
-  
+
                     user = await new Student(result[i]);
                    // console.log("Student = " + user);
                     user.password = user.hashPassword(user.password);
                      user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");
-  
+
                     user.photo.contentType = 'image/png';
                      await user
                       .save()
@@ -479,8 +488,8 @@ if(request.type.toLowerCase()==="experienced")
                       .catch(err => {
                         return res.send(err);
                       });
-  
-  
+
+
                   }
                   else
                   {/* var empUser = {
@@ -488,7 +497,7 @@ if(request.type.toLowerCase()==="experienced")
                     "email": result[i].email, "password": result[i].password, "role": result[i].role, "status": result[i].status
                   }; */
                   user = new User(result[i]);
-  
+
                   user.password = user.hashPassword(user.password);
                    await  user
                     .save()
@@ -499,17 +508,17 @@ if(request.type.toLowerCase()==="experienced")
                       return res.send(err);
                     });
                   //  console.log("empUser = " + user);
-  
+
                   if (result[i].role.indexOf("admin") !== -1) {
                     user = new Admin(result[i]);
                    // console.log("Admin = " + user);
                     user.password = user.hashPassword(user.password);
                       user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");
-  
-  
-  
-  
-  
+
+
+
+
+
                     user.photo.contentType = 'image/png';
                        await user
                       .save()
@@ -520,14 +529,14 @@ if(request.type.toLowerCase()==="experienced")
                         return res.send(err);
                       });
                   }
-  
+
                   if (result[i].role.indexOf("teacher") !== -1) {
                     user = new Teacher(result[i]);
                     //console.log("Teacher = " + user);
                     user.password = user.hashPassword(user.password);
                     user.photo.data = fs.readFileSync("ZipUploads//"+result[i].username+".jpg");
-  
-  
+
+
                     user.photo.contentType = 'image/png';
                         await   user
                       .save()
@@ -538,59 +547,59 @@ if(request.type.toLowerCase()==="experienced")
                         return res.send(err);
                       });
                   }
-  
-  
-  
-  
+
+
+
+
                   }
                 }
-  
+
                 else {
                   importErrors["    record# " + (i + 1) + " of user: " + result[i].username] = impValResult;
-  
+
                 }
-  
-  
-  
+
+
+
               }
-             // console.log("IMPORT ERRORS: " + JSON.stringify(importErrors));
-  
-  
+              console.log("IMPORT ERRORS: " + JSON.stringify(importErrors));
+
+
               if (Object.keys(importErrors).length > 0)
                 return res.send({ errors: importErrors });
               else
                 return res.send("Imported Successfully");
-  
-  
-  
-  
+
+
+
+
             }
           );
-  
-  
-  
+
+
+
         } catch (e) {
           console.log(e);
           res.json({ error_code: 2, err_desc: "Corupted excel file" });
         }
       });
     });
-    
+
 
 
   }
 
-async function photoZipUploading(req,res)
+ function photoZipUploading(req,res)
 {
  console.log("in Photo ZipUpload");
 
 
  rimraf('./ZipUploads/*.*', function (e) {
- 
+
   console.log(e);
   console.log('Deleted Photos');
 
-  zipUpload(req, res, async function (err) {
+  zipUpload(req, res, function (err) {
     if (err) {
        res.json({ error_code: 1, err_desc: err });
     }
@@ -600,15 +609,15 @@ async function photoZipUploading(req,res)
   else{
     console.log(req.file.path);
   zipPath = req.file.path;
-  
-  await  fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads'}));
-  
+
+   fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: 'ZipUploads'}));
+
   res.json({success:true, message:"zip "+ req.file.originalname +  " uploaded to " +zipPath});
   }
-  
-  
-  
-  
+
+
+
+
   });
 
 });

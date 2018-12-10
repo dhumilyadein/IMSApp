@@ -115,7 +115,7 @@ class ImportUser extends Component {
     const excel = new FormData();
     const zip = new FormData();
     console.log("file" + this.state.filename);
-    this.setState({ loader: false, importErrors: null, showErrors: false, disableButton: true });
+    this.setState({ loader: false, importErrors: null, showErrors: false, disableButton: false });
     if (!this.state.file)
 
       this.setState({
@@ -161,7 +161,7 @@ class ImportUser extends Component {
               loader: false,
               disableButton: false,
               impSuccess: false,
-              zipFile:null
+
 
 
 
@@ -195,7 +195,7 @@ class ImportUser extends Component {
                       loader: false,
                       disableButton: false,
                       impSuccess: false,
-                      
+
 
 
                     });
