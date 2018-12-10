@@ -178,8 +178,8 @@ const AddFees = Loadable({
   loading: Loading
 });
 
-const FeesView = Loadable({
-  loader: () => import("./views/admin/finance/feesview/FeesView"),
+const FeeTemplates = Loadable({
+  loader: () => import("./views/admin/finance/feeTemplates/FeeTemplates"),
   loading: Loading
 });
 
@@ -220,13 +220,13 @@ const routes = [
   },
 {
     path: "/admin/userdetails",
-    exact: true, 
+    exact: true,
     name: "User Details",
     component: UserDetails
   },
 
-  { path: '/admin/userdetails/:username', 
-  exact: true, 
+  { path: '/admin/userdetails/:username',
+  exact: true,
   name: "User Details",
     component: UserDetails
    },
@@ -241,9 +241,9 @@ const routes = [
     component: AddFees
   },
   {
-    path: "/admin/finance/feesview",
-    name: "Fees Status",
-    component: FeesView
+    path: "/admin/finance/FeeTemplates",
+    name: "Fee Templates",
+    component: FeeTemplates
   },
   {
     path: "/admin/searchuser",

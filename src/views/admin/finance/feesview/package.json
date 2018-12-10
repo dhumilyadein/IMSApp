@@ -1,6 +1,0 @@
-{
-  "name": "FeesView",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./admin/finance/feesview/FeesView.js"
-}

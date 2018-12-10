@@ -62,8 +62,8 @@ export default {
       icon: 'fa fa-money',
     },
     {
-      name: 'Fees Status ',
-      url: '/admin/finance/FeesView',
+      name: 'Fee Templates ',
+      url: '/admin/finance/FeeTemplates',
       icon: 'fa fa-money',
     },
 
