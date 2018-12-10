@@ -237,7 +237,9 @@ class RegisterUser extends Component {
 
      }
 
-     else{if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
+     else{
+
+      if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
       {  if (this.state.role[0] === "student") {
          console.log("in STUDENT");
 
