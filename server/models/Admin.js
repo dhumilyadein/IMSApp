@@ -104,7 +104,7 @@ var AdminSchema = new Schema({
     required: true
   },
 
-  type: {
+  admintype: {
     type: String,
     required: true
   },

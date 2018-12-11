@@ -29,6 +29,10 @@ var StudentSchema = new Schema({
     type: String,
     required: true
   },
+  parentpostalcode: {
+    type: String,
+    required: true
+  },
 
   dob: {
     type: Date,

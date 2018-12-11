@@ -132,7 +132,7 @@ class RegisterUser extends Component {
    */
 
   resetForm = e => {
-    document.getElementById("photo").value = "";
+    document.getElementById("photo").value = null;
     document.getElementById("gender1").checked = false;
     document.getElementById("gender2").checked = false;
 
@@ -195,7 +195,7 @@ class RegisterUser extends Component {
       gender: "",
       maritalstatus: "",
       qualification: "",
-      photo: "",
+      photo: null,
       religion: "",
       nationality: "",
       bloodgroup: "",
@@ -215,9 +215,9 @@ class RegisterUser extends Component {
    */
  photoUpload()
 {console.log("in PhotoUpload for file - "+this.state.photoname)
-  
+
   const data = new FormData();  //photo upload
-  this.setState({photoname:this.state.photo.name, corruptphoto:false},()=>{
+  this.setState({photoname:this.state.photo.name},()=>{
 
     data.append('file', this.state.photo, this.state.photoname);
     axios
@@ -226,24 +226,67 @@ class RegisterUser extends Component {
     console.log("in Photo Res " + JSON.stringify(res.data));
     if (res.data.error_code === 1) {
 
-      this.setState({
-        corruptphoto:true
+     return this.setState({
+        corruptphoto:true,
+
+
 
 
 
       });
+
      }
-else
-this.setState({
-  corruptphoto:false
+
+     else{
+
+      if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
+      {  if (this.state.role[0] === "student") {
+         console.log("in STUDENT");
 
 
+         axios
+           .post("http://localhost:8001/api/studentRegister", this.state)
+           .then(result => {
+             console.log("RESULT.data " + JSON.stringify(result.data));
+             if (result.data.errors) {
+               return this.setState(result.data);
+             }
 
-});
+             this.resetForm();
+
+             return this.setState({
+               userdata: result.data.data,
+               errors: null,
+               studentRegSuccess: true,
+               modalSuccess: true,
+
+
+             });
+           });
+       } else if(this.state.role.indexOf("admin")!==-1 || this.state.role.indexOf("teacher")!==-1 ){
+         this.setState({ roleerror: false,  errors:null });
+         axios
+           .post("http://localhost:8001/api/empRegister", this.state)
+           .then(result => {
+             console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
+             if (result.data.errors) {
+               return this.setState(result.data);
+             }
+             this.resetForm();
+             return this.setState({
+               userdata: result.data.data,
+               errors: null,
+               empRegSuccess: true,
+               modalSuccess: true
+
+             });
+           });
+       }}}
+
 
   })
   });
- 
+
 
 }
 
@@ -254,60 +297,20 @@ this.setState({
     this.setState({ roleerror: false, errors:null});
     // console.log(JSON.stringify(this.state));
     //console.log("in STUDENT" + this.state.role[0]);
-if(this.state.photo)
-   this.photoUpload();
-   else
-   this.setState({photoerror: "Please select Photo"})
 
-      if (this.state.role.length === 0) {
+    if (this.state.role.length === 0) {
       this.setState({ roleerror: true });
 
     }
 
-
-    if(this.state.photoerror===null && this.state.corruptphoto===false)
-   {  if (this.state.role[0] === "student") {
-      console.log("in STUDENT");
-
-
-      axios
-        .post("http://localhost:8001/api/studentRegister", this.state)
-        .then(result => {
-          console.log("RESULT.data " + JSON.stringify(result.data));
-          if (result.data.errors) {
-            return this.setState(result.data);
-          }
-
-          this.resetForm();
-
-          return this.setState({
-            userdata: result.data.data,
-            errors: null,
-            studentRegSuccess: true,
-            modalSuccess: true,
+   if(this.state.photo===null)
+   this.setState({photoerror: "Please select Photo"})
+   else
+   this.photoUpload();
 
 
-          });
-        });
-    } else if(this.state.role.indexOf("admin")!==-1 || this.state.role.indexOf("teacher")!==-1 ){
-      this.setState({ roleerror: false,  errors:null });
-      axios
-        .post("http://localhost:8001/api/empRegister", this.state)
-        .then(result => {
-          console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
-          if (result.data.errors) {
-            return this.setState(result.data);
-          }
-          this.resetForm();
-          return this.setState({
-            userdata: result.data.data,
-            errors: null,
-            empRegSuccess: true,
-            modalSuccess: true
 
-          });
-        });
-    }}
+
   }
 
   /**
@@ -356,6 +359,8 @@ this.setState({
    * @param {*} e
    */
   roleHandler = e => {
+
+    this.setState({roleerror:false})
     if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
       const temp = this.state.role;
       temp.push(e.target.name);
@@ -431,11 +436,17 @@ this.setState({
 
 
   fileChange = event => {
-    const file = event.target.files[0];
+   try{ const file = event.target.files[0];
     this.setState(
       { photo: file, nophoto: false, photoerror:null, corruptphoto:false,photoname:file.name },
       () => console.log("file:  " + this.state.photoname)
-    );
+    );}
+    catch (err) {
+      console.log("Photo Upload error: No file selected: " + err);
+      this.setState({photo:null,photoerror:null, corruptphoto:false});
+      document.getElementById("photo").value = null;
+
+    }
   };
 
   render() {
