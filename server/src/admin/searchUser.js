@@ -3,6 +3,7 @@ var util = require('util');
 var { check, validationResult } = require("express-validator/check");
 
 const User = require("../../models/User");
+const Student = require("../../models/Student");
 
 module.exports = function (app) {
 
@@ -125,9 +126,64 @@ module.exports = function (app) {
     console.log("SEARCH USER EXIT");
   }
 
+  /**
+     * @description Post method for SearchUser service
+     */
+    function searchStudents(req, res) {
+
+      console.log("searchStudents ENTRY");
+  
+      var searchJSON = {};
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      var using = req.body.using;
+      var find = req.body.find;
+      var searchCriteria = req.body.searchCriteria;
+  
+      console.log("find - " + find + " using - " + using + " searchCriteria - " + searchCriteria);
+  
+      if ("containsSearchCriteria" === searchCriteria) {
+        find = "/" + find + "/i";
+      } else {
+        find = "/^" + find + "$/i";
+      }
+  
+      searchJSON = {
+        [using]: { $regex: eval(find) }
+      }
+
+      console.log("searchStudentJSON - " + JSON.stringify(searchJSON));
+  
+      Student.find(searchJSON)
+        .then(function (studentData) {
+  
+          console.log("SEARCH USER RESULT " + searchCriteria + "\n" + studentData + " find - " + find);
+          res.send(studentData);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+  
+      //console.log("searchString - " + JSON.stringify(searchString));
+  
+      console.log("searchStudents EXIT");
+    }
+
   app.post("/api/searchUsers", serValidation, searchUsers, (req, res) => {
-    console.log("REDIRECTING TO USERS PAGE");
+    console.log("SearchUsers post service running");
 
   });
+
+  app.post("/api/searchStudents", serValidation, searchStudents, (req, res) => {
+    console.log("SearchStudents post service running");
+
+  });
+
   app.get("/", (req, res) => res.json("sdasdsa"));
 };

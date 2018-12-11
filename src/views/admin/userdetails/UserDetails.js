@@ -44,8 +44,6 @@ class UserDetails extends Component {
 
     super(props);
 
-    this.fetchUserDataOnPageLoad();
-
     this.state = {
       admintype: "Office Admin",
       username: "",
@@ -116,30 +114,28 @@ class UserDetails extends Component {
       photoerror: null,
 
       // To make tab 1 on focus
-      activeTab: '1',
+      activeTab: 'Student',
 
       // For changing fields to non editable when screen mode is "display"
       editMode: "disabled", // {"disable", ""}
 
       // Data fetched from users table on the username
-      fetchedUserDetails : null,
+      fetchedUserDetails : [{}],
+
+      // Data fetched from students table on the username
+      fetchedStudentsDetails : [],
 
       // For hiding fields which are meant to be displayed only in "edit" mode, fields like password, confirm password, roles, etc.
       screenmode: "display" // {"dispaly", "edit"}
     };
 
     this.changeHandler = this.changeHandler.bind(this);
-    this.submitHandler = this.submitHandler.bind(this);
-    this.roleHandler = this.roleHandler.bind(this);
-    this.resetForm = this.resetForm.bind(this);
-    this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.fetchUserDataOnPageLoad = this.fetchUserDataOnPageLoad.bind(this);
 
 
-    this.fileChange = this.fileChange.bind(this);
-    this.copyAddress = this.copyAddress.bind(this);
-    this.photoUpload = this.photoUpload.bind(this);
+    this.fetchUserDataOnPageLoad();
   }
   
   /**
@@ -153,7 +149,7 @@ class UserDetails extends Component {
     }
   }
 
-  fetchUserDataOnPageLoad() {
+  async fetchUserDataOnPageLoad() {
 
     console.log("fetchUserDataOnPageLoad ENTER: " + this.props.match.params.username);
 
@@ -165,7 +161,7 @@ class UserDetails extends Component {
     }
     console.log("Submit Request - " + JSON.stringify(searchUserRequest));
 
-    axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(res => {
+    await axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(res => {
 
       console.log("submit response data - " + JSON.stringify(res.data));
       console.log("res.data.errors - " + res.data.errors);
@@ -175,13 +171,43 @@ class UserDetails extends Component {
       if (res.data.errors) {
         return this.setState({ errors: res.data.errors });
       } else {
-        console.log("Final User details - " + JSON.stringify(res.data));
 
         this.setState({
-            fetchedUserDetails : res.data[0]
+            fetchedUserDetails : res.data
           });
 
-          console.log("Roles fetched from users table - " + this.state.fetchedUserDetails.role);
+          console.log("Final User details - res.data - " + JSON.stringify(res.data));
+          console.log("this.state.fetchedUserDetails - " + JSON.stringify(this.state.fetchedUserDetails));
+          console.log("this.state.fetchedUserDetails.role - First user - " + this.props.match.params.username + " @ Details fetched on username - " + JSON.stringify(this.state.fetchedUserDetails[0]));
+      }
+    });
+
+    var searchStudentsRequest = {
+      "find" : this.props.match.params.username,
+      "using" : "username",
+      "searchCriteria" : "equalsSearchCriteria"
+    }
+
+    await axios.post("http://localhost:8001/api/searchStudents", searchStudentsRequest).then(res => {
+
+      console.log("searchStudents Submit Request - " + JSON.stringify(searchStudentsRequest));
+
+      console.log("searchStudents submit response data - " + JSON.stringify(res.data));
+      console.log("searchStudents  res.data.errors - " + res.data.errors);
+      console.log("searchStudents  res.data.message - " + res.data.message);
+      console.log("searchStudents  res.data.error - " + res.data.errors);
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+            fetchedStudentsDetails : res.data
+          });
+
+          console.log("Final User details - res.data - " + JSON.stringify(res.data));
+          console.log("this.state.fetchedStudentsDetails - " + JSON.stringify(this.state.fetchedStudentsDetails));
+          console.log("this.state.fetchedStudentsDetails.role - First user - " + this.props.match.params.username + " @ Details fetched on username - " + JSON.stringify(this.state.fetchedStudentsDetails[0]));
       }
     });
 
@@ -191,185 +217,6 @@ class UserDetails extends Component {
     this.setState({
       modalSuccess: !this.state.modalSuccess
     });
-  }
-
-  /**
-   * @description Dismisses the alert
-   * @param {*} e
-   */
-  onDismiss() {
-    this.setState({ visible: false });
-  }
-
-  /**
-   * @description Resets the form
-   * @param {*} e
-   */
-
-  resetForm = e => {
-    document.getElementById("photo").value = "";
-    document.getElementById("gender1").checked = false;
-    document.getElementById("gender2").checked = false;
-
-
-    this.setState({
-      photoerror: null,
-      admintype: "Office Admin",
-      empRegSuccess: false,
-      modalSuccess: true,
-      parentpassword_con: "",
-      parentusername: "",
-      occupation: "",
-      relation: "",
-      parentpassword: "",
-      username: "",
-      email: "",
-      firstname: "",
-      lastname: "",
-      password: "",
-      password_con: "",
-      role: ["student"],
-      userdata: null,
-      studentRegSuccess: false,
-      employeeno: "",
-      errors: null,
-      importErrors: null,
-      status: "Active",
-      disabled: true,
-      checked: {
-        adminChecked: false,
-        teacherChecked: false,
-        studentChecked: true,
-        parentChecked: false
-      },
-      visible: true,
-      modalSuccess: true,
-      parentfirstname: "",
-      parentlastname: "",
-      parentrelation: "",
-      parentoccupation: "",
-      parentemail: "",
-      parentphone1: "",
-      parentphone2: "",
-      parentaddress: "",
-      parentcity: "",
-      parentpostalcode: "",
-      parentstate: "",
-      address: "",
-      city: "",
-      postalcode: "",
-      state: "",
-      admissionno: "",
-      rollno: "",
-      doj: "",
-      type: "",
-      experiencedetails: "NA",
-      department: "",
-      designation: "",
-      dob: "",
-      gender: "",
-      maritalstatus: "",
-      qualification: "",
-      photo: "",
-      religion: "",
-      nationality: "",
-      bloodgroup: "",
-      category: "",
-
-      corruptphoto: false,
-      photoname: "",
-      phone: "",
-      parentaddresscheck: false,
-      roleerror: false
-    });
-  };
-
-  /**
-   * @description Handles the form submit request
-   * @param {*} e
-   */
-  photoUpload() {
-    const data = new FormData();  //photo upload
-    data.append('file', this.state.photo, this.state.photoname);
-    axios
-      .post("http://localhost:8001/api/photoUploading", data)
-      .then(res => {
-        console.log("in Photo Res " + JSON.stringify(res.data));
-        if (res.data.error_code === 1) {
-
-          this.setState({
-            corruptphoto: true
-
-
-
-          });
-        }
-      })
-
-  }
-
-  submitHandler(e) {
-    //var tempdata = {"role":["student"],"userdata":null,"studentRegSuccess":false,"errors":null,"importErrors":null,"status":"Active","disabled":true,"checked":{"adminChecked":false,"teacherChecked":false,"studentChecked":true},"visible":true,"studentmodalSuccess":true,"admintype":"Office Admin","nophoto":false,"corruptphoto":false,"photoname":"Book1.xlsx","roleerror":false,"firstname":"dfdfd","lastname":"dfdf","dob":"2018-11-08","gender":"Female","bloodgroup":"B-","nationality":"Indian","religion":"Sikh","category":"OBC","photo":"tempphotodata","admissionno":"4545","rollno":"56565","doj":"2018-11-20","phone":"+91 56565-56565","address":"dfdf","city":"dfdf","postalcode":"dfdf","state":"dfdfdf","username":"yuyg","email":"fdfdf@df.co","password":"pass","password_con":"pass","parentfirstname":"fgfg","parentlastname":"hjhjhj","relation":"Father","occupation":"fgfgfg","parentemail":"dfdf@gh.cd","parentphone1":"+91 56656-56565","parentphone2":"+91 45454-54545","parentaddress":"dfdf","parentcity":"dfdf","parentpostalcode":"dfdf","parentstate":"dfdfdf","parentusername":"gngngn","parentpassword":"pass","parentpassword_con":"pass"};
-
-    e.preventDefault();
-    this.setState({ roleerror: false, errors: null });
-    // console.log(JSON.stringify(this.state));
-    //console.log("in STUDENT" + this.state.role[0]);
-    if (this.state.photo)
-      this.photoUpload();
-    else
-      this.setState({ photoerror: "Please select Photo" })
-
-    if (this.state.role.length === 0) {
-      this.setState({ roleerror: true });
-
-    }
-
-
-    if (this.state.photoerror === null && this.state.corruptphoto === false) {
-      if (this.state.role[0] === "student") {
-        console.log("in STUDENT");
-
-
-        axios
-          .post("http://localhost:8001/api/studentRegister", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-            if (result.data.errors) {
-              return this.setState(result.data);
-            }
-
-            this.resetForm();
-
-            return this.setState({
-              userdata: result.data.data,
-              errors: null,
-              studentRegSuccess: true,
-              modalSuccess: true,
-
-
-            });
-          });
-      } else if (this.state.role.indexOf("admin") !== -1 || this.state.role.indexOf("teacher") !== -1) {
-        this.setState({ roleerror: false, errors: null });
-        axios
-          .post("http://localhost:8001/api/empRegister", this.state)
-          .then(result => {
-            console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
-            if (result.data.errors) {
-              return this.setState(result.data);
-            }
-            this.resetForm();
-            return this.setState({
-              userdata: result.data.data,
-              errors: null,
-              empRegSuccess: true,
-              modalSuccess: true
-
-            });
-          });
-      }
-    }
   }
 
   /**
@@ -391,116 +238,10 @@ class UserDetails extends Component {
       });
   }
 
-  copyAddress(e) {
-    if (e.target.checked === true) {
-      console.log("address check true: " + e.target.checked);
-      this.setState({
-        parentaddress: this.state.address,
-        parentcity: this.state.city,
-        parentpostalcode: this.state.postalcode,
-        parentstate: this.state.state,
-        parentaddresscheck: true
-      });
-    } else if (e.target.checked === false) {
-      console.log("address check false: " + e.target.checked);
-      this.setState({
-        parentaddress: "",
-        parentcity: "",
-        parentpostalcode: "",
-        parentstate: "",
-        parentaddresscheck: false
-      });
-    }
-  }
-
-  /**
-   * @description Called when the role(s) are selected. To update role Array
-   * @param {*} e
-   */
-  roleHandler = e => {
-    if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
-      const temp = this.state.role;
-      temp.push(e.target.name);
-
-      this.setState({ role: temp }, () => console.log(this.state.role));
-    } else if (
-      !e.target.checked &&
-      this.state.role.indexOf(e.target.name) !== -1
-    ) {
-      const temp = this.state.role;
-      temp.splice(this.state.role.indexOf(e.target.name), 1);
-
-      this.setState({ role: temp }, () => console.log(this.state.role));
-    }
-
-    // Checked status
-    var checkedStatus = e.target.checked;
-    const tempCheckedStatus = this.state.checked;
-
-    if (e.target.name === "admin" && e.target.checked) {
-      tempCheckedStatus.adminChecked = true;
-      this.setState({ checked: tempCheckedStatus });
-    } else if (e.target.name === "admin" && !e.target.checked) {
-      tempCheckedStatus.adminChecked = false;
-      this.setState({ checked: tempCheckedStatus });
-    }
-
-    if (e.target.name === "teacher" && e.target.checked) {
-      tempCheckedStatus.teacherChecked = true;
-      this.setState({ checked: tempCheckedStatus });
-    } else if (e.target.name === "teacher" && !e.target.checked) {
-      tempCheckedStatus.teacherChecked = false;
-      this.setState({ checked: tempCheckedStatus });
-    }
-
-    if (e.target.name === "student" && e.target.checked) {
-      this.setState({
-        checked: {
-          studentChecked: true,
-          adminChecked: false,
-          teacherChecked: false
-        },
-        disabled: true,
-        role: ["student"]
-      });
-    } else if (e.target.name === "student" && !e.target.checked) {
-      console.log("not checked");
-
-      this.setState({
-        checked: {
-          studentChecked: false,
-          adminChecked: false,
-          teacherChecked: false
-        },
-        disabled: false
-      });
-    }
-
-    console.log(
-      "studentChecked - " +
-      this.state.checked.studentChecked +
-      " adminChecked - " +
-      this.state.checked.adminChecked +
-      " teacherChecked - " +
-      this.state.checked.teacherChecked
-    );
-  };
-
-  /**
-   * @description handles the file upload
-   * @param {*} e
-   */
-
-
-  fileChange = event => {
-    const file = event.target.files[0];
-    this.setState(
-      { photo: file, nophoto: false, photoname: file.name, photoerror: null, corruptphoto: false },
-      () => console.log("file:  " + this.state.photo)
-    );
-  };
-
   render() {
+
+    //this.fetchUserDataOnPageLoad();
+
     return (
       <div style={{ width: "1000px" }}>
 
@@ -528,35 +269,35 @@ class UserDetails extends Component {
           <Row lg="4" style={{ width: "2500px" }}>
             <Col xs="12" md="7" className="mb-4">
 
-              <Nav tabs>
+<Nav tabs>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: this.state.activeTab === '1' })}
-                  onClick={() => { this.toggle('1'); }}
+                  className={classnames({ active: this.state.activeTab === 'Student' })}
+                  onClick={() => { this.toggle('Student'); }}
                 >
-                  Home
+                  Student
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: this.state.activeTab === '2' })}
-                  onClick={() => { this.toggle('2'); }}
+                  className={classnames({ active: this.state.activeTab === 'Admin' })}
+                  onClick={() => { this.toggle('Admin'); }}
                 >
-                  Profile
+                  Admin
                 </NavLink>
               </NavItem>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: this.state.activeTab === '3' })}
-                  onClick={() => { this.toggle('3'); }}
+                  className={classnames({ active: this.state.activeTab === 'Teacher' })}
+                  onClick={() => { this.toggle('Teacher'); }}
                 >
-                  Messages
+                  Teacher
                 </NavLink>
               </NavItem>
-            </Nav>
+            </Nav>         
 
 <TabContent activeTab={this.state.activeTab}>
-              <TabPane tabId="1">
+              <TabPane tabId="Student">
 
               <Card className="mx-4">
                 <CardBody className="p-2">
@@ -1935,14 +1676,14 @@ class UserDetails extends Component {
               </Card>
 
 </TabPane>
-<TabPane tabId="2">
+<TabPane tabId="Admin">
                 2. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
                 et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
                 aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
                 dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
                 officia deserunt mollit anim id est laborum.
               </TabPane>
-              <TabPane tabId="3">
+              <TabPane tabId="Teacher">
                 2. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
                 et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
                 aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum

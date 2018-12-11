@@ -250,7 +250,7 @@ class SearchUser extends Component {
                           filter={AutoComplete.noFilter}
                           maxSearchResults={5}
                           onNewRequest={this.selectedItem}
-                          autofocus="true"
+                          autoFocus="true"
                         />
                       </MuiThemeProvider>
 
