@@ -24,6 +24,7 @@ import {
   AvGroup,
   AvInput
 } from "availity-reactstrap-validation";
+import { runInThisContext } from "vm";
 
 class FeeTemplates extends Component {
   constructor(props) {
@@ -35,8 +36,9 @@ class FeeTemplates extends Component {
       success: null,
       userdata: null,
       templateName: "",
-      rows: [{}],
-      showCreateButton:true
+      rows: [{feeType:"",amount:""}],
+      showCreateButton:true,
+      rowError:false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -57,24 +59,35 @@ class FeeTemplates extends Component {
    */
 
   submitHandler(e)
-  {
+  {this.setState({rowError:""});
 console.log("in Submit State: "+JSON.stringify(this.state));
+console.log("Row Length: "+this.state.rows.length);
+
+if(this.state.rows.length===0)
+this.setState({rowError:"Please add atleast one Fee Category"});
+else
+for(var i=0;i<this.state.rows.length;i++ )
+{ if(this.state.rows[i].feeType===""||this.state.rows[i].amount==="")
+this.setState({rowError:"Please fill all the table fields first"});
+
+}
+
 
   }
 
   handleChange = idx => e => {
     e.preventDefault();
     const { name, value } = e.target;
-    const rows = [...this.state.rows];
-    rows[idx] = {
-      [name]: value
-    };
+    const temp =this.state.rows;
+    temp[idx][name]= value;
+  
     this.setState({
-      rows
-    });
+      rows:temp
+    },()=>{console.log("Change State: " +JSON.stringify(this.state))});
   };
   handleAddRow = e => {
     e.preventDefault();
+    this.setState({rowError:""});
     const item = {
       feeType: "",
       amount: ""
@@ -86,13 +99,14 @@ console.log("in Submit State: "+JSON.stringify(this.state));
   handleRemoveRow = e => {
     e.preventDefault();
     this.setState({
-      rows: this.state.rows.slice(0, -1)
+      rows: this.state.rows.slice(0, -1),
+     rowError:""
     });
   };
   handleRemoveSpecificRow = idx => () => {
-    const rows = [...this.state.rows];
-    rows.splice(idx, 1);
-    this.setState({ rows });
+    const temp = [...this.state.rows];
+    temp.splice(idx, 1);
+    this.setState({ rows:temp });
   };
 
   render() {
@@ -128,8 +142,8 @@ console.log("in Submit State: "+JSON.stringify(this.state));
 
                           <AvField
 
-                            required
-                            errorMessage="Please enter Template name"
+required
+errorMessage="Enter Template name"
                             type="text"
                             label="Template Name"
                             name="templateName"
@@ -150,7 +164,7 @@ console.log("in Submit State: "+JSON.stringify(this.state));
                             <thead>
                               <tr>
                                 <th className="text-center"> S.No. </th>
-                                <th className="text-center"> Fee Type </th>
+                                <th className="text-center"> Fee Category </th>
                                 <th className="text-center"> Amount(Rs) </th>
                                 <th />
                               </tr>
@@ -161,11 +175,10 @@ console.log("in Submit State: "+JSON.stringify(this.state));
                                   <td align="center">{idx+1}</td>
                                   <td>
                                     <AvField
-                                      required
-                                      errorMessage="Enter Fee type"
+                                     
                                       type="text"
-                                      name={"feeType"+{idx}}
-                                      value={this.state.rows[idx].feetype}
+                                      name="feeType"
+                                      value={this.state.rows[idx].feeType}
                                       onChange={this.handleChange(idx)}
                                       className="form-control"
 
@@ -176,9 +189,8 @@ console.log("in Submit State: "+JSON.stringify(this.state));
 
 
                                     <AvField
-                                      name={"amount"+{idx}}
-                                      required
-                                      errorMessage="Enter Fee Amount"
+                                      name="amount"
+                                     
                                       type="number"
                                       className="form-control"
                                       value={this.state.rows[idx].amount}
@@ -201,6 +213,13 @@ console.log("in Submit State: "+JSON.stringify(this.state));
                               ))}
                             </tbody>
                           </table>
+                          {this.state.rowError && (
+                          <font color="red"><h6>
+                            {" "}
+                            <p>{this.state.rowError} </p>
+                         </h6> </font>
+                        )}
+                         
                           <Button
                             onClick={this.handleAddRow}
                             className="btn btn-primary"
