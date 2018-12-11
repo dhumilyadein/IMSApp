@@ -166,4 +166,4 @@ StudentSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = User = mongoose.model("student", StudentSchema);
+module.exports = Student = mongoose.model("student", StudentSchema);
