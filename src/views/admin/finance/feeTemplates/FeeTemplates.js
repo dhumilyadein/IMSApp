@@ -76,8 +76,8 @@ console.log("in Submit State: "+JSON.stringify(this.state));
   handleAddRow = e => {
     e.preventDefault();
     const item = {
-      name: "",
-      mobile: ""
+      feeType: "",
+      amount: ""
     };
     this.setState({
       rows: [...this.state.rows, item]
@@ -164,9 +164,10 @@ console.log("in Submit State: "+JSON.stringify(this.state));
                                       required
                                       errorMessage="Enter Fee type"
                                       type="text"
-                                      name="feeType"
+                                      name={"feeType"+{idx}}
                                       value={this.state.rows[idx].feetype}
                                       onChange={this.handleChange(idx)}
+                                      className="form-control"
 
                                       id="feeType"
                                     />
@@ -175,11 +176,11 @@ console.log("in Submit State: "+JSON.stringify(this.state));
 
 
                                     <AvField
-                                      name="amount"
+                                      name={"amount"+{idx}}
                                       required
                                       errorMessage="Enter Fee Amount"
                                       type="number"
-
+                                      className="form-control"
                                       value={this.state.rows[idx].amount}
                                       onChange={this.handleChange(idx)}
 
