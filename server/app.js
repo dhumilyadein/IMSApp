@@ -8,6 +8,7 @@ const adminRegister = require("./src/admin/registerUser");
 const adminImport = require("./src/admin/importUsers");
 const adminSearch = require("./src/admin/searchUser");
 const studentSearch = require("./src/admin/searchStudent");
+const feetemplate = require("./src/admin/feeTemplate");
 
 const login = require("./src/login");
 const app = express();
@@ -18,7 +19,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      
+
     ],
     methods: ["GET", "HEAD", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"],
     credentials: true //allow setting of cookies
@@ -40,6 +41,7 @@ adminRegister(app);
 adminImport(app);
 adminSearch(app);
 studentSearch(app);
+feetemplate(app);
 login(app);
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));

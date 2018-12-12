@@ -14,40 +14,64 @@ import {
   InputGroupText,
   Label,
   Row,
-  Table
+  Table,
+  Modal,
+  ModalHeader
 } from "reactstrap";
-import { AppSwitch } from "@coreui/react";
+
 import axios from "axios";
-import {
-  AvForm,
-  AvField,
-  AvGroup,
-  AvInput
-} from "availity-reactstrap-validation";
-import { runInThisContext } from "vm";
 
 class FeeTemplates extends Component {
   constructor(props) {
     super(props);
+    this.getExistingTemplates();
     this.state = {
       showCreateTemplate: false,
-      status: null,
+      status: "Active",
       erorrs: null,
       success: null,
       userdata: null,
       templateName: "",
-      rows: [{feeType:"",amount:""}],
-      showCreateButton:true,
-      rowError:false
+      rows: [{ feeType: "", amount: "" }],
+      existingRows:[{templateName:""}],
+      showCreateButton: true,
+      rowError: false,
+      templateNameError: "",
+      success: false,
+      modalSuccess: false,
+      visible: false
     };
+
+
 
     this.handleChange = this.handleChange.bind(this);
     this.handleAddRow = this.handleAddRow.bind(this);
     this.handleRemoveRow = this.handleRemoveRow.bind(this);
     this.handleRemoveSpecificRow = this.handleRemoveSpecificRow.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
+    this.toggleSuccess = this.toggleSuccess.bind(this);
+    this.onDismiss = this.onDismiss.bind(this);
+    this.getExistingTemplates = this.getExistingTemplates.bind(this);
+
+
+
+
   }
 
+  getExistingTemplates()
+  {
+
+    axios
+    .get("http://localhost:8001/api/existingTemplates")
+    .then(result => {
+      console.log("Existing RESULT.data " + JSON.stringify(result.data));
+      if (result.data) {
+        this.setState({
+          existingRows: result.data
+        });
+      }
+    });
+  }
   /**
    * @description Handles the form search request
    * @param {*} e
@@ -58,36 +82,88 @@ class FeeTemplates extends Component {
    * @param {*} e
    */
 
-  submitHandler(e)
-  {this.setState({rowError:""});
-console.log("in Submit State: "+JSON.stringify(this.state));
-console.log("Row Length: "+this.state.rows.length);
+  toggleSuccess() {
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
+    });
+  }
 
-if(this.state.rows.length===0)
-this.setState({rowError:"Please add atleast one Fee Category"});
-else
-for(var i=0;i<this.state.rows.length;i++ )
-{ if(this.state.rows[i].feeType===""||this.state.rows[i].amount==="")
-this.setState({rowError:"Please fill all the table fields first"});
+  /**
+   * @description Dismisses the alert
+   * @param {*} e
+   */
+  onDismiss() {
+    this.setState({ visible: !this.state.visible });
+  }
 
-}
+  submitHandler(e) {
+    var submit = true;
+    console.log("in Submit State: " + JSON.stringify(this.state));
+    console.log("Row Length: " + this.state.rows.length);
+    this.setState({ rowError: "", templateNameError: "" ,   success: false,
+    modalSuccess: false}, () => {
+      if (!this.state.templateName) {
+        this.setState({ templateNameError: "Please Enter Template Name" });
+        submit = false;
+      } else if (this.state.rows.length === 0) {
+        this.setState({ rowError: "Please add atleast one Fee Category" });
+        submit = false;
+      } else
+        for (var i = 0; i < this.state.rows.length; i++) {
+          if (
+            this.state.rows[i].feeType === "" ||
+            this.state.rows[i].amount === ""
+          ) {
+            this.setState({
+              rowError: "Please fill all the table fields first"
+            });
+            submit = false;
 
+            break;
+          }
+        }
 
+      if (submit === true) {
+        console.log("Submitting Template: ");
+        axios
+          .post("http://localhost:8001/api/feeTemplate", this.state)
+          .then(result => {
+            console.log("RESULT.data " + JSON.stringify(result.data));
+            if (result.data.code === 11000) {
+              this.setState({
+                templateNameError: "Template Name already exists!"
+              });
+            } else if (result.data.msg === "Success")
+              this.setState({
+                templateName: "",
+                rows: [{ feeType: "", amount: "" }],
+                success: true,
+                modalSuccess: true
+              });
+              this.getExistingTemplates();
+          });
+      }
+    });
   }
 
   handleChange = idx => e => {
     e.preventDefault();
     const { name, value } = e.target;
-    const temp =this.state.rows;
-    temp[idx][name]= value;
-  
-    this.setState({
-      rows:temp
-    },()=>{console.log("Change State: " +JSON.stringify(this.state))});
+    const temp = this.state.rows;
+    temp[idx][name] = value;
+
+    this.setState(
+      {
+        rows: temp
+      },
+      () => {
+        console.log("Change State: " + JSON.stringify(this.state));
+      }
+    );
   };
   handleAddRow = e => {
     e.preventDefault();
-    this.setState({rowError:""});
+    this.setState({ rowError: "" });
     const item = {
       feeType: "",
       amount: ""
@@ -100,13 +176,13 @@ this.setState({rowError:"Please fill all the table fields first"});
     e.preventDefault();
     this.setState({
       rows: this.state.rows.slice(0, -1),
-     rowError:""
+      rowError: ""
     });
   };
   handleRemoveSpecificRow = idx => () => {
     const temp = [...this.state.rows];
     temp.splice(idx, 1);
-    this.setState({ rows:temp });
+    this.setState({ rows: temp });
   };
 
   render() {
@@ -118,86 +194,122 @@ this.setState({rowError:"Please fill all the table fields first"});
               <Card className="mx-4">
                 <CardBody className="p-4">
                   <h1>Fee Templates</h1>
-
-                    <br /> <br />
-                  <AvForm>
-                  {this.state.showCreateButton &&
-                   <div className="justify-content-center"> <Button
-                      color="success"
-                        size="lg"
-                      onClick={() => {
-                        this.setState({ showCreateTemplate: true, showCreateButton:false });
-                      }}
+                  <br /> <br />
+                  {this.state.success && (
+                    <Modal
+                      isOpen={this.state.modalSuccess}
+                      className={"modal-success " + this.props.className}
+                      toggle={this.toggleSuccess}
                     >
-                      Create Template
-                    </Button>
-                    </div>
-                  }
+                      <ModalHeader toggle={this.toggleSuccess}>
+                        Template saved Successfully!
+                      </ModalHeader>
+                    </Modal>
+                  )}
+                  <Form>
+                    {this.state.showCreateButton && (
+                      <div className="justify-content-center">
+                        {" "}
+                        <Button
+                          color="success"
+                          size="lg"
+                          onClick={() => {
+                            this.setState({
+                              showCreateTemplate: true,
+                              showCreateButton: false
+                            });
+                          }}
+                        >
+                          Create Template
+                        </Button>
+                      </div>
+                    )}
 
                     <br />
                     {this.state.showCreateTemplate && (
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h4 align="center"> Fee Template</h4>
-
-                          <AvField
-
-required
-errorMessage="Enter Template name"
-                            type="text"
-                            label="Template Name"
-                            name="templateName"
-                            id="templateName"
-                            value={this.state.templateName}
-                            onChange={( e) => {
-                              this.setState({ templateName:e.target.value },()=>{console.log("Template name: "+this.state.templateName);});
-
-                            }}
-                          />
-
-
-
-                          <table
-                            className="table table-bordered table-hover"
-                            id="tab_logic"
-                          >
+                          <h3 align="center"> Create Fee Template</h3>
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText style={{ width: "120px" }}>
+                                <b>Template Name</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              label="Template Name"
+                              name="templateName"
+                              id="templateName"
+                              value={this.state.templateName}
+                              onChange={e => {
+                                this.setState(
+                                  { templateName: e.target.value },
+                                  () => {
+                                    console.log(
+                                      "Template name: " +
+                                        this.state.templateName
+                                    );
+                                  }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.templateNameError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.templateNameError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+                          <Table bordered hover>
                             <thead>
-                              <tr>
-                                <th className="text-center"> S.No. </th>
-                                <th className="text-center"> Fee Category </th>
-                                <th className="text-center"> Amount(Rs) </th>
+                              <tr style={{'background-color': "palevioletred"}}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Fee Category </h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
                                 <th />
                               </tr>
                             </thead>
                             <tbody>
                               {this.state.rows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
-                                  <td align="center">{idx+1}</td>
-                                  <td>
-                                    <AvField
-                                     
-                                      type="text"
-                                      name="feeType"
-                                      value={this.state.rows[idx].feeType}
-                                      onChange={this.handleChange(idx)}
-                                      className="form-control"
-
-                                      id="feeType"
-                                    />
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
                                   </td>
                                   <td>
-
-
-                                    <AvField
-                                      name="amount"
-                                     
-                                      type="number"
-                                      className="form-control"
-                                      value={this.state.rows[idx].amount}
-                                      onChange={this.handleChange(idx)}
-
-                                      id="amount"
-                                    />
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        type="text"
+                                        name="feeType"
+                                        value={this.state.rows[idx].feeType}
+                                        onChange={this.handleChange(idx)}
+                                        className="form-control"
+                                        size="lg"
+                                        id="feeType"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="amount"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.rows[idx].amount}
+                                        onChange={this.handleChange(idx)}
+                                        id="amount"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
                                   </td>
                                   <td align="center">
                                     <Button
@@ -205,6 +317,7 @@ errorMessage="Enter Template name"
                                       onClick={this.handleRemoveSpecificRow(
                                         idx
                                       )}
+                                      size="lg"
                                     >
                                       Remove
                                     </Button>
@@ -212,68 +325,135 @@ errorMessage="Enter Template name"
                                 </tr>
                               ))}
                             </tbody>
-                          </table>
+                          </Table>
                           {this.state.rowError && (
-                          <font color="red"><h6>
-                            {" "}
-                            <p>{this.state.rowError} </p>
-                         </h6> </font>
-                        )}
-                         
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.rowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
                           <Button
                             onClick={this.handleAddRow}
                             className="btn btn-primary"
                             color="success"
-                          >                           Add Row
+                            size="lg"
+                          >
+                            {" "}
+                            Add Row
                           </Button>
-
-
                           <Button
                             onClick={this.handleRemoveRow}
                             className="btn btn-danger float-right"
+                            size="lg"
                           >
                             Delete Last Row
                           </Button>
                           <br /> <br />
+                          <Row>
+                            <Col>
+                              <Button
+                                onClick={this.submitHandler}
+                                size="lg"
+                                color="info"
+                                block
+                              >
+                                Create
+                              </Button>
+                            </Col>
 
-<Row><Col>
-                          <Button
-                            onClick={this.submitHandler}
-                            size="lg"
-                            color="info"
-                            block
-                          >
-                           Create
-                          </Button></Col>
+                            <Col>
+                              <Button
+                                onClick={() => {
+                                  this.setState({
+                                    showCreateTemplate: false,
+                                    showCreateButton: true,
+                                    rows: [{}]
+                                  });
+                                }}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                                Cancel
+                              </Button>
+                            </Col>
+                          </Row>
+                        </CardBody>
+                      </Card>
+                    )}
+                  </Form>
+                </CardBody>
+              </Card>
+{!this.state.showCreateTemplate&&
+              <Card className="mx-4">
+                <CardBody className="p-4">
 
-<Col>
-                          <Button
-                            onClick={() => {
-                        this.setState({ showCreateTemplate: false, showCreateButton:true, rows:[{}] });
-                      }}
-                            size="lg"
-                            color="secondary"
-                            block
-                          >
-                           Cancel
-                          </Button></Col>
+                  <Form>
+                                      <br />
 
-</Row>
+                      <Card className="mx-1">
+                        <CardBody className="p-2">
+                          <h2 align="center"> Existing Fee Templates</h2>
+<br/>
+                          <Table bordered hover>
+                            <thead>
+                              <tr  style={{'background-color': "lightcoral"}}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Template Name </h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Actions</h4>{" "}
+                                </th>
+
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.existingRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h5>{idx + 1}</h5>
+                                  </td>
+                                  <td align="center">
+                                  <h5> {this.state.existingRows[idx].templateName}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                  <Button
+                                      className="btn btn-outline-info btn-sg"
+                                    //  onClick={this.handleRemoveExistingSpecificRow(idx)}
+                                      size="lg"
+                                    >
+                                      Edit
+                                    </Button>
+                                    &nbsp;&nbsp;
+                                    <Button
+                                      className="btn btn-outline-danger btn-sg"
+                                      //  onClick={this.handleRemoveExistingSpecificRow(idx)}
+                                      size="lg"
+                                    >
+                                      Remove
+                                    </Button>
+
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
 
 
 
                         </CardBody>
                       </Card>
-                    )}
-                  </AvForm>
+
+                  </Form>
                 </CardBody>
-              </Card>
-              <Card className="mx-4">
-                <CardBody className="p-4">
-                  <h3>Existing Fee Templates</h3>
-                  <Form />
-                </CardBody>
-              </Card>
+              </Card>}
             </Col>
           </Row>
         </Container>

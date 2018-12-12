@@ -135,7 +135,7 @@ var AdminSchema = new Schema({
   },
 
 
-},  { collection: 'admin' });
+},  { collection: 'Admins' });
 
 AdminSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
@@ -144,4 +144,4 @@ AdminSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = Admin = mongoose.model("admin", AdminSchema);
+module.exports = Admin = mongoose.model("Admins", AdminSchema);

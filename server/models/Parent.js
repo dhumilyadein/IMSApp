@@ -87,7 +87,7 @@ var ParentSchema = new Schema({
   },
 
 
-},  { collection: 'parent' });
+},  { collection: 'Parents' });
 
 ParentSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
@@ -96,4 +96,4 @@ ParentSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = Parent = mongoose.model("parent", ParentSchema);
+module.exports = Parent = mongoose.model("Parents", ParentSchema);

@@ -157,7 +157,7 @@ var StudentSchema = new Schema({
   }
 
 
-},  { collection: 'student' });
+},  { collection: 'Students' });
 
 StudentSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
@@ -166,4 +166,4 @@ StudentSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = Student = mongoose.model("student", StudentSchema);
+module.exports = Student = mongoose.model("Students", StudentSchema);
