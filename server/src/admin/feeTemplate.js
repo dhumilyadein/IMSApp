@@ -5,7 +5,7 @@ async function addFeeTemplate(req, res) {
 console.log("in Add Fee Req.body: "+JSON.stringify(req.body))
 
 var template = {
-  "templateName": req.body.templateName.toLowerCase(), "status": req.body.status, "templateRows": req.body.rows,
+  "templateName": req.body.templateName, "status": req.body.status, "templateRows": req.body.rows,
 
 };
 var addTemplate = new FeeTemplate(template);
@@ -75,12 +75,39 @@ return res.send({error:"Failed to Update existing template"});
 
 }
 
+async function copyFeeTemplate(req,res)
+{console.log("In Copy Template for: "+ JSON.stringify(req.body));
+
+
+var template = {
+  "templateName": req.body.templateName, "status": req.body.status, 
+  "templateRows": req.body.editRows,
+
+};
+var copyTemplate = new FeeTemplate(template);
+
+
+
+
+
+await copyTemplate
+  .save()
+  .then(user => {
+      return res.send({msg:"Template Copied"});
+  })
+  .catch(err => {
+    return res.send(err);
+  });
+
+
+
+}
 
   app.post("/api/feeTemplate", addFeeTemplate);
   app.get("/api/existingTemplates", existingTemplates);
   app.post("/api/deleteTemplate", deleteTemplate);
   app.post("/api/updateFeeTemplate", updateFeeTemplate);
-
+  app.post("/api/copyFeeTemplate", copyFeeTemplate);
 
 
 

@@ -15,21 +15,26 @@ var FeeTemplateSchema = new Schema({
     type: String,
     required: true,
     unique:true,
-    dropDups: true
+    dropDups: true,
+    trim:true,
+   lowercase:true
   },
 
 
   templateRows: {
     type: Array,
+    
     required: true,
 
     feeType:{
     type: String,
+    trim:true,
     required: true,
 
   },
   amount:{
     type: String,
+    trim:true,
     required: true,
 
   }},

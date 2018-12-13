@@ -43,7 +43,8 @@ class FeeTemplates extends Component {
       visible: false,
       showEditTemplate: false,
       templateNo: "",
-      showExistingTemplate:true
+      showExistingTemplate:true,
+      showCopyTemplate:false
 
     };
 
@@ -61,6 +62,7 @@ class FeeTemplates extends Component {
     this.getExistingTemplates = this.getExistingTemplates.bind(this);
 
     this.updateHandler = this.updateHandler.bind(this);
+    this.copyHandler = this.copyHandler.bind(this);
     this.handleRemoveExistingSpecificRow = this.handleRemoveExistingSpecificRow.bind(this);
 
 
@@ -194,6 +196,60 @@ class FeeTemplates extends Component {
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
             if (result.data.msg === "Template Updated")
+              this.setState({
+                success: true,
+                modalSuccess: true
+              });
+            this.getExistingTemplates();
+          });
+      }
+    });
+  }
+
+
+  copyHandler(e) {
+    var submit = true;
+    console.log("in Copy State: " + JSON.stringify(this.state));
+    console.log("Row Length: " + this.state.editRows.length);
+    this.setState({
+      rowError: "", templateNameError: "", success: false,
+      modalSuccess: false
+    }, () => {
+      if (!this.state.templateName) {
+        this.setState({ templateNameError: "Please Enter Template Name" });
+        submit = false;
+      } else if (this.state.editRows.length === 0) {
+        this.setState({ rowError: "Please add atleast one Fee Category" });
+        submit = false;
+      } else
+        for (var i = 0; i < this.state.editRows.length; i++) {
+          if (
+            this.state.editRows[i].feeType === "" ||
+            this.state.editRows[i].amount === ""
+          ) {
+            this.setState({
+              rowError: "Please fill all the table fields first"
+            });
+            submit = false;
+
+            break;
+          }
+        }
+
+      if (submit === true) {
+
+        this.setState()
+        console.log("Copying Template for: ");
+        axios
+          .post("http://localhost:8001/api/copyFeeTemplate", this.state)
+          .then(result => {
+            console.log("COPY RESULT.data " + JSON.stringify(result.data));
+            if (result.data.code === 11000) 
+              this.setState({
+                templateNameError: "Template Name already exists! Name must be Unique."
+              });
+
+            if (result.data.msg === "Template Copied")
               this.setState({
                 success: true,
                 modalSuccess: true
@@ -486,12 +542,12 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 color="secondary"
                                 block
                               >
-                                Cancel
+                                Cancel to go Back
                               </Button>
                             </Col>
                           </Row>
                         </CardBody>
-                        <font color="brown">**Cancel to go Back**</font>
+                       
                       </Card>
 
                     )}
@@ -783,7 +839,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                           <Row>
                             <Col>
                               <Button
-                                onClick={this.updateHandler}
+                                onClick={this.copyHandler}
                                 size="lg"
                                 color="success"
                                 block
@@ -800,6 +856,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     showCreateTemplate: false,
                                     showCreateButton: true,
                                     showExistingTemplate:true,
+                                    showCopyTemplate:false,
                                     rows: [{}]
                                   });
                                 }}
@@ -834,7 +891,14 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h2 align="center"> Existing Fee Templates</h2>
+                          <h2 align="center"> Existing Fee Templates</h2>  <Button
+                                      color="info"
+                                        onClick={this.getExistingTemplates}
+                                      size="lg"
+                                    >
+                                      Refresh
+                                    </Button>
+                          <br />
                           <br />
                           <Table bordered hover>
                             <thead>
@@ -847,7 +911,9 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                   <h4>Template Name </h4>
                                 </th>
                                 <th className="text-center">
-                                  <h4> Actions</h4>{" "}
+                                 <h4> Actions</h4>
+                                
+
                                 </th>
 
                               </tr>
@@ -886,7 +952,20 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     &nbsp;&nbsp;
                                     <Button
                                       color="warning"
-                                       // onClick={this.handleCopyExistingSpecificRow(idx)}
+                                      onClick={()=>{this.setState({
+                                        editRows:this.state.existingRows[idx].templateRows,
+                                        showEditTemplate: false,
+                                        showCopyTemplate: true,
+                                        templateNo: idx,
+                                        templateName: this.state.existingRows[idx].templateName,
+                                        showCreateTemplate:false,
+                                        showCreateButton:false,
+                                        showExistingTemplate:false
+
+
+                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+                                      }}
+
                                       size="lg"
                                     >
                                       Copy

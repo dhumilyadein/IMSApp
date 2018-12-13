@@ -5,15 +5,19 @@ var TeacherSchema = new Schema({
   username: {
     type: String,
     required: true,
-    unique:true
+    unique:true,
+    trim:true,
+    lowercase:true
   },
   firstname: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
   lastname: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
   maritalstatus: {
     type: String,
@@ -42,6 +46,7 @@ var TeacherSchema = new Schema({
   experiencedetails: {
     type: String,
     required: true,
+    trim:true
 
   },
    bloodgroup: {
@@ -73,7 +78,8 @@ var TeacherSchema = new Schema({
 
     employeeno: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   doj: {
@@ -89,22 +95,26 @@ var TeacherSchema = new Schema({
 
   address: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   city: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   postalcode: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   state: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
 
@@ -112,7 +122,8 @@ var TeacherSchema = new Schema({
     email: {
     type: String,
     required: true,
-    unique:true
+    unique:true,
+    trim:true
   },
   password: {
     type: String,
