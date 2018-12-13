@@ -40,10 +40,37 @@ function existingTemplates(req, res) {
   }
 
   function deleteTemplate(req,res)
-  {console.log("In Delete Template for: "+ JSON.stringify(req.body));
+  {console.log("In Delete Template for: "+ JSON.stringify(req.body.templateName));
 
-//FeeTemplate
-//.deleteOne({templateName:req.body.existingRows.})
+FeeTemplate
+.deleteOne({templateName:req.body.templateName})
+.then(data => {
+  return res.send({msg:"Template Deleted"});
+})
+.catch(err => {
+return res.send({error:"Failed to Delete existing template"});
+});
+
+
+}
+
+function updateFeeTemplate(req,res)
+{console.log("In Update Template for: "+ JSON.stringify(req.body));
+
+
+FeeTemplate
+.updateOne({templateName:req.body.existingRows[req.body.templateNo].templateName},
+  {$set: {templateName:req.body.templateName,
+          templateRows:req.body.editRows
+
+  }}
+  )
+.then(data => {
+return res.send({msg:"Template Updated"});
+})
+.catch(err => {
+return res.send({error:"Failed to Update existing template"});
+});
 
 
 }
@@ -52,6 +79,8 @@ function existingTemplates(req, res) {
   app.post("/api/feeTemplate", addFeeTemplate);
   app.get("/api/existingTemplates", existingTemplates);
   app.post("/api/deleteTemplate", deleteTemplate);
+  app.post("/api/updateFeeTemplate", updateFeeTemplate);
+
 
 
 

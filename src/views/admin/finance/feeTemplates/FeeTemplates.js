@@ -186,19 +186,15 @@ class FeeTemplates extends Component {
         }
 
       if (submit === true) {
-        console.log("Updating Template: ");
+
+        this.setState()
+        console.log("Updating Template for: ");
         axios
           .post("http://localhost:8001/api/updateFeeTemplate", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
-            if (result.data.code === 11000) {
+            if (result.data.msg === "Template Updated")
               this.setState({
-                templateNameError: "Template Name already exists!"
-              });
-            } else if (result.data.msg === "Success")
-              this.setState({
-                templateName: "",
-                editRows: [{ feeType: "", amount: "" }],
                 success: true,
                 modalSuccess: true
               });
@@ -279,26 +275,21 @@ class FeeTemplates extends Component {
   handleRemoveExistingSpecificRow= idx => () => {
     const temp = [...this.state.existingRows];
     temp.splice(idx, 1);
-    this.setState({ existingRows: temp });
+    this.setState({ existingRows: temp,
+    templateName: this.state.existingRows[idx].templateName},()=>{
+      axios
+      .post("http://localhost:8001/api/deleteTemplate", this.state)
+      .then(result => {
+        console.log("RESULT.data " + JSON.stringify(result.data));
+        if (result.data.error)
+         console.log(result.data.error);
+        this.getExistingTemplates();
+      });
 
-
-    axios
-    .post("http://localhost:8001/api/deleteTemplate", this.state.existingRows[idx].templateName)
-    .then(result => {
-      console.log("RESULT.data " + JSON.stringify(result.data));
-      if (result.data.code === 11000) {
-        this.setState({
-          templateNameError: "Template Name already exists!"
-        });
-      } else if (result.data.msg === "Success")
-        this.setState({
-          templateName: "",
-          rows: [{ feeType: "", amount: "" }],
-          success: true,
-          modalSuccess: true
-        });
-      this.getExistingTemplates();
     });
+
+console.log("template Name: "+ this.state.existingRows[idx].templateName);
+
 
   };
 
