@@ -24,15 +24,27 @@ import {
     Label,
     Row,
 } from 'reactstrap';
-
+import { AutoComplete } from 'material-ui';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import axios, { post } from "axios";
 
 class AddFees extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             find: null,
-            results: []
+            results: [],
+
+            find: null,
+            using: "firstname",
+            role: "student",
+            searchCriteria: "containsSearchCriteria",
+            dataSource: [],
+
+            usersDetails: null,
+            studentsDetails: null
 
 
 
@@ -43,13 +55,158 @@ class AddFees extends Component {
         this.feeStudentSearch = this.feeStudentSearch.bind(this);
         this.resetForm = this.resetForm.bind(this);
         this.getStudent = this.getStudent.bind(this);
-        
 
+        this.onUpdateInput = this.onUpdateInput.bind(this);
+        this.onUpdateInput = this.onUpdateInput.bind(this);
+        this.performSearch = this.performSearch.bind(this);
+        this.selectedItem = this.selectedItem.bind(this);
+        this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
+
+    }
+
+    onUpdateInput(inputValue, datasource, params) {
+
+        if (params.source == 'touchTap' || params.source == 'click') return;
+
+        this.setState({
+            find: inputValue
+        }, function () {
+            this.performSearch();
+        });
+    }
+
+    performSearch() {
+
+        var fetchedUsernames = [];
+
+        if (this.state.find !== '') {
+
+            console.log("AddFee search bar request - " + JSON.stringify(this.state));
+
+            axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
+
+                console.log("AddFee res.data.errors - " + res.data.errors);
+                console.log("AddFee res.data.message - " + res.data.message);
+                console.log("AddFee res.data.error - " + res.data.errors);
+
+                if (res.data.errors) {
+                    return this.setState({ errors: res.data.errors });
+                } else {
+
+                    var resData = res.data;
+
+                    // Setting response data in state so that it can be used in the onclick event of search bar items (selectedItem method)
+                    console.log("AddFee Setting searchBarResponse with " + JSON.stringify(resData));
+                    this.setState({ searchBarResponse: resData });
+
+                    //this.props.history.push("/users");
+                    console.log("AddFee final response search bar - " + JSON.stringify(res.data));
+
+                    var i = 1;
+                    res.data.forEach(function (item) {
+
+                        console.log("AddFee Fetched username - " + item.username);
+                        console.log("AddFee Fetched Full Name - " + item.firstname + " " + item.lastname);
+
+                        let displayText = item.firstname + " " + item.lastname + " (" + item.username + ")";
+                        fetchedUsernames.push(displayText);
+
+                    });
+
+                    console.log("AddFee Fetched usernames on search - " + fetchedUsernames);
+
+                    this.setState({
+                        dataSource: fetchedUsernames
+                    });
+
+                    console.log("AddFee this.state.dataSource - " + this.state.dataSource);
+
+                    console.log("AddFee this.state.searchBarResponse 1 - " + JSON.stringify(this.state.searchBarResponse));
+
+                    console.log("AddFee this.state before - " + JSON.stringify(this.state));
+                }
+            });
+        }
+    }
+
+    /**
+     * @description For getting search bar selected value
+     */
+    async selectedItem(chosenSearchValue, index) {
+
+        var searchBarResponse;
+        var selectedUsername;
+
+        this.setState({ chosenSearchValue: chosenSearchValue });
+        console.log("AddFee this.state.chosenSearchValue - " + this.statechosenSearchValue);
+
+        selectedUsername = chosenSearchValue.split("(")[1].split(")")[0];
+        console.log("AddFee username retrieved from chosen field after removing () " + selectedUsername);
+
+        searchBarResponse = this.state.searchBarResponse;
+        console.log("AddFee this.state.searchBarResponse 2 - " + JSON.stringify(searchBarResponse));
+
+        var tempArrayForUser = [];
+        console.log("AddFee AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        for (var i = 0; i < searchBarResponse.length; i++) {
+
+            console.log("searchBarResponse[i][\"username\"] - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername + " searchBarResponse.length - " + searchBarResponse.length);
+            console.log("searchBarResponse[i] - " + JSON.stringify(searchBarResponse));
+
+            if (searchBarResponse[i]["username"].toLowerCase() === String(selectedUsername).toLowerCase()) {
+
+                console.log("searchBarResponse[i][\"username\"] BBBBBBBBBBBBBBBBBBB - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername);
+
+                // tempArrayForUser.push(searchBarResponse[i]);
+                // this.props.history.push(
+                //     {
+                //         pathname: '/admin/users',
+                //         state: tempArrayForUser
+                //     });
+                // return searchBarResponse[i];
+
+                this.setState({
+                    usersDetails: searchBarResponse[i]
+                });
+
+                console.log("Selected Student's USER details " + JSON.stringify(this.state.usersDetails));
+
+                await this.searchStudentsDetails(selectedUsername, "username", "equalsSearchCriteria");
+            }
+        }
 
 
     }
 
+    searchStudentsDetails(find, using, searchCriteria) {
 
+        var searchStudentsRequest = {
+            "find": find,
+            "using": using,
+            "searchCriteria": searchCriteria
+        }
+
+        axios.post("http://localhost:8001/api/searchStudents", searchStudentsRequest).then(res => {
+
+            console.log("AddFee Submit Request - " + JSON.stringify(searchStudentsRequest));
+
+            console.log("AddFee submit response data - " + JSON.stringify(res.data));
+            console.log("AddFee  res.data.errors - " + res.data.errors);
+            console.log("AddFee  res.data.message - " + res.data.message);
+            console.log("AddFee  res.data.error - " + res.data.errors);
+
+            if (res.data.errors) {
+                return this.setState({ errors: res.data.errors });
+            } else {
+
+                this.setState({
+                    studentsDetails: res.data
+                });
+
+                console.log("Selected Student's STUDENT details " + JSON.stringify(this.state.studentsDetails));
+            }
+        });
+    }
     resetForm = (e) => {
         this.setState({
             username: "",
@@ -108,32 +265,32 @@ class AddFees extends Component {
      */
 
 
-    feeStudentSearch(e)
-    {console.log("find: "+e.target.value);
+    feeStudentSearch(e) {
+        console.log("find: " + e.target.value);
         this.setState({
             find: e.target.value
-          }, () => {
+        }, () => {
             if (this.state.find && this.state.find.length > 1) {
-              if (this.state.find.length % 2 === 0) {
-                this.getStudent()
-              }
-            } 
-          })
+                if (this.state.find.length % 2 === 0) {
+                    this.getStudent()
+                }
+            }
+        })
 
     }
 
     getStudent = () => {
-        console.log("find state: "+this.state);
-        axios.post(`http://localhost:8001/api/searchStudent`,this.state)
-          .then(({ data }) => {
-            this.setState({
-              results: data.data // MusicGraph returns an object named data, 
-                              // as does axios. So... data.data                             
-            },()=>{console.log("search results: "+this.state.results)   ;})
-          })
-      }
-    
-    
+        console.log("find state: " + this.state);
+        axios.post(`http://localhost:8001/api/searchStudent`, this.state)
+            .then(({ data }) => {
+                this.setState({
+                    results: data.data // MusicGraph returns an object named data, 
+                    // as does axios. So... data.data                             
+                }, () => { console.log("search results: " + this.state.results); })
+            })
+    }
+
+
 
 
 
@@ -156,13 +313,25 @@ class AddFees extends Component {
                                             <Label htmlFor="text-input">Search Student</Label>
                                         </Col>
                                         <Col xs="12" md="9">
-                                            <Input
-                                             type="text"
-                                              id="search" 
-                                              name="search" 
-                                              placeholder="Student Name or roll no."
-                                              onChange={this.feeStudentSearch} />
-                                              
+                                            <Row>
+                                                <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
+                                                    <AutoComplete
+                                                        hintText="Enter Search text"
+                                                        dataSource={this.state.dataSource}
+                                                        onUpdateInput={this.onUpdateInput}
+                                                        fullWidth={true}
+                                                        filter={AutoComplete.noFilter}
+                                                        maxSearchResults={5}
+                                                        onNewRequest={this.selectedItem}
+                                                        autoFocus="true"
+                                                    />
+                                                </MuiThemeProvider>
+                                            </Row>
+                                            <Row>
+                                                <Button color="success" block onClick={this.searchHandler} disabled="disabled">
+                                                    Advanced Search (ye abhi change hoga)
+                                                </Button>
+                                            </Row>
 
                                         </Col>
                                     </FormGroup>
