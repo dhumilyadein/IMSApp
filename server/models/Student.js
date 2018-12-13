@@ -5,33 +5,42 @@ var StudentSchema = new Schema({
   username: {
     type: String,
     required: true,
-    unique:true
+    unique:true,
+    trim:true,
+    lowercase:true
   },
   parentusername: {
     type: String,
     required: true,
-    unique:true
+    unique:true,
+    trim:true,
+    lowercase:true
   },
   firstname: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
   lastname: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   parentfirstname: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
   parentlastname: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
   parentpostalcode: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   dob: {
@@ -81,12 +90,14 @@ var StudentSchema = new Schema({
 
   admissionno: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   rollno: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   doj: {
@@ -111,22 +122,26 @@ var StudentSchema = new Schema({
   },
   address: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   city: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   postalcode: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
   state: {
     type: String,
-    required: true
+    required: true,
+    trim:true
   },
 
 

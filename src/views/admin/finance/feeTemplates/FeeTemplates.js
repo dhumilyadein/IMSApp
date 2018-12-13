@@ -43,7 +43,8 @@ class FeeTemplates extends Component {
       visible: false,
       showEditTemplate: false,
       templateNo: "",
-      showExistingTemplate:true
+      showExistingTemplate:true,
+      showCopyTemplate:false
 
     };
 
@@ -61,6 +62,7 @@ class FeeTemplates extends Component {
     this.getExistingTemplates = this.getExistingTemplates.bind(this);
 
     this.updateHandler = this.updateHandler.bind(this);
+    this.copyHandler = this.copyHandler.bind(this);
     this.handleRemoveExistingSpecificRow = this.handleRemoveExistingSpecificRow.bind(this);
 
 
@@ -194,6 +196,60 @@ class FeeTemplates extends Component {
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
             if (result.data.msg === "Template Updated")
+              this.setState({
+                success: true,
+                modalSuccess: true
+              });
+            this.getExistingTemplates();
+          });
+      }
+    });
+  }
+
+
+  copyHandler(e) {
+    var submit = true;
+    console.log("in Copy State: " + JSON.stringify(this.state));
+    console.log("Row Length: " + this.state.editRows.length);
+    this.setState({
+      rowError: "", templateNameError: "", success: false,
+      modalSuccess: false
+    }, () => {
+      if (!this.state.templateName) {
+        this.setState({ templateNameError: "Please Enter Template Name" });
+        submit = false;
+      } else if (this.state.editRows.length === 0) {
+        this.setState({ rowError: "Please add atleast one Fee Category" });
+        submit = false;
+      } else
+        for (var i = 0; i < this.state.editRows.length; i++) {
+          if (
+            this.state.editRows[i].feeType === "" ||
+            this.state.editRows[i].amount === ""
+          ) {
+            this.setState({
+              rowError: "Please fill all the table fields first"
+            });
+            submit = false;
+
+            break;
+          }
+        }
+
+      if (submit === true) {
+
+        this.setState()
+        console.log("Copying Template for: ");
+        axios
+          .post("http://localhost:8001/api/copyFeeTemplate", this.state)
+          .then(result => {
+            console.log("COPY RESULT.data " + JSON.stringify(result.data));
+            if (result.data.code === 11000) 
+              this.setState({
+                templateNameError: "Template Name already exists! Name must be Unique."
+              });
+
+            if (result.data.msg === "Template Copied")
               this.setState({
                 success: true,
                 modalSuccess: true
@@ -388,11 +444,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
-                                <th>
+                                <th className="text-center">
                                   <Button
                                     onClick={this.handleAddRow}
                                     className="btn btn-primary"
-                                    color="info"
+                                    color="primary"
                                     size="lg"
                                   >
                                     {" "}
@@ -486,12 +542,12 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 color="secondary"
                                 block
                               >
-                                Cancel
+                                Cancel to go Back
                               </Button>
                             </Col>
                           </Row>
                         </CardBody>
-                        <font color="brown">**Cancel to go Back**</font>
+                       
                       </Card>
 
                     )}
@@ -550,11 +606,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
-                                <th>
+                                <th className="text-center">
                                   <Button
                                     onClick={this.handleEditAddRow}
                                     className="btn btn-primary"
-                                    color="info"
+                                    color="primary"
                                     size="lg"
                                   >
                                     {" "}
@@ -657,6 +713,164 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                       </Card>
                     }
 
+{this.state.showCopyTemplate &&
+                      <Card className="mx-1">
+                        <CardBody className="p-2">
+                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName}</font> </h3>
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText style={{ width: "120px" }}>
+                                <b>Template Name</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              label="Template Name"
+                              size="lg"
+                              name="templateName"
+                              id="templateName"
+                              value={this.state.templateName}
+                              onChange={e => {
+                                this.setState(
+                                  { templateName: e.target.value },
+                                  () => {
+                                    console.log(
+                                      "Template name: " +
+                                      this.state.templateName
+                                    );
+                                  }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.templateNameError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.templateNameError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "palevioletred" }}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Fee Category </h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
+                                <th>
+                                  <Button
+                                    onClick={this.handleEditAddRow}
+                                    className="btn btn-primary"
+                                    color="primary"
+                                    size="lg"
+                                  >
+                                    {" "}
+                                    Add Row
+                      </Button>
+
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.editRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        type="text"
+                                        name="feeType"
+                                        value={this.state.editRows[idx].feeType}
+                                        onChange={this.handleEditChange(idx)}
+                                        className="form-control"
+                                        size="lg"
+                                        id="feeType"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="amount"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.editRows[idx].amount}
+                                        onChange={this.handleEditChange(idx)}
+                                        id="amount"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td align="center">
+                                    <Button
+                                      className="btn btn-danger btn-sg"
+                                      onClick={this.handleEditRemoveSpecificRow(
+                                        idx
+                                      )}
+                                      size="lg"
+                                    >
+                                      Remove
+                                </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                          {this.state.rowError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.rowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+
+                          <br /> <br />
+                          <Row>
+                            <Col>
+                              <Button
+                                onClick={this.copyHandler}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                               Create Copy
+                          </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={() => {
+                                  this.setState({
+                                    showEditTemplate: false,
+                                    showCreateTemplate: false,
+                                    showCreateButton: true,
+                                    showExistingTemplate:true,
+                                    showCopyTemplate:false,
+                                    rows: [{}]
+                                  });
+                                }}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                                Cancel
+                          </Button>
+                            </Col>
+                          </Row>
+                        </CardBody>
+                      </Card>
+                    }
 
 
 
@@ -677,11 +891,18 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h2 align="center"> Existing Fee Templates</h2>
+                          <h2 align="center"> Existing Fee Templates</h2>  <Button
+                                      color="info"
+                                        onClick={this.getExistingTemplates}
+                                      size="lg"
+                                    >
+                                      Refresh
+                                    </Button>
+                          <br />
                           <br />
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'backgroundColor': "lightcoral" }}>
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
                                 <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
@@ -690,7 +911,9 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                   <h4>Template Name </h4>
                                 </th>
                                 <th className="text-center">
-                                  <h4> Actions</h4>{" "}
+                                 <h4> Actions</h4>
+                                
+
                                 </th>
 
                               </tr>
@@ -707,7 +930,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
                                   <td align="center">
                                     <Button
-                                     color="info"
+                                     color="primary"
                                       onClick={()=>{this.setState({
                                         editRows:this.state.existingRows[idx].templateRows,
                                         showEditTemplate: true,
@@ -728,12 +951,34 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     </Button>
                                     &nbsp;&nbsp;
                                     <Button
+                                      color="warning"
+                                      onClick={()=>{this.setState({
+                                        editRows:this.state.existingRows[idx].templateRows,
+                                        showEditTemplate: false,
+                                        showCopyTemplate: true,
+                                        templateNo: idx,
+                                        templateName: this.state.existingRows[idx].templateName,
+                                        showCreateTemplate:false,
+                                        showCreateButton:false,
+                                        showExistingTemplate:false
+
+
+                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+                                      }}
+
+                                      size="lg"
+                                    >
+                                      Copy
+                                    </Button>
+                                    &nbsp;&nbsp;
+                                    <Button
                                       color="danger"
                                         onClick={this.handleRemoveExistingSpecificRow(idx)}
                                       size="lg"
                                     >
                                       Remove
                                     </Button>
+
 
                                   </td>
                                 </tr>

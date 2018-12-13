@@ -5,17 +5,22 @@ var ParentSchema = new Schema({
   parentusername: {
     type: String,
     required: true,
-    unique:true
+    unique:true,
+    trim:true,
+    lowercase:true
+
   },
 
 
   parentfirstname: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
   parentlastname: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
 
 
@@ -26,12 +31,14 @@ var ParentSchema = new Schema({
 
   occupation: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
 
   parentemail: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
 
   parentphone1: {
@@ -46,26 +53,31 @@ var ParentSchema = new Schema({
 
   parentaddress: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
 
   parentcity: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
   userid: {
     type: Number,
     required: true,
-    unique:true
+    unique:true,
+    trim:true,
   },
   parentstate: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
 
   parentpostalcode: {
     type: String,
-    required: true
+    required: true,
+    trim:true,
   },
 
 
