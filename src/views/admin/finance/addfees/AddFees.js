@@ -328,9 +328,11 @@ class AddFees extends Component {
                                                 </MuiThemeProvider>
                                             </Row>
                                             <Row>
-                                                <Button color="success" block onClick={this.searchHandler} disabled="disabled">
-                                                    Advanced Search (ye abhi change hoga)
-                                                </Button>
+                                                {/* <Button color="success" block onClick={this.searchHandler} disabled="disabled">
+                                                    Advanced Serch (ye abhi change hoga)
+                                                </Button> */}
+                                                {/* <Badge href='#/admin/searchUser' color='success'>Advanced Serch</Badge> */}
+                                                <a href='#/admin/searchUser'>Advanced Serch</a>
                                             </Row>
 
                                         </Col>
