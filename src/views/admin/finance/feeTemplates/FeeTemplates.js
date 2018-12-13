@@ -388,11 +388,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
-                                <th>
+                                <th className="text-center">
                                   <Button
                                     onClick={this.handleAddRow}
                                     className="btn btn-primary"
-                                    color="info"
+                                    color="primary"
                                     size="lg"
                                   >
                                     {" "}
@@ -550,11 +550,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
-                                <th>
+                                <th className="text-center">
                                   <Button
                                     onClick={this.handleEditAddRow}
                                     className="btn btn-primary"
-                                    color="info"
+                                    color="primary"
                                     size="lg"
                                   >
                                     {" "}
@@ -657,6 +657,163 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                       </Card>
                     }
 
+{this.state.showCopyTemplate &&
+                      <Card className="mx-1">
+                        <CardBody className="p-2">
+                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName}</font> </h3>
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText style={{ width: "120px" }}>
+                                <b>Template Name</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              label="Template Name"
+                              size="lg"
+                              name="templateName"
+                              id="templateName"
+                              value={this.state.templateName}
+                              onChange={e => {
+                                this.setState(
+                                  { templateName: e.target.value },
+                                  () => {
+                                    console.log(
+                                      "Template name: " +
+                                      this.state.templateName
+                                    );
+                                  }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.templateNameError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.templateNameError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "palevioletred" }}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Fee Category </h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
+                                <th>
+                                  <Button
+                                    onClick={this.handleEditAddRow}
+                                    className="btn btn-primary"
+                                    color="primary"
+                                    size="lg"
+                                  >
+                                    {" "}
+                                    Add Row
+                      </Button>
+
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.editRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        type="text"
+                                        name="feeType"
+                                        value={this.state.editRows[idx].feeType}
+                                        onChange={this.handleEditChange(idx)}
+                                        className="form-control"
+                                        size="lg"
+                                        id="feeType"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="amount"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.editRows[idx].amount}
+                                        onChange={this.handleEditChange(idx)}
+                                        id="amount"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td align="center">
+                                    <Button
+                                      className="btn btn-danger btn-sg"
+                                      onClick={this.handleEditRemoveSpecificRow(
+                                        idx
+                                      )}
+                                      size="lg"
+                                    >
+                                      Remove
+                                </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                          {this.state.rowError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.rowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+
+                          <br /> <br />
+                          <Row>
+                            <Col>
+                              <Button
+                                onClick={this.updateHandler}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                               Create Copy
+                          </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={() => {
+                                  this.setState({
+                                    showEditTemplate: false,
+                                    showCreateTemplate: false,
+                                    showCreateButton: true,
+                                    showExistingTemplate:true,
+                                    rows: [{}]
+                                  });
+                                }}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                                Cancel
+                          </Button>
+                            </Col>
+                          </Row>
+                        </CardBody>
+                      </Card>
+                    }
 
 
 
@@ -681,7 +838,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                           <br />
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'backgroundColor': "lightcoral" }}>
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
                                 <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
@@ -707,7 +864,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
                                   <td align="center">
                                     <Button
-                                     color="info"
+                                     color="primary"
                                       onClick={()=>{this.setState({
                                         editRows:this.state.existingRows[idx].templateRows,
                                         showEditTemplate: true,
@@ -728,12 +885,21 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     </Button>
                                     &nbsp;&nbsp;
                                     <Button
+                                      color="warning"
+                                       // onClick={this.handleCopyExistingSpecificRow(idx)}
+                                      size="lg"
+                                    >
+                                      Copy
+                                    </Button>
+                                    &nbsp;&nbsp;
+                                    <Button
                                       color="danger"
                                         onClick={this.handleRemoveExistingSpecificRow(idx)}
                                       size="lg"
                                     >
                                       Remove
                                     </Button>
+
 
                                   </td>
                                 </tr>
