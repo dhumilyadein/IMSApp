@@ -53,7 +53,7 @@ var UserSchema = new Schema({
     type: String,
     required: true}
 
-},  { collection: 'user' });
+},  { collection: 'Users' });
 
 UserSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
@@ -61,5 +61,5 @@ UserSchema.methods.hashPassword = function(password) {
 UserSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
-UserSchema.plugin(autoIncrement.plugin, { model: 'user', field: 'userid', startAt: 1});
-module.exports = User = mongoose.model("user", UserSchema);
+UserSchema.plugin(autoIncrement.plugin, { model: 'Users', field: 'userid', startAt: 1});
+module.exports = User = mongoose.model("Users", UserSchema);

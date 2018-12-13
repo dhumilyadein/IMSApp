@@ -130,7 +130,7 @@ var TeacherSchema = new Schema({
   },
 
 
-},  { collection: 'teacher' });
+},  { collection: 'Teachers' });
 
 TeacherSchema.methods.hashPassword = function(password) {
   return bcrypt.hashSync(password, 12);
@@ -139,4 +139,4 @@ TeacherSchema.methods.comparePassword = function(password, hashedPassword) {
   return bcrypt.compareSync(password, hashedPassword);
 };
 
-module.exports = Teacher = mongoose.model("teacher", TeacherSchema);
+module.exports = Teacher = mongoose.model("Teachers", TeacherSchema);
