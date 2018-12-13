@@ -43,6 +43,7 @@ class FeeTemplates extends Component {
       visible: false,
       showEditTemplate: false,
       templateNo: "",
+      showExistingTemplate:true
 
     };
 
@@ -59,6 +60,8 @@ class FeeTemplates extends Component {
     this.onDismiss = this.onDismiss.bind(this);
     this.getExistingTemplates = this.getExistingTemplates.bind(this);
 
+    this.updateHandler = this.updateHandler.bind(this);
+    this.handleRemoveExistingSpecificRow = this.handleRemoveExistingSpecificRow.bind(this);
 
 
 
@@ -153,6 +156,58 @@ class FeeTemplates extends Component {
     });
   }
 
+  updateHandler(e) {
+    var submit = true;
+    console.log("in Submit State: " + JSON.stringify(this.state));
+    console.log("Row Length: " + this.state.editRows.length);
+    this.setState({
+      rowError: "", templateNameError: "", success: false,
+      modalSuccess: false
+    }, () => {
+      if (!this.state.templateName) {
+        this.setState({ templateNameError: "Please Enter Template Name" });
+        submit = false;
+      } else if (this.state.editRows.length === 0) {
+        this.setState({ rowError: "Please add atleast one Fee Category" });
+        submit = false;
+      } else
+        for (var i = 0; i < this.state.editRows.length; i++) {
+          if (
+            this.state.editRows[i].feeType === "" ||
+            this.state.editRows[i].amount === ""
+          ) {
+            this.setState({
+              rowError: "Please fill all the table fields first"
+            });
+            submit = false;
+
+            break;
+          }
+        }
+
+      if (submit === true) {
+        console.log("Updating Template: ");
+        axios
+          .post("http://localhost:8001/api/updateFeeTemplate", this.state)
+          .then(result => {
+            console.log("RESULT.data " + JSON.stringify(result.data));
+            if (result.data.code === 11000) {
+              this.setState({
+                templateNameError: "Template Name already exists!"
+              });
+            } else if (result.data.msg === "Success")
+              this.setState({
+                templateName: "",
+                editRows: [{ feeType: "", amount: "" }],
+                success: true,
+                modalSuccess: true
+              });
+            this.getExistingTemplates();
+          });
+      }
+    });
+  }
+
   handleChange = idx => e => {
     e.preventDefault();
     const { name, value } = e.target;
@@ -190,7 +245,7 @@ class FeeTemplates extends Component {
   handleEditChange = idx => e => {
     e.preventDefault();
     const { name, value } = e.target;
-    const temp = this.state.rows;
+    const temp = this.state.editRows;
     temp[idx][name] = value;
 
     this.setState(
@@ -218,6 +273,33 @@ class FeeTemplates extends Component {
     const temp = [...this.state.editRows];
     temp.splice(idx, 1);
     this.setState({ editRows: temp });
+  };
+
+
+  handleRemoveExistingSpecificRow= idx => () => {
+    const temp = [...this.state.existingRows];
+    temp.splice(idx, 1);
+    this.setState({ existingRows: temp });
+
+
+    axios
+    .post("http://localhost:8001/api/deleteTemplate", this.state.existingRows[idx].templateName)
+    .then(result => {
+      console.log("RESULT.data " + JSON.stringify(result.data));
+      if (result.data.code === 11000) {
+        this.setState({
+          templateNameError: "Template Name already exists!"
+        });
+      } else if (result.data.msg === "Success")
+        this.setState({
+          templateName: "",
+          rows: [{ feeType: "", amount: "" }],
+          success: true,
+          modalSuccess: true
+        });
+      this.getExistingTemplates();
+    });
+
   };
 
   render() {
@@ -251,7 +333,10 @@ class FeeTemplates extends Component {
                           onClick={() => {
                             this.setState({
                               showCreateTemplate: true,
-                              showCreateButton: false
+                              showCreateButton: false,
+                              showExistingTemplate:false,
+                              templateName:""
+
                             });
                           }}
                         >
@@ -273,6 +358,7 @@ class FeeTemplates extends Component {
                             </InputGroupAddon>
                             <Input
                               type="text"
+                              size="lg"
                               label="Template Name"
                               name="templateName"
                               id="templateName"
@@ -300,7 +386,7 @@ class FeeTemplates extends Component {
                           )}
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'background-color': "palevioletred" }}>
+                              <tr style={{ 'backgroundColor': "palevioletred" }}>
                                 <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
@@ -401,6 +487,7 @@ class FeeTemplates extends Component {
                                   this.setState({
                                     showCreateTemplate: false,
                                     showCreateButton: true,
+                                    showExistingTemplate:true,
                                     rows: [{}]
                                   });
                                 }}
@@ -413,13 +500,18 @@ class FeeTemplates extends Component {
                             </Col>
                           </Row>
                         </CardBody>
+                        <font color="brown">**Cancel to go Back**</font>
                       </Card>
+
                     )}
+
+
+
 
                     {this.state.showEditTemplate &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Edit Template: {this.state.rows[this.state.templateNo].templateName}</h3>
+                          <h3 align="center"> Edit Template:  <font color="blue"> {this.state.templateName}</font> </h3>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText style={{ width: "120px" }}>
@@ -429,6 +521,7 @@ class FeeTemplates extends Component {
                             <Input
                               type="text"
                               label="Template Name"
+                              size="lg"
                               name="templateName"
                               id="templateName"
                               value={this.state.templateName}
@@ -455,7 +548,7 @@ class FeeTemplates extends Component {
                           )}
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'background-color': "palevioletred" }}>
+                              <tr style={{ 'backgroundColor': "palevioletred" }}>
                                 <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
@@ -468,7 +561,7 @@ class FeeTemplates extends Component {
                                 </th>
                                 <th>
                                   <Button
-                                    onClick={this.handleAddRow}
+                                    onClick={this.handleEditAddRow}
                                     className="btn btn-primary"
                                     color="info"
                                     size="lg"
@@ -481,7 +574,7 @@ class FeeTemplates extends Component {
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.rows.map((item, idx) => (
+                              {this.state.editRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
@@ -541,7 +634,7 @@ class FeeTemplates extends Component {
                           <Row>
                             <Col>
                               <Button
-                                onClick={this.submitHandler}
+                                onClick={this.updateHandler}
                                 size="lg"
                                 color="success"
                                 block
@@ -557,6 +650,7 @@ class FeeTemplates extends Component {
                                     showEditTemplate: false,
                                     showCreateTemplate: false,
                                     showCreateButton: true,
+                                    showExistingTemplate:true,
                                     rows: [{}]
                                   });
                                 }}
@@ -573,17 +667,17 @@ class FeeTemplates extends Component {
                     }
 
 
-                   
+
 
                   </Form>
                 </CardBody>
               </Card>
 
 
- 
 
 
-              {!this.state.showCreateTemplate &&
+
+              {this.state.showExistingTemplate &&
                 <Card className="mx-4">
                   <CardBody className="p-4">
 
@@ -596,7 +690,7 @@ class FeeTemplates extends Component {
                           <br />
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'background-color': "lightcoral" }}>
+                              <tr style={{ 'backgroundColor': "lightcoral" }}>
                                 <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
@@ -622,16 +716,18 @@ class FeeTemplates extends Component {
 
                                   <td align="center">
                                     <Button
-                                      className="btn btn-outline-info btn-sg"
+                                     color="info"
                                       onClick={()=>{this.setState({
-                                        editRows:this.state.existingRows,
+                                        editRows:this.state.existingRows[idx].templateRows,
                                         showEditTemplate: true,
                                         templateNo: idx,
                                         templateName: this.state.existingRows[idx].templateName,
                                         showCreateTemplate:false,
-                                        showCreateButton:false
+                                        showCreateButton:false,
+                                        showExistingTemplate:false
 
-                                      })
+
+                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
                                       }}
 
 
@@ -641,8 +737,8 @@ class FeeTemplates extends Component {
                                     </Button>
                                     &nbsp;&nbsp;
                                     <Button
-                                      className="btn btn-outline-danger btn-sg"
-                                      //  onClick={this.handleRemoveExistingSpecificRow(idx)}
+                                      color="danger"
+                                        onClick={this.handleRemoveExistingSpecificRow(idx)}
                                       size="lg"
                                     >
                                       Remove

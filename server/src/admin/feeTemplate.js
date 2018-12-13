@@ -39,10 +39,19 @@ function existingTemplates(req, res) {
 
   }
 
+  function deleteTemplate(req,res)
+  {console.log("In Delete Template for: "+ JSON.stringify(req.body));
+
+//FeeTemplate
+//.deleteOne({templateName:req.body.existingRows.})
+
+
+}
 
 
   app.post("/api/feeTemplate", addFeeTemplate);
   app.get("/api/existingTemplates", existingTemplates);
+  app.post("/api/deleteTemplate", deleteTemplate);
 
 
 
