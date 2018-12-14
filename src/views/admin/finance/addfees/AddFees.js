@@ -28,6 +28,7 @@ import { AutoComplete } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import axios, { post } from "axios";
+import SearchUser from '../../searchuser/SearchUser';
 
 class AddFees extends Component {
 
@@ -44,23 +45,24 @@ class AddFees extends Component {
             dataSource: [],
 
             usersDetails: null,
-            studentsDetails: null
+            studentsDetails: null,
 
+            showSearchUserSectionFlag : false,
 
+            actionTypeForSearchUser: "RedirectToAddFee"
 
 
         };
         this.changeHandler = this.changeHandler.bind(this);
         this.submitHandler = this.submitHandler.bind(this);
-        this.feeStudentSearch = this.feeStudentSearch.bind(this);
         this.resetForm = this.resetForm.bind(this);
-        this.getStudent = this.getStudent.bind(this);
 
         this.onUpdateInput = this.onUpdateInput.bind(this);
         this.onUpdateInput = this.onUpdateInput.bind(this);
         this.performSearch = this.performSearch.bind(this);
         this.selectedItem = this.selectedItem.bind(this);
         this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
+        this.showSearchUserSection = this.showSearchUserSection.bind(this);
 
     }
 
@@ -207,6 +209,17 @@ class AddFees extends Component {
             }
         });
     }
+
+    showSearchUserSection(e) {
+
+        e.preventDefault();
+        this.setState({
+            showSearchUserSectionFlag : true
+        });
+    }
+
+
+
     resetForm = (e) => {
         this.setState({
             username: "",
@@ -265,41 +278,11 @@ class AddFees extends Component {
      */
 
 
-    feeStudentSearch(e) {
-        console.log("find: " + e.target.value);
-        this.setState({
-            find: e.target.value
-        }, () => {
-            if (this.state.find && this.state.find.length > 1) {
-                if (this.state.find.length % 2 === 0) {
-                    this.getStudent()
-                }
-            }
-        })
-
-    }
-
-    getStudent = () => {
-        console.log("find state: " + this.state);
-        axios.post(`http://localhost:8001/api/searchStudent`, this.state)
-            .then(({ data }) => {
-                this.setState({
-                    results: data.data // MusicGraph returns an object named data, 
-                    // as does axios. So... data.data                             
-                }, () => { console.log("search results: " + this.state.results); })
-            })
-    }
-
-
-
-
-
-
     render() {
         return (
             <div>
 
-
+{!this.state.showSearchUserSectionFlag && (
                 <Row lg="2">
                     <Col md="12">
                         <Card>
@@ -332,7 +315,7 @@ class AddFees extends Component {
                                                     Advanced Serch (ye abhi change hoga)
                                                 </Button> */}
                                                 {/* <Badge href='#/admin/searchUser' color='success'>Advanced Serch</Badge> */}
-                                                <a href='#/admin/searchUser'>Advanced Serch</a>
+                                                <a href='#' onClick={this.showSearchUserSection}>Advanced Serch</a>
                                             </Row>
 
                                         </Col>
@@ -561,16 +544,17 @@ class AddFees extends Component {
                                 <Button type="reset" size="sm" color="danger"><i className="fa fa-ban"></i> Reset</Button>
                             </CardFooter>
                         </Card>
-
-
                     </Col>
-
-
-
-
-
                 </Row>
+    )}
 
+    { this.state.showSearchUserSectionFlag && (
+                <Row lg="2">
+                    <Col md="12">
+                        <SearchUser data={this.state.actionTypeForSearchUser}/>
+                    </Col>
+                </Row>
+    )}
             </div>
         );
     }

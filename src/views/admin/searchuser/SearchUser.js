@@ -23,6 +23,7 @@ import { AutoComplete } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import JSONP from 'jsonp';
+import { withRouter } from 'react-router';
 
 var Promise = require('promise');
 
@@ -51,47 +52,63 @@ class SearchUser extends Component {
 
       dataSource: [],
 
-      searchBarResponse: null
+      searchBarResponse: null,
+
+      userDetails: null,
+
+      studentDetails: null,
+
+      // Action type for deciding where to redirect
+      // Redirect to AddFee page if 'actionTypeForSearchUser' is 'RedirectToAddFee' (which means searchUser request is coming from AddFee page)
+      actionTypeForSearchUser: null
     };
 
+    if (this.props.data) {
+      console.log("actionTypeForSearchUser - " + this.props.data);
+      this.setState({
+        actionTypeForSearchUser: this.props.data
+      });
+    }
   }
 
   /**
    * @description Handles the form search request
    * @param {*} e
    */
-  searchHandler(e) {
+  async searchHandler(e) {
     console.log("searchHandler ENTER:  " + JSON.stringify(this.state));
 
     e.preventDefault();
-    console.log("Submit Request - " + JSON.stringify(this.state));
 
-    axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
+    axios.post("http://localhost:8001/api/searchUsers", this.state).then(uRes => {
 
-      console.log("submit response data - " + JSON.stringify(res.data));
-      console.log("res.data.errors - " + res.data.errors);
-      console.log("res.data.message - " + res.data.message);
-      console.log("res.data.error - " + res.data.errors);
+      if (uRes.data.errors) {
 
-      if (res.data.errors) {
-        return this.setState({ errors: res.data.errors });
+        return this.setState({ errors: uRes.data.errors });
+
       } else {
 
-        console.log("Final response submit - " + JSON.stringify(res.data));
+        this.setState({ userDetails: uRes.data });
 
-        console.log("this.state.searchBarResponse 3 - " + JSON.stringify(this.state.searchBarResponse));
+        if (this.state.actionTypeForSearchUser === 'RedirectToAddFee') {
 
+          console.log('userDetails - ' + this.state.userDetails);
 
-        // this.setState({searchBarResponse: res.data}, function() {
-        //   console.log("username again again - " + this.state.searchBarResponse[0].username);
-        // });
+          this.props.history.push(
+            {
+              //pathname: '/admin/finance/AddFees',
+              pathname: '/admin/users',
+              state: this.state.userDetails
+            });
 
-        this.props.history.push(
-          {
-            pathname: '/admin/users',
-            state: res.data
-          });
+        } else {
 
+          this.props.history.push(
+            {
+              pathname: '/admin/users',
+              state: this.state.userDetails
+            });
+        }
       }
     });
   }
@@ -125,10 +142,6 @@ class SearchUser extends Component {
 
       axios.post("http://localhost:8001/api/searchUsers", this.state).then(res => {
 
-        console.log("res.data.errors - " + res.data.errors);
-        console.log("res.data.message - " + res.data.message);
-        console.log("res.data.error - " + res.data.errors);
-
         if (res.data.errors) {
           return this.setState({ errors: res.data.errors });
         } else {
@@ -136,11 +149,7 @@ class SearchUser extends Component {
           var resData = res.data;
 
           // Setting response data in state so that it can be used in the onclick event of search bar items (selectedItem method)
-          console.log("Setting searchBarResponse with " + JSON.stringify(resData));
           this.setState({ searchBarResponse: resData });
-
-          //this.props.history.push("/users");
-          console.log("final response search bar - " + JSON.stringify(res.data));
 
           var i = 1;
           res.data.forEach(function (item) {
@@ -153,17 +162,10 @@ class SearchUser extends Component {
 
           });
 
-          console.log("Fetched usernames on search - " + fetchedUsernames);
-
           this.setState({
             dataSource: fetchedUsernames
           });
 
-          console.log("this.state.dataSource - " + this.state.dataSource);
-
-          console.log("this.state.searchBarResponse 1 - " + JSON.stringify(this.state.searchBarResponse));
-
-          console.log("this.state before - " + JSON.stringify(this.state));
         }
       });
     }
@@ -178,24 +180,16 @@ class SearchUser extends Component {
     var selectedUsername;
 
     this.setState({ chosenSearchValue: chosenSearchValue });
-    console.log("this.state.chosenSearchValue - " + this.statechosenSearchValue);
 
     selectedUsername = chosenSearchValue.split("(")[1].split(")")[0];
-    console.log("username retrieved from chosen field after removing () " + selectedUsername);
 
     searchBarResponse = this.state.searchBarResponse;
-    console.log("this.state.searchBarResponse 2 - " + JSON.stringify(searchBarResponse));
 
     var tempArrayForUser = [];
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     for (var i = 0; i < searchBarResponse.length; i++) {
 
-      console.log("searchBarResponse[i][\"username\"] - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername + " searchBarResponse.length - " + searchBarResponse.length);
-      console.log("searchBarResponse[i] - " + JSON.stringify(searchBarResponse));
 
       if (searchBarResponse[i]["username"].toLowerCase() === String(selectedUsername).toLowerCase()) {
-
-        console.log("searchBarResponse[i][\"username\"] BBBBBBBBBBBBBBBBBBB - " + searchBarResponse[i]["username"] + " selectedUsername - " + selectedUsername);
 
         tempArrayForUser.push(searchBarResponse[i]);
         this.props.history.push(
@@ -333,7 +327,7 @@ class SearchUser extends Component {
                             name="searchCriteria"
                             value="equalsSearchCriteria"
                             onChange={this.changeHandler}
-                             />
+                          />
                           <Label className="form-check-label"
                             check htmlFor="equalsSearchCriteria">Equals</Label>
                         </FormGroup>
@@ -343,8 +337,8 @@ class SearchUser extends Component {
                             id="searchCriteria"
                             name="searchCriteria"
                             value="containsSearchCriteria"
-                            onChange={this.changeHandler} 
-                            defaultChecked/>
+                            onChange={this.changeHandler}
+                            defaultChecked />
                           <Label className="form-check-label"
                             check htmlFor="containsSearchCriteria">Contains</Label>
                         </FormGroup>
@@ -367,4 +361,4 @@ class SearchUser extends Component {
   }
 }
 
-export default SearchUser;
+export default withRouter(SearchUser);

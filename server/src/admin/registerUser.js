@@ -506,7 +506,7 @@ module.exports = function (app) {
 
     var parentUser = {
       "username": req.body.parentusername, "firstname": req.body.parentfirstname, "lastname": req.body.parentlastname,
-      "email": req.body.parentemail, "password": req.body.parentpassword, "role": "Parent", status: req.body.status
+      "email": req.body.parentemail, "password": req.body.parentpassword, "role": "parent", status: req.body.status
     };
     var user = new User(parentUser);
    // console.log("user = " + user);
@@ -538,7 +538,7 @@ req.body["userid"]=user.userid;
 
     var studentUser = {
       "username": req.body.username, "firstname": req.body.firstname, "lastname": req.body.lastname,
-      "email": req.body.email, "password": req.body.password, "role": "Student", "status": req.body.status
+      "email": req.body.email, "password": req.body.password, "role": "student", "status": req.body.status
     };
     user = new User(studentUser);
   //  console.log("user = " + user);
