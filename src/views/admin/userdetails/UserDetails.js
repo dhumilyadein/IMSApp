@@ -126,9 +126,8 @@ class UserDetails extends Component {
       fetchedStudentsDetails: [],
 
       // For hiding fields which are meant to be displayed only in "edit" mode, fields like password, confirm password, roles, etc.
-      screenmode: "display", // {"dispaly", "edit"}
+      screenmode: "display" // {"dispaly", "edit"}
 
-      count: 0
     };
 
     this.changeHandler = this.changeHandler.bind(this);
@@ -137,21 +136,9 @@ class UserDetails extends Component {
     this.fetchUserDataOnPageLoad = this.fetchUserDataOnPageLoad.bind(this);
     this.mapStudentResponseToState = this.mapStudentResponseToState.bind(this);
 
-
-
-  }
-
-  componentDidMount() {
     this.fetchUserDataOnPageLoad();
+
   }
-
-  componentDidUpdate() {
-    console.log("AAAAAAAAAAAAAAAAAAAA - " + (this.state.count)++);
-    //this.fetchUserDataOnPageLoad();
-    //this.mapStudentResponseToState();
-  }
-
-
 
   /**
    * For tab toggle
@@ -178,11 +165,6 @@ class UserDetails extends Component {
 
     await axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(res => {
 
-      console.log("submit response data - " + JSON.stringify(res.data));
-      console.log("res.data.errors - " + res.data.errors);
-      console.log("res.data.message - " + res.data.message);
-      console.log("res.data.error - " + res.data.errors);
-
       if (res.data.errors) {
         return this.setState({ errors: res.data.errors });
       } else {
@@ -190,10 +172,6 @@ class UserDetails extends Component {
         this.setState({
           fetchedUserDetails: res.data
         });
-
-        console.log("Final User details - res.data - " + JSON.stringify(res.data));
-        console.log("this.state.fetchedUserDetails - " + JSON.stringify(this.state.fetchedUserDetails));
-        console.log("this.state.fetchedUserDetails.role - First user - " + this.props.match.params.username + " @ Details fetched on username - " + JSON.stringify(this.state.fetchedUserDetails[0]));
       }
     });
 
@@ -205,13 +183,6 @@ class UserDetails extends Component {
 
     await axios.post("http://localhost:8001/api/searchStudents", searchStudentsRequest).then(res => {
 
-      console.log("searchStudents Submit Request - " + JSON.stringify(searchStudentsRequest));
-
-      console.log("searchStudents submit response data - " + JSON.stringify(res.data));
-      console.log("searchStudents  res.data.errors - " + res.data.errors);
-      console.log("searchStudents  res.data.message - " + res.data.message);
-      console.log("searchStudents  res.data.error - " + res.data.errors);
-
       if (res.data.errors) {
         return this.setState({ errors: res.data.errors });
       } else {
@@ -219,11 +190,6 @@ class UserDetails extends Component {
         this.setState({
           fetchedStudentsDetails: res.data
         });
-
-        //console.log("Final User details - res.data - " + JSON.stringify(res.data));
-        //console.log("this.state.fetchedStudentsDetails - " + JSON.stringify(this.state.fetchedStudentsDetails));
-        //console.log("this.state.fetchedStudentsDetails.role - First user - " + this.props.match.params.username + " @ Details fetched on username - " + JSON.stringify(this.state.fetchedStudentsDetails[0]));
-
       }
       this.mapStudentResponseToState();
     });
