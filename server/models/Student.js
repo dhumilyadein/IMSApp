@@ -60,6 +60,12 @@ var StudentSchema = new Schema({
   },
 
 
+  feeTemplate: {
+    type: String,
+    required: true
+  },
+
+
    bloodgroup: {
     type: String,
     required: true
