@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
+//import Multiselect from 'multiselect-dropdown-react';
 
 import {
   Button,
@@ -29,6 +30,7 @@ import axios, { post } from "axios";
 class RegisterUser extends Component {
   constructor(props) {
     super(props);
+    this.getExistingTemplates();
     this.state = {
       admintype: "Office Admin",
       username: "",
@@ -90,13 +92,14 @@ class RegisterUser extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
-      feeTemplate:"",
+      feeTemplate:[{}],
       corruptphoto: false,
       photoname: "",
       phone: "",
       parentaddresscheck: false,
       roleerror: false,
-      photoerror:null
+      photoerror:null,
+
     };
 
     this.changeHandler = this.changeHandler.bind(this);
@@ -106,11 +109,36 @@ class RegisterUser extends Component {
     this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
 
-
+    this.getExistingTemplates = this.getExistingTemplates.bind(this);
     this.fileChange = this.fileChange.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
     this.photoUpload = this.photoUpload.bind(this);
   }
+
+  getExistingTemplates() {
+
+    axios
+      .get("http://localhost:8001/api/existingTemplates")
+      .then(result => {
+        console.log("Existing Fee Templates: " + JSON.stringify(result.data));
+        console.log("No of templates " + result.data.length);
+        if (result.data) {
+          var temp=[];
+         for(var i=0;i<result.data.length;i++)
+         {
+           temp.push({"name":result.data[i].templateName,
+           "value":result.data[i].templateName
+          })
+
+
+
+         }
+         console.log("Temp: "+JSON.stringify(temp));
+         this.setState({feeTemplate:temp});
+        }
+      });
+  }
+
 
   toggleSuccess() {
     this.setState({
@@ -1009,13 +1037,17 @@ this.setState({
                                 onChange={this.changeHandler}
                                 value={this.state.feeTemplate}
                               >
-                                <option value="">Select</option>
+
+                               <option value="">Select</option>
                                 <option value="General">type 1</option>
                                 <option value="ST">type2</option>
                                 <option value="SC">type3</option>
                                 <option value="OBC">type4</option>
 
                               </Input>
+
+
+
                             </InputGroup>
                             {this.state.errors && this.state.errors.feeTemplate && (
                               <font color="red">

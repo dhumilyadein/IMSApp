@@ -44,7 +44,9 @@ class FeeTemplates extends Component {
       showEditTemplate: false,
       templateNo: "",
       showExistingTemplate:true,
-      showCopyTemplate:false
+      showCopyTemplate:false,
+      templateTypeError:"",
+      templateType:""
 
     };
 
@@ -111,12 +113,17 @@ class FeeTemplates extends Component {
     console.log("in Submit State: " + JSON.stringify(this.state));
     console.log("Row Length: " + this.state.rows.length);
     this.setState({
-      rowError: "", templateNameError: "", success: false,
+      rowError: "", templateNameError: "", success: false, templateTypeError:"",
       modalSuccess: false
     }, () => {
       if (!this.state.templateName) {
         this.setState({ templateNameError: "Please Enter Template Name" });
-        submit = false;
+        submit = false;}
+
+       else if (!this.state.templateType) {
+          this.setState({ templateTypeError: "Please Select Template Type" });
+          submit = false;
+
       } else if (this.state.rows.length === 0) {
         this.setState({ rowError: "Please add atleast one Fee Category" });
         submit = false;
@@ -397,6 +404,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                       <Card className="mx-1">
                         <CardBody className="p-2">
                           <h3 align="center"> Create Fee Template</h3>
+                          <br />
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText style={{ width: "120px" }}>
@@ -431,6 +439,56 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               </h6>{" "}
                             </font>
                           )}
+
+
+
+
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                <b>Template Type</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="templateType"
+                                id="templateType"
+                                size="lg"
+                                type="select"
+                                onChange={e => {
+                                  this.setState(
+                                    { templateType: e.target.value },
+                                    () => {
+                                      console.log(
+                                        "Template Type: " +
+                                        this.state.templateType
+                                      );
+                                    }
+                                  );
+                                }}
+                                value={this.state.templateType}
+                              >
+
+                               <option value="">Select</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Quarterly">Quarterly</option>
+                                <option value="Half Yearly">Half Yearly</option>
+                                <option value="Yearly">Yearly</option>
+
+                              </Input>
+                            </InputGroup>
+                            {this.state.templateTypeError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.templateTypeError}</p>
+                              </font>
+                            )}
+
+
+
+
+
+
                           <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -593,6 +651,52 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               </h6>{" "}
                             </font>
                           )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                <b>Template Type</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="templateType"
+                                id="templateType"
+                                size="lg"
+                                type="select"
+                                onChange={e => {
+                                  this.setState(
+                                    { templateType: e.target.value },
+                                    () => {
+                                      console.log(
+                                        "Template Type: " +
+                                        this.state.templateType
+                                      );
+                                    }
+                                  );
+                                }}
+                                value={this.state.templateType}
+                              >
+
+                               <option value="">Select</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Quarterly">Quarterly</option>
+                                <option value="Half Yearly">Half Yearly</option>
+                                <option value="Yearly">Yearly</option>
+
+                              </Input>
+                            </InputGroup>
+                            {this.state.templateTypeError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.templateTypeError}</p>
+                              </font>
+                            )}
+
+
+
+
+
+
                           <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -751,6 +855,51 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               </h6>{" "}
                             </font>
                           )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                <b>Template Type</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="templateType"
+                                id="templateType"
+                                size="lg"
+                                type="select"
+                                onChange={e => {
+                                  this.setState(
+                                    { templateType: e.target.value },
+                                    () => {
+                                      console.log(
+                                        "Template Type: " +
+                                        this.state.templateType
+                                      );
+                                    }
+                                  );
+                                }}
+                                value={this.state.templateType}
+                              >
+
+                               <option value="">Select</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Quarterly">Quarterly</option>
+                                <option value="Half Yearly">Half Yearly</option>
+                                <option value="Yearly">Yearly</option>
+
+                              </Input>
+                            </InputGroup>
+                            {this.state.templateTypeError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.templateTypeError}</p>
+                              </font>
+                            )}
+
+
+
+
+
                           <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -911,6 +1060,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                   <h4>Template Name </h4>
                                 </th>
                                 <th className="text-center">
+                                  {" "}
+                                  <h4>Template Type </h4>
+                                </th>
+
+                                <th className="text-center">
                                  <h4> Actions</h4>
 
 
@@ -929,6 +1083,10 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                   </td>
 
                                   <td align="center">
+                                    <h5> {this.state.existingRows[idx].templateType}</h5>
+                                  </td>
+
+                                  <td align="center">
                                     <Button
                                      color="primary"
                                       onClick={()=>{this.setState({
@@ -936,9 +1094,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         showEditTemplate: true,
                                         templateNo: idx,
                                         templateName: this.state.existingRows[idx].templateName,
+                                        templateType: this.state.existingRows[idx].templateType,
                                         showCreateTemplate:false,
                                         showCreateButton:false,
-                                        showExistingTemplate:false
+                                        showExistingTemplate:false,
+                                        templateNameError:""
 
 
                                       },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
@@ -958,6 +1118,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         showCopyTemplate: true,
                                         templateNo: idx,
                                         templateName: this.state.existingRows[idx].templateName,
+                                        templateType: this.state.existingRows[idx].templateType,
                                         showCreateTemplate:false,
                                         showCreateButton:false,
                                         showExistingTemplate:false
