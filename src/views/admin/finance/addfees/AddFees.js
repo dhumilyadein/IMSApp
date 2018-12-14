@@ -64,6 +64,8 @@ class AddFees extends Component {
         this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
         this.showSearchUserSection = this.showSearchUserSection.bind(this);
 
+    console.log("AddFee this.props.match.params - " + this.props.match.params.studentDetails);
+
     }
 
     onUpdateInput(inputValue, datasource, params) {
@@ -298,7 +300,7 @@ class AddFees extends Component {
                                         <Col xs="12" md="9">
                                             <Row>
                                                 <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
-                                                    <AutoComplete
+                                                    <AutoComplete displayText
                                                         hintText="Enter Search text"
                                                         dataSource={this.state.dataSource}
                                                         onUpdateInput={this.onUpdateInput}

@@ -63,12 +63,6 @@ class SearchUser extends Component {
       actionTypeForSearchUser: null
     };
 
-    if (this.props.data) {
-      console.log("actionTypeForSearchUser - " + this.props.data);
-      this.setState({
-        actionTypeForSearchUser: this.props.data
-      });
-    }
   }
 
   /**
@@ -80,7 +74,13 @@ class SearchUser extends Component {
 
     e.preventDefault();
 
-    axios.post("http://localhost:8001/api/searchUsers", this.state).then(uRes => {
+    var searchUserRequest = {
+      "find": this.state.find,
+      "using": "username",
+      "role": "student",
+      "searchCriteria": "containsSearchCriteria",
+    }
+    await axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(uRes => {
 
       if (uRes.data.errors) {
 
@@ -90,18 +90,28 @@ class SearchUser extends Component {
 
         this.setState({ userDetails: uRes.data });
 
+        if (this.props.data) {
+          console.log("SearchUser actionTypeForSearchUser - " + this.props.data);
+          this.setState({
+            actionTypeForSearchUser: this.props.data
+          });
+          console.log("SearchUser AFTER SETTING STATE actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
+        }
+
         if (this.state.actionTypeForSearchUser === 'RedirectToAddFee') {
 
-          console.log('userDetails - ' + this.state.userDetails);
+          console.log('ADDFEE FLOW RedirectToAddFee userDetails - ' + JSON.stringify(this.state.userDetails));
 
           this.props.history.push(
             {
               //pathname: '/admin/finance/AddFees',
               pathname: '/admin/users',
-              state: this.state.userDetails
+              state: { "actionTypeForSearchUser" : "RedirectToAddFee", "userDetails" : this.state.userDetails}
             });
 
         } else {
+
+          console.log('NORMAL FLOW userDetails - ' + this.state.userDetails + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
 
           this.props.history.push(
             {
@@ -153,9 +163,6 @@ class SearchUser extends Component {
 
           var i = 1;
           res.data.forEach(function (item) {
-
-            console.log("Fetched username - " + item.username);
-            console.log("Fetched Full Name - " + item.firstname + " " + item.lastname);
 
             let displayText = item.firstname + " " + item.lastname + " (" + item.username + ")";
             fetchedUsernames.push(displayText);
