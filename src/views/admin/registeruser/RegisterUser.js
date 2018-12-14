@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
-//import Multiselect from 'multiselect-dropdown-react';
+
+import Select from 'react-select';
 
 import {
   Button,
@@ -26,6 +27,8 @@ import {
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
 import axios, { post } from "axios";
+
+
 
 class RegisterUser extends Component {
   constructor(props) {
@@ -1030,21 +1033,19 @@ this.setState({
                                   Fee Template
                                 </InputGroupText>
                               </InputGroupAddon>
-                              <Input
+                              <Select
+                              multi
                                 name="feeTemplate"
                                 id="feeTemplate"
-                                type="select"
-                                onChange={this.changeHandler}
-                                value={this.state.feeTemplate}
-                              >
 
-                               <option value="">Select</option>
-                                <option value="General">type 1</option>
-                                <option value="ST">type2</option>
-                                <option value="SC">type3</option>
-                                <option value="OBC">type4</option>
+                                //onChange={this.changeHandler}
+                               // value={this.state.feeTemplate}
+                                options={this.state.feeTemplate}
+                              />
 
-                              </Input>
+
+
+
 
 
 
@@ -1061,6 +1062,8 @@ this.setState({
 
                                 </p>
                               )}
+
+
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
