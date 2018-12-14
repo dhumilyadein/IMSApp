@@ -244,7 +244,7 @@ class FeeTemplates extends Component {
           .post("http://localhost:8001/api/copyFeeTemplate", this.state)
           .then(result => {
             console.log("COPY RESULT.data " + JSON.stringify(result.data));
-            if (result.data.code === 11000) 
+            if (result.data.code === 11000)
               this.setState({
                 templateNameError: "Template Name already exists! Name must be Unique."
               });
@@ -547,7 +547,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                             </Col>
                           </Row>
                         </CardBody>
-                       
+
                       </Card>
 
                     )}
@@ -764,7 +764,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
-                                <th>
+                                <th className="text-center">
                                   <Button
                                     onClick={this.handleEditAddRow}
                                     className="btn btn-primary"
@@ -882,7 +882,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
 
 
-              {this.state.showExistingTemplate &&
+              {this.state.showExistingTemplate && this.state.existingRows.length>0 &&
                 <Card className="mx-4">
                   <CardBody className="p-4">
 
@@ -912,7 +912,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                 </th>
                                 <th className="text-center">
                                  <h4> Actions</h4>
-                                
+
 
                                 </th>
 

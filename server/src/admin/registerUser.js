@@ -76,6 +76,11 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Please select Bloodgroup"),
 
+      check("feeTemplate")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Fee Template"),
+
     check("gender")
       .not()
       .isEmpty()
@@ -651,7 +656,7 @@ async function photoUploading(req,res)
  console.log("in Photo Upload ");
 
  await rimraf('./PhotoUploads/*.*', function (e) {
- 
+
   console.log(e);
   console.log('Register - Deleted Photo');
   photoUpload(req, res, function (err) {
@@ -666,9 +671,9 @@ async function photoUploading(req,res)
   photoPath = req.file.path;
   res.json({message:"photo uploaded to " +photoPath});
   }
-  
-  
-  
+
+
+
   });
 });
 

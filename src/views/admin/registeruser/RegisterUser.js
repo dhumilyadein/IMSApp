@@ -90,7 +90,7 @@ class RegisterUser extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
-
+      feeTemplate:"",
       corruptphoto: false,
       photoname: "",
       phone: "",
@@ -965,6 +965,12 @@ this.setState({
                                         </p>
                                       </font>
                                     )}
+
+
+
+
+
+
                                   <InputGroup className="mb-3">
                                     <InputGroupAddon addonType="prepend">
                                       <InputGroupText
@@ -989,6 +995,38 @@ this.setState({
                                         <p>{this.state.errors.rollno.msg}</p>
                                       </font>
                                     )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                  Fee Template
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="feeTemplate"
+                                id="feeTemplate"
+                                type="select"
+                                onChange={this.changeHandler}
+                                value={this.state.feeTemplate}
+                              >
+                                <option value="">Select</option>
+                                <option value="General">type 1</option>
+                                <option value="ST">type2</option>
+                                <option value="SC">type3</option>
+                                <option value="OBC">type4</option>
+
+                              </Input>
+                            </InputGroup>
+                            {this.state.errors && this.state.errors.feeTemplate && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.feeTemplate.msg}</p>
+                              </font>
+                            )}
+
+
+
+
                                 </p>
                               )}
                             <InputGroup className="mb-3">
