@@ -242,7 +242,7 @@ const routes = [
     component: AddFees
   },
   {
-    path: "/admin/finance/addfees/:studentDetails",
+    path: "/admin/finance/addfees/:username",
     exact: true,
     name: "Add Fees",
     component: AddFees
