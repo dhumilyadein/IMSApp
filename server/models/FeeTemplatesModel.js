@@ -20,10 +20,15 @@ var FeeTemplateSchema = new Schema({
    lowercase:true
   },
 
+  templateType: {
+    type: String,
+    required: true,
+
+  },
 
   templateRows: {
     type: Array,
-    
+
     required: true,
 
     feeType:{

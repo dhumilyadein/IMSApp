@@ -76,6 +76,11 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Please select Bloodgroup"),
 
+      check("feeTemplate")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Fee Template"),
+
     check("gender")
       .not()
       .isEmpty()
@@ -506,7 +511,7 @@ module.exports = function (app) {
 
     var parentUser = {
       "username": req.body.parentusername, "firstname": req.body.parentfirstname, "lastname": req.body.parentlastname,
-      "email": req.body.parentemail, "password": req.body.parentpassword, "role": "Parent", status: req.body.status
+      "email": req.body.parentemail, "password": req.body.parentpassword, "role": "parent", status: req.body.status
     };
     var user = new User(parentUser);
    // console.log("user = " + user);
@@ -538,7 +543,7 @@ req.body["userid"]=user.userid;
 
     var studentUser = {
       "username": req.body.username, "firstname": req.body.firstname, "lastname": req.body.lastname,
-      "email": req.body.email, "password": req.body.password, "role": "Student", "status": req.body.status
+      "email": req.body.email, "password": req.body.password, "role": "student", "status": req.body.status
     };
     user = new User(studentUser);
   //  console.log("user = " + user);
@@ -651,7 +656,7 @@ async function photoUploading(req,res)
  console.log("in Photo Upload ");
 
  await rimraf('./PhotoUploads/*.*', function (e) {
- 
+
   console.log(e);
   console.log('Register - Deleted Photo');
   photoUpload(req, res, function (err) {
@@ -666,9 +671,9 @@ async function photoUploading(req,res)
   photoPath = req.file.path;
   res.json({message:"photo uploaded to " +photoPath});
   }
-  
-  
-  
+
+
+
   });
 });
 

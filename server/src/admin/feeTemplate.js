@@ -6,6 +6,7 @@ console.log("in Add Fee Req.body: "+JSON.stringify(req.body))
 
 var template = {
   "templateName": req.body.templateName, "status": req.body.status, "templateRows": req.body.rows,
+  "templateType":req.body.templateType
 
 };
 var addTemplate = new FeeTemplate(template);
@@ -61,7 +62,8 @@ function updateFeeTemplate(req,res)
 FeeTemplate
 .updateOne({templateName:req.body.existingRows[req.body.templateNo].templateName},
   {$set: {templateName:req.body.templateName,
-          templateRows:req.body.editRows
+          templateRows:req.body.editRows,
+          templateType:req.body.templateType
 
   }}
   )
@@ -80,8 +82,8 @@ async function copyFeeTemplate(req,res)
 
 
 var template = {
-  "templateName": req.body.templateName, "status": req.body.status, 
-  "templateRows": req.body.editRows,
+  "templateName": req.body.templateName, "status": req.body.status,
+  "templateRows": req.body.editRows,"templateType":req.body.templateType
 
 };
 var copyTemplate = new FeeTemplate(template);

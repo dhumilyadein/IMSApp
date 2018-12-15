@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
 
+import Select from 'react-select';
+
 import {
   Button,
   Card,
@@ -26,9 +28,12 @@ import {
 import { AppSwitch } from "@coreui/react";
 import axios, { post } from "axios";
 
+
+
 class RegisterUser extends Component {
   constructor(props) {
     super(props);
+    this.getExistingTemplates();
     this.state = {
       admintype: "Office Admin",
       username: "",
@@ -90,13 +95,14 @@ class RegisterUser extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
-
+      feeTemplate:[{}],
       corruptphoto: false,
       photoname: "",
       phone: "",
       parentaddresscheck: false,
       roleerror: false,
-      photoerror:null
+      photoerror:null,
+
     };
 
     this.changeHandler = this.changeHandler.bind(this);
@@ -106,11 +112,36 @@ class RegisterUser extends Component {
     this.onDismiss = this.onDismiss.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
 
-
+    this.getExistingTemplates = this.getExistingTemplates.bind(this);
     this.fileChange = this.fileChange.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
     this.photoUpload = this.photoUpload.bind(this);
   }
+
+  getExistingTemplates() {
+
+    axios
+      .get("http://localhost:8001/api/existingTemplates")
+      .then(result => {
+        console.log("Existing Fee Templates: " + JSON.stringify(result.data));
+        console.log("No of templates " + result.data.length);
+        if (result.data) {
+          var temp=[];
+         for(var i=0;i<result.data.length;i++)
+         {
+           temp.push({"name":result.data[i].templateName,
+           "value":result.data[i].templateName
+          })
+
+
+
+         }
+         console.log("Temp: "+JSON.stringify(temp));
+         this.setState({feeTemplate:temp});
+        }
+      });
+  }
+
 
   toggleSuccess() {
     this.setState({
@@ -965,6 +996,12 @@ this.setState({
                                         </p>
                                       </font>
                                     )}
+
+
+
+
+
+
                                   <InputGroup className="mb-3">
                                     <InputGroupAddon addonType="prepend">
                                       <InputGroupText
@@ -989,8 +1026,44 @@ this.setState({
                                         <p>{this.state.errors.rollno.msg}</p>
                                       </font>
                                     )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                  Fee Template
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Select
+                              multi
+                                name="feeTemplate"
+                                id="feeTemplate"
+
+                                //onChange={this.changeHandler}
+                               // value={this.state.feeTemplate}
+                                options={this.state.feeTemplate}
+                              />
+
+
+
+
+
+
+
+                            </InputGroup>
+                            {this.state.errors && this.state.errors.feeTemplate && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.feeTemplate.msg}</p>
+                              </font>
+                            )}
+
+
+
+
                                 </p>
                               )}
+
+
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
