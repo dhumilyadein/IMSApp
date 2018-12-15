@@ -28,6 +28,7 @@ import { AutoComplete } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import axios, { post } from "axios";
+import SearchUser from '../../searchuser/SearchUser';
 
 class AddFees extends Component {
 
@@ -44,23 +45,30 @@ class AddFees extends Component {
             dataSource: [],
 
             usersDetails: null,
-            studentsDetails: null
+            studentsDetails: null,
 
+            showSearchUserSectionFlag : false,
 
+            actionTypeForSearchUser: "RedirectToAddFee"
 
 
         };
         this.changeHandler = this.changeHandler.bind(this);
         this.submitHandler = this.submitHandler.bind(this);
-        this.feeStudentSearch = this.feeStudentSearch.bind(this);
         this.resetForm = this.resetForm.bind(this);
-        this.getStudent = this.getStudent.bind(this);
 
         this.onUpdateInput = this.onUpdateInput.bind(this);
         this.onUpdateInput = this.onUpdateInput.bind(this);
         this.performSearch = this.performSearch.bind(this);
         this.selectedItem = this.selectedItem.bind(this);
         this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
+        this.showSearchUserSection = this.showSearchUserSection.bind(this);
+
+        if(this.props.match.params.username) {
+            console.log("AddFee this.props.match.params - " + this.props.match.params.username);
+
+            this.searchStudentsDetails(this.props.match.params.username, "username", "equalsSearchCriteria");
+        }
 
     }
 
@@ -190,11 +198,6 @@ class AddFees extends Component {
 
             console.log("AddFee Submit Request - " + JSON.stringify(searchStudentsRequest));
 
-            console.log("AddFee submit response data - " + JSON.stringify(res.data));
-            console.log("AddFee  res.data.errors - " + res.data.errors);
-            console.log("AddFee  res.data.message - " + res.data.message);
-            console.log("AddFee  res.data.error - " + res.data.errors);
-
             if (res.data.errors) {
                 return this.setState({ errors: res.data.errors });
             } else {
@@ -207,6 +210,17 @@ class AddFees extends Component {
             }
         });
     }
+
+    showSearchUserSection(e) {
+
+        e.preventDefault();
+        this.setState({
+            showSearchUserSectionFlag : true
+        });
+    }
+
+
+
     resetForm = (e) => {
         this.setState({
             username: "",
@@ -265,41 +279,16 @@ class AddFees extends Component {
      */
 
 
-    feeStudentSearch(e) {
-        console.log("find: " + e.target.value);
-        this.setState({
-            find: e.target.value
-        }, () => {
-            if (this.state.find && this.state.find.length > 1) {
-                if (this.state.find.length % 2 === 0) {
-                    this.getStudent()
-                }
-            }
-        })
-
-    }
-
-    getStudent = () => {
-        console.log("find state: " + this.state);
-        axios.post(`http://localhost:8001/api/searchStudent`, this.state)
-            .then(({ data }) => {
-                this.setState({
-                    results: data.data // MusicGraph returns an object named data, 
-                    // as does axios. So... data.data                             
-                }, () => { console.log("search results: " + this.state.results); })
-            })
-    }
-
-
-
-
-
-
     render() {
+
+        if(this.props.location.state && this.props.location.state.studentDetails) {
+            console.log("this.props.location.state.studentDetails - " + this.props.location.state.studentDetails);
+        }
+
         return (
             <div>
 
-
+{!this.state.showSearchUserSectionFlag && (
                 <Row lg="2">
                     <Col md="12">
                         <Card>
@@ -315,7 +304,7 @@ class AddFees extends Component {
                                         <Col xs="12" md="9">
                                             <Row>
                                                 <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
-                                                    <AutoComplete
+                                                    <AutoComplete displayText
                                                         hintText="Enter Search text"
                                                         dataSource={this.state.dataSource}
                                                         onUpdateInput={this.onUpdateInput}
@@ -332,7 +321,7 @@ class AddFees extends Component {
                                                     Advanced Serch (ye abhi change hoga)
                                                 </Button> */}
                                                 {/* <Badge href='#/admin/searchUser' color='success'>Advanced Serch</Badge> */}
-                                                <a href='#/admin/searchUser'>Advanced Serch</a>
+                                                <a href='#' onClick={this.showSearchUserSection}>Advanced Serch</a>
                                             </Row>
 
                                         </Col>
@@ -342,7 +331,8 @@ class AddFees extends Component {
                                             <Label htmlFor="email-input">Email Input</Label>
                                         </Col>
                                         <Col xs="12" md="9">
-                                            <Input type="email" id="email-input" name="email-input" placeholder="Enter Email" autoComplete="email" />
+
+                                        <Input type="email" id="email-input" name="email-input" placeholder="Enter Email" autoComplete="email" />
                                             <FormText className="help-block">Please enter your email</FormText>
                                         </Col>
                                     </FormGroup>
@@ -561,16 +551,17 @@ class AddFees extends Component {
                                 <Button type="reset" size="sm" color="danger"><i className="fa fa-ban"></i> Reset</Button>
                             </CardFooter>
                         </Card>
-
-
                     </Col>
-
-
-
-
-
                 </Row>
+    )}
 
+    { this.state.showSearchUserSectionFlag && (
+                <Row lg="2">
+                    <Col md="12">
+                        <SearchUser data={this.state.actionTypeForSearchUser}/>
+                    </Col>
+                </Row>
+    )}
             </div>
         );
     }
