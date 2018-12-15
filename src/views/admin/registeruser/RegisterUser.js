@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
 
-import Select from 'react-select';
+//import Select from 'react-select';
+//import {ReactSelectize, MultiSelect} from 'react-selectize';
+
 
 import {
   Button,
@@ -96,6 +98,7 @@ class RegisterUser extends Component {
       bloodgroup: "",
       category: "",
       feeTemplate:[{}],
+      selectedFeeTemplate:[],
       corruptphoto: false,
       photoname: "",
       phone: "",
@@ -129,8 +132,8 @@ class RegisterUser extends Component {
           var temp=[];
          for(var i=0;i<result.data.length;i++)
          {
-           temp.push({"name":result.data[i].templateName,
-           "value":result.data[i].templateName
+           temp.push({"value":result.data[i].templateName,
+           "label":result.data[i].templateName+" ("+(result.data[i].templateType.toLowerCase())+")"
           })
 
 
@@ -1026,34 +1029,36 @@ this.setState({
                                         <p>{this.state.errors.rollno.msg}</p>
                                       </font>
                                     )}
-
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                  Fee Template
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Select
-                              multi
-                                name="feeTemplate"
-                                id="feeTemplate"
-
-                                //onChange={this.changeHandler}
-                               // value={this.state.feeTemplate}
+  <div><Input
+                              
+                                             
+                              type="select"
+                              multiple={true}
+                                name="selectedFeeTemplate"
+                                id="selectedFeeTemplate"
+                                placeholder="Select Fee Template(s)"
+                              onChange={selected=>{
+                               
+                                let temp=[];
+                                for(var i=0; i<selected.length;i++)
+                                {temp.push(selected[i].value);}
+                               
+                                this.setState({selectedFeeTemplate:temp},
+                              ()=>{console.log("Selected fee Template: "+JSON.stringify(this.state.selectedFeeTemplate));})
+                              
+                              
+                                
+                          }}
+                              //  value={this.state.selectedFeeTemplate}
                                 options={this.state.feeTemplate}
                               />
+</div>
 
-
-
-
-
-
-
-                            </InputGroup>
-                            {this.state.errors && this.state.errors.feeTemplate && (
+                       
+                            {this.state.errors && this.state.errors.selectedFeeTemplate && (
                               <font color="red">
                                 {" "}
-                                <p>{this.state.errors.feeTemplate.msg}</p>
+                               <p>{this.state.errors.selectedFeeTemplate.msg}</p>
                               </font>
                             )}
 

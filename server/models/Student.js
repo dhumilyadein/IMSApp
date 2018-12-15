@@ -150,6 +150,12 @@ var StudentSchema = new Schema({
     trim:true
   },
 
+  feeTemplatetypes: {
+    type: Array,
+    required: true,
+    trim:true
+  },
+
 
 
     email: {

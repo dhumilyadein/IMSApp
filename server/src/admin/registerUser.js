@@ -76,10 +76,10 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Please select Bloodgroup"),
 
-      check("feeTemplate")
+      check("selectedFeeTemplate")
       .not()
       .isEmpty()
-      .withMessage("Please select Fee Template"),
+      .withMessage("Please select Fee Template(s)"),
 
     check("gender")
       .not()
@@ -566,6 +566,7 @@ req.body["userid"]=user.userid;
     user.password = user.hashPassword(user.password);
     user.photo.data = fs.readFileSync(photoPath);
     user.photo.contentType = 'image/png';
+    user.feeTemplatetypes=req.body.selectedFeeTemplate;
 
     await user
       .save()
