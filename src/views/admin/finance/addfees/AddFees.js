@@ -64,15 +64,7 @@ class AddFees extends Component {
         this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
         this.showSearchUserSection = this.showSearchUserSection.bind(this);
 
-<<<<<<< HEAD
-        if(this.props.match.params.username) {
-            console.log("AddFee this.props.match.params - " + this.props.match.params.username);
-
-            this.searchStudentsDetails(this.props.match.params.username, "username", "equalsSearchCriteria");
-        }
-=======
     console.log("AddFee this.props.match.params - " + this.props.match.params.studentDetails);
->>>>>>> 5e37cca16b4d3467d1b2a68c2a02518b15562b48
 
     }
 
@@ -284,14 +276,6 @@ class AddFees extends Component {
 
 
     render() {
-<<<<<<< HEAD
-
-        if(this.props.location.state && this.props.location.state.studentDetails) {
-            console.log("this.props.location.state.studentDetails - " + this.props.location.state.studentDetails);
-        }
-
-=======
->>>>>>> 5e37cca16b4d3467d1b2a68c2a02518b15562b48
         return (
             <div>
 
