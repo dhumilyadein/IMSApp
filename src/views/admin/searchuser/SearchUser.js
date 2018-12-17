@@ -126,7 +126,7 @@ class SearchUser extends Component {
           this.props.history.push(
             {
               pathname: '/admin/users',
-              state: this.state.userDetails
+              state: {"userDetails" : this.state.userDetails}
             });
         }
       }
@@ -230,7 +230,7 @@ class SearchUser extends Component {
           this.props.history.push(
             {
               pathname: '/admin/users',
-              state: tempArrayForUser
+              state: { "userDetails" : tempArrayForUser}
             });
         }
 
