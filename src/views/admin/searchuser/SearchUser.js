@@ -73,7 +73,7 @@ class SearchUser extends Component {
 
     // Checking action type - which tells from which page request is coming
     if (this.props.data) {
-      console.log("SearchUser actionTypeForSearchUser - " + this.props.data);
+      
       this.setState({
         actionTypeForSearchUser: this.props.data
       });
@@ -108,27 +108,14 @@ class SearchUser extends Component {
 
         this.setActionTypeForSearchUser();
 
-        if (this.state.actionTypeForSearchUser === 'RedirectToAddFee') {
-
-          console.log('ADDFEE FLOW RedirectToAddFee userDetails - ' + JSON.stringify(this.state.userDetails));
-
-          this.props.history.push(
-            {
-              //pathname: '/admin/finance/AddFees',
-              pathname: '/admin/users',
-              state: { "actionTypeForSearchUser" : "RedirectToAddFee", "userDetails" : this.state.userDetails}
-            });
-
-        } else {
-
-          console.log('NORMAL FLOW userDetails - ' + this.state.userDetails + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
+        console.log('ADDFEE FLOW RedirectToAddFee userDetails - ' + JSON.stringify(this.state.userDetails) 
+          + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
 
           this.props.history.push(
             {
               pathname: '/admin/users',
-              state: {"userDetails" : this.state.userDetails}
+              state: { "actionTypeForSearchUser" : this.state.actionTypeForSearchUser, "userDetails" : this.state.userDetails}
             });
-        }
       }
     });
   }
@@ -210,29 +197,16 @@ class SearchUser extends Component {
 
         this.setActionTypeForSearchUser();
 
-        if (this.state.actionTypeForSearchUser === 'RedirectToAddFee') {
-
-          console.log('ADDFEE search bar FLOW RedirectToAddFee userDetails - ' + JSON.stringify(tempArrayForUser));
+        console.log('ADDFEE search bar FLOW RedirectToAddFee userDetails - ' + JSON.stringify(tempArrayForUser) 
+          + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
 
           tempArrayForUser.push(searchBarResponse[i]);
           this.props.history.push(
             {
               //pathname: '/admin/finance/AddFees',
               pathname: '/admin/users',
-              state: { "actionTypeForSearchUser" : "RedirectToAddFee", "userDetails" : tempArrayForUser}
+              state: { "actionTypeForSearchUser" : this.state.actionTypeForSearchUser, "userDetails" : tempArrayForUser}
             });
-
-        } else {
-
-          console.log('NORMAL FLOW userDetails - ' + tempArrayForUser + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
-
-          tempArrayForUser.push(searchBarResponse[i]);
-          this.props.history.push(
-            {
-              pathname: '/admin/users',
-              state: { "userDetails" : tempArrayForUser}
-            });
-        }
 
         return searchBarResponse[i];
       }

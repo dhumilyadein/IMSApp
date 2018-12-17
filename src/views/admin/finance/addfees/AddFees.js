@@ -64,6 +64,8 @@ class AddFees extends Component {
         this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
         this.showSearchUserSection = this.showSearchUserSection.bind(this);
 
+        console.log("Hey DUDE this.state.studentsDetails - " + this.state.studentsDetails);
+
         if(this.props.match.params.username) {
             console.log("AddFee this.props.match.params - " + this.props.match.params.username);
 
@@ -303,8 +305,9 @@ class AddFees extends Component {
                                         </Col>
                                         <Col xs="12" md="9">
                                             <Row>
-                                                <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
-                                                    <AutoComplete displayText
+                                            {!this.state.studentsDetails && (
+                                            <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
+                                                    <AutoComplete
                                                         hintText="Enter Search text"
                                                         dataSource={this.state.dataSource}
                                                         onUpdateInput={this.onUpdateInput}
@@ -315,13 +318,30 @@ class AddFees extends Component {
                                                         autoFocus="true"
                                                     />
                                                 </MuiThemeProvider>
+                                            )}
+                                                {this.state.studentsDetails && (
+                                                <MuiThemeProvider muiTheme={getMuiTheme()} className="mb-4">
+                                                    <AutoComplete searchText={this.state.studentsDetails[0].firstname 
+                                                    + " " + this.state.studentsDetails[0].lastname 
+                                                    + " (" + this.state.studentsDetails[0].username + ")"}
+                                                        hintText="Enter Search text"
+                                                        dataSource={this.state.dataSource}
+                                                        onUpdateInput={this.onUpdateInput}
+                                                        fullWidth={true}
+                                                        filter={AutoComplete.noFilter}
+                                                        maxSearchResults={5}
+                                                        onNewRequest={this.selectedItem}
+                                                        autoFocus="true"
+                                                    />
+                                                </MuiThemeProvider>
+                                                )}
                                             </Row>
                                             <Row>
                                                 {/* <Button color="success" block onClick={this.searchHandler} disabled="disabled">
                                                     Advanced Serch (ye abhi change hoga)
                                                 </Button> */}
                                                 {/* <Badge href='#/admin/searchUser' color='success'>Advanced Serch</Badge> */}
-                                                <a href='#' onClick={this.showSearchUserSection}>Advanced Serch</a>
+                                                <a href='#' onClick={this.showSearchUserSection}>Advanced Search</a>
                                             </Row>
 
                                         </Col>
