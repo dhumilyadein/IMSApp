@@ -64,7 +64,11 @@ class AddFees extends Component {
         this.searchStudentsDetails = this.searchStudentsDetails.bind(this);
         this.showSearchUserSection = this.showSearchUserSection.bind(this);
 
-    console.log("AddFee this.props.match.params - " + this.props.match.params.studentDetails);
+        if(this.props.match.params.username) {
+            console.log("AddFee this.props.match.params - " + this.props.match.params.username);
+
+            this.searchStudentsDetails(this.props.match.params.username, "username", "equalsSearchCriteria");
+        }
 
     }
 
@@ -194,11 +198,6 @@ class AddFees extends Component {
 
             console.log("AddFee Submit Request - " + JSON.stringify(searchStudentsRequest));
 
-            console.log("AddFee submit response data - " + JSON.stringify(res.data));
-            console.log("AddFee  res.data.errors - " + res.data.errors);
-            console.log("AddFee  res.data.message - " + res.data.message);
-            console.log("AddFee  res.data.error - " + res.data.errors);
-
             if (res.data.errors) {
                 return this.setState({ errors: res.data.errors });
             } else {
@@ -281,6 +280,11 @@ class AddFees extends Component {
 
 
     render() {
+
+        if(this.props.location.state && this.props.location.state.studentDetails) {
+            console.log("this.props.location.state.studentDetails - " + this.props.location.state.studentDetails);
+        }
+
         return (
             <div>
 
@@ -327,7 +331,8 @@ class AddFees extends Component {
                                             <Label htmlFor="email-input">Email Input</Label>
                                         </Col>
                                         <Col xs="12" md="9">
-                                            <Input type="email" id="email-input" name="email-input" placeholder="Enter Email" autoComplete="email" />
+
+                                        <Input type="email" id="email-input" name="email-input" placeholder="Enter Email" autoComplete="email" />
                                             <FormText className="help-block">Please enter your email</FormText>
                                         </Col>
                                     </FormGroup>

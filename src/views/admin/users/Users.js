@@ -5,30 +5,7 @@ import axios from "axios";
 import usersData from './UsersData'
 
 var studentDetails = {};
-
-function fetchStudentDetails(username) {
-
-  //If page needs to be redirected to AddFee, fetching studentDetails
-  var searchStudentsRequest = {
-    "find": username,
-    "using": "username",
-    "searchCriteria": "equalsSearchCriteria"
-  }
-
-  console.log("searchStudentsRequest - " + JSON.stringify(searchStudentsRequest));
-
-  axios.post("http://localhost:8001/api/searchStudents", searchStudentsRequest).then(stRes => {
-
-    if (stRes.data.errors) {
-      return this.setState({ errors: stRes.data.errors });
-    } else {
-
-      console.log("Users.js " + " username - " + username + " student details -  " + JSON.stringify(stRes.data));
-
-      studentDetails = stRes.data;
-    }
-  });
-}
+// var addFeeLink;
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -39,10 +16,12 @@ function UserRow(props) {
   const user = props.user
   const actionTypeForSearchUser = props.actionTypeForSearchUser
 
-  const userLink = `#/admin/userDetails/${user.username}`
-  //const addFeeLink = `#/admin/finance/AddFees/${studentDetails}`
-  const addFeeLink = `#/admin/finance/AddFees/kapil`
+  console.log("Sending sending studentDetails - " + studentDetails);
+  console.log("Sending sending studentDetails - " + JSON.stringify(studentDetails));
 
+  const userLink = `#/admin/userDetails/${user.username}`
+  const addFeeLink = `#/admin/finance/AddFees/${user.username}`
+  
   const getBadge = (status) => {
     return status === 'Active' ? 'success' :
       status === 'Inactive' ? 'secondary' :
@@ -56,7 +35,7 @@ function UserRow(props) {
         <th scope="row">
 
         {actionTypeForSearchUser == 'RedirectToAddFee' && (
-            <a href={addFeeLink} onClick={fetchStudentDetails(user.username)}>{user.username}</a>
+            <a href={addFeeLink}>{user.username}</a>
           )}
           {actionTypeForSearchUser != 'RedirectToAddFee' && (
             <a href={userLink}>{user.username}</a>
