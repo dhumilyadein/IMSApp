@@ -9,6 +9,7 @@ const Student = require("../../models/Student");
 const Parent = require("../../models/Parent");
 const Teacher = require("../../models/Teacher");
 const Admin = require("../../models/Admin");
+const FeeTemplate = require("../../models/FeeTemplatesModel");
 
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
@@ -95,6 +96,8 @@ module.exports = function(app) {
     //  if(request.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/))
     //  error[password]="Password should contain atleast 6 characters, inclding 1 special symbol and 1 number";
     try {
+
+
       if (!request.username) valError["UserName"] = "Username can't be empty";
       else {
         const usernameCheck = await User.findOne({
@@ -121,6 +124,14 @@ module.exports = function(app) {
     } catch (e) {
       console.log(e);
     }
+if(request.role.indexOf("student")!==-1)
+   { for(var i=0;i<request.feeTemplate.length;i++)
+    {
+      const feeTemp = await FeeTemplate.findOne({ templateName: request.feeTemplate[i] });
+if(!feeTemp){
+valError["FeeTemplate"] = "Fee template "+request.feeTemplate[i]+" doesn't exist"
+break;
+    }}}
     if (!request.firstname) valError["FirstName"] = "firstname can't be empty";
     else if (!request.firstname.match(fnExp))
       valError["FirstName"] = "firstname should contain only letters";
@@ -259,6 +270,8 @@ module.exports = function(app) {
     return self.indexOf(value) === index;
   }
   async function importExcel(req, res) {
+
+
     console.log("in import Excel  ");
 
     var exceltojson;
@@ -306,7 +319,7 @@ module.exports = function(app) {
               // console.log("Total records: " + Object.keys(result).length);
               var importErrors = {};
               for (let i = 0; i < result.length; i++) {
-                // console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
+                //console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
                 //console.log("record length: "+Object.keys(result[i]).length);
                 var counter = 0;
                 for (var key in result[i]) {
@@ -321,7 +334,7 @@ module.exports = function(app) {
                 );
                 if (counter === Object.keys(result[i]).length) continue;
 
-                if (Object.keys(result[i]).length !== 44) {
+                if (Object.keys(result[i]).length !== 45) {
                   importErrors["record: " + (i + 1) + " "] =
                     " Incomplete record as some columns are missing! ";
 
@@ -354,11 +367,26 @@ module.exports = function(app) {
                 result[i] = temp;
 
                 result[i].role = await result[i].role.filter(onlyUnique);
-                // console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
+                 console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
                 // console.log("Fresher Yes : " + result[i].type.toLowerCase);
                 if (result[i].type.toLowerCase() === "fresher") {
                   result[i].experiencedetails = "NA";
                 }
+                if (result[i].role.indexOf("student") !== -1)
+       {
+        var  feeTemp= result[i].feetemplate.split(",").map(function(item) {
+          return item.trim();
+        });
+
+
+result[i]["feeTemplate"]=feeTemp;
+
+console.log("Fee temp: "+result[i].feeTemplate);
+console.log("Role: "+result[i].role);
+       }
+
+
+
                 var impValResult = await importValidation(result[i]);
                 console.log(
                   "impValResultLength: " + Object.keys(impValResult).length
@@ -376,7 +404,7 @@ module.exports = function(app) {
                       lastname: result[i].parentlastname,
                       email: result[i].parentemail,
                       password: result[i].parentpassword,
-                      role: "Parent",
+                      role: "parent",
                       status: result[i].status
                     };
                     //Saving Parent in users
@@ -519,6 +547,8 @@ module.exports = function(app) {
     });
   }
 
+
+
   function photoZipUploading(req, res) {
     console.log("in Photo ZipUpload");
 
@@ -549,9 +579,9 @@ module.exports = function(app) {
     });
   }
 
-  app.post("/api/importExcel", importExcel);
-  app.post("/api/photoZipUploading", photoZipUploading);
 
+  app.post("/api/photoZipUploading", photoZipUploading);
+  app.post("/api/importExcel", importExcel);
   app.get("/", (req, res) => res.json("sdasdsa"));
   //---------------------------------------------
 };

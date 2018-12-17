@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
 
+
 import Select from 'react-select';
+
 
 import {
   Button,
@@ -34,6 +36,15 @@ class RegisterUser extends Component {
   constructor(props) {
     super(props);
     this.getExistingTemplates();
+
+    const selectStyles = {
+      menu: base => ({
+        ...base,
+        zIndex: 100
+      })
+    };
+
+
     this.state = {
       admintype: "Office Admin",
       username: "",
@@ -96,6 +107,7 @@ class RegisterUser extends Component {
       bloodgroup: "",
       category: "",
       feeTemplate:[{}],
+      selectedFeeTemplate:[],
       corruptphoto: false,
       photoname: "",
       phone: "",
@@ -129,9 +141,9 @@ class RegisterUser extends Component {
           var temp=[];
          for(var i=0;i<result.data.length;i++)
          {
-           temp.push({"name":result.data[i].templateName,
-           "value":result.data[i].templateName
-          })
+           temp.push({"value":result.data[i].templateName,
+           "label":result.data[i].templateName+" ("+(result.data[i].templateType.toLowerCase())+")"
+          });
 
 
 
@@ -480,6 +492,8 @@ this.setState({
     }
   };
 
+
+
   render() {
     return (
       <div style={{ width: "1000px" }}>
@@ -624,6 +638,8 @@ this.setState({
                           </font>
                         )}
 
+
+
                         <Card className="mx-1">
                           <CardBody className="p-2">
                             <h5>Basic Details</h5>
@@ -763,6 +779,7 @@ this.setState({
                                     type="select"
                                     onChange={this.changeHandler}
                                     value={this.state.maritalstatus}
+                                    
                                   >
                                     <option value="">Select</option>
                                     <option value="Single">Single</option>
@@ -1027,40 +1044,56 @@ this.setState({
                                       </font>
                                     )}
 
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                  Fee Template
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Select
-                              multi
-                                name="feeTemplate"
-                                id="feeTemplate"
-
-                                //onChange={this.changeHandler}
-                               // value={this.state.feeTemplate}
-                                options={this.state.feeTemplate}
-                              />
+                               
+<Card className="mx-1">
+                          <CardBody className="p-2">
+                            <h6>Select Fee Templates</h6>
 
 
+                            <Select isMulti={true}
+                          placeholder="Select or Type to search"
+                            options={this.state.feeTemplate} 
+                          closeMenuOnSelect={false}
 
+                          style={{backgroundColor:'#fff'}}
+                            isSearchable={true}
+                            onChange={selected=>{console.log("Selected: "+JSON.stringify(selected));
+                            var temp=[];
 
-
-
-
-                            </InputGroup>
-                            {this.state.errors && this.state.errors.feeTemplate && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.feeTemplate.msg}</p>
-                              </font>
-                            )}
+                            for(var i=0;i<selected.length;i++)
+                            {temp.push(selected[i].value)}
+                            this.setState({selectedFeeTemplate:temp},()=>
+                            {console.log("Selected Fee Templ: "+JSON.stringify(this.state.selectedFeeTemplate));
+                          })
 
 
 
 
-                                </p>
+
+
+
+                          }
+                           
+
+
+                            } />
+
+
+
+
+
+
+                           </CardBody>
+                        </Card>
+                        {this.state.errors && this.state.errors.selectedFeeTemplate && (
+                            <font color="red">
+                              {" "}
+                             <p>{this.state.errors.selectedFeeTemplate.msg}</p>
+                            </font>
+                          )}
+ 
+ 
+                                 </p>
                               )}
 
 
@@ -1283,30 +1316,7 @@ this.setState({
                           <CardBody className="p-2">
                             <h5>Contact Details</h5>
 
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "125px" }}>
-                                  Phone Number
-                                </InputGroupText>
-                                <ReactPhoneInput
-                                  defaultCountry="in"
-                                  value={this.state.phone}
-                                  name="phone"
-                                  onChange={phone => {
-                                    console.log("phone value: " + phone);
-                                    this.setState({ phone });
-                                  }}
-                                />
-                              </InputGroupAddon>
-                            </InputGroup>
-
-                            {this.state.errors && this.state.errors.phone && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.phone.msg}</p>
-                              </font>
-                            )}
-
+                           
                             <Card className="mx-1">
                               <CardBody className="p-2">
                                 <b>Address</b>
@@ -1388,6 +1398,30 @@ this.setState({
                                 )}
                               </CardBody>
                             </Card>
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "125px" }}>
+                                  Phone Number
+                                </InputGroupText>
+                                <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.phone}
+                                  name="phone"
+                                  onChange={phone => {
+                                    console.log("phone value: " + phone);
+                                    this.setState({ phone });
+                                  }}
+                                />
+                              </InputGroupAddon>
+                            </InputGroup>
+
+                            {this.state.errors && this.state.errors.phone && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.phone.msg}</p>
+                              </font>
+                            )}
+
                           </CardBody>
                         </Card>
 
