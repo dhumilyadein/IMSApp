@@ -207,6 +207,11 @@ class FeeTemplates extends Component {
                 success: true,
                 modalSuccess: true
               });
+              else if(result.data.error.code === 11000) {
+                this.setState({
+                  templateNameError: "Template Name already exists!"
+                });}
+              
             this.getExistingTemplates();
           });
       }
@@ -417,7 +422,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               label="Template Name"
                               name="templateName"
                               id="templateName"
-                              value={this.state.templateName}
+                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { templateName: e.target.value },
@@ -616,7 +621,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                     {this.state.showEditTemplate &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Edit Template:  <font color="blue"> {this.state.templateName}</font> </h3>
+                          <h3 align="center"> Edit Template:  <font color="blue">
+                           {this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}</font> </h3>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText style={{ width: "120px" }}>
@@ -629,7 +635,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               size="lg"
                               name="templateName"
                               id="templateName"
-                              value={this.state.templateName}
+                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { templateName: e.target.value },
@@ -735,7 +741,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                       <Input
                                         type="text"
                                         name="feeType"
-                                        value={this.state.editRows[idx].feeType}
+                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
+                                           + this.state.editRows[idx].feeType.slice(1)}
                                         onChange={this.handleEditChange(idx)}
                                         className="form-control"
                                         size="lg"
@@ -820,10 +827,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 {this.state.showCopyTemplate &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName}</font> </h3>
+                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName.charAt(0).toUpperCase()
+                             + this.state.templateName.slice(1)}</font> </h3>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
-                              <InputGroupText style={{ width: "120px" }}>
+                              <InputGroupText >
                                 <b>Template Name</b>
                               </InputGroupText>
                             </InputGroupAddon>
@@ -833,7 +841,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               size="lg"
                               name="templateName"
                               id="templateName"
-                              value={this.state.templateName}
+                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { templateName: e.target.value },
@@ -938,7 +946,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                       <Input
                                         type="text"
                                         name="feeType"
-                                        value={this.state.editRows[idx].feeType}
+                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase() + 
+                                          this.state.editRows[idx].feeType.slice(1)}
                                         onChange={this.handleEditChange(idx)}
                                         className="form-control"
                                         size="lg"
@@ -1079,7 +1088,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].templateName}</h5>
+                                    <h5> {this.state.existingRows[idx].templateName.charAt(0).toUpperCase() + 
+                                      this.state.existingRows[idx].templateName.slice(1)}</h5>
                                   </td>
 
                                   <td align="center">

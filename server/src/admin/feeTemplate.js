@@ -35,7 +35,7 @@ function existingTemplates(req, res) {
         return res.send(data);
     })
     .catch(err => {
-      return res.send({error:"Fail to fetch existing records"});
+      return res.send({error:err});
     });
 
   }
@@ -49,7 +49,7 @@ FeeTemplate
   return res.send({msg:"Template Deleted"});
 })
 .catch(err => {
-return res.send({error:"Failed to Delete existing template"});
+return res.send({error:err});
 });
 
 
@@ -71,7 +71,7 @@ FeeTemplate
 return res.send({msg:"Template Updated"});
 })
 .catch(err => {
-return res.send({error:"Failed to Update existing template"});
+return res.send({error:err});
 });
 
 
