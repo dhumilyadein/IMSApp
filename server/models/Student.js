@@ -60,10 +60,6 @@ var StudentSchema = new Schema({
   },
 
 
-  feeTemplate: {
-    type: String,
-    required: true
-  },
 
 
    bloodgroup: {
@@ -150,7 +146,7 @@ var StudentSchema = new Schema({
     trim:true
   },
 
-  feeTemplatetypes: {
+  feeTemplate: {
     type: Array,
     required: true,
     trim:true

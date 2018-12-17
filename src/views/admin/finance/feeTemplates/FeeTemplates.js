@@ -407,7 +407,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                           <br />
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
-                              <InputGroupText style={{ width: "120px" }}>
+                              <InputGroupText >
                                 <b>Template Name</b>
                               </InputGroupText>
                             </InputGroupAddon>
@@ -446,7 +446,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
 <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
+                                <InputGroupText>
                                 <b>Template Type</b>
                                 </InputGroupText>
                               </InputGroupAddon>
