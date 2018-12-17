@@ -125,13 +125,16 @@ module.exports = function(app) {
       console.log(e);
     }
 if(request.role.indexOf("student")!==-1)
+{if(request.feeTemplate.length===0)
+valError["FeeTemplate"] = "Fee template is empty"
+ else
    { for(var i=0;i<request.feeTemplate.length;i++)
     {
     const feeTemp = await FeeTemplate.findOne({ templateName: request.feeTemplate[i] });
 if(!feeTemp){
 valError["FeeTemplate"] = "Fee template "+request.feeTemplate[i]+" doesn't exist"
 break;
-    }}}
+    }}}}
 
 
     if (!request.firstname) valError["FirstName"] = "firstname can't be empty";
@@ -268,9 +271,7 @@ break;
     return valError;
   }
 
-  function onlyUnique(value, index, self) {
-    return self.indexOf(value) === index;
-  }
+
   async function importExcel(req, res) {
 
 
