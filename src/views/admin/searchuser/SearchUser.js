@@ -36,6 +36,7 @@ class SearchUser extends Component {
     this.changeHandler = this.changeHandler.bind(this);
     this.searchHandler = this.searchHandler.bind(this);
     this.selectedItem = this.selectedItem.bind(this);
+    this.setActionTypeForSearchUser = this.setActionTypeForSearchUser.bind(this);
 
     this.state = {
       find: null,
@@ -66,6 +67,21 @@ class SearchUser extends Component {
   }
 
   /**
+   * @description: Checking action type - which tells from which page request is coming
+   */
+  setActionTypeForSearchUser() {
+
+    // Checking action type - which tells from which page request is coming
+    if (this.props.data) {
+      
+      this.setState({
+        actionTypeForSearchUser: this.props.data
+      });
+      console.log("SearchUser AFTER SETTING STATE actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
+    }
+  }
+
+  /**
    * @description Handles the form search request
    * @param {*} e
    */
@@ -90,35 +106,16 @@ class SearchUser extends Component {
 
         this.setState({ userDetails: uRes.data });
 
-        if (this.props.data) {
-          console.log("SearchUser actionTypeForSearchUser - " + this.props.data);
-          this.setState({
-            actionTypeForSearchUser: this.props.data
-          });
-          console.log("SearchUser AFTER SETTING STATE actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
-        }
+        this.setActionTypeForSearchUser();
 
-        if (this.state.actionTypeForSearchUser === 'RedirectToAddFee') {
-
-          console.log('ADDFEE FLOW RedirectToAddFee userDetails - ' + JSON.stringify(this.state.userDetails));
-
-          this.props.history.push(
-            {
-              //pathname: '/admin/finance/AddFees',
-              pathname: '/admin/users',
-              state: { "actionTypeForSearchUser" : "RedirectToAddFee", "userDetails" : this.state.userDetails}
-            });
-
-        } else {
-
-          console.log('NORMAL FLOW userDetails - ' + this.state.userDetails + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
+        console.log('ADDFEE FLOW RedirectToAddFee userDetails - ' + JSON.stringify(this.state.userDetails) 
+          + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
 
           this.props.history.push(
             {
               pathname: '/admin/users',
-              state: this.state.userDetails
+              state: { "actionTypeForSearchUser" : this.state.actionTypeForSearchUser, "userDetails" : this.state.userDetails}
             });
-        }
       }
     });
   }
@@ -198,12 +195,19 @@ class SearchUser extends Component {
 
       if (searchBarResponse[i]["username"].toLowerCase() === String(selectedUsername).toLowerCase()) {
 
-        tempArrayForUser.push(searchBarResponse[i]);
-        this.props.history.push(
-          {
-            pathname: '/admin/users',
-            state: tempArrayForUser
-          });
+        this.setActionTypeForSearchUser();
+
+        console.log('ADDFEE search bar FLOW RedirectToAddFee userDetails - ' + JSON.stringify(tempArrayForUser) 
+          + " this.state.actionTypeForSearchUser - " + this.state.actionTypeForSearchUser);
+
+          tempArrayForUser.push(searchBarResponse[i]);
+          this.props.history.push(
+            {
+              //pathname: '/admin/finance/AddFees',
+              pathname: '/admin/users',
+              state: { "actionTypeForSearchUser" : this.state.actionTypeForSearchUser, "userDetails" : tempArrayForUser}
+            });
+
         return searchBarResponse[i];
       }
     }

@@ -566,7 +566,8 @@ req.body["userid"]=user.userid;
     user.password = user.hashPassword(user.password);
     user.photo.data = fs.readFileSync(photoPath);
     user.photo.contentType = 'image/png';
-    user.feeTemplatetypes=req.body.selectedFeeTemplate;
+    user.feeTemplate=req.body.selectedFeeTemplate;
+
 
     await user
       .save()
