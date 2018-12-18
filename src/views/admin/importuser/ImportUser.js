@@ -300,19 +300,19 @@ class ImportUser extends Component {
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                        <div> <font color="red">  Please make sure the number of Records in Excel sheet matches the total number of Photos in zip file. </font>
-                          <br />
-                          <font color="red">  Please make sure each Photo's name matches the Username in the Excel sheet.</font>
-                          <br />
+                        <div> <font color="red"> <h6> Please make sure the number of Records in Excel sheet matches the total number of Photos in zip file.</h6> </font>
+                          
+                          <font color="red"><h6>  Please make sure each Photo's name matches the Username in the Excel sheet.</h6></font>
+                         
 
-                          <font color="red">  Please make sure Photos.zip contains only JPG format photos and no Folder(s).</font>
+                          <font color="red"> <h6> Please make sure Photos.zip contains only JPG format photos and no Folder(s).</h6></font>
+                       
+                          <font color="red"><h6>  If you face any unexpected behaviour, click Reset or Refresh your browser's tab and try again.</h6></font>
                           <br />
-                          <font color="red">  If you face any unexpected behaviour, click Reset or Refresh your browser's tab and try again.</font>
-                          <br /><br />
                         </div>
 
                       </InputGroupAddon>
-                      <h5>Upload excel file(XLS,XLSX)</h5>
+                      <h4>Upload excel file(XLS,XLSX)</h4>
                       <Input
                         type="file"
                         name="file"
@@ -324,18 +324,18 @@ class ImportUser extends Component {
                     </InputGroup>
 
                     {this.state.noFile
-                      && <font color="red">  <p>Please choose the Excel file</p></font>
+                      && <font color="red">  <h5>Please choose the Excel file</h5></font>
                     }
 
                     {this.state.corruptFile
-                      && <font color="red">  <p>Please select a valid XLS or XLSX file only.</p></font>
+                      && <font color="red">  <h5>Please select a valid XLS or XLSX file only.</h5></font>
                     }
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
 
                       </InputGroupAddon>
-                      <h5>Upload Photos Zip</h5>
+                      <h4>Upload Photos Zip</h4>
                       <Input
                         type="file"
                         name="zipfile"
@@ -347,17 +347,21 @@ class ImportUser extends Component {
                     </InputGroup>
 
                     {this.state.noZipFile
-                      && <font color="red">  <p>Please choose the Photos Zip file</p></font>
+                      && <font color="red">  <h5>Please choose the Photos Zip file</h5></font>
                     }
 
                     {this.state.corruptZipFile
-                      && <font color="red">  <p>Please select a valid Zip file only.</p></font>
+                      && <font color="red">  <h5>Please select a valid Zip file only.</h5></font>
                     }
 
 
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="3" xl className="mb-3 mb-xl-0">
-                        <Button type="submit" block color="success" onClick={this.fileHandler} disabled={this.state.disableButton} style={{ width: "200px" }}> Import sheet</Button>
+                       
+                      {!this.state.loader && 
+                        <Button type="submit" block color="success"
+                         onClick={this.fileHandler} disabled={this.state.disableButton}
+                          style={{ width: "200px" }}><h4> Import sheet </h4>  </Button>}
 
                         {this.state.loader && <font color="Green">  <h5>Importing sheet...</h5></font>}
                         {this.state.loader &&
@@ -367,7 +371,7 @@ class ImportUser extends Component {
                         }
                       </Col>
                       <Col><Button block onClick={this.reset} color="info" style={{ width: "200px" }}>
-                        Reset
+                         <h4> Reset </h4> 
                         </Button ></Col>
                     </Row>
 

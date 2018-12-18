@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
 import DatePicker from 'react-date-picker';
+import ReactLoading from 'react-loading';
 
 //import {propTypes} from 'react/addons';
 
@@ -46,7 +47,7 @@ class RegisterUser extends Component {
 
 
     this.state = {
-      loader:true,
+      loader:false,
       admintype: "Office Admin",
       username: "",
       email: "",
@@ -132,37 +133,7 @@ class RegisterUser extends Component {
     this.photoUpload = this.photoUpload.bind(this);
   }
 
-  get options() {
-    return (
-      {
-        lines: 13,
-        length: 20,
-        width: 10,
-        radius: 30,
-        corners: 1,
-        rotate: 0,
-        direction: 1,
-        color: '#fff',
-        speed: 1,
-        trail: 60
-      }
-    );
-  }
 
-  get styleForOverlay() {
-    return (
-      {
-        background: 'rgba(0, 0, 0, 0.2)',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 10,
-        display: 'block'
-      }
-    );
-  }
 
   getExistingTemplates() {
 
@@ -310,6 +281,7 @@ class RegisterUser extends Component {
 
      return this.setState({
         corruptphoto:true,
+        loader:false
 
 
 
@@ -331,6 +303,8 @@ class RegisterUser extends Component {
            .then(result => {
              console.log("RESULT.data " + JSON.stringify(result.data));
              if (result.data.errors) {
+              this.setState({loader:false});
+
                return this.setState(result.data);
              }
 
@@ -341,6 +315,7 @@ class RegisterUser extends Component {
                errors: null,
                studentRegSuccess: true,
                modalSuccess: true,
+               loader:false
 
 
              });
@@ -352,6 +327,7 @@ class RegisterUser extends Component {
            .then(result => {
              console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
              if (result.data.errors) {
+              this.setState({loader:false});
                return this.setState(result.data);
              }
              this.resetForm();
@@ -359,7 +335,8 @@ class RegisterUser extends Component {
                userdata: result.data.data,
                errors: null,
                empRegSuccess: true,
-               modalSuccess: true
+               modalSuccess: true,
+               loader:false
 
              });
            });
@@ -381,12 +358,12 @@ class RegisterUser extends Component {
     //console.log("in STUDENT" + this.state.role[0]);
 
     if (this.state.role.length === 0) {
-      this.setState({ roleerror: true });
+      this.setState({ roleerror: true, loader:false });
 
     }
 
    if(this.state.photo===null)
-   this.setState({photoerror: "Please select Photo"})
+   this.setState({photoerror: "Please select Photo",loader:false})
    else
    this.photoUpload();
 
@@ -586,8 +563,9 @@ this.setState({
                     <Row lg="2">
                       <Col>
                         <Card className="mx-1">
+                        <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}><h5>Select User Roles</h5></CardHeader>
                           <CardBody className="p-2">
-                            <h5>Select User Roles</h5>
+                          
 
                             <Table responsive size="sm" hover>
                               <tbody>
@@ -690,7 +668,7 @@ this.setState({
 
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                            <h5>Basic Details</h5>
+                            <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}><h5>Basic Details</h5></CardHeader>
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
@@ -1027,7 +1005,7 @@ this.setState({
                       <Col>
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                            <h5>Official Details</h5>
+                           <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}> <h5>Official Details</h5></CardHeader>
 
                             {this.state.role.indexOf("teacher") === -1 &&
                               this.state.role.indexOf("admin") === -1 && (
@@ -1364,7 +1342,7 @@ this.setState({
                         </Card>
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                            <h5>Login Details</h5>
+                          <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}>  <h5>Login Details</h5></CardHeader>
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText>
@@ -1463,7 +1441,7 @@ this.setState({
 
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                            <h5>Contact Details</h5>
+                           <CardHeader> <h5>Contact Details</h5></CardHeader>
 
 
                             <Card className="mx-1">
@@ -1580,7 +1558,7 @@ this.setState({
                           <p>
                             <Card className="mx-1">
                               <CardBody className="p-2">
-                                <h5>Parent Details</h5>
+                             <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}>   <h5>Parent Details</h5></CardHeader>
                                 <InputGroup className="mb-3">
                                   <InputGroupAddon addonType="prepend">
                                     <InputGroupText style={{ width: "110px" }}>
@@ -1883,7 +1861,7 @@ this.setState({
 
                             <Card className="mx-1">
                               <CardBody className="p-2">
-                                <h5>Parent Login Details</h5>
+                               <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}> <h5>Parent Login Details</h5></CardHeader>
                                 <InputGroup className="mb-3">
                                   <InputGroupAddon addonType="prepend">
                                     <InputGroupText>
@@ -1974,19 +1952,28 @@ this.setState({
 
                     <Row className="align-items-center">
                       <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                        <Button
+                      {!this.state.loader &&  <Button
                           type="submit"
                           onClick={this.submitHandler}
                           block
                           color="success"
                         >
                           {" "}
-                          Register
-                        </Button>
+                           <h4>  Register</h4>
+                        </Button>}
+
+                       
+                        {this.state.loader &&
+                          <div align="center"><ReactLoading type="spin"
+                            color="	#006400"
+                            height='2%' width='10%' />
+    <br/> 
+
+ <font color="DarkGreen">  <h4>Registering...</h4></font></div> }
                       </Col>
                       <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
                         <Button block onClick={this.resetForm} color="info">
-                          Reset
+                        <h4>  Reset</h4>
                         </Button>
                       </Col>
                     </Row>
