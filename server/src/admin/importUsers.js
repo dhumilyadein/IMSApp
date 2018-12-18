@@ -130,7 +130,7 @@ valError["FeeTemplate"] = "Fee template is empty"
  else
    { for(var i=0;i<request.feeTemplate.length;i++)
     {
-    const feeTemp = await FeeTemplate.findOne({ templateName: request.feeTemplate[i] });
+    const feeTemp = await FeeTemplate.findOne({ templateName: request.feeTemplate[i].toLowerCase() });
 if(!feeTemp){
 valError["FeeTemplate"] = "Fee template "+request.feeTemplate[i]+" doesn't exist"
 break;

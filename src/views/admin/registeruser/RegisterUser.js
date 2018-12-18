@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
+import DatePicker from 'react-date-picker';
 
-
-
+//import {propTypes} from 'react/addons';
 
 import Select from 'react-select';
-
 
 import {
   Button,
@@ -36,11 +35,14 @@ import axios, { post } from "axios";
 
 
 class RegisterUser extends Component {
+
+
   constructor(props) {
+
     super(props);
     this.getExistingTemplates();
 
-   
+
 
 
     this.state = {
@@ -130,6 +132,38 @@ class RegisterUser extends Component {
     this.photoUpload = this.photoUpload.bind(this);
   }
 
+  get options() {
+    return (
+      {
+        lines: 13,
+        length: 20,
+        width: 10,
+        radius: 30,
+        corners: 1,
+        rotate: 0,
+        direction: 1,
+        color: '#fff',
+        speed: 1,
+        trail: 60
+      }
+    );
+  }
+
+  get styleForOverlay() {
+    return (
+      {
+        background: 'rgba(0, 0, 0, 0.2)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 10,
+        display: 'block'
+      }
+    );
+  }
+
   getExistingTemplates() {
 
     axios
@@ -142,7 +176,7 @@ class RegisterUser extends Component {
          for(var i=0;i<result.data.length;i++)
          {
            temp.push({"value":result.data[i].templateName,
-           "label":result.data[i].templateName+" ("+(result.data[i].templateType.toLowerCase())+")"
+           "label":result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1)+" ("+(result.data[i].templateType.toLowerCase())+")"
           });
 
 
@@ -501,19 +535,20 @@ this.setState({
 
   render() {
     return (
-     
+
+
       <div style={{ width: "1000px" }}>
 
+
+
         <Container style={{ width: "2500px" }}>
-       
-        
-         
-          <Row lg="4" style={{ width: "2500px" }}>
+
+                 <Row lg="4" style={{ width: "2500px" }}>
             <Col md="7">
               <Card className="mx-4">
                 <CardBody className="p-2">
 
-              
+
                   <Form>
                     {this.state.studentRegSuccess && (
                       <Modal
@@ -530,6 +565,8 @@ this.setState({
                         </ModalHeader>
                       </Modal>
                     )}
+
+
 
 
                     {this.state.empRegSuccess && (
@@ -705,14 +742,12 @@ this.setState({
                                 </InputGroupText>
                               </InputGroupAddon>
 
-                              <Input
-                                type="date"
+                              <DatePicker
+
                                 name="dob"
                                 id="dob"
                                 value={this.state.dob}
-                                placeholder="Date of Birth"
-                                autoComplete="Date of Brith"
-                                onChange={this.changeHandler}
+                                onChange={date=>{this.setState({dob:date})}}
                               />
                             </InputGroup>
 
@@ -790,7 +825,7 @@ this.setState({
                                     type="select"
                                     onChange={this.changeHandler}
                                     value={this.state.maritalstatus}
-                                    
+
                                   >
                                     <option value="">Select</option>
                                     <option value="Single">Single</option>
@@ -1055,7 +1090,7 @@ this.setState({
                                       </font>
                                     )}
 
-                               
+
 <Card className="mx-1">
                           <CardBody className="p-2">
                             <h6>Select Fee Templates</h6>
@@ -1066,7 +1101,7 @@ this.setState({
                             name="selectedFeeTemplate"
                              isMulti={true}
                           placeholder="Select or Type to search"
-                            options={this.state.feeTemplate} 
+                            options={this.state.feeTemplate}
                           closeMenuOnSelect={false}
                          value={this.state.selectedFeeTemplateValue}
 
@@ -1088,7 +1123,7 @@ this.setState({
 
 
                           }
-                           
+
 
 
                             } />
@@ -1106,8 +1141,8 @@ this.setState({
                              <p>{this.state.errors.selectedFeeTemplate.msg}</p>
                             </font>
                           )}
- 
- 
+
+
                                  </p>
                               )}
 
@@ -1119,13 +1154,13 @@ this.setState({
                                 </InputGroupText>
                               </InputGroupAddon>
 
-                              <Input
-                                type="date"
+
+                              <DatePicker
+
                                 name="doj"
                                 id="doj"
                                 value={this.state.doj}
-                                autoComplete="Date of Joining"
-                                onChange={this.changeHandler}
+                                onChange={date=>{this.setState({doj:date})}}
                               />
                             </InputGroup>
                             {this.state.errors && this.state.errors.doj && (
@@ -1424,13 +1459,13 @@ this.setState({
                               )}
                           </CardBody>
                         </Card>
-                      
+
 
                         <Card className="mx-1">
                           <CardBody className="p-2">
                             <h5>Contact Details</h5>
 
-                           
+
                             <Card className="mx-1">
                               <CardBody className="p-2">
                                 <b>Address</b>
@@ -1960,10 +1995,11 @@ this.setState({
               </Card>
             </Col>
           </Row>
-        
+
         </Container>
-       
+
       </div>
+
     );
   }
 }
