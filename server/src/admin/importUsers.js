@@ -125,13 +125,18 @@ module.exports = function(app) {
       console.log(e);
     }
 if(request.role.indexOf("student")!==-1)
+{if(request.feeTemplate.length===0)
+valError["FeeTemplate"] = "Fee template is empty"
+ else
    { for(var i=0;i<request.feeTemplate.length;i++)
     {
-      const feeTemp = await FeeTemplate.findOne({ templateName: request.feeTemplate[i] });
+    const feeTemp = await FeeTemplate.findOne({ templateName: request.feeTemplate[i].toLowerCase() });
 if(!feeTemp){
 valError["FeeTemplate"] = "Fee template "+request.feeTemplate[i]+" doesn't exist"
 break;
-    }}}
+    }}}}
+
+
     if (!request.firstname) valError["FirstName"] = "firstname can't be empty";
     else if (!request.firstname.match(fnExp))
       valError["FirstName"] = "firstname should contain only letters";
@@ -266,9 +271,7 @@ break;
     return valError;
   }
 
-  function onlyUnique(value, index, self) {
-    return self.indexOf(value) === index;
-  }
+
   async function importExcel(req, res) {
 
 
@@ -334,7 +337,7 @@ break;
                 );
                 if (counter === Object.keys(result[i]).length) continue;
 
-                if (Object.keys(result[i]).length !== 45) {
+                if (Object.keys(result[i]).length !== 43) {
                   importErrors["record: " + (i + 1) + " "] =
                     " Incomplete record as some columns are missing! ";
 
@@ -354,19 +357,16 @@ break;
                   continue;
                 }
 
-                var roles = [];
-                if (result[i].role1) roles.push(result[i].role1);
-                if (result[i].role2) roles.push(result[i].role2);
-                if (result[i].role3) roles.push(result[i].role3);
+                var roles =
+                result[i].role.split(",").map(function(item) {
+                  if(item!=="")
+                  return item.trim();
+                });
 
-                result[i]["role"] = roles;
-                var { role1, ...temp } = result[i];
-                var { role2, ...temp } = temp;
-                var { role3, ...temp } = temp;
+                result[i]["role"] =  roles.filter(function (el) {
+                  return el;
+                });
 
-                result[i] = temp;
-
-                result[i].role = await result[i].role.filter(onlyUnique);
                  console.log("Result with Updated Roles: "+i+ " "+ JSON.stringify(result[i]));
                 // console.log("Fresher Yes : " + result[i].type.toLowerCase);
                 if (result[i].type.toLowerCase() === "fresher") {
@@ -375,11 +375,14 @@ break;
                 if (result[i].role.indexOf("student") !== -1)
        {
         var  feeTemp= result[i].feetemplate.split(",").map(function(item) {
+          if(item!=="")
           return item.trim();
         });
 
 
-result[i]["feeTemplate"]=feeTemp;
+result[i]["feeTemplate"]=feeTemp.filter(function (el) {
+  return el;
+});
 
 console.log("Fee temp: "+result[i].feeTemplate);
 console.log("Role: "+result[i].role);

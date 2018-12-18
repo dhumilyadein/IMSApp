@@ -15,7 +15,30 @@ var FeeTemplateSchema = new Schema({
     type: String,
     required: true,
     unique:true,
-    dropDups: true,
+    validate: {
+      isAsync: true,
+      validator: function(value, isValid) {
+          const self = this;
+          return self.constructor.findOne({ templateName: value })
+          .exec(function(err, user){
+              if(err){
+                  throw err;
+              }
+              else if(user) {
+                  if(self.id === user.id) {
+                      return isValid(true);
+                  }
+                  return isValid(false);
+              }
+              else{
+                  return isValid(true);
+              }
+
+          })
+      },
+      message:  'The Template Name is already in use'
+  },
+
     trim:true,
    lowercase:true
   },

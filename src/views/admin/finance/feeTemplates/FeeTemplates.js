@@ -120,11 +120,11 @@ class FeeTemplates extends Component {
         this.setState({ templateNameError: "Please Enter Template Name" });
         submit = false;}
 
-       else if (!this.state.templateType) {
+        if (!this.state.templateType) {
           this.setState({ templateTypeError: "Please Select Template Type" });
           submit = false;
 
-      } else if (this.state.rows.length === 0) {
+      }  if (this.state.rows.length === 0) {
         this.setState({ rowError: "Please add atleast one Fee Category" });
         submit = false;
       } else
@@ -148,16 +148,21 @@ class FeeTemplates extends Component {
           .post("http://localhost:8001/api/feeTemplate", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
-            if (result.data.code === 11000) {
+            if(result.data.errors)
+            {if (result.data.errors.templateName)
               this.setState({
-                templateNameError: "Template Name already exists!"
-              });
-            } else if (result.data.msg === "Success")
+                templateNameError: "Template Name already exists! Use another Template Name"
+              });}
+             else if (result.data.msg === "Success")
               this.setState({
                 templateName: "",
                 rows: [{ feeType: "", amount: "" }],
                 success: true,
-                modalSuccess: true
+                modalSuccess: true,
+                templateNameError:"",
+                templateTypeError:"",
+                rowError:"",
+templateType:""
               });
             this.getExistingTemplates();
           });
@@ -176,7 +181,15 @@ class FeeTemplates extends Component {
       if (!this.state.templateName) {
         this.setState({ templateNameError: "Please Enter Template Name" });
         submit = false;
-      } else if (this.state.editRows.length === 0) {
+
+      }
+      if (!this.state.templateType) {
+        this.setState({ templateTypeError: "Please Select Template Type" });
+        submit = false;
+
+    }
+
+      if (this.state.editRows.length === 0) {
         this.setState({ rowError: "Please add atleast one Fee Category" });
         submit = false;
       } else
@@ -205,8 +218,17 @@ class FeeTemplates extends Component {
             if (result.data.msg === "Template Updated")
               this.setState({
                 success: true,
-                modalSuccess: true
+                modalSuccess: true,
+                templateNameError:"",
+                templateTypeError:"",
+                rowError:""
+
               });
+              else    if (result.data.msg === "already exist")
+
+                this.setState({
+                  templateNameError: "Template Name already exists! Use another Template Name"
+                });
             this.getExistingTemplates();
           });
       }
@@ -225,7 +247,15 @@ class FeeTemplates extends Component {
       if (!this.state.templateName) {
         this.setState({ templateNameError: "Please Enter Template Name" });
         submit = false;
-      } else if (this.state.editRows.length === 0) {
+      }
+
+      if (!this.state.templateType) {
+        this.setState({ templateTypeError: "Please Select Template Type" });
+        submit = false;
+
+    }
+
+    if (this.state.editRows.length === 0) {
         this.setState({ rowError: "Please add atleast one Fee Category" });
         submit = false;
       } else
@@ -251,15 +281,20 @@ class FeeTemplates extends Component {
           .post("http://localhost:8001/api/copyFeeTemplate", this.state)
           .then(result => {
             console.log("COPY RESULT.data " + JSON.stringify(result.data));
-            if (result.data.code === 11000)
+            if(result.data.errors)
+            if (result.data.errors.templateName)
               this.setState({
-                templateNameError: "Template Name already exists! Name must be Unique."
+                templateNameError: "Template Name already exists! Use another Template Name"
               });
 
             if (result.data.msg === "Template Copied")
               this.setState({
                 success: true,
-                modalSuccess: true
+                modalSuccess: true,
+                templateNameError:"",
+                templateTypeError:"",
+                rowError:""
+
               });
             this.getExistingTemplates();
           });
@@ -389,7 +424,12 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               showCreateTemplate: true,
                               showCreateButton: false,
                               showExistingTemplate:false,
-                              templateName:""
+                              templateName:"",
+                              templateType:"",
+                              templateNameError:"",
+                              templateTypeError:"",
+                              rowError:"",
+                              rows: [{ feeType: "", amount: "" }],
 
                             });
                           }}
@@ -417,7 +457,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               label="Template Name"
                               name="templateName"
                               id="templateName"
-                              value={this.state.templateName}
+                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { templateName: e.target.value },
@@ -616,7 +656,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                     {this.state.showEditTemplate &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Edit Template:  <font color="blue"> {this.state.templateName}</font> </h3>
+                          <h3 align="center"> Edit Template:  <font color="blue">
+                           {this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}</font> </h3>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText style={{ width: "120px" }}>
@@ -629,7 +670,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               size="lg"
                               name="templateName"
                               id="templateName"
-                              value={this.state.templateName}
+                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { templateName: e.target.value },
@@ -735,7 +776,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                       <Input
                                         type="text"
                                         name="feeType"
-                                        value={this.state.editRows[idx].feeType}
+                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
+                                           + this.state.editRows[idx].feeType.slice(1)}
                                         onChange={this.handleEditChange(idx)}
                                         className="form-control"
                                         size="lg"
@@ -820,10 +862,11 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 {this.state.showCopyTemplate &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName}</font> </h3>
+                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName.charAt(0).toUpperCase()
+                             + this.state.templateName.slice(1)}</font> </h3>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
-                              <InputGroupText style={{ width: "120px" }}>
+                              <InputGroupText >
                                 <b>Template Name</b>
                               </InputGroupText>
                             </InputGroupAddon>
@@ -833,7 +876,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                               size="lg"
                               name="templateName"
                               id="templateName"
-                              value={this.state.templateName}
+                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { templateName: e.target.value },
@@ -938,7 +981,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                       <Input
                                         type="text"
                                         name="feeType"
-                                        value={this.state.editRows[idx].feeType}
+                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase() +
+                                          this.state.editRows[idx].feeType.slice(1)}
                                         onChange={this.handleEditChange(idx)}
                                         className="form-control"
                                         size="lg"
@@ -1079,7 +1123,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].templateName}</h5>
+                                    <h5> {this.state.existingRows[idx].templateName.charAt(0).toUpperCase() +
+                                      this.state.existingRows[idx].templateName.slice(1)}</h5>
                                   </td>
 
                                   <td align="center">
@@ -1098,7 +1143,9 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         showCreateTemplate:false,
                                         showCreateButton:false,
                                         showExistingTemplate:false,
-                                        templateNameError:""
+                                        templateNameError:"",
+                                        templateTypeError:"",
+                                        rowError:""
 
 
                                       },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
@@ -1121,7 +1168,10 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         templateType: this.state.existingRows[idx].templateType,
                                         showCreateTemplate:false,
                                         showCreateButton:false,
-                                        showExistingTemplate:false
+                                        showExistingTemplate:false,
+                                        templateNameError:"",
+                                        templateTypeError:"",
+                                        rowError:""
 
 
                                       },()=>{console.log("Updated State: "+JSON.stringify(this.state));})

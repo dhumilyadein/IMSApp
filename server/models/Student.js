@@ -149,7 +149,8 @@ var StudentSchema = new Schema({
   feeTemplate: {
     type: Array,
     required: true,
-    trim:true
+    trim:true,
+    lowercase:true
   },
 
 
@@ -157,7 +158,8 @@ var StudentSchema = new Schema({
     email: {
     type: String,
     required: true,
-    unique:true
+    unique:true,
+    lowercase:true
   },
   password: {
     type: String,

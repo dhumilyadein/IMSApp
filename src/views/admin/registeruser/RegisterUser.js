@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
+import DatePicker from 'react-date-picker';
 
+//import {propTypes} from 'react/addons';
 
 import Select from 'react-select';
-
 
 import {
   Button,
@@ -32,20 +33,20 @@ import axios, { post } from "axios";
 
 
 
+
 class RegisterUser extends Component {
+
+
   constructor(props) {
+
     super(props);
     this.getExistingTemplates();
 
-    const selectStyles = {
-      menu: base => ({
-        ...base,
-        zIndex: 100
-      })
-    };
+
 
 
     this.state = {
+      loader:true,
       admintype: "Office Admin",
       username: "",
       email: "",
@@ -106,8 +107,9 @@ class RegisterUser extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
-      feeTemplate:[{}],
+      feeTemplate:[],
       selectedFeeTemplate:[],
+      selectedFeeTemplateValue:[],
       corruptphoto: false,
       photoname: "",
       phone: "",
@@ -130,6 +132,38 @@ class RegisterUser extends Component {
     this.photoUpload = this.photoUpload.bind(this);
   }
 
+  get options() {
+    return (
+      {
+        lines: 13,
+        length: 20,
+        width: 10,
+        radius: 30,
+        corners: 1,
+        rotate: 0,
+        direction: 1,
+        color: '#fff',
+        speed: 1,
+        trail: 60
+      }
+    );
+  }
+
+  get styleForOverlay() {
+    return (
+      {
+        background: 'rgba(0, 0, 0, 0.2)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 10,
+        display: 'block'
+      }
+    );
+  }
+
   getExistingTemplates() {
 
     axios
@@ -142,7 +176,7 @@ class RegisterUser extends Component {
          for(var i=0;i<result.data.length;i++)
          {
            temp.push({"value":result.data[i].templateName,
-           "label":result.data[i].templateName+" ("+(result.data[i].templateType.toLowerCase())+")"
+           "label":result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1)+" ("+(result.data[i].templateType.toLowerCase())+")"
           });
 
 
@@ -176,13 +210,18 @@ class RegisterUser extends Component {
 
   resetForm = e => {
     document.getElementById("photo").value = null;
+    document.getElementById("selectedFeeTemplate").value = null;
     document.getElementById("gender1").checked = false;
     document.getElementById("gender2").checked = false;
 
 
     this.setState({
       photoerror:null,
+      loader:false,
       admintype: "Office Admin",
+      selectedFeeTemplate:[],
+      selectedFeeTemplateValue:[],
+      feeTemplate:[],
       empRegSuccess: false,
       modalSuccess: true,
       parentpassword_con: "",
@@ -337,7 +376,7 @@ class RegisterUser extends Component {
     //var tempdata = {"role":["student"],"userdata":null,"studentRegSuccess":false,"errors":null,"importErrors":null,"status":"Active","disabled":true,"checked":{"adminChecked":false,"teacherChecked":false,"studentChecked":true},"visible":true,"studentmodalSuccess":true,"admintype":"Office Admin","nophoto":false,"corruptphoto":false,"photoname":"Book1.xlsx","roleerror":false,"firstname":"dfdfd","lastname":"dfdf","dob":"2018-11-08","gender":"Female","bloodgroup":"B-","nationality":"Indian","religion":"Sikh","category":"OBC","photo":"tempphotodata","admissionno":"4545","rollno":"56565","doj":"2018-11-20","phone":"+91 56565-56565","address":"dfdf","city":"dfdf","postalcode":"dfdf","state":"dfdfdf","username":"yuyg","email":"fdfdf@df.co","password":"pass","password_con":"pass","parentfirstname":"fgfg","parentlastname":"hjhjhj","relation":"Father","occupation":"fgfgfg","parentemail":"dfdf@gh.cd","parentphone1":"+91 56656-56565","parentphone2":"+91 45454-54545","parentaddress":"dfdf","parentcity":"dfdf","parentpostalcode":"dfdf","parentstate":"dfdfdf","parentusername":"gngngn","parentpassword":"pass","parentpassword_con":"pass"};
 
     e.preventDefault();
-    this.setState({ roleerror: false, errors:null});
+    this.setState({ roleerror: false, errors:null, loader:true});
     // console.log(JSON.stringify(this.state));
     //console.log("in STUDENT" + this.state.role[0]);
 
@@ -496,13 +535,20 @@ this.setState({
 
   render() {
     return (
+
+
       <div style={{ width: "1000px" }}>
 
+
+
         <Container style={{ width: "2500px" }}>
-          <Row lg="4" style={{ width: "2500px" }}>
+
+                 <Row lg="4" style={{ width: "2500px" }}>
             <Col md="7">
               <Card className="mx-4">
                 <CardBody className="p-2">
+
+
                   <Form>
                     {this.state.studentRegSuccess && (
                       <Modal
@@ -519,6 +565,8 @@ this.setState({
                         </ModalHeader>
                       </Modal>
                     )}
+
+
 
 
                     {this.state.empRegSuccess && (
@@ -694,14 +742,12 @@ this.setState({
                                 </InputGroupText>
                               </InputGroupAddon>
 
-                              <Input
-                                type="date"
+                              <DatePicker
+
                                 name="dob"
                                 id="dob"
                                 value={this.state.dob}
-                                placeholder="Date of Birth"
-                                autoComplete="Date of Brith"
-                                onChange={this.changeHandler}
+                                onChange={date=>{this.setState({dob:date})}}
                               />
                             </InputGroup>
 
@@ -779,7 +825,7 @@ this.setState({
                                     type="select"
                                     onChange={this.changeHandler}
                                     value={this.state.maritalstatus}
-                                    
+
                                   >
                                     <option value="">Select</option>
                                     <option value="Single">Single</option>
@@ -995,7 +1041,7 @@ this.setState({
                                       </InputGroupText>
                                     </InputGroupAddon>
                                     <Input
-                                      type="text"
+                                      type="number"
                                       name="admissionno"
                                       id="admissionno"
                                       autoComplete="admissionno"
@@ -1044,25 +1090,29 @@ this.setState({
                                       </font>
                                     )}
 
-                               
+
 <Card className="mx-1">
                           <CardBody className="p-2">
                             <h6>Select Fee Templates</h6>
 
 
-                            <Select isMulti={true}
+                            <Select
+                            id="selectedFeeTemplate"
+                            name="selectedFeeTemplate"
+                             isMulti={true}
                           placeholder="Select or Type to search"
-                            options={this.state.feeTemplate} 
+                            options={this.state.feeTemplate}
                           closeMenuOnSelect={false}
+                         value={this.state.selectedFeeTemplateValue}
 
-                          style={{backgroundColor:'#fff'}}
                             isSearchable={true}
                             onChange={selected=>{console.log("Selected: "+JSON.stringify(selected));
                             var temp=[];
 
                             for(var i=0;i<selected.length;i++)
                             {temp.push(selected[i].value)}
-                            this.setState({selectedFeeTemplate:temp},()=>
+                            this.setState({selectedFeeTemplate:temp,
+                            selectedFeeTemplateValue:selected},()=>
                             {console.log("Selected Fee Templ: "+JSON.stringify(this.state.selectedFeeTemplate));
                           })
 
@@ -1073,7 +1123,7 @@ this.setState({
 
 
                           }
-                           
+
 
 
                             } />
@@ -1091,8 +1141,8 @@ this.setState({
                              <p>{this.state.errors.selectedFeeTemplate.msg}</p>
                             </font>
                           )}
- 
- 
+
+
                                  </p>
                               )}
 
@@ -1104,13 +1154,13 @@ this.setState({
                                 </InputGroupText>
                               </InputGroupAddon>
 
-                              <Input
-                                type="date"
+
+                              <DatePicker
+
                                 name="doj"
                                 id="doj"
                                 value={this.state.doj}
-                                autoComplete="Date of Joining"
-                                onChange={this.changeHandler}
+                                onChange={date=>{this.setState({doj:date})}}
                               />
                             </InputGroup>
                             {this.state.errors && this.state.errors.doj && (
@@ -1314,9 +1364,108 @@ this.setState({
                         </Card>
                         <Card className="mx-1">
                           <CardBody className="p-2">
+                            <h5>Login Details</h5>
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <i className="icon-user" />
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                name="username"
+                                id="username"
+                                value={this.state.username}
+                                placeholder="Username"
+                                autoComplete="username"
+                                onChange={this.changeHandler}
+                              />
+                            </InputGroup>
+                            {this.state.errors && this.state.errors.username && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.username.msg}</p>
+                              </font>
+                            )}
+
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>@</InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                name="email"
+                                id="email"
+                                value={this.state.email}
+                                placeholder="Email"
+                                autoComplete="email"
+                                onChange={this.changeHandler}
+                              />
+                            </InputGroup>
+
+                            {this.state.errors && this.state.errors.email && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.email.msg}</p>
+                              </font>
+                            )}
+
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <i className="icon-lock" />
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="password"
+                                name="password"
+                                id="password"
+                                placeholder="Password"
+                                value={this.state.password}
+                                autoComplete="new-password"
+                                onChange={this.changeHandler}
+                              />
+                            </InputGroup>
+
+                            {this.state.errors && this.state.errors.password && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.password.msg}</p>
+                              </font>
+                            )}
+
+                            <InputGroup className="mb-4">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <i className="icon-lock" />
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="password"
+                                name="password_con"
+                                id="password_con"
+                                placeholder="Confirm Password"
+                                value={this.state.password_con}
+                                autoComplete="new-password"
+                                onChange={this.changeHandler}
+                              />
+                            </InputGroup>
+
+                            {this.state.errors &&
+                              this.state.errors.password_con && (
+                                <font color="red">
+                                  <p>{this.state.errors.password_con.msg}</p>
+                                </font>
+                              )}
+                          </CardBody>
+                        </Card>
+
+
+                        <Card className="mx-1">
+                          <CardBody className="p-2">
                             <h5>Contact Details</h5>
 
-                           
+
                             <Card className="mx-1">
                               <CardBody className="p-2">
                                 <b>Address</b>
@@ -1425,104 +1574,7 @@ this.setState({
                           </CardBody>
                         </Card>
 
-                        <Card className="mx-1">
-                          <CardBody className="p-2">
-                            <h5>Login Details</h5>
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText>
-                                  <i className="icon-user" />
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                name="username"
-                                id="username"
-                                value={this.state.username}
-                                placeholder="Username"
-                                autoComplete="username"
-                                onChange={this.changeHandler}
-                              />
-                            </InputGroup>
-                            {this.state.errors && this.state.errors.username && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.username.msg}</p>
-                              </font>
-                            )}
-
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText>@</InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                name="email"
-                                id="email"
-                                value={this.state.email}
-                                placeholder="Email"
-                                autoComplete="email"
-                                onChange={this.changeHandler}
-                              />
-                            </InputGroup>
-
-                            {this.state.errors && this.state.errors.email && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.email.msg}</p>
-                              </font>
-                            )}
-
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText>
-                                  <i className="icon-lock" />
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="password"
-                                name="password"
-                                id="password"
-                                placeholder="Password"
-                                value={this.state.password}
-                                autoComplete="new-password"
-                                onChange={this.changeHandler}
-                              />
-                            </InputGroup>
-
-                            {this.state.errors && this.state.errors.password && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.password.msg}</p>
-                              </font>
-                            )}
-
-                            <InputGroup className="mb-4">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText>
-                                  <i className="icon-lock" />
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="password"
-                                name="password_con"
-                                id="password_con"
-                                placeholder="Confirm Password"
-                                value={this.state.password_con}
-                                autoComplete="new-password"
-                                onChange={this.changeHandler}
-                              />
-                            </InputGroup>
-
-                            {this.state.errors &&
-                              this.state.errors.password_con && (
-                                <font color="red">
-                                  <p>{this.state.errors.password_con.msg}</p>
-                                </font>
-                              )}
-                          </CardBody>
-                        </Card>
-                      </Col>
+                        </Col>
                       <Col>
                         {this.state.role.indexOf("student") !== -1 && (
                           <p>
@@ -1943,8 +1995,11 @@ this.setState({
               </Card>
             </Col>
           </Row>
+
         </Container>
+
       </div>
+
     );
   }
 }

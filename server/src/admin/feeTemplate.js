@@ -35,7 +35,7 @@ function existingTemplates(req, res) {
         return res.send(data);
     })
     .catch(err => {
-      return res.send({error:"Fail to fetch existing records"});
+      return res.send({error:err});
     });
 
   }
@@ -49,17 +49,21 @@ FeeTemplate
   return res.send({msg:"Template Deleted"});
 })
 .catch(err => {
-return res.send({error:"Failed to Delete existing template"});
+return res.send({error:err});
 });
 
 
 }
 
-function updateFeeTemplate(req,res)
+async function updateFeeTemplate(req,res)
 {console.log("In Update Template for: "+ JSON.stringify(req.body));
-
-
-FeeTemplate
+let feeData=null;
+await FeeTemplate.findOne({ templateName: req.body.templateName })
+.then(data => {
+  if(data)
+  return res.send({msg:"already exist"});
+  else
+  FeeTemplate
 .updateOne({templateName:req.body.existingRows[req.body.templateNo].templateName},
   {$set: {templateName:req.body.templateName,
           templateRows:req.body.editRows,
@@ -68,11 +72,19 @@ FeeTemplate
   }}
   )
 .then(data => {
+
 return res.send({msg:"Template Updated"});
 })
 .catch(err => {
-return res.send({error:"Failed to Update existing template"});
+return res.send({error:err});
 });
+  })
+  .catch(err => {
+  return res.send({error:err});
+  });
+
+
+
 
 
 }
