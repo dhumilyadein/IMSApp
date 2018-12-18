@@ -294,6 +294,8 @@ class UserDetails extends Component {
             <Col xs="12" md="7" className="mb-4">
 
               <Nav tabs>
+              {this.state.fetchedUserDetails && this.state.fetchedUserDetails[0] && this.state.fetchedUserDetails[0].role 
+              && this.state.fetchedUserDetails[0].role.includes("student") && (
                 <NavItem>
                   <NavLink
                     className={classnames({ active: this.state.activeTab === 'Student' })}
@@ -302,6 +304,7 @@ class UserDetails extends Component {
                     Student
                 </NavLink>
                 </NavItem>
+              )}
                 <NavItem>
                   <NavLink
                     className={classnames({ active: this.state.activeTab === 'Admin' })}
@@ -321,6 +324,9 @@ class UserDetails extends Component {
               </Nav>
 
               <TabContent activeTab={this.state.activeTab}>
+
+              {this.state.fetchedUserDetails && this.state.fetchedUserDetails[0] && this.state.fetchedUserDetails[0].role 
+              && this.state.fetchedUserDetails[0].role.includes("student") && (
                 <TabPane tabId="Student">
 
                   <Card className="mx-4">
@@ -1700,6 +1706,8 @@ class UserDetails extends Component {
                   </Card>
 
                 </TabPane>
+              )}
+
                 <TabPane tabId="Admin">
                   2. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
                   et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -1708,7 +1716,7 @@ class UserDetails extends Component {
                   officia deserunt mollit anim id est laborum.
               </TabPane>
                 <TabPane tabId="Teacher">
-                  2. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
+                  3. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
                   et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
                   aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
                   dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
