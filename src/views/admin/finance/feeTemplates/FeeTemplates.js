@@ -12,6 +12,7 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupText,
+  CardHeader,
   Label,
   Row,
   Table,
@@ -1084,14 +1085,20 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h2 align="center"> Existing Fee Templates</h2>  <Button
-                                      color="info"
+                        <CardHeader style={{backgroundColor: 'Aqua', borderColor: 'black',  display: 'flex',
+  alignItems: 'center'}}>  
+                          ><h2> Existing Fee Templates</h2> 
+                           &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+                           <Button
+                                      color="primary"
                                         onClick={this.getExistingTemplates}
                                       size="lg"
                                     >
                                       Refresh
-                                    </Button>
-                          <br />
+                                    </Button> </CardHeader>
+                           
+                            
+                        
                           <br />
                           <Table bordered hover>
                             <thead>
