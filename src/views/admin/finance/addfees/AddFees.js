@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Select from 'react-select';
 import {
     Badge,
     Button,
@@ -35,28 +36,21 @@ class AddFees extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            find: null,
-            results: [],
 
-            find: null,
-            using: "firstname",
-            role: "student",
-            searchCriteria: "containsSearchCriteria",
-            dataSource: [],
+class:"",
+section:"",
+classError:"",
+            studentResults: [],
 
-            usersDetails: null,
-            studentsDetails: null,
 
-            showSearchUserSectionFlag : false,
-
-            actionTypeForSearchUser: "RedirectToAddFee"
 
 
         };
-        this.changeHandler = this.changeHandler.bind(this);
+
         this.submitHandler = this.submitHandler.bind(this);
         this.resetForm = this.resetForm.bind(this);
-
+        this.classChangeHandler = this.classChangeHandler.bind(this);
+         this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
 
 
 
@@ -112,10 +106,87 @@ class AddFees extends Component {
      * @description Called when the change event is triggered.
      * @param {*} e
      */
-    changeHandler(e) {
-        this.setState({
-            [e.target.name]: e.target.value
-        });
+    classChangeHandler(e) {
+
+      this.setState({class: e.target.value, classError:""},()=>{console.log("in Class change: "+this.state.class);
+
+      axios
+      .post("http://localhost:8001/api/selectStudentByClass", this.state)
+      .then(result => {
+          console.log("result.data " + JSON.stringify(result.data));
+
+          if (result.data.length>0) {
+            var temp=[];
+           for(var i=0;i<result.data.length;i++)
+           {
+             temp.push({"value":result.data[i].username,
+             "label":result.data[i].firstname.charAt(0).toUpperCase() + result.data[i].firstname.slice(1)+" "+
+             result.data[i].lastname.charAt(0).toUpperCase() + result.data[i].lastname.slice(1)+
+              " ("+(result.data[i].username.toLowerCase())+")"
+            });}
+            this.setState({studentResults:temp});
+          }
+
+          else if (result.data.errors) {
+
+              return this.setState(result.data);
+          }
+
+          return this.setState({
+
+          });
+
+      });
+
+    });
+
+
+
+
+    }
+
+    sectionChangeHandler(e) {
+
+if(!this.state.class)
+{this.setState({classError:"Please select Class first"});
+return;}
+
+      this.setState({section: e.target.value, studentResults:[]},()=>{console.log("in section change: "+this.state.section);
+
+
+      axios
+      .post("http://localhost:8001/api/selectStudentBySection", this.state)
+      .then(result => {
+          console.log("result.data " + JSON.stringify(result.data));
+
+          if (result.data.length>0) {
+            var temp=[];
+           for(var i=0;i<result.data.length;i++)
+           {
+             temp.push({"value":result.data[i].username,
+             "label":result.data[i].firstname.charAt(0).toUpperCase() + result.data[i].firstname.slice(1)+" "+
+             result.data[i].lastname.charAt(0).toUpperCase() + result.data[i].lastname.slice(1)+
+              " ("+(result.data[i].username.toLowerCase())+")"
+            });}
+            this.setState({studentResults:temp});
+          }
+
+          else if (result.data.errors) {
+
+              return this.setState(result.data);
+          }
+
+          return this.setState({
+
+          });
+
+      });
+
+    });
+
+
+
+
     }
 
     /**
@@ -138,7 +209,10 @@ class AddFees extends Component {
                             </CardHeader>
                             <CardBody>
                                 <Form>
-                            <InputGroup className="mb-4">
+                                <Card className="mx-5">
+                          <CardBody className="p-1">
+                          <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}> <h5>Select Student by Class & Section</h5></CardHeader>
+                            <br/><InputGroup className="mb-4">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
                                  Class
@@ -149,7 +223,7 @@ class AddFees extends Component {
                                 id="class"
                                 type="select"
                                 value={this.state.class}
-                                onChange={this.changeHandler}
+                                onChange={ this.classChangeHandler}
                               >
                                 <option value="">Select</option>
                                 <option value="LKG">LKG</option>
@@ -169,6 +243,13 @@ class AddFees extends Component {
                                    </Input>
                             </InputGroup>
 
+                            {this.state.classError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.classError}</p>
+                              </font>
+                            )}
+
                             <InputGroup className="mb-4">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
@@ -180,7 +261,7 @@ class AddFees extends Component {
                                 id="section"
                                 type="select"
                                 value={this.state.section}
-                                onChange={this.changeHandler}
+                                onChange={this.sectionChangeHandler}
                               >
                                 <option value="">Select</option>
                                 <option value="A">A</option>
@@ -191,6 +272,79 @@ class AddFees extends Component {
 
                                    </Input>
                             </InputGroup>
+
+                            <Select
+                            id="studentSelect"
+                            name="studentSelect"
+                            // isMulti={true}
+                          placeholder="Select Student or Type to search"
+                            options={this.state.studentResults}
+                         // closeMenuOnSelect={false}
+                         value={this.state.studentSelect}
+                         isClearable={true}
+                         menuIsOpen ={true}
+                            isSearchable={true}
+                            onChange={selected=>{console.log("Selected: "+JSON.stringify(selected));
+                            /* var temp=[];
+
+                            for(var i=0;i<selected.length;i++)
+                            {temp.push(selected[i].value)}
+                            this.setState({selectedFeeTemplate:temp,
+                            selectedFeeTemplateValue:selected},()=>
+                            {console.log("Selected Fee Templ: "+JSON.stringify(this.state.selectedFeeTemplate));  })*/
+
+
+
+
+
+
+
+
+                          }
+
+
+
+                            } />
+                            <br/>
+
+
+
+</CardBody></Card>
+
+{/* <Card>            <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}> <h5>Select Student by Roll No</h5></CardHeader>
+<br/>
+<CardBody>
+<InputGroup className="mb-3">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText
+                                        style={{ width: "120px" }}
+                                      >
+                                        Roll No
+                                      </InputGroupText>
+                                    </InputGroupAddon>
+                                    <Input
+                                      type="text"
+                                      name="rollno"
+                                      id="rollno"
+                                      value={this.state.rollno}
+                                      autoComplete="rollno"
+                                      onChange={this.changeHandler}
+                                    />
+                                  </InputGroup>
+
+                                  <Button
+                          type="submit"
+                         // onClick={this.submitHandler}
+                          block
+                          color="success"
+                        >
+                          {" "}
+                           <h4>  Search</h4>
+                        </Button>
+
+                        </CardBody></Card> */}
+
+<br/><br/><br/><br/><br/><br/>
                                 </Form>
                             </CardBody>
 
