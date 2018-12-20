@@ -163,6 +163,7 @@ break;
     if (!request.bloodgroup)
       valError["BloodGroup"] = "Bloodgroup can't be empty";
 
+
     if (!request.nationality)
       valError["Nationality"] = "Nationality can't be empty";
 
@@ -184,6 +185,12 @@ break;
     if (request.role.indexOf("student") !== -1) {
       if (!request.admissionno)
         valError["AdmissionNo"] = "Admission no can't be empty";
+
+        if (!request.class)
+      valError["Class"] = "Class can't be empty";
+
+      if (!request.section)
+      valError["Section"] = "Section can't be empty";
 
       if (!request.rollno) valError["RollNo"] = "Roll No can't be empty";
 
@@ -337,7 +344,7 @@ break;
                 );
                 if (counter === Object.keys(result[i]).length) continue;
 
-                if (Object.keys(result[i]).length !== 43) {
+                if (Object.keys(result[i]).length !== 45) {
                   importErrors["record: " + (i + 1) + " "] =
                     " Incomplete record as some columns are missing! ";
 

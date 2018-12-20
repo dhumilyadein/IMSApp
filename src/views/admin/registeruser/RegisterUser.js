@@ -47,6 +47,8 @@ class RegisterUser extends Component {
 
 
     this.state = {
+      class:"",
+      section:"",
       loader:false,
       admintype: "Office Admin",
       username: "",
@@ -187,6 +189,8 @@ class RegisterUser extends Component {
 
 
     this.setState({
+      class:"",
+      section:"",
       photoerror:null,
       loader:false,
       admintype: "Office Admin",
@@ -565,7 +569,7 @@ this.setState({
                         <Card className="mx-1">
                         <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}><h5>Select User Roles</h5></CardHeader>
                           <CardBody className="p-2">
-                          
+
 
                             <Table responsive size="sm" hover>
                               <tbody>
@@ -995,7 +999,7 @@ this.setState({
                               </font>
                             )}
                             {this.state.corruptphoto
-                              && <font color="red">  <p>Please select JPEG/PNG/JPG file format </p></font>
+                              && <font color="red">  <p>Please select only JPG file format </p></font>
                             }
 
 
@@ -1068,6 +1072,71 @@ this.setState({
                                       </font>
                                     )}
 
+<InputGroup className="mb-4">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                 Class
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="class"
+                                id="class"
+                                type="select"
+                                value={this.state.class}
+                                onChange={this.changeHandler}
+                              >
+                                <option value="">Select</option>
+                                <option value="LKG">LKG</option>
+                                <option value="UKG">UKG</option>
+                                <option value="I">I</option>
+                                <option value="II">II</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                                <option value="V">V</option>
+                                <option value="VI">VI</option>
+                                <option value="VII">VII</option>
+                                <option value="VIII">VIII</option>
+                                <option value="IX">IX</option>
+                                <option value="X">X</option>
+                                <option value="XI">XI</option>
+                                <option value="XII">XII</option>
+                                   </Input>
+                            </InputGroup>
+                            {this.state.errors && this.state.errors.class && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.class.msg}</p>
+                              </font>
+                            )}
+
+<InputGroup className="mb-4">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                                 Section
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="section"
+                                id="section"
+                                type="select"
+                                value={this.state.section}
+                                onChange={this.changeHandler}
+                              >
+                                <option value="">Select</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+
+                                   </Input>
+                            </InputGroup>
+                            {this.state.errors && this.state.errors.section && (
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.errors.section.msg}</p>
+                              </font>
+                            )}
 
 <Card className="mx-1">
                           <CardBody className="p-2">
@@ -1125,7 +1194,7 @@ this.setState({
                               )}
 
 
-                            <InputGroup className="mb-3">
+                            <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
                                   Date of Joining
@@ -1962,12 +2031,12 @@ this.setState({
                            <h4>  Register</h4>
                         </Button>}
 
-                       
+
                         {this.state.loader &&
                           <div align="center"><ReactLoading type="spin"
                             color="	#006400"
                             height='2%' width='10%' />
-    <br/> 
+    <br/>
 
  <font color="DarkGreen">  <h4>Registering...</h4></font></div> }
                       </Col>

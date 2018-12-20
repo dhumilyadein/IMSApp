@@ -153,6 +153,16 @@ var StudentSchema = new Schema({
     lowercase:true
   },
 
+  class: {
+    type: String,
+    required: true,
+    trim:true
+  },
+  section: {
+    type: String,
+    required: true,
+    trim:true
+  },
 
 
     email: {

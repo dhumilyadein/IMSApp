@@ -1086,8 +1086,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                       <Card className="mx-1">
                         <CardBody className="p-2">
                         <CardHeader style={{backgroundColor: 'Aqua', borderColor: 'black',  display: 'flex',
-  alignItems: 'center'}}>  
-                          ><h2> Existing Fee Templates</h2> 
+  alignItems: 'center'}}>
+                          <h2> Existing Fee Templates</h2>
                            &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
                            <Button
                                       color="primary"
@@ -1096,9 +1096,9 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     >
                                       Refresh
                                     </Button> </CardHeader>
-                           
-                            
-                        
+
+
+
                           <br />
                           <Table bordered hover>
                             <thead>

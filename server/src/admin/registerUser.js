@@ -76,6 +76,16 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Please select Bloodgroup"),
 
+      check("class")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Class"),
+
+      check("section")
+      .not()
+      .isEmpty()
+      .withMessage("Please select Section"),
+
       check("selectedFeeTemplate")
       .not()
       .isEmpty()
