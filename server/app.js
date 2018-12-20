@@ -8,6 +8,7 @@ const adminRegister = require("./src/admin/registerUser");
 const adminImport = require("./src/admin/importUsers");
 const adminSearch = require("./src/admin/searchUser");
 const studentSearch = require("./src/admin/searchStudent");
+const parentSearch = require("./src/admin/searchParent");
 const feetemplate = require("./src/admin/feeTemplate");
 
 const login = require("./src/login");
@@ -43,5 +44,6 @@ adminSearch(app);
 studentSearch(app);
 feetemplate(app);
 login(app);
+parentSearch(app);
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
