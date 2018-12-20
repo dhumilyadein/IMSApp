@@ -52,6 +52,7 @@ classError:"",
         this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
 
+         this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
 
 
 
@@ -280,11 +281,12 @@ return;}
                           placeholder="Select Student or Type to search"
                             options={this.state.studentResults}
                          // closeMenuOnSelect={false}
-                         value={this.state.studentSelect}
+                         //value={this.state.selectedStudent}
                          isClearable={true}
                          menuIsOpen ={true}
                             isSearchable={true}
-                            onChange={selected=>{console.log("Selected: "+JSON.stringify(selected));
+
+                            onChange={this.studentSelectedHandler}
                             /* var temp=[];
 
                             for(var i=0;i<selected.length;i++)
@@ -304,7 +306,7 @@ return;}
 
 
 
-                            } />
+                             />
                             <br/>
 
 
