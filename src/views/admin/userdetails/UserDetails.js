@@ -34,6 +34,8 @@ import {
 import { AppSwitch } from "@coreui/react";
 import axios, { post } from "axios";
 
+var imageContext = require.context('../../../photoTemp', true);
+
 const whiteTextFieldStyle = {
   background: "white"
 }
@@ -179,7 +181,7 @@ class UserDetails extends Component {
     });
 
     if (this.state.fetchedUserDetails && this.state.fetchedUserDetails[0]
-      && this.state.fetchedUserDetails[0].role.includes("student")) {
+      && this.state.fetchedUserDetails[0].role && this.state.fetchedUserDetails[0].role.includes("student")) {
 
       var searchStudentsRequest = {
         "find": this.props.match.params.username,
@@ -258,13 +260,15 @@ class UserDetails extends Component {
       nationality: studentData.nationality,
       bloodgroup: studentData.bloodgroup,
       category: studentData.category,
-      phone: studentData.phone
+      phone: studentData.phone,
+      photo: studentData.photo
     });
 
 
     console.log("student details - " + studentData.username + " " + this.state.firstname + " "
       + this.state.lastname + " " + this.state.dob + " " + this.state.doj + " " + this.state.parentusername
-      + " " + this.state.gender + " " + this.state.parentfirstname + " " + this.state.address + " " + this.state.city);
+      + " " + this.state.gender + " " + this.state.parentfirstname + " " + this.state.address + " " + this.state.city
+      + " student photo - " + JSON.stringify(studentData.photo));
   }
 
   mapParentResponseToState() {
@@ -319,7 +323,10 @@ class UserDetails extends Component {
 
   render() {
 
-    //this.mapStudentResponseToState();
+    let imgSource = null;
+    if(this.state.username) {
+        imgSource = imageContext(`./${this.state.username}.jpg`);
+    }
 
     return (
       <div style={{ width: "1000px" }}>
@@ -1321,8 +1328,19 @@ class UserDetails extends Component {
                                   </CardBody>
                                 </Card>
                               </Col>
+
                               <Col>
+                                <Card className="mb-3">
+                                  <CardBody className="p-2">
+                                    {imgSource && ( 
+                                      <img id="displayImage" src={imgSource} /> 
+                                    )}
+                                    {/* <img id="displayImage1" src={require('../../../photoTemp/kapil.jpg')} widht="200px" height="200px"/> */}
+                                  
+                                  </CardBody>
+                                </Card>
                                 {this.state.role.indexOf("student") !== -1 && (
+
                                   <p>
                                     <Card className="mx-1">
                                       <CardBody className="p-2">
