@@ -1,4 +1,5 @@
 const Student = require("../../models/Student");
+const FeeTemplate = require("../../models/FeeTemplatesModel");
 
 module.exports = function (app) {
 async function addFeeTemplate(req, res) {
@@ -46,6 +47,20 @@ function selectStudentByClass(req, res) {
 
   }
 
+  function selectfeeTemplate(req, res) {
+    console.log("in selectfeeTemplate"+ JSON.stringify(req.body.selectedStudent));
+
+    Student
+      .findOne({username:req.body.selectedStudent.value})
+      .then(data => {
+        //console.log("Student Result: "+JSON.stringify(data))
+          return res.send(data.feeTemplate);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+
+    }
 
   function selectStudentBySection(req, res) {
     console.log("in Selct Student "+ JSON.stringify(req.body));
@@ -144,12 +159,33 @@ await copyTemplate
 
 }
 
+async function getfeeTemplate(req,res)
+{console.log("In Get Template for: "+ JSON.stringify(req.body));
+
+
+FeeTemplate
+      .findOne({templateName:req.body.selectedFeeTemplate.value})
+      .then(data => {
+        //console.log("Student Result: "+JSON.stringify(data))
+          return res.send(data);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+
+
+
+
+}
+
+
   app.post("/api/selectStudentByClass", selectStudentByClass);
   app.post("/api/selectStudentBySection", selectStudentBySection);
   app.post("/api/deleteTemplate", deleteTemplate);
   app.post("/api/updateFeeTemplate", updateFeeTemplate);
   app.post("/api/copyFeeTemplate", copyFeeTemplate);
-
+  app.post("/api/selectfeeTemplate", selectfeeTemplate);
+   app.post("/api/getfeeTemplate", getfeeTemplate);
 
 
 

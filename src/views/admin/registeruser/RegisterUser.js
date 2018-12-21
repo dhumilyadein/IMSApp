@@ -184,7 +184,7 @@ class RegisterUser extends Component {
 
   resetForm = e => {
     document.getElementById("photo").value = null;
-    document.getElementById("selectedFeeTemplate").value = null;
+    //document.getElementById("selectedFeeTemplate").value = null;
     document.getElementById("gender1").checked = false;
     document.getElementById("gender2").checked = false;
 
