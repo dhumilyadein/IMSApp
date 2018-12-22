@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
 import classnames from 'classnames';
+import DatePicker from 'react-date-picker';
 import {
     Badge,
     Button,
@@ -25,6 +26,7 @@ import {
     InputGroupText,
     Label,
     Row,
+    Table,
     TabContent, TabPane, Nav, NavItem, NavLink,   CardTitle, CardText
 } from 'reactstrap';
 import { AutoComplete } from 'material-ui';
@@ -49,15 +51,38 @@ classError:"",
 feeTemplates:[],
 selectedStudent:[],
 error:"",
-selectedFeeTemplate:[]
+showFeeTemplate:false,
+templateRows: [{ feeType: "", amount: "" }],
+templateType:"",
+totalAmount:"",
+year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
+showMonth:false,
+showQuarter: false,
+showHalfYearly:false,
+month:"",
+quarter:"",
+halfYear:"",
+totalDueAmount:"",
+lateFeeFine:"0",
+paidAmount:"",
+pastPendingDue:"",
+paidAmount:"0",
+remarks:"",
+dos:Date.now(),
+yearError:"",
+quarterError:"",
+halfYearError:"",
+monthError:"",
+paidAmountError:"",
+dosError:""
 
         };
 
-        this.submitHandler = this.submitHandler.bind(this);
+
         this.resetForm = this.resetForm.bind(this);
         this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-
+         this.feeSubmitHandler = this.feeSubmitHandler.bind(this);
          this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
          this.toggle = this.toggle.bind(this);
          this.feeTemplateSelectHandler = this.feeTemplateSelectHandler.bind(this);
@@ -87,42 +112,70 @@ selectedFeeTemplate:[]
       }
     }
 
-    /**
-     * @description Handles the form submit request
-     * @param {*} e
-     */
-    submitHandler(e) {
 
-        e.preventDefault();
-        console.log(JSON.stringify(this.state));
+    feeSubmitHandler(e){
+      e.preventDefault();
+console.log("In FeeSubmit:"+ JSON.stringify(this.state));
+var submit=true;
 
-        axios
-            .post("http://localhost:8001/api/register", this.state)
-            .then(result => {
-                console.log("result.data " + result.data);
-                if (result.data.errors) {
+if(!this.state.year)
+{
+this.setState({yearError:"Please Enter Year (Eg. 2018-19)"})
+submit=false;
 
-                    return this.setState(result.data);
-                }
-                this.resetForm();
-                return this.setState({
-                    userdata: result.data,
-                    errors: null,
-                    studentRegSuccess: true,
-                    modalSuccess: true
-                });
+}
+if(this.state.templateType==="Monthly")
+if(!this.state.month)
+{
+this.setState({monthError:"Please Select month"})
+submit=false;
 
-            });
+}
+if(this.state.templateType==="Quarterly")
+if(!this.state.quarter)
+{
+this.setState({quarterError:"Please Select Quarter"})
+submit=false;
+
+}
+
+if(this.state.templateType==="Half Yearly")
+if(!this.state.halfYear)
+{
+this.setState({halfYearError:"Please Select Half Year"})
+submit=false;
+
+}
+
+if(!this.state.paidAmount)
+{
+  this.setState({paidAmountError:"Please Enter Paid Amount"})
+  submit=false;
+
+  }
+
+  if(!this.state.dos)
+{
+  this.setState({dos:"Please Enter Date of Submission"})
+  submit=false;
+
+  }
+
+
+
+
+
+
+
+
+
     }
 
-    /**
-     * @description Called when the change event is triggered.
-     * @param {*} e
-     */
+
     classChangeHandler(e) {
 
       this.setState({class: e.target.value, error:"",feeTemplates:[],section:"",
-       classError:"",studentResults:[],selectedStudent:[], selectedFeeTemplate:[]},
+       classError:"",studentResults:[],selectedStudent:[], selectedFeeTemplate:[], showFeeTemplate:false},
 
        ()=>{console.log("in Class change: "+this.state.class);
 
@@ -229,7 +282,7 @@ if(!e.target.value)
 if(e)
      { console.log("In Student "+(e.value));
 
-this.setState({selectedStudent:e},()=>{
+this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},()=>{
 
   axios
   .post("http://localhost:8001/api/selectfeeTemplate", this.state)
@@ -250,14 +303,19 @@ this.setState({selectedStudent:e},()=>{
 
       else if (result.data.error) {
 
-          return this.setState({error:result.data.error.message});
+         this.setState({error:result.data.error.message});
       }
 
 
 
 
 
-});})
+});
+
+
+
+
+})
 
 
 
@@ -270,35 +328,69 @@ this.setState({selectedStudent:e},()=>{
       if(e)
            { console.log("In Fee Template "+(e.value));
 
-      this.setState({selectedFeeTemplate:e},()=>{
+this.setState({selectedFeeTemplate:e, showMonth:false, showQuarter:false, showHalfYearly:false},()=>{
 
-        axios
-        .post("http://localhost:8001/api/getfeeTemplate", this.state)
-        .then(result => {
-            console.log("result.data " + JSON.stringify(result.data));
+  axios
+  .post("http://localhost:8001/api/getfeeTemplate", this.state)
+  .then(result => {
+      console.log("result.data " + JSON.stringify(result.data));
 
-            if (result.data.length>0) {
-              var temp=[];
-             for(var i=0;i<result.data.length;i++)
-             {
-              temp.push({"value":result.data[i],
-              "label":result.data[i]
-             });
+      if (result.data.error) {
+        return this.setState({error:result.data.error.message});
+    }
 
-            }
-              this.setState({feeTemplates:temp});
-            }
-
-            else if (result.data.error) {
-
-                return this.setState({error:result.data.error.message});
-            }
+var tempAmount=0;
+for(var i=0;i<result.data.templateRows.length;i++)
+tempAmount=tempAmount+parseInt(result.data.templateRows[i].amount);
 
 
 
 
+if(result.data.templateType==="Monthly")
+  this.setState({showMonth:true})
+  else if(result.data.templateType==="Quarterly")
+  this.setState({showQuarter:true})
+  else if(result.data.templateType==="Half Yearly")
+  this.setState({showHalfYearly:true})
 
-      });})
+
+        this.setState({templateRows:result.data.templateRows,showFeeTemplate:true,
+                            templateType:result.data.templateType, totalAmount:tempAmount});
+
+
+
+
+
+
+
+
+
+});
+
+axios
+.post("http://localhost:8001/api/getpendingFeeAmount", this.state)
+.then(result => {
+    console.log("result.data " + JSON.stringify(result.data));
+
+    if (result.data.error) {
+      return this.setState({error:result.data.error.message});
+  }
+
+
+      this.setState({pastPendingDue:result.data});
+
+
+
+
+
+
+
+
+
+});
+
+})
+
 
 
 
@@ -441,8 +533,161 @@ this.setState({selectedStudent:e},()=>{
                             onChange={this.feeTemplateSelectHandler}
                             />
 
-<Card><CardBody>
-<Table bordered hover>
+
+  <br/>
+
+  {this.state.showFeeTemplate&& <p>
+
+    <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Template Type</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="templateType"
+                              id="templateType"
+                              value={this.state.templateType}
+                            disabled
+
+
+
+                            />
+                          </InputGroup>
+
+    <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Year</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="year"
+                              id="year"
+                              value={this.state.year}
+                              onChange={e => {this.setState({year:e.target.value})}}
+
+
+
+
+                            />
+                          </InputGroup>
+                          {this.state.yearError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.yearError}</p>
+                              </font>
+                            )}
+
+
+
+{this.state.showMonth&&
+                          <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                               <b>  Month</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="month"
+                                id="month"
+                                type="select"
+                                value={this.state.month}
+                                onChange={e=>{this.setState({month:e.target.value})}}
+                              >
+                                <option value="">Select Month</option>
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <option value="March">March</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="July">July</option>
+                                <option value="August">August</option>
+                                <option value="September">September</option>
+                                <option value="October">October</option>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                                   </Input>
+                                   {this.state.monthError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.monthError}</p>
+                              </font>
+                            )}
+                            </InputGroup>
+
+
+
+
+                          }
+
+{this.state.showQuarter&&
+  <InputGroup className="mb-3">
+      <InputGroupAddon addonType="prepend">
+        <InputGroupText style={{ width: "120px" }}>
+       <b>  Quarter</b>
+        </InputGroupText>
+      </InputGroupAddon>
+      <Input
+        name="quarter"
+        id="quarter"
+        type="select"
+        value={this.state.quarter}
+        onChange={e=>{this.setState({quarter:e.target.value})}}
+      >
+        <option value="">Select Quarter</option>
+        <option value="Apr-Jun">Apr-Jun</option>
+        <option value="Jul-Sep">Jul-Sep</option>
+        <option value="Oct-Dec">Oct-Dec</option>
+        <option value="Jan-Mar">Jan-Mar</option>
+
+           </Input>
+
+           {this.state.quarterError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.quarterError}</p>
+                              </font>
+                            )}
+    </InputGroup>}
+
+    {this.state.showHalfYearly&&
+  <InputGroup className="mb-3">
+      <InputGroupAddon addonType="prepend">
+        <InputGroupText style={{ width: "120px" }}>
+       <b>  Half Year</b>
+        </InputGroupText>
+      </InputGroupAddon>
+      <Input
+        name="halfYear"
+        id="halfYear"
+        type="select"
+        value={this.state.halfYear}
+        onChange={e=>{this.setState({halfYear:e.target.value})}}
+      >
+        <option value="">Select Half Year</option>
+        <option value="Apr-Sep">Apr-Sep</option>
+        <option value="Oct-Mar">Oct-Mar</option>
+
+
+           </Input>
+
+           {this.state.halfYearError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.halfYearError}</p>
+                              </font>
+                            )}
+    </InputGroup>}
+
+
+<Table bordered hover
+>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
                                 <th className="text-center">
@@ -455,14 +700,11 @@ this.setState({selectedStudent:e},()=>{
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
-                                <th className="text-center">
 
-
-                                </th>
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.editRows.map((item, idx) => (
+                              {this.state.templateRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
@@ -472,12 +714,13 @@ this.setState({selectedStudent:e},()=>{
                                       <Input
                                         type="text"
                                         name="feeType"
-                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
-                                           + this.state.editRows[idx].feeType.slice(1)}
+                                        value={this.state.templateRows[idx].feeType.charAt(0).toUpperCase()
+                                           + this.state.templateRows[idx].feeType.slice(1)}
 
                                         className="form-control"
                                         size="lg"
                                         id="feeType"
+                                        disabled
                                       />
                                     </InputGroup>
                                   </td>
@@ -487,29 +730,209 @@ this.setState({selectedStudent:e},()=>{
                                         name="amount"
                                         type="number"
                                         className="form-control"
-                                        value={this.state.editRows[idx].amount}
-                                        onChange={this.handleEditChange(idx)}
+                                        value={this.state.templateRows[idx].amount}
+
                                         id="amount"
                                         size="lg"
+                                        disabled
                                       />
                                     </InputGroup>
                                   </td>
-                                  <td align="center">
-                                    <Button
-                                      className="btn btn-danger btn-sg"
-                                      onClick={this.handleEditRemoveSpecificRow(
-                                        idx
-                                      )}
-                                      size="lg"
-                                    >
-                                      Remove
-                                </Button>
-                                  </td>
+
                                 </tr>
                               ))}
                             </tbody>
                           </Table>
-  </CardBody></Card>
+
+                        <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Fee Amount(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="totalAmount"
+                              id="totalAmount"
+                              value={this.state.totalAmount}
+                            disabled
+
+
+
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Late Fee Fine(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             name="lateFeeFine"
+                              id="lateFeeFine"
+                              value={this.state.lateFeeFine}
+                              onChange={e=>{this.setState({lateFeeFine:e.target.value})}}
+
+
+
+                            />
+   </InputGroup>
+
+
+
+   <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Past Due Amount(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             name="pastPendingDue"
+                              id="pastPendingDue"
+                              value={this.state.pastPendingDue}
+                              onChange={e=>{this.setState({pastPendingDue:e.target.value})}}
+
+
+
+                            />
+                          </InputGroup>
+
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Due Amount(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="totalDueAmount"
+                              id="totalDueAmount"
+                              value={
+                              ( parseInt(this.state.totalAmount)+(parseInt(this.state.pastPendingDue)||0)+
+                                (parseInt(this.state.lateFeeFine)||0))-(parseInt(this.state.paidAmount)||0)
+                             }
+                              disabled
+
+
+                            />
+                          </InputGroup>
+
+
+
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Paid Fee Amount (Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             name="paidAmount"
+                              id="paidAmount"
+                              value={this.state.paidAmount}
+                              onChange={e=>{this.setState({paidAmount:e.target.value})}}
+
+                           />
+                             {this.state.paidAmountError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.paidAmountError}</p>
+                              </font>
+                            )}
+                          </InputGroup>
+
+
+
+                          <InputGroup className="mb-2">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b>  Date of Submission</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="doj"
+                                id="doj"
+                                value={this.state.dos}
+                                onChange={date=>{this.setState({dos:date})}}
+                              />
+                              {this.state.dosError &&(
+                                <font color="red">
+                                  {" "}
+                                  <p>{this.state.dosError}</p>
+                                </font>
+                              )}
+
+                            </InputGroup>
+
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Remarks</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="textarea"
+                              size="lg"
+                             name="remarks"
+                              id="remarks"
+                              value={this.state.remarks}
+                              onChange={e=>{this.setState({remarks:e.target.value})}}
+
+
+
+
+                            />
+                          </InputGroup>
+
+<br/> <Row>
+                            <Col>
+                              <Button
+                                onClick={this.feeSubmitHandler}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                                Submit
+                              </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={() => {
+                                  this.setState({
+                                    showFeeTemplate: false,
+selectedFeeTemplate:[],
+selectedStudent:[],
+class:"",
+
+                                    templateRows: []
+                                  });
+                                }}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                                Cancel
+                              </Button>
+                            </Col>
+                          </Row>
+
+                          </p>
+                        }
+
 
 
 <br/>

@@ -158,6 +158,14 @@ var StudentSchema = new Schema({
     required: true,
     trim:true
   },
+
+
+  pendingFeeAmount: {
+    type: String,
+    trim:true,
+    default:0
+  },
+
   section: {
     type: String,
     required: true,

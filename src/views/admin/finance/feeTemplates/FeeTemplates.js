@@ -225,11 +225,7 @@ templateType:""
                 rowError:""
 
               });
-              else    if (result.data.msg === "already exist")
 
-                this.setState({
-                  templateNameError: "Template Name already exists! Use another Template Name"
-                });
             this.getExistingTemplates();
           });
       }
@@ -282,13 +278,13 @@ templateType:""
           .post("http://localhost:8001/api/copyFeeTemplate", this.state)
           .then(result => {
             console.log("COPY RESULT.data " + JSON.stringify(result.data));
-            if(result.data.errors)
-            if (result.data.errors.templateName)
-              this.setState({
-                templateNameError: "Template Name already exists! Use another Template Name"
-              });
+                if (result.data.msg === "already exist")
 
-            if (result.data.msg === "Template Copied")
+            this.setState({
+              templateNameError: "Template Name already exists! Use another Template Name"
+            });
+
+           else if (result.data.msg === "Template Copied")
               this.setState({
                 success: true,
                 modalSuccess: true,
