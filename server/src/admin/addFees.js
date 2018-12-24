@@ -87,7 +87,7 @@ async function getpendingFeeAmount(req,res)
 
 
 Student
-      .findOne({username:req.body.selectedStudent.value})
+      .findOne({username:req.body.username})
       .then(data => {
         //console.log("Student Result: "+JSON.stringify(data))
           return res.send(data.pendingFeeAmount);
@@ -138,16 +138,18 @@ function feeSubmit(req,res)
 
 function getStudentByRollNo(req,res)
 
-{ console.log("In getStudentByRollNo: "+JSON.stringify(req.body));
+{ console.log("In getStudentByRollNo: "+req.body.rollNo);
 
   Student
   .findOne({rollno:req.body.rollNo})
   .then(data => {
     //console.log("Student Result: "+JSON.stringify(data))
-      return res.send(data);
+      return res.send({"firstname":data.firstname,"lastname":data.lastname, 
+      "username":data.username, "feeTemplate":data.feeTemplate, "class":data.class, "section":data.section
+    });
   })
-  .catch(err => {
-    return res.send({error:err});
+  .catch(err => {console.log("Error"+err);
+    return res.send({error:"Not Found"});
   });
 }
 
