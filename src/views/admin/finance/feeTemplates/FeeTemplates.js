@@ -567,6 +567,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         value={this.state.rows[idx].feeType}
                                         onChange={this.handleChange(idx)}
                                         className="form-control"
+                                        style={{textAlign:'center'}}
                                         size="lg"
                                         id="feeType"
                                       />
@@ -580,6 +581,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         className="form-control"
                                         value={this.state.rows[idx].amount}
                                         onChange={this.handleChange(idx)}
+                                        style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
                                       />
@@ -776,6 +778,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
                                            + this.state.editRows[idx].feeType.slice(1)}
                                         onChange={this.handleEditChange(idx)}
+                                        style={{textAlign:'center'}}
                                         className="form-control"
                                         size="lg"
                                         id="feeType"
@@ -790,6 +793,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         className="form-control"
                                         value={this.state.editRows[idx].amount}
                                         onChange={this.handleEditChange(idx)}
+                                        style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
                                       />
@@ -984,6 +988,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         className="form-control"
                                         size="lg"
                                         id="feeType"
+                                        style={{textAlign:'center'}}
                                       />
                                     </InputGroup>
                                   </td>
@@ -997,6 +1002,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         onChange={this.handleEditChange(idx)}
                                         id="amount"
                                         size="lg"
+                                        style={{textAlign:'center'}}
                                       />
                                     </InputGroup>
                                   </td>

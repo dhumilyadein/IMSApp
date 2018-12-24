@@ -24,7 +24,7 @@ var FeeRecordSchema = new Schema({
     trim:true
   },
 
-  StudentDetails: {
+  studentDetails: {
     type: Array,
     required: true,
     name:{
@@ -80,6 +80,11 @@ templateName:{ type:String,
 
        required: true},
 
+       totalFeeAmount:{ type:String,
+        trim:true,
+
+       required: true},
+
        paidAmount:{ type:String,
         trim:true,
        required: true},
@@ -91,6 +96,7 @@ templateName:{ type:String,
       dos:{ type:Date,
         trim:true,
        required: true},
+
 
 
 

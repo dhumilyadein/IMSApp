@@ -26,6 +26,9 @@ import {
     InputGroupText,
     Label,
     Row,
+    Modal,
+    ModalHeader,
+
     Table,
     TabContent, TabPane, Nav, NavItem, NavLink,   CardTitle, CardText
 } from 'reactstrap';
@@ -44,6 +47,7 @@ class AddFees extends Component {
 class:"",
 section:"",
 classError:"",
+showSearchButton:true,
             studentResults: [],
             studentOpen:true,
 
@@ -66,7 +70,7 @@ totalDueAmount:"",
 lateFeeFine:"0",
 paidAmount:"",
 pastPendingDue:"",
-paidAmount:"0",
+paidAmount:"",
 remarks:"",
 dos:Date.now(),
 yearError:"",
@@ -74,36 +78,61 @@ quarterError:"",
 halfYearError:"",
 monthError:"",
 paidAmountError:"",
-dosError:""
+dosError:"",
+sectionError:"",
+modalSuccess:false,
+success:false,
+studentName:"",
+rollNo:""
 
         };
 
 
-        this.resetForm = this.resetForm.bind(this);
         this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
          this.feeSubmitHandler = this.feeSubmitHandler.bind(this);
          this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
          this.toggle = this.toggle.bind(this);
          this.feeTemplateSelectHandler = this.feeTemplateSelectHandler.bind(this);
-
+         this.toggleSuccess = this.toggleSuccess.bind(this);
+         this.getStudentByRollNo = this.getStudentByRollNo.bind(this);
 
 
     }
 
+    getStudentByRollNo()
+        {
+console.log("In GetBy RollNo: ", this.state.rollNo);
+var submit=true;
 
-    resetForm = (e) => {
-        this.setState({
-            username: "",
-            email: "",
-            firstname: "",
-            lastname: "",
-            password: "",
-            password_con: "",
-            errors: null
-        });
+if(!this.rollNo)
+{this.setState({rollNoError:"Please Enter Roll Number"})
+submit=false}
 
-    }
+if(submit)
+
+{
+  axios
+  .post("http://localhost:8001/api/getStudentByRollNo", this.state.rollNo)
+  .then(result => {
+      console.log(" Roll no result.data " + JSON.stringify(result.data));
+
+      if (result.data) {
+
+      }
+
+      else if (result.data.errors) {
+
+        return this.setState({error:result.data.errors});
+      }
+
+
+  });
+
+}
+
+        }
+
     toggle(tab) {
       if (this.state.activeTab !== tab) {
         this.setState({
@@ -112,29 +141,36 @@ dosError:""
       }
     }
 
-
+    toggleSuccess() {
+      this.setState({
+        modalSuccess: !this.state.modalSuccess
+      });
+    }
     feeSubmitHandler(e){
       e.preventDefault();
 console.log("In FeeSubmit:"+ JSON.stringify(this.state));
 var submit=true;
 
-if(!this.state.year)
+this.setState({yearError:"", quarterError:"",monthError:"",halfYearError:"",paidAmountError:"",sectionError:"", error:"", success: false,
+modalSuccess: false})
+
+if(!this.state.year||this.state.year.length!=9)
 {
-this.setState({yearError:"Please Enter Year (Eg. 2018-19)"})
+this.setState({yearError:"Please Enter Year correctly (Eg. 2018-19)"});
 submit=false;
 
 }
 if(this.state.templateType==="Monthly")
 if(!this.state.month)
 {
-this.setState({monthError:"Please Select month"})
+this.setState({monthError:"Please Select month"});
 submit=false;
 
 }
 if(this.state.templateType==="Quarterly")
 if(!this.state.quarter)
 {
-this.setState({quarterError:"Please Select Quarter"})
+this.setState({quarterError:"Please Select Quarter"});
 submit=false;
 
 }
@@ -142,25 +178,70 @@ submit=false;
 if(this.state.templateType==="Half Yearly")
 if(!this.state.halfYear)
 {
-this.setState({halfYearError:"Please Select Half Year"})
+this.setState({halfYearError:"Please Select Half Year"});
 submit=false;
 
 }
 
 if(!this.state.paidAmount)
 {
-  this.setState({paidAmountError:"Please Enter Paid Amount"})
+  this.setState({paidAmountError:"Please Enter Paid Amount"});
+  submit=false;
+
+  }
+
+  if(!this.state.section)
+{
+  this.setState({sectionError:"Please Select Section"});
   submit=false;
 
   }
 
   if(!this.state.dos)
 {
-  this.setState({dos:"Please Enter Date of Submission"})
+  this.setState({dosError:"Please Enter Date of Submission"});
   submit=false;
 
   }
 
+  if(submit)
+  { this.setState({totalDueAmount:document.getElementById("totalDueAmount").value,
+                    studentName:this.state.selectedStudent.label},()=>{
+
+    axios
+    .post("http://localhost:8001/api/feeSubmit", this.state)
+    .then(result => {
+        console.log("result.data " + JSON.stringify(result.data));
+
+        if (result.data.msg === "Success")
+              this.setState({
+
+                success: true,
+                modalSuccess: true,
+                class:"",
+                section:"",
+                selectedStudent:[],
+                selectedFeeTemplate:[],
+                showFeeTemplate:false,
+                paidAmount:"",
+                feeTemplates:[],
+                studentResults: [],
+
+
+
+              });
+
+              else if (result.data.error) {
+
+                return this.setState({error:result.data.error});
+            }
+
+
+    });
+  })
+
+
+  }
 
 
 
@@ -213,8 +294,10 @@ if(!this.state.paidAmount)
 
     sectionChangeHandler(e) {
       console.log("in section change: "+e.target.value);
+      this.setState({selectedStudent:[]});
 if(!this.state.class)
 {this.setState({classError:"Please select Class first"});
+
 return;}
 
 if(!e.target.value)
@@ -436,6 +519,17 @@ axios
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="1">
             <Row>
+            {this.state.success && (
+                    <Modal
+                      isOpen={this.state.modalSuccess}
+                      className={"modal-success " + this.props.className}
+                      toggle={this.toggleSuccess}
+                    >
+                      <ModalHeader toggle={this.toggleSuccess}>
+                        Student: {this.state.studentName}'s Fee Submitted Successfully!
+                      </ModalHeader>
+                    </Modal>
+                  )}
               <Col sm="12">
               <Card className="mx-5">
                           <CardBody className="p-1">
@@ -500,10 +594,15 @@ axios
 
                                    </Input>
                             </InputGroup>
+                            {this.state.sectionError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.sectionError}</p>
+                              </font>
+                            )}
 
 
-
-                            <Select
+                     <Select
                             id="studentSelect"
                             name="studentSelect"
 
@@ -585,7 +684,7 @@ axios
 
 
 
-{this.state.showMonth&&
+{this.state.showMonth&&(<p>
                           <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
@@ -613,20 +712,26 @@ axios
                                 <option value="November">November</option>
                                 <option value="December">December</option>
                                    </Input>
-                                   {this.state.monthError &&(
+
+                            </InputGroup>
+                            {this.state.monthError &&(
                               <font color="red">
                                 {" "}
                                 <p>{this.state.monthError}</p>
                               </font>
                             )}
-                            </InputGroup>
+                            </p>
+
+
+                            )
+
 
 
 
 
                           }
 
-{this.state.showQuarter&&
+{this.state.showQuarter&& <p>
   <InputGroup className="mb-3">
       <InputGroupAddon addonType="prepend">
         <InputGroupText style={{ width: "120px" }}>
@@ -648,15 +753,17 @@ axios
 
            </Input>
 
-           {this.state.quarterError &&(
+
+    </InputGroup>
+    {this.state.quarterError &&(
                               <font color="red">
                                 {" "}
                                 <p>{this.state.quarterError}</p>
                               </font>
                             )}
-    </InputGroup>}
+    </p>}
 
-    {this.state.showHalfYearly&&
+    {this.state.showHalfYearly&& <p>
   <InputGroup className="mb-3">
       <InputGroupAddon addonType="prepend">
         <InputGroupText style={{ width: "120px" }}>
@@ -677,13 +784,15 @@ axios
 
            </Input>
 
-           {this.state.halfYearError &&(
+
+    </InputGroup>
+    {this.state.halfYearError &&(
                               <font color="red">
                                 {" "}
                                 <p>{this.state.halfYearError}</p>
                               </font>
                             )}
-    </InputGroup>}
+    </p>}
 
 
 <Table bordered hover
@@ -709,7 +818,7 @@ axios
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
-                                  <td>
+                                  <td align="center">
                                     <InputGroup className="mb-3">
                                       <Input
                                         type="text"
@@ -721,17 +830,18 @@ axios
                                         size="lg"
                                         id="feeType"
                                         disabled
+                                       style={{textAlign:'center'}}
                                       />
                                     </InputGroup>
                                   </td>
-                                  <td>
+                                  <td align="center">
                                     <InputGroup className="mb-3">
                                       <Input
                                         name="amount"
                                         type="number"
                                         className="form-control"
                                         value={this.state.templateRows[idx].amount}
-
+                                        style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
                                         disabled
@@ -842,15 +952,15 @@ axios
                               onChange={e=>{this.setState({paidAmount:e.target.value})}}
 
                            />
-                             {this.state.paidAmountError &&(
+
+                          </InputGroup>
+
+                          {this.state.paidAmountError &&(
                               <font color="red">
                                 {" "}
                                 <p>{this.state.paidAmountError}</p>
                               </font>
                             )}
-                          </InputGroup>
-
-
 
                           <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
@@ -867,15 +977,15 @@ axios
                                 value={this.state.dos}
                                 onChange={date=>{this.setState({dos:date})}}
                               />
-                              {this.state.dosError &&(
+
+
+                            </InputGroup>
+                            {this.state.dosError &&(
                                 <font color="red">
                                   {" "}
                                   <p>{this.state.dosError}</p>
                                 </font>
                               )}
-
-                            </InputGroup>
-
 
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
@@ -936,12 +1046,13 @@ class:"",
 
 
 <br/>
-{this.state.error &&(
+
+{this.state.error &&
                               <font color="red">
                                 {" "}
                                 <p>{this.state.error}</p>
                               </font>
-                            )}
+                            }
 
 </CardBody></Card>
               </Col>
@@ -966,21 +1077,31 @@ class:"",
                                       type="text"
                                       name="rollno"
                                       id="rollno"
-                                      value={this.state.rollno}
+                                      value={this.state.rollNo}
                                       autoComplete="rollno"
-                                      onChange={this.changeHandler}
+                                      onChange={e=>{this.setState({rollNo:e.target.value})}}
                                     />
                                   </InputGroup>
+                                  {this.state.rollNoError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.rollNoError} </p>
+                              </h6>{" "}
+                            </font>)}
 
-                                  <Button
+
+                   {  this.showSearchButton &&       (      <Button
                           type="submit"
-                         // onClick={this.submitHandler}
+                          onClick={this.getStudentByRollNo}
                           block
                           color="success"
                         >
                           {" "}
                            <h4>  Search</h4>
                         </Button>
+                    ) }
+
 
                         </CardBody></Card>
 
