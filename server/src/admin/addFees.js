@@ -103,12 +103,12 @@ Student
 
 function feeSubmit(req,res)
 {
-  console.log("in Fee Submit: "+JSON.stringify(req.body));
+  console.log("in Fee Submit: "+JSON.stringify(req.body.totalDueAmount));
 
   var tempStudentDetails=[{"name":req.body.selectedStudent.label.substr(0,req.body.selectedStudent.label.indexOf("(")).trim(),
                             "username":req.body.selectedStudent.value}];
 
-                            console.log("in Fee Submit: "+JSON.stringify(tempStudentDetails));
+                           // console.log("in Fee Submit: "+JSON.stringify(tempStudentDetails));
 
   var template = {
     "templateName": req.body.selectedFeeTemplate.value,  "templateRows": req.body.rows,
@@ -122,6 +122,52 @@ function feeSubmit(req,res)
 
 
   };
+
+  if(parseInt(req.body.totalDueAmount)>0)
+
+  {
+    Student
+    .updateOne({username:req.body.selectedStudent.value},
+      {$set: {pendingFeeAmount:req.body.totalDueAmount,
+             
+    
+      }}
+      )
+    .then(data => {
+      var addFee = new FeeRecord(template);
+
+      addFee
+     .save()
+     .then(user => {
+         return res.send({msg:"Success",pendingAmount:"Updated"});
+     })
+     .catch(err => {
+       return res.send({error:err});
+     });
+    
+    })
+    .catch(err => {
+     res.send({error:err});
+    });
+    
+
+
+  }
+else{
+  Student
+  .updateOne({username:req.body.selectedStudent.value},
+    {$set: {pendingFeeAmount:req.body.totalDueAmount,
+           
+  
+    }}
+    )
+    .then(user => {
+     console.log("Pending amount 0 updated");
+  })
+  .catch(err => {
+    console.log("Pending amount error 0");  });
+
+
   var addFee = new FeeRecord(template);
 
      addFee
@@ -132,7 +178,7 @@ function feeSubmit(req,res)
     .catch(err => {
       return res.send({error:err});
     });
-
+  }
 
 }
 

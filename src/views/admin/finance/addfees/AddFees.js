@@ -181,14 +181,14 @@ if(submit)
           studentName:  result.data.firstname.charAt(0).toUpperCase() + result.data.firstname.slice(1)+ " "+
           result.data.lastname.charAt(0).toUpperCase() + result.data.lastname.slice(1)+ " ("+result.data.username+")",
           class:result.data.class, section:result.data.section, selectedFeeTemplate:[], 
-          selectedStudent:{"value":result.data.username, "lable":result.data.firstname.charAt(0).toUpperCase() + result.data.firstname.slice(1)+ " "+
+          selectedStudent:{"value":result.data.username, "label":result.data.firstname.charAt(0).toUpperCase() + result.data.firstname.slice(1)+ " "+
           result.data.lastname.charAt(0).toUpperCase() + result.data.lastname.slice(1)+ " ("+result.data.username+")"}
 
       });}
 
       else if (result.data.error) {
 
-        return this.setState({error:"Roll Number not Found!"});
+        return this.setState({error:"Roll Number not Found!",showRollFeeTemplate:false});
       }
 
 
@@ -287,12 +287,18 @@ if(!this.state.paidAmount)
                 modalSuccess: true,
                 class:"",
                 section:"",
-                selectedStudent:[],
+                
                 selectedFeeTemplate:[],
                 showFeeTemplate:false,
                 paidAmount:"",
-                feeTemplates:[],
+               
                 studentResults: [],
+               
+               
+                halfYear:"",
+                remarks:"",
+                quarter:"",
+                month:""
 
 
 
