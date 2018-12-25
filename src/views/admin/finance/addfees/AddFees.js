@@ -207,9 +207,11 @@ if(submit)
     }
 
     toggleSuccess() {
+
       this.setState({
         modalSuccess: !this.state.modalSuccess
       });
+      this.reset();
     }
 
 
@@ -1099,9 +1101,10 @@ axios
                                     showFeeTemplate: false,
 selectedFeeTemplate:[],
 selectedStudent:[],
-class:"",
+class:"",section:"",
 
-                                    templateRows: []
+                                    templateRows: [],
+                                    showRollFeeTemplate:false
                                   });
                                 }}
                                 size="lg"
