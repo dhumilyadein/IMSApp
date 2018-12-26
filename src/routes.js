@@ -174,7 +174,12 @@ const Widgets = Loadable({
 
 // IMS app changes
 const AddFees = Loadable({
-  loader: () => import("./views/admin/finance/addfees/AddFees"),
+  loader: () => import("./views/admin/finance/addFees/AddFees"),
+  loading: Loading
+});
+
+const ViewFees = Loadable({
+  loader: () => import("./views/admin/finance/viewFees/ViewFees"),
   loading: Loading
 });
 
@@ -236,17 +241,21 @@ const routes = [
     component: ImportUser
   },
   {
-    path: "/admin/finance/addfees",
+    path: "/admin/finance/addFees",
     exact: true,
     name: "Add Fees",
     component: AddFees
   },
+
   {
-    path: "/admin/finance/addfees/:username",
+    path: "/admin/finance/viewFees",
     exact: true,
-    name: "Add Fees",
-    component: AddFees
+    name: "View Fees",
+    component: ViewFees
   },
+
+
+
   {
     path: "/admin/finance/FeeTemplates",
     name: "Fee Templates",

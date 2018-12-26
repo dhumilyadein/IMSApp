@@ -62,6 +62,11 @@ export default {
       icon: 'fa fa-money',
     },
     {
+      name: 'View Fees',
+      url: '/admin/finance/ViewFees',
+      icon: 'fa fa-money',
+    },
+    {
       name: 'Fee Templates ',
       url: '/admin/finance/FeeTemplates',
       icon: 'fa fa-money',
