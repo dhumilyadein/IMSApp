@@ -60,7 +60,6 @@ class UserDetails extends Component {
       studentRegSuccess: false,
 
       empRegSuccess: false,
-      modalSuccess: true,
       employeeno: "",
       errors: null,
       importErrors: null,
@@ -73,7 +72,6 @@ class UserDetails extends Component {
         parentChecked: false
       },
       visible: true,
-      modalSuccess: true,
       parentfirstname: "",
       parentlastname: "",
       parentrelation: "",
@@ -131,18 +129,25 @@ class UserDetails extends Component {
       fetchedParentDetail: {},
 
       // For hiding fields which are meant to be displayed only in "edit" mode, fields like password, confirm password, roles, etc.
-      screenmode: "display" // {"dispaly", "edit"}
+      screenmode: "display", // {"dispaly", "edit"}
+
+      // UserDetailsUpdate Modal will be displayed if this flag is true
+      userDetailsUpdatedFlag: false
 
     };
 
     this.changeHandler = this.changeHandler.bind(this);
-    this.toggleSuccess = this.toggleSuccess.bind(this);
+    this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
     this.toggle = this.toggle.bind(this);
     this.fetchUserDataOnPageLoad = this.fetchUserDataOnPageLoad.bind(this);
     this.mapStudentResponseToState = this.mapStudentResponseToState.bind(this);
+    this.switchToEditMode = this.switchToEditMode.bind(this);
+    this.updateUserDetails = this.updateUserDetails.bind(this);
+    this.copyAddress = this.copyAddress.bind(this);
+    this.switchToDisplayMode = this.switchToDisplayMode.bind(this);
 
+    // Fetching data from Mongo on page load
     this.fetchUserDataOnPageLoad();
-
   }
 
   /**
@@ -239,7 +244,7 @@ class UserDetails extends Component {
       email: studentData.email,
       firstname: studentData.firstname,
       lastname: studentData.lastname,
-      password: studentData.password,
+      //password: studentData.password,
       parentfirstname: studentData.parentfirstname,
       parentlastname: studentData.parentlastname,
       parentusername: studentData.parentusername,
@@ -265,7 +270,8 @@ class UserDetails extends Component {
     });
 
 
-    console.log("student details - " + studentData.username + " " + this.state.firstname + " "
+    console.log("student details username - " + studentData.username + " password - "
+      + studentData.password + " " + this.state.firstname + " "
       + this.state.lastname + " " + this.state.dob + " " + this.state.doj + " " + this.state.parentusername
       + " " + this.state.gender + " " + this.state.parentfirstname + " " + this.state.address + " " + this.state.city
       + " student photo - " + JSON.stringify(studentData.photo));
@@ -296,9 +302,54 @@ class UserDetails extends Component {
     console.log("Parent details - " + parentData.parentusername);
   }
 
-  toggleSuccess() {
+  switchToEditMode() {
+
     this.setState({
-      modalSuccess: !this.state.modalSuccess
+      editMode: "",
+    });
+    this.setState({
+      screenmode: "edit",
+    });
+  }
+
+  switchToDisplayMode() {
+
+    this.setState({
+      editMode: "disabled",
+    });
+    this.setState({
+      screenmode: "display",
+    });
+  }
+
+  async updateUserDetails() {
+
+    var updateUserDetailsRequest = this.state;
+
+    console.log("UserDetails - updateUserDetails - updateUserDetailsRequest - "
+      + JSON.stringify(updateUserDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/updateUserDetails", updateUserDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        console.log('Updating user details in the Database');
+        this.setState({
+          userDetailsUpdatedFlag: true
+        });
+
+        //Switching mode after updating the details
+        this.switchToDisplayMode();
+      }
+    });
+
+  }
+
+  toggleModalSuccess() {
+    this.setState({
+      userDetailsUpdatedFlag: !this.state.userDetailsUpdatedFlag
     });
   }
 
@@ -321,36 +372,78 @@ class UserDetails extends Component {
       });
   }
 
+  /**
+   * Auto copy parent address if the 'Address is same' check box slelected
+   **/
+  copyAddress(e) {
+    if (e.target.checked === true) {
+      console.log("address check true: " + e.target.checked);
+      this.setState({
+        parentaddress: this.state.address,
+        parentcity: this.state.city,
+        parentpostalcode: this.state.postalcode,
+        parentstate: this.state.state,
+        parentaddresscheck: true
+      });
+    } else if (e.target.checked === false) {
+      console.log("address check false: " + e.target.checked);
+      this.setState({
+        parentaddress: this.state.parentaddress,
+        parentcity: this.state.parentcity,
+        parentpostalcode: this.state.parentpostalcode,
+        parentstate: this.state.parentstate,
+        parentaddresscheck: false
+      });
+    }
+  }
+
   render() {
 
     let imgSource = null;
-    if(this.state.username) {
-        imgSource = imageContext(`./${this.state.username}.jpg`);
+    if (this.state.username) {
+      imgSource = imageContext(`./${this.state.username}.jpg`);
     }
 
     return (
       <div style={{ width: "1000px" }}>
 
         <Container style={{ width: "2500px" }}>
-          <Row lg="4" style={{ width: "2500px" }}>
-            <Col md="7">
 
-              <Card className="mx-4">
-                <CardBody className="p-2">
+          {this.state.userDetailsUpdatedFlag && (
+            <Modal
+              isOpen={this.state.userDetailsUpdatedFlag}
+              className={"modal-success " + this.props.className}
+              toggle={this.toggleModalSuccess}
+            >
+              <ModalHeader
+                toggle={this.toggleModalSuccess}
+              >
+                {"User ("}{this.state.username}{") details updated successfully!"}
+              </ModalHeader>
+            </Modal>
+          )}
 
-                  <Button
-                    type="submit"
-                    onClick={this.submitHandler}
-                    block
-                    color="success"
-                  >
-                    {" "}
-                    Edit
+          {this.state.screenmode && this.state.screenmode == 'display' && (
+            <Row lg="4" style={{ width: "2500px" }}>
+              <Col md="7">
+
+                <Card className="mx-4">
+                  <CardBody className="p-2">
+
+                    <Button
+                      type="submit"
+                      onClick={this.switchToEditMode}
+                      block
+                      color="success"
+                    >
+                      {" "}
+                      Edit
                         </Button>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          )}
 
           <Row lg="4" style={{ width: "2500px" }}>
             <Col xs="12" md="7" className="mb-4">
@@ -400,37 +493,6 @@ class UserDetails extends Component {
                       <Card className="mx-4">
                         <CardBody className="p-2">
                           <Form>
-
-                            {this.state.studentRegSuccess && (
-                              <Modal
-                                isOpen={this.state.modalSuccess}
-                                className={"modal-success " + this.props.className}
-                                toggle={this.toggleSuccess}
-                              >
-                                <ModalHeader toggle={this.toggleSuccess}>
-                                  Student: {this.state.userdata.firstname}{" "}
-                                  {this.state.userdata.lastname}{" "}
-                                  and Parent: {this.state.userdata.parentfirstname}{" "}
-                                  {this.state.userdata.parentlastname} Registered
-                                  Successfully!
-                        </ModalHeader>
-                              </Modal>
-                            )}
-
-
-                            {this.state.empRegSuccess && (
-                              <Modal
-                                isOpen={this.state.modalSuccess}
-                                className={"modal-success " + this.props.className}
-                                toggle={this.toggleSuccess}
-                              >
-                                <ModalHeader toggle={this.toggleSuccess}>
-                                  {this.state.userdata.firstname}{" "}
-                                  {this.state.userdata.lastname}{" "}
-                                  Registered Successfully!
-                        </ModalHeader>
-                              </Modal>
-                            )}
 
                             <Row lg="2">
                               <Col>
@@ -795,8 +857,141 @@ class UserDetails extends Component {
 
                                   </CardBody>
                                 </Card>
+
+                                <Card className="mx-1">
+                                  <CardBody className="p-2">
+                                    <h5>Contact Details</h5>
+
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "125px" }}>
+                                          Phone Number
+                                </InputGroupText>
+                                        <ReactPhoneInput
+                                          defaultCountry="in"
+                                          value={this.state.phone}
+                                          name="phone"
+                                          onChange={phone => {
+                                            console.log("phone value: " + phone);
+                                            this.setState({ phone });
+                                          }}
+                                          disabled={this.state.editMode}
+                                          style={whiteTextFieldStyle}
+                                        />
+                                      </InputGroupAddon>
+                                    </InputGroup>
+
+                                    {this.state.errors && this.state.errors.phone && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.phone.msg}</p>
+                                      </font>
+                                    )}
+
+                                    <Card className="mx-1">
+                                      <CardBody className="p-2">
+                                        <b>Address</b>
+                                        <FormGroup>
+                                          <Input
+                                            type="text"
+                                            id="street"
+                                            placeholder="House No, Area"
+                                            name="address"
+                                            value={this.state.address}
+                                            onChange={this.changeHandler}
+                                            disabled={this.state.editMode}
+                                            style={whiteTextFieldStyle}
+                                          />
+                                        </FormGroup>
+                                        {this.state.errors &&
+                                          this.state.errors.address && (
+                                            <font color="red">
+                                              {" "}
+                                              <p>{this.state.errors.address.msg}</p>
+                                            </font>
+                                          )}
+                                        <FormGroup row className="my-0">
+                                          <Col xs="8">
+                                            <FormGroup>
+                                              <Input
+                                                type="text"
+                                                id="city"
+                                                placeholder="City"
+                                                name="city"
+                                                value={this.state.city}
+                                                onChange={this.changeHandler}
+                                                disabled={this.state.editMode}
+                                                style={whiteTextFieldStyle}
+                                              />
+                                            </FormGroup>
+                                            {this.state.errors &&
+                                              this.state.errors.city && (
+                                                <font color="red">
+                                                  {" "}
+                                                  <p>{this.state.errors.city.msg}</p>
+                                                </font>
+                                              )}
+                                          </Col>
+                                          <Col xs="4">
+                                            <FormGroup>
+                                              <Input
+                                                type="text"
+                                                id="postal-code"
+                                                placeholder="Postal Code"
+                                                name="postalcode"
+                                                value={this.state.postalcode}
+                                                onChange={this.changeHandler}
+                                                disabled={this.state.editMode}
+                                                style={whiteTextFieldStyle}
+                                              />
+                                            </FormGroup>
+                                            {this.state.errors &&
+                                              this.state.errors.postalcode && (
+                                                <font color="red">
+                                                  {" "}
+                                                  <p>
+                                                    {this.state.errors.postalcode.msg}
+                                                  </p>
+                                                </font>
+                                              )}
+                                          </Col>
+                                        </FormGroup>
+                                        <FormGroup>
+                                          <Input
+                                            type="text"
+                                            id="statename"
+                                            placeholder="State"
+                                            name="state"
+                                            value={this.state.state}
+                                            onChange={this.changeHandler}
+                                            disabled={this.state.editMode}
+                                            style={whiteTextFieldStyle}
+                                          />
+                                        </FormGroup>
+
+                                        {this.state.errors && this.state.errors.state && (
+                                          <font color="red">
+                                            {" "}
+                                            <p>{this.state.errors.state.msg}</p>
+                                          </font>
+                                        )}
+                                      </CardBody>
+                                    </Card>
+                                  </CardBody>
+                                </Card>
                               </Col>
                               <Col>
+
+                                <Card className="mb-3">
+                                  <CardBody className="p-2">
+                                    {imgSource && (
+                                      <img id="displayImage" src={imgSource} />
+                                    )}
+                                    {/* <img id="displayImage1" src={require('../../../photoTemp/kapil.jpg')} widht="200px" height="200px"/> */}
+
+                                  </CardBody>
+                                </Card>
+
                                 <Card className="mx-1">
                                   <CardBody className="p-2">
                                     <h5>Official Details</h5>
@@ -1090,135 +1285,15 @@ class UserDetails extends Component {
                                       )}
                                   </CardBody>
                                 </Card>
-                                <Card className="mx-1">
-                                  <CardBody className="p-2">
-                                    <h5>Contact Details</h5>
-
-                                    <InputGroup className="mb-3">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "125px" }}>
-                                          Phone Number
-                                </InputGroupText>
-                                        <ReactPhoneInput
-                                          defaultCountry="in"
-                                          value={this.state.phone}
-                                          name="phone"
-                                          onChange={phone => {
-                                            console.log("phone value: " + phone);
-                                            this.setState({ phone });
-                                          }}
-                                          disabled={this.state.editMode}
-                                          style={whiteTextFieldStyle}
-                                        />
-                                      </InputGroupAddon>
-                                    </InputGroup>
-
-                                    {this.state.errors && this.state.errors.phone && (
-                                      <font color="red">
-                                        {" "}
-                                        <p>{this.state.errors.phone.msg}</p>
-                                      </font>
-                                    )}
-
-                                    <Card className="mx-1">
-                                      <CardBody className="p-2">
-                                        <b>Address</b>
-                                        <FormGroup>
-                                          <Input
-                                            type="text"
-                                            id="street"
-                                            placeholder="House No, Area"
-                                            name="address"
-                                            value={this.state.address}
-                                            onChange={this.changeHandler}
-                                            disabled={this.state.editMode}
-                                            style={whiteTextFieldStyle}
-                                          />
-                                        </FormGroup>
-                                        {this.state.errors &&
-                                          this.state.errors.address && (
-                                            <font color="red">
-                                              {" "}
-                                              <p>{this.state.errors.address.msg}</p>
-                                            </font>
-                                          )}
-                                        <FormGroup row className="my-0">
-                                          <Col xs="8">
-                                            <FormGroup>
-                                              <Input
-                                                type="text"
-                                                id="city"
-                                                placeholder="City"
-                                                name="city"
-                                                value={this.state.city}
-                                                onChange={this.changeHandler}
-                                                disabled={this.state.editMode}
-                                                style={whiteTextFieldStyle}
-                                              />
-                                            </FormGroup>
-                                            {this.state.errors &&
-                                              this.state.errors.city && (
-                                                <font color="red">
-                                                  {" "}
-                                                  <p>{this.state.errors.city.msg}</p>
-                                                </font>
-                                              )}
-                                          </Col>
-                                          <Col xs="4">
-                                            <FormGroup>
-                                              <Input
-                                                type="text"
-                                                id="postal-code"
-                                                placeholder="Postal Code"
-                                                name="postalcode"
-                                                value={this.state.postalcode}
-                                                onChange={this.changeHandler}
-                                                disabled={this.state.editMode}
-                                                style={whiteTextFieldStyle}
-                                              />
-                                            </FormGroup>
-                                            {this.state.errors &&
-                                              this.state.errors.postalcode && (
-                                                <font color="red">
-                                                  {" "}
-                                                  <p>
-                                                    {this.state.errors.postalcode.msg}
-                                                  </p>
-                                                </font>
-                                              )}
-                                          </Col>
-                                        </FormGroup>
-                                        <FormGroup>
-                                          <Input
-                                            type="text"
-                                            id="statename"
-                                            placeholder="State"
-                                            name="state"
-                                            value={this.state.state}
-                                            onChange={this.changeHandler}
-                                            disabled={this.state.editMode}
-                                            style={whiteTextFieldStyle}
-                                          />
-                                        </FormGroup>
-
-                                        {this.state.errors && this.state.errors.state && (
-                                          <font color="red">
-                                            {" "}
-                                            <p>{this.state.errors.state.msg}</p>
-                                          </font>
-                                        )}
-                                      </CardBody>
-                                    </Card>
-                                  </CardBody>
-                                </Card>
 
                                 <Card className="mx-1">
                                   <CardBody className="p-2">
                                     <h5>Login Details</h5>
                                     <InputGroup className="mb-3">
                                       <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                          <i className="icon-user" />
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          {/* <i className="icon-user" /> */}
+                                          Username
                                         </InputGroupText>
                                       </InputGroupAddon>
                                       <Input
@@ -1229,7 +1304,7 @@ class UserDetails extends Component {
                                         placeholder="Username"
                                         autoComplete="username"
                                         onChange={this.changeHandler}
-                                        disabled={this.state.editMode}
+                                        disabled="disabled"
                                         style={whiteTextFieldStyle}
                                       />
                                     </InputGroup>
@@ -1242,7 +1317,8 @@ class UserDetails extends Component {
 
                                     <InputGroup className="mb-3">
                                       <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>@</InputGroupText>
+                                        {/* <InputGroupText>@</InputGroupText> */}
+                                        <InputGroupText style={{ width: "120px" }}>Email</InputGroupText>
                                       </InputGroupAddon>
                                       <Input
                                         type="text"
@@ -1330,15 +1406,7 @@ class UserDetails extends Component {
                               </Col>
 
                               <Col>
-                                <Card className="mb-3">
-                                  <CardBody className="p-2">
-                                    {imgSource && ( 
-                                      <img id="displayImage" src={imgSource} /> 
-                                    )}
-                                    {/* <img id="displayImage1" src={require('../../../photoTemp/kapil.jpg')} widht="200px" height="200px"/> */}
-                                  
-                                  </CardBody>
-                                </Card>
+
                                 {this.state.role.indexOf("student") !== -1 && (
 
                                   <p>
@@ -1680,8 +1748,9 @@ class UserDetails extends Component {
                                         <h5>Parent Login Details</h5>
                                         <InputGroup className="mb-3">
                                           <InputGroupAddon addonType="prepend">
-                                            <InputGroupText>
-                                              <i className="icon-user" />
+                                            <InputGroupText style={{ width: "120px" }}>
+                                              {/* <i className="icon-user" /> */}
+                                              Username
                                             </InputGroupText>
                                           </InputGroupAddon>
                                           <Input
@@ -1692,7 +1761,7 @@ class UserDetails extends Component {
                                             placeholder="Username"
                                             autoComplete="username"
                                             onChange={this.changeHandler}
-                                            disabled={this.state.editMode}
+                                            disabled="disabled"
                                             style={whiteTextFieldStyle}
                                           />
                                         </InputGroup>
@@ -1812,6 +1881,28 @@ class UserDetails extends Component {
 
             </Col>
           </Row>
+
+          {this.state.screenmode && this.state.screenmode == 'edit' && (
+            <Row lg="4" style={{ width: "2500px" }}>
+              <Col md="7">
+
+                <Card className="mx-4">
+                  <CardBody className="p-2">
+
+                    <Button
+                      type="submit"
+                      onClick={this.updateUserDetails}
+                      block
+                      color="success"
+                    >
+                      {" "}
+                      Update Details
+                        </Button>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          )}
         </Container>
       </div>
     );
