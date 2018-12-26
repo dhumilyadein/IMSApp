@@ -225,11 +225,7 @@ templateType:""
                 rowError:""
 
               });
-              else    if (result.data.msg === "already exist")
 
-                this.setState({
-                  templateNameError: "Template Name already exists! Use another Template Name"
-                });
             this.getExistingTemplates();
           });
       }
@@ -282,13 +278,13 @@ templateType:""
           .post("http://localhost:8001/api/copyFeeTemplate", this.state)
           .then(result => {
             console.log("COPY RESULT.data " + JSON.stringify(result.data));
-            if(result.data.errors)
-            if (result.data.errors.templateName)
-              this.setState({
-                templateNameError: "Template Name already exists! Use another Template Name"
-              });
+                if (result.data.msg === "already exist")
 
-            if (result.data.msg === "Template Copied")
+            this.setState({
+              templateNameError: "Template Name already exists! Use another Template Name"
+            });
+
+           else if (result.data.msg === "Template Copied")
               this.setState({
                 success: true,
                 modalSuccess: true,
@@ -571,6 +567,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         value={this.state.rows[idx].feeType}
                                         onChange={this.handleChange(idx)}
                                         className="form-control"
+                                        style={{textAlign:'center'}}
                                         size="lg"
                                         id="feeType"
                                       />
@@ -584,6 +581,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         className="form-control"
                                         value={this.state.rows[idx].amount}
                                         onChange={this.handleChange(idx)}
+                                        style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
                                       />
@@ -780,6 +778,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
                                            + this.state.editRows[idx].feeType.slice(1)}
                                         onChange={this.handleEditChange(idx)}
+                                        style={{textAlign:'center'}}
                                         className="form-control"
                                         size="lg"
                                         id="feeType"
@@ -794,6 +793,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         className="form-control"
                                         value={this.state.editRows[idx].amount}
                                         onChange={this.handleEditChange(idx)}
+                                        style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
                                       />
@@ -988,6 +988,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         className="form-control"
                                         size="lg"
                                         id="feeType"
+                                        style={{textAlign:'center'}}
                                       />
                                     </InputGroup>
                                   </td>
@@ -1001,6 +1002,7 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                         onChange={this.handleEditChange(idx)}
                                         id="amount"
                                         size="lg"
+                                        style={{textAlign:'center'}}
                                       />
                                     </InputGroup>
                                   </td>
@@ -1086,8 +1088,8 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                       <Card className="mx-1">
                         <CardBody className="p-2">
                         <CardHeader style={{backgroundColor: 'Aqua', borderColor: 'black',  display: 'flex',
-  alignItems: 'center'}}>  
-                          ><h2> Existing Fee Templates</h2> 
+  alignItems: 'center'}}>
+                          <h2> Existing Fee Templates</h2>
                            &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
                            <Button
                                       color="primary"
@@ -1096,9 +1098,9 @@ console.log("template Name: "+ this.state.existingRows[idx].templateName);
                                     >
                                       Refresh
                                     </Button> </CardHeader>
-                           
-                            
-                        
+
+
+
                           <br />
                           <Table bordered hover>
                             <thead>

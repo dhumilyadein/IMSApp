@@ -1,0 +1,6 @@
+{
+  "name": "ViewFees",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./admin/finance/viewFees/ViewFees.js"
+}
