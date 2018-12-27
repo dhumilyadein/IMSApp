@@ -324,7 +324,7 @@ if(!e.target.value)
 if(e)
      { console.log("In Student "+(e.value));
 
-this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},()=>{
+this.setState({selectedStudent:e,showFeeRecords:false,error:""},()=>{
 
   axios
   .post("http://localhost:8001/api/getFeesDetails", {"selectedStudent":this.state.selectedStudent})
@@ -333,6 +333,9 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
 
           if(result.data)
           this.setState({feeRecords:result.data, showFeeRecords:true});
+          
+if(result.data.length===0)
+{this.setState({error:"No Record found!",showFeeRecords:false})};
 
 
 
@@ -389,7 +392,7 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
             <Row>
 
               <Col sm="12">
-              <Card className="mx-5">
+        {  !this.state.showViewCard &&    <Card className="mx-5">
                           <CardBody className="p-1">
 
                             <br/><InputGroup className="mb-3">
@@ -513,53 +516,90 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                     <h4>{idx + 1}</h4>
                                   </td>
                                   <td align="center">
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        type="text"
-                                        name="feeTemplate"
-                                        value={this.state.feeRecords[idx].templateName.charAt(0).toUpperCase()
+                                   {this.state.feeRecords[idx].templateName.charAt(0).toUpperCase()
                                            + this.state.feeRecords[idx].templateName.slice(1)}
 
-                                        className="form-control"
-                                        size="lg"
-                                        id="feeType"
-                                        disabled
-                                       style={{textAlign:'center'}}
-                                      />
-                                    </InputGroup>
+                                        
                                   </td>
                                   <td align="center">
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="templateType"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.feeRecords[idx].templateType}
-                                        style={{textAlign:'center'}}
-                                        id="templateType"
-                                        size="lg"
-                                        disabled
-                                      />
-                                    </InputGroup>
+                                   {this.state.feeRecords[idx].templateType}
+                                       
                                   </td>
 
 
                                   <td align="center">
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="dos"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.feeRecords[idx].dos.substr(0,10)}
-                                        style={{textAlign:'center'}}
-                                        id="dos"
-                                        size="lg"
-                                        disabled
-                                      />
-                                    </InputGroup>
+                                  {this.state.feeRecords[idx].dos.substr(0,10)}
+                                       
                                   </td>
 
                                   <td align="center">
+
+
+                                  <Button
+                                     color="primary"
+                                      onClick={()=>{this.setState({
+                                        showViewCard:true,
+                                        studentName:this.state.feeRecords[idx].studentDetails[0].name
+
+
+                                      },()=>{console.log("Student name: "+this.state.studentName)})}}
+
+
+                                      size="lg"
+                                    >
+                                      View
+                                    </Button>
+                                    &nbsp;&nbsp;
+                                    <Button
+                                      color="warning"
+                                      onClick={()=>{this.setState({
+                                        editRows:this.state.existingRows[idx].templateRows,
+                                        showEditTemplate: false,
+                                        showCopyTemplate: true,
+                                        templateNo: idx,
+                                        templateName: this.state.existingRows[idx].templateName,
+                                        templateType: this.state.existingRows[idx].templateType,
+                                        showCreateTemplate:false,
+                                        showCreateButton:false,
+                                        showExistingTemplate:false,
+                                        templateNameError:"",
+                                        templateTypeError:"",
+                                        rowError:""
+
+
+                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+                                      }}
+
+                                      size="lg"
+                                    >
+                                      Print
+                                    </Button>
+                                    &nbsp;&nbsp;
+                                    <Button
+                                      color="danger"
+                                      onClick={()=>{this.setState({
+                                        editRows:this.state.existingRows[idx].templateRows,
+                                        showEditTemplate: false,
+                                        showCopyTemplate: true,
+                                        templateNo: idx,
+                                        templateName: this.state.existingRows[idx].templateName,
+                                        templateType: this.state.existingRows[idx].templateType,
+                                        showCreateTemplate:false,
+                                        showCreateButton:false,
+                                        showExistingTemplate:false,
+                                        templateNameError:"",
+                                        templateTypeError:"",
+                                        rowError:""
+
+
+                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+                                      }}
+
+                                      size="lg"
+                                    >
+                                      DownLoad
+                                    </Button>
+                                   
 
                                   </td>
 
@@ -578,11 +618,55 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
 {this.state.error &&
                               <font color="red">
                                 {" "}
-                                <p>{this.state.error}</p>
+                                <h5>{this.state.error}</h5>
                               </font>
                             }
 
 </CardBody></Card>
+        }
+{this.state.showViewCard &&
+<Card><CardBody>
+
+ 
+                           
+                        <Row>        <h5>Sudent Name:</h5> 
+                      
+                             &nbsp; &nbsp;
+                          <font color="green"> <h5>{this.state.studentName} </h5></font>
+                           &nbsp; &nbsp; &nbsp; &nbsp;
+                           <h5>Class:</h5> 
+                      
+                      &nbsp; &nbsp;
+                    <h5>{this.state.class} </h5>
+
+                    &nbsp; &nbsp; &nbsp; &nbsp;
+                           <h5>Section:</h5> 
+                      
+                      &nbsp; &nbsp;
+                    <h5>{this.state.section} </h5>
+                           
+                           
+                           </Row>
+                         
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        
+  
+  </CardBody></Card>
+}
               </Col>
             </Row>
           </TabPane>
