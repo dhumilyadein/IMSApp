@@ -1,7 +1,7 @@
 var util = require('util');
 
 var { check, validationResult } = require("express-validator/check");
-
+var fs = require('fs');
 const User = require("../../models/User");
 const Student = require("../../models/Student");
 
@@ -163,7 +163,11 @@ module.exports = function (app) {
       Student.find(searchJSON)
         .then(function (studentData) {
   
-          console.log("SEARCH USER RESULT " + searchCriteria + "\n" + studentData + " find - " + find);
+          console.log("SEARCH USER RESULT 1 " + studentData[0].photo.data 
+          + " \n" + searchCriteria + "\n studentData - " + studentData + " find - " + find);
+
+          fs.writeFileSync('../src/photoTemp/' + studentData[0].username + ".jpg", studentData[0].photo.data);
+
           res.send(studentData);
         })
         .catch(function (error) {

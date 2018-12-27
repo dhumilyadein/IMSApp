@@ -7,6 +7,7 @@
 /server/PhotoUploads
 /server/ZipUploads
 package-lock.json
+/src/photoTemp
 
 # testing
 /coverage
