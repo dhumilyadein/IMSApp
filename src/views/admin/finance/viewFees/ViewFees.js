@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import classnames from 'classnames';
 import DatePicker from 'react-date-picker';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
     Badge,
     Button,
@@ -94,8 +96,7 @@ feeRecords:[]
 
          this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
          this.toggle = this.toggle.bind(this);
-
-
+         this.downloadPDF = this.downloadPDF.bind(this);
          this.getStudentByRollNo = this.getStudentByRollNo.bind(this);
 this.reset=this.reset.bind(this);
 
@@ -208,7 +209,19 @@ if(submit)
       }
     }
 
+    downloadPDF(){
 
+      const input = document.getElementById("divToPrint");
+    html2canvas(input)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        pdf.addImage(imgData, 'JPEG', 0, 0);
+        // pdf.output('dataurlnewwindow');
+        pdf.save("download.pdf");
+      })
+    ;
+    }
 
 
 
@@ -516,19 +529,19 @@ if(result.data.length===0)
                                     <h4>{idx + 1}</h4>
                                   </td>
                                   <td align="center">
-                                   {this.state.feeRecords[idx].templateName.charAt(0).toUpperCase()
-                                           + this.state.feeRecords[idx].templateName.slice(1)}
+                                <h5>   {this.state.feeRecords[idx].templateName.charAt(0).toUpperCase()
+                                           + this.state.feeRecords[idx].templateName.slice(1)}</h5>
 
                                         
                                   </td>
                                   <td align="center">
-                                   {this.state.feeRecords[idx].templateType}
+                                  <h5> {this.state.feeRecords[idx].templateType}</h5>
                                        
                                   </td>
 
 
                                   <td align="center">
-                                  {this.state.feeRecords[idx].dos.substr(0,10)}
+                                <h5>  {this.state.feeRecords[idx].dos.substr(0,10)}</h5>
                                        
                                   </td>
 
@@ -539,10 +552,30 @@ if(result.data.length===0)
                                      color="primary"
                                       onClick={()=>{this.setState({
                                         showViewCard:true,
-                                        studentName:this.state.feeRecords[idx].studentDetails[0].name
+                                        studentName:this.state.feeRecords[idx].studentDetails[0].name,
+                                        class:this.state.feeRecords[idx].class,
+                                        section:this.state.feeRecords[idx].section,
+                                        templateName: this.state.feeRecords[idx].templateName,
+                                        templateType: this.state.feeRecords[idx].templateType,
+                                        year:this.state.feeRecords[idx].year,
+                                        templateRows:this.state.feeRecords[idx].templateRows,
+                                        month:this.state.feeRecords[idx].month,
+                                        quarter: this.state.feeRecords[idx].quarter,
+                                        halfYear:this.state.feeRecords[idx].halfYear,
+                                        totalAmount:this.state.feeRecords[idx].totalFeeAmount,
+                                        lateFeeFine:this.state.feeRecords[idx].lateFeeFine,
+                                        pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
+                                        paidAmount:this.state.feeRecords[idx].paidAmount,
+                                        totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
+                                        dos:this.state.feeRecords[idx].dos,
+                                        remarks:this.state.feeRecords[idx].remarks
 
 
-                                      },()=>{console.log("Student name: "+this.state.studentName)})}}
+
+
+
+
+                                      },()=>{console.log("Student name: "+this.state.quarter)})}}
 
 
                                       size="lg"
@@ -553,9 +586,8 @@ if(result.data.length===0)
                                     <Button
                                       color="warning"
                                       onClick={()=>{this.setState({
-                                        editRows:this.state.existingRows[idx].templateRows,
-                                        showEditTemplate: false,
-                                        showCopyTemplate: true,
+                                       
+                                        
                                         templateNo: idx,
                                         templateName: this.state.existingRows[idx].templateName,
                                         templateType: this.state.existingRows[idx].templateType,
@@ -627,28 +659,202 @@ if(result.data.length===0)
 {this.state.showViewCard &&
 <Card><CardBody>
 
- 
+<div id="divToPrint">
                            
                         <Row>        <h5>Sudent Name:</h5> 
                       
                              &nbsp; &nbsp;
-                          <font color="green"> <h5>{this.state.studentName} </h5></font>
+                          <font color="blue"> <h5>{this.state.studentName} </h5></font>
                            &nbsp; &nbsp; &nbsp; &nbsp;
                            <h5>Class:</h5> 
                       
                       &nbsp; &nbsp;
-                    <h5>{this.state.class} </h5>
+                      <font color="blue"> <h5>{this.state.class} </h5></font>
 
                     &nbsp; &nbsp; &nbsp; &nbsp;
                            <h5>Section:</h5> 
                       
                       &nbsp; &nbsp;
-                    <h5>{this.state.section} </h5>
+                      <font color="blue"> <h5>{this.state.section} </h5></font>
+
+                      &nbsp; &nbsp; &nbsp; &nbsp;
+                           <h5>Date:</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.dos.substr(0,10)} </h5></font>
                            
                            
                            </Row>
-                         
- 
+                           &nbsp; &nbsp; &nbsp; &nbsp;
+                      <Row>     <h5>Fee Type:</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.templateName} ({this.state.templateType}) </h5></font>
+                      &nbsp; &nbsp; &nbsp; &nbsp;
+                      <h5>Year:</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.year} </h5></font>
+                      &nbsp; &nbsp; &nbsp; &nbsp;
+{this.state.month && <Row>
+                      <h5>Month:</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.month} </h5></font> </Row>}
+
+                      {this.state.halfYear &&<Row>
+                      <h5>Half Year:</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.halfYear} </h5></font></Row>}
+
+{this.state.quarter &&<Row>
+                      <h5>Quarter:</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.quarter} </h5></font></Row>}
+
+                      </Row>
+                      <br/>
+                      <Table bordered hover
+>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "palevioletred" }}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Fee Category </h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
+
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.templateRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                  <td align="center">
+                              <h4>     {this.state.templateRows[idx].feeType.charAt(0).toUpperCase()
+                                           + this.state.templateRows[idx].feeType.slice(1)}</h4>
+
+                                       
+                                  </td>
+                                  <td align="center">
+                        <h4>           {this.state.templateRows[idx].amount}</h4>
+                                       
+                                  </td>
+
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+<br/>
+
+
+<Table bordered hover
+>
+                            
+                            <tbody>
+                             
+                                <tr id="addr0">
+                                  <td align="center">
+                                    <h4>Totoal Fee Amount(Rs.): </h4>
+                                  </td>
+                                  <td align="center">
+                              <h4>     <font color="blue"> {this.state.totalAmount} </font></h4>
+
+                                       
+                                  </td></tr>
+                               <tr>   <td align="center">
+                                    <h4>Late Fee Fine(Rs.): </h4>
+                                  </td>
+                                  <td align="center">
+                              <h4>     <font color="blue"> {this.state.lateFeeFine} </font></h4>
+                                      
+                                  </td></tr>
+
+                               <tr>   <td align="center">
+                                    <h4>Past Due Amount(Rs.): </h4>
+                                  </td>
+                                  <td align="center">
+                              <h4>     <font color="blue"> {this.state.pastPendingDue} </font></h4>
+                                 
+                                  </td></tr>
+
+                           <tr>       <td align="center">
+                                    <h4>Totoal Paid Amount(Rs.):</h4>
+                                  </td>
+                                  <td align="center">
+                              <h4>     <font color="blue"> {this.state.paidAmount} </font></h4>
+                                 
+                                  </td></tr>
+
+                               <tr>   <td align="center">
+                                    <h4>Current Due Amount(Rs.):</h4>
+                                  </td>
+                                  <td align="center">
+                              <h4>     <font color="blue"> {this.state.totalDueAmount} </font></h4>
+                                 
+                                  </td></tr>
+
+
+                                  
+
+                               
+                                                        </tbody>
+                          </Table>
+
+<br/>
+                      {this.state.remarks && <Row>
+                        
+                        <h5>Remarks</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.remarks} </h5></font>
+                      
+                       </Row> }
+                       </div>
+                   <br/>      <br/>
+
+                   <Row> <Col><Button
+                                   onClick={this.downloadPDF}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                                Download
+                              </Button></Col>
+
+                              &nbsp;&nbsp;&nbsp;&nbsp;
+<Col>
+                              <Button
+                                   onClick={()=>{this.setState({showViewCard:false})}}
+                                size="lg"
+                                color="primary"
+                                block
+                              >
+                                Print
+                              </Button>
+</Col>
+                              &nbsp;&nbsp;&nbsp;&nbsp;
+                     
+                     
+                     <Col>
+                       <Button
+                                   onClick={()=>{this.setState({showViewCard:false})}}
+                                size="lg"
+                                color="danger"
+                                block
+                              >
+                                Cancel
+                              </Button> </Col> </Row>
+
  
  
  
@@ -666,6 +872,7 @@ if(result.data.length===0)
         
   
   </CardBody></Card>
+
 }
               </Col>
             </Row>
