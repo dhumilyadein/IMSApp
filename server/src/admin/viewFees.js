@@ -108,10 +108,6 @@ function getFeesDetails(req,res)
 
 
 
-
-
-
-
 function getStudentByRollNo(req,res)
 
 { console.log("In getStudentByRollNo: "+req.body.rollNo);
@@ -129,11 +125,39 @@ function getStudentByRollNo(req,res)
   });
 }
 
+
+function getFeeDefaulters(req,res)
+{
+console.log("In getfeeDefaulters: ");
+
+Student
+    .find({pendingFeeAmount: {$gt:0}})
+    .then(data => { var temp=[];
+        for(var i=0;i<data.length;i++)
+        {temp.push({"name": data[i].firstname.charAt(0).toUpperCase() + data[i].firstname.slice(1)+" "+
+        data[i].lastname.charAt(0).toUpperCase() +  data[i].lastname.slice(1)+
+         " ("+ data[i].username+")", "class":data[i].class+ " "+data[i].section, "rollNo": data[i].rollno
+         , "pendingFeeAmount":data[i].pendingFeeAmount});
+
+
+        }
+      //console.log("Student Result: "+JSON.stringify(data))
+        return res.send(temp);
+    })
+    .catch(err => {
+      return res.send({error:err});
+    });
+
+
+}
+
   app.post("/api/selectStudentByClass", selectStudentByClass);
   app.post("/api/selectStudentBySection", selectStudentBySection);
 
 
    app.post("/api/getfeeTemplate", getfeeTemplate);
+ 
+   app.get("/api/getFeeDefaulters", getFeeDefaulters);
 
    app.post("/api/getpendingFeeAmount", getpendingFeeAmount);
    app.post("/api/getFeesDetails", getFeesDetails);

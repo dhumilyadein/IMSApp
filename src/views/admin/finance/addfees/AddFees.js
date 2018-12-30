@@ -224,7 +224,7 @@ console.log("In FeeSubmit:"+ JSON.stringify(this.state));
 var submit=true;
 
 this.setState({yearError:"", quarterError:"",studentError:"", monthError:"",halfYearError:"",dosError:"", paidAmountError:"",sectionError:"", error:"", success: false,
-modalSuccess: false, studentName:""})
+modalSuccess: false})
 
 if(!this.state.year||this.state.year.length!=9)
 {
