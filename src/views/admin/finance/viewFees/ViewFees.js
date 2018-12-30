@@ -66,6 +66,7 @@ year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
 showMonth:false,
 showQuarter: false,
 showHalfYearly:false,
+showViewCard:false,
 month:"",
 quarter:"",
 halfYear:"",
@@ -75,7 +76,7 @@ paidAmount:"",
 pastPendingDue:"0",
 paidAmount:"",
 remarks:"",
-dos:Date.now(),
+dos:Date(Date.now()).toString(),
 yearError:"",
 quarterError:"",
 halfYearError:"",
@@ -123,7 +124,7 @@ this.reset=this.reset.bind(this);
         
                     studentResults: [],
                     studentOpen:true,
-        
+        showViewCard:false,
                     activeTab:"1",
         feeTemplates:[],
         selectedStudent:[],
@@ -145,7 +146,7 @@ this.reset=this.reset.bind(this);
         pastPendingDue:"0",
         paidAmount:"",
         remarks:"",
-        dos:Date.now(),
+        dos:Date(Date.now()).toString(),
         yearError:"",
         quarterError:"",
         halfYearError:"",
@@ -225,9 +226,11 @@ this.studentSelectedHandler(tempStudentdetails);
       const input = document.getElementById(this.state.divToPrint);
     html2canvas(input)
       .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF();
-        pdf.addImage(imgData, 'JPEG', 0, 0);
+        const imgData = canvas.toDataURL('image/jpeg');
+        const pdf = new jsPDF("l");
+        var width = pdf.internal.pageSize.getWidth();
+var height = pdf.internal.pageSize.getHeight();
+        pdf.addImage(imgData, 'JPEG', 10, 10,width,height);
         // pdf.output('dataurlnewwindow');
         pdf.save("feeReceipt.pdf");
       })
@@ -239,9 +242,11 @@ this.studentSelectedHandler(tempStudentdetails);
       const input = document.getElementById(this.state.divToPrint);
     html2canvas(input)
       .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF();
-        pdf.addImage(imgData, 'JPEG', 0, 0);
+        const imgData = canvas.toDataURL('image/jpeg');
+        const pdf = new jsPDF("landscape");
+        var width = pdf.internal.pageSize.getWidth();
+        var height = pdf.internal.pageSize.getHeight();
+        pdf.addImage(imgData, 'JPEG', 10, 10,width,height);
        
       
         pdf.autoPrint();
@@ -461,7 +466,7 @@ if(result.data.length===0)
           <TabPane tabId="1">
             <Row>
 
-              <Col sm="12">
+              <Col sm="9">
         {  !this.state.showViewCard &&    <Card className="mx-5">
                           <CardBody className="p-1">
 
@@ -624,7 +629,7 @@ if(result.data.length===0)
                                         pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
                                         paidAmount:this.state.feeRecords[idx].paidAmount,
                                         totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
-                                        dos:this.state.feeRecords[idx].dos,
+                                        dos:this.state.feeRecords[idx].dos.substr(0,10),
                                         remarks:this.state.feeRecords[idx].remarks,
                                         divToPrint: "divToPrint1"
 
@@ -664,7 +669,7 @@ if(result.data.length===0)
                                         pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
                                         paidAmount:this.state.feeRecords[idx].paidAmount,
                                         totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
-                                        dos:this.state.feeRecords[idx].dos,
+                                        dos:this.state.feeRecords[idx].dos.substr(0,10),
                                         remarks:this.state.feeRecords[idx].remarks,
                                         divToPrint: "divToPrint1"
 
@@ -706,7 +711,7 @@ if(result.data.length===0)
                                         pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
                                         paidAmount:this.state.feeRecords[idx].paidAmount,
                                         totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
-                                        dos:this.state.feeRecords[idx].dos,
+                                        dos:this.state.feeRecords[idx].dos.substr(0,10),
                                         remarks:this.state.feeRecords[idx].remarks,
                                         divToPrint: "divToPrint1"
 
@@ -757,7 +762,7 @@ if(result.data.length===0)
 
          <div textAlign="center">  <h3>         Fee Receipt     </h3></div>
          <br/>
-                        <Row>        <h5>Sudent Name:</h5> 
+        <Card><CardBody>   <Row>        <h5>Sudent Name:</h5> 
                       
                              &nbsp; &nbsp;
                           <font color="blue"> <h5>{this.state.studentName} </h5></font>
@@ -777,12 +782,13 @@ if(result.data.length===0)
                            <h5>Date:</h5> 
                       
                       &nbsp; &nbsp;
-                      <font color="blue"> <h5>{this.state.dos.substr(0,10)} </h5></font>
+                      <font color="blue"> <h5>{this.state.dos} </h5></font>
                            
+
+
                            
                            </Row>
-                           &nbsp; &nbsp; &nbsp; &nbsp;
-                      <Row>     <h5>Fee Type:</h5> 
+                            <Row>     <h5>Fee Type:</h5> 
                       
                       &nbsp; &nbsp;
                       <font color="blue"> <h5>{this.state.templateName} ({this.state.templateType}) </h5></font>
@@ -811,8 +817,17 @@ if(result.data.length===0)
                       <font color="blue"> <h5>{this.state.quarter} </h5></font></Row>}
 
                       </Row>
+                      {this.state.remarks && <Row>
+                        
+                        <h5>Remarks</h5> 
+                      
+                      &nbsp; &nbsp;
+                      <font color="blue"> <h5>{this.state.remarks} </h5></font>
+                      
+                       </Row> }
+                      </CardBody></Card>
                       <br/>
-                      <Table style={{ width: 1000}} bordered hover
+                      <Table  bordered hover
 >
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -853,7 +868,7 @@ if(result.data.length===0)
 <br/>
 
 
-<Table bordered hover style={{ width: 1000}}
+<Table bordered hover 
 >
                             
                             <tbody>
@@ -907,14 +922,7 @@ if(result.data.length===0)
                           </Table>
 
 <br/>
-                      {this.state.remarks && <Row>
-                        
-                        <h5>Remarks</h5> 
-                      
-                      &nbsp; &nbsp;
-                      <font color="blue"> <h5>{this.state.remarks} </h5></font>
-                      
-                       </Row> }
+                     
                        </div>
                    <br/>      <br/>
 
@@ -1127,7 +1135,7 @@ if(result.data.length===0)
                                           pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
                                           paidAmount:this.state.feeRecords[idx].paidAmount,
                                           totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
-                                          dos:this.state.feeRecords[idx].dos,
+                                          dos:this.state.feeRecords[idx].dos.substr(0,10),
                                           remarks:this.state.feeRecords[idx].remarks,
                                           divToPrint:"divToPrint2"
   
@@ -1166,7 +1174,7 @@ if(result.data.length===0)
                                           pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
                                           paidAmount:this.state.feeRecords[idx].paidAmount,
                                           totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
-                                          dos:this.state.feeRecords[idx].dos,
+                                          dos:this.state.feeRecords[idx].dos.substr(0,10),
                                           remarks:this.state.feeRecords[idx].remarks,
                                           divToPrint:"divToPrint2"
   
@@ -1208,7 +1216,7 @@ if(result.data.length===0)
                                           pastPendingDue:this.state.feeRecords[idx].pastPendingDue,
                                           paidAmount:this.state.feeRecords[idx].paidAmount,
                                           totalDueAmount:this.state.feeRecords[idx].totalDueAmount,
-                                          dos:this.state.feeRecords[idx].dos,
+                                          dos:this.state.feeRecords[idx].dos.substr(0,10),
                                           remarks:this.state.feeRecords[idx].remarks,
                                           divToPrint:"divToPrint2"
   
@@ -1259,7 +1267,7 @@ if(result.data.length===0)
   
            <div textAlign="center">  <h3>         Fee Receipt     </h3></div>
            <br/>
-                          <Row>        <h5>Sudent Name:</h5> 
+                       <Card><CardBody>   <Row>        <h5>Sudent Name:</h5> 
                         
                                &nbsp; &nbsp;
                             <font color="blue"> <h5>{this.state.studentName} </h5></font>
@@ -1283,7 +1291,7 @@ if(result.data.length===0)
                              
                              
                              </Row>
-                             &nbsp; &nbsp; &nbsp; &nbsp;
+                            
                         <Row>     <h5>Fee Type:</h5> 
                         
                         &nbsp; &nbsp;
@@ -1312,9 +1320,18 @@ if(result.data.length===0)
                         &nbsp; &nbsp;
                         <font color="blue"> <h5>{this.state.quarter} </h5></font></Row>}
   
-                        </Row>
+                        </Row> 
+                        {this.state.remarks && <Row>
+                          
+                          <h5>Remarks</h5> 
+                        
+                        &nbsp; &nbsp;
+                        <font color="blue"> <h5>{this.state.remarks} </h5></font>
+                        
+                         </Row> }
+                        </CardBody></Card>
                         <br/>
-                        <Table style={{ width: 1000}} bordered hover
+                        <Table bordered hover
   >
                               <thead>
                                 <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -1355,7 +1372,7 @@ if(result.data.length===0)
   <br/>
   
   
-  <Table bordered hover style={{ width: 1000}}
+  <Table bordered hover
   >
                               
                               <tbody>
@@ -1408,15 +1425,7 @@ if(result.data.length===0)
                                                           </tbody>
                             </Table>
   
-  <br/>
-                        {this.state.remarks && <Row>
-                          
-                          <h5>Remarks</h5> 
-                        
-                        &nbsp; &nbsp;
-                        <font color="blue"> <h5>{this.state.remarks} </h5></font>
-                        
-                         </Row> }
+                       
                          </CardBody> </Card> </div>
                      <br/>      <br/>
   
