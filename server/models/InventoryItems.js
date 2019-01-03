@@ -35,14 +35,18 @@ var InventoryItemsSchema = new Schema({
 
           })
       },
-      message:  'The Template Name is already in use'
+      message:  'The List Name is already in use'
   },
 
     trim:true,
    lowercase:true
   },
 
- 
+  remarks:{
+    type: String,
+    trim:true,
+   
+  },
 
   itemRows: {
     type: Array,

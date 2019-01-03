@@ -41,7 +41,7 @@ class AddItems extends Component {
       totalAmount:""
        
       }],
-     
+     remarks:"",
       rowError: false,
       listNameError: "",
       success: false,
@@ -85,7 +85,7 @@ this.setState({
       totalAmount:""
        
       }],
-     
+      remarks:"",
       rowError: false,
       listNameError: "",
       success: false,
@@ -150,7 +150,7 @@ this.setState({
         }
 
       if (submit === true) {
-        console.log("Submitting Template: ");
+        console.log("Submitting Items: ");
         axios
           .post("http://localhost:8001/api/addItems", this.state)
           .then(result => {
@@ -158,7 +158,7 @@ this.setState({
             if(result.data.errors)
             {if (result.data.errors.listName)
               this.setState({
-                templateNameError: "List Name already exists! Use another Name"
+                listNameError:result.data.errors.listName.message
               });}
              else if (result.data.msg === "Success")
               this.setState({
@@ -229,20 +229,19 @@ this.setState({grandTotal:amount})
   };
 
   handleRemoveSpecificRow = idx => () => {
-    const temp = [...this.state.rows];
-    temp.splice(idx, 1);
-    this.setState({ rows: temp });
+   
+   this.setState({ grandTotal:this.state.grandTotal-this.state.rows[idx].totalAmount},
+    ()=>{const temp = [...this.state.rows];
+        temp.splice(idx, 1);
+        this.setState({ rows: temp,
+        });})
+    
   };
 
 
   
 
-  handleEditRemoveSpecificRow = idx => () => {
-    const temp = [...this.state.editRows];
-    temp.splice(idx, 1);
-    this.setState({ editRows: temp });
-  };
-
+ 
 
  
 
@@ -360,10 +359,10 @@ this.setState({grandTotal:amount})
                                   <h4>Quantity</h4>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h4>Cost per Item(Rs)</h4>{" "}
+                                  <h4>Cost/Item(Rs)</h4>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h4>Total Amount(Rs)</h4>{" "}
+                                  <h4>Total(Rs)</h4>{" "}
                                 </th>
 
                                 
@@ -372,9 +371,10 @@ this.setState({grandTotal:amount})
                                     onClick={this.handleAddRow}
                                     className="btn btn-primary"
                                     color="primary"
-                                    size="sm"
+                                 
+                                    block
                                   >
-                                    {" "}
+                                    
                                     Add Row
                           </Button>
 
@@ -490,6 +490,26 @@ this.setState({grandTotal:amount})
                             />
                           </InputGroup>
 
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Remarks</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="remarks"
+                              id="remarks"
+                             value={this.state.remarks}
+                             onChange={e => {
+                                this.setState(
+                                  { remarks: e.target.value })}}
+
+
+                            />
+                          </InputGroup>
+
                           <br /> <br />
                           <Row>
                             <Col>
@@ -505,12 +525,7 @@ this.setState({grandTotal:amount})
 
                             <Col>
                               <Button
-                                onClick={() => {
-                                  this.setState({
-                                    
-                                    rows: [{}]
-                                  });
-                                }}
+                                onClick={this.reset}
                                 size="lg"
                                 color="secondary"
                                 block

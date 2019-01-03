@@ -61,19 +61,19 @@ export default {
           name: 'Add Fees',
           url: '/admin/finance/AddFees',
           icon: 'fa fa-money',
-          variant: 'primary',
+          variant: 'success',
         },
         {
           name: 'View Fees',
           url: '/admin/finance/ViewFees',
           icon: 'fa fa-money',
-          variant: 'primary',
+          variant: 'success',
         },
         {
           name: 'Fee Templates ',
           url: '/admin/finance/FeeTemplates',
           icon: 'fa fa-money',
-          variant: 'primary',
+          variant: 'success',
         },
     ]},
 

@@ -8,7 +8,7 @@ console.log("in addItems Req.body: "+JSON.stringify(req.body))
 
 var template = {
   "listName": req.body.listName, "dos": req.body.dos, "itemRows": req.body.rows,
-  "grandTotal":req.body.grandTotal
+  "grandTotal":req.body.grandTotal, "remarks":req.body.remarks
 
 };
 var addItem = new InventoryItems(template);
