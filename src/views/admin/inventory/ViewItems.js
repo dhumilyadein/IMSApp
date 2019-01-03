@@ -25,29 +25,25 @@ import axios from "axios";
 class FeeTemplates extends Component {
   constructor(props) {
     super(props);
-    this.getExistingTemplates();
+    this.getExistingItems();
     this.state = {
       showCreateTemplate: false,
-      status: "Active",
+    
       erorrs: null,
       success: null,
-      userdata: null,
-      templateName: "",
-      rows: [{ feeType: "", amount: "" }],
-      editRows: [{ feeType: "", amount: "" }],
-      existingRows: [{ templateName: "" }],
-      showCreateButton: true,
+     
+      existingRows: [{ listName: "" }],
+    
       rowError: false,
-      templateNameError: "",
+      listNameError: "",
       success: false,
       modalSuccess: false,
       visible: false,
       showEditTemplate: false,
-      templateNo: "",
+      
       showExistingTemplate:true,
-      showCopyTemplate:false,
-      templateTypeError:"",
-      templateType:""
+     
+      
 
     };
 

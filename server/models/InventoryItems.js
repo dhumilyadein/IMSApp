@@ -65,6 +65,13 @@ var InventoryItemsSchema = new Schema({
     required: true,
 
   },
+  unit:{
+    type: String,
+    trim:true,
+    required: true,
+
+  },
+
 costPerItem:{
     type: String,
     trim:true,

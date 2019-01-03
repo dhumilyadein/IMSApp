@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
+import AutosizeInput from 'react-input-autosize';
 import {
   Button,
   Card,
@@ -37,6 +38,7 @@ class AddItems extends Component {
       listName: "",
       rows: [{ itemName:"",
       quantity:"",
+      unit:"",
       costPerItem:"",
       totalAmount:""
        
@@ -81,6 +83,7 @@ this.setState({
       listName: "",
       rows: [{ itemName:"",
       quantity:"",
+      unit:"",
       costPerItem:"",
       totalAmount:""
        
@@ -138,7 +141,9 @@ this.setState({
             this.state.rows[i].itemName === "" ||
             this.state.rows[i].costPerItem === ""||
             this.state.rows[i].quantity === ""||
-            this.state.rows[i].totalAmount === ""
+            this.state.rows[i].totalAmount === ""||
+            this.state.rows[i].unit === ""
+
           ) {
             this.setState({
               rowError: "Please fill all the table fields first"
@@ -219,6 +224,7 @@ this.setState({grandTotal:amount})
     this.setState({ rowError: "" });
     const item = { itemName:"",
     quantity:"",
+    unit:"",
     costPerItem:"",
     totalAmount:""
      
@@ -359,6 +365,9 @@ this.setState({grandTotal:amount})
                                   <h4>Quantity</h4>{" "}
                                 </th>
                                 <th className="text-center">
+                                  <h4>Unit</h4>{" "}
+                                </th>
+                                <th className="text-center">
                                   <h4>Cost/Item(Rs)</h4>{" "}
                                 </th>
                                 <th className="text-center">
@@ -389,15 +398,17 @@ this.setState({grandTotal:amount})
                                   </td>
                                   <td>
                                     <InputGroup className="mb-3">
-                                      <Input
+                                      <AutosizeInput
                                         type="text"
                                         name="itemName"
                                         value={this.state.rows[idx].itemName}
                                         onChange={this.handleChange(idx)}
                                         className="form-control"
                                         style={{textAlign:'center'}}
-                                        size="lg"
+                                      
                                         id="itemName"
+                                        placeholder="Enter Here"
+                                       
                                       />
                                     </InputGroup>
                                   </td>
@@ -411,6 +422,22 @@ this.setState({grandTotal:amount})
                                         onChange={this.handleChange(idx)}
                                         style={{textAlign:'center'}}
                                         id="quantity"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="unit"
+                                        type="text"
+                                        className="form-control"
+                                        value={this.state.rows[idx].unit}
+                                        onChange={this.handleChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="unit"
                                         size="lg"
                                       />
                                     </InputGroup>
