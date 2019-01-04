@@ -67,13 +67,13 @@ function existingItems(req, res) {
 
   }
 
-  function deleteTemplate(req,res)
-  {console.log("In Delete Template for: "+ JSON.stringify(req.body.templateName));
+  function deleteItem(req,res)
+  {console.log("In deleteItem: "+ JSON.stringify(req.body.itemName));
 
-FeeTemplate
-.deleteOne({templateName:req.body.templateName})
+Items
+.deleteOne({itemName:req.body.itemName})
 .then(data => {
-  return res.send({msg:"Template Deleted"});
+  return res.send({msg:"Item Deleted"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -116,7 +116,7 @@ return res.send({error:err});
   app.post("/api/addItems", addItems);
   app.post("/api/createItem", createItem);
   app.get("/api/existingItems", existingItems);
-  app.post("/api/deleteTemplate", deleteTemplate);
+  app.post("/api/deleteItem", deleteItem);
   app.post("/api/updateFeeTemplate", updateFeeTemplate);
 
 

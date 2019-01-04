@@ -52,7 +52,7 @@ this.getExistingItems();
 
 
     this.getExistingItems = this.getExistingItems.bind(this);
-
+    this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
 
 
 
@@ -135,7 +135,17 @@ this.getExistingItems();
 
 
 
+deleteSpecificItem(itemName){
+  axios
+  .post("http://localhost:8001/api/deleteItem",{"itemName":itemName})
+  .then(result => {
+    console.log("Existing RESULT.data " + JSON.stringify(result.data));
+    if (result.data.msg==="Item Deleted")
+      this.getExistingItems();
 
+  })
+
+}
 
 
 
@@ -243,13 +253,13 @@ this.getExistingItems();
                             </font>
                           )}
 <br/>
-<Row>
+<Row >
                             <Col>
                               <Button
                                 onClick={this.submitHandler}
                                 size="lg"
                                 color="success"
-                                block
+
                               >
                                 Create
                               </Button>
@@ -311,33 +321,12 @@ this.getExistingItems();
                                   </td>
 
                                   <td align="center">
-                                    <Button
-                                     color="primary"
-                                     // onClick={}
 
-
-                                      size="lg"
-                                    >
-                                      Edit
-                                    </Button>
-                                    &nbsp;&nbsp;
-                                    <Button
-                                      color="warning"
-                                    //  onClick={()=>{this.setState({
-
-
-
-
-
-
-                                      size="lg"
-                                    >
-                                      Copy
-                                    </Button>
-                                    &nbsp;&nbsp;
                                     <Button
                                       color="danger"
-                                     //   onClick={this.handleRemoveExistingSpecificRow(idx)}
+                                        onClick={ this.deleteSpecificItem(this.state.existingItems[idx].itemName)
+
+                                        }
                                       size="lg"
                                     >
                                       Remove
