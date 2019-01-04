@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
-import AutosizeInput from 'react-input-autosize';
+import Select from 'react-select';
+
 import {
   Button,
   Card,
