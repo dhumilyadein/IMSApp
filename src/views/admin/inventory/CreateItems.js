@@ -39,7 +39,9 @@ this.getExistingItems();
       modalSuccess: false,
       visible: false,
       unitError:"",
-      existingItems:[]
+      existingItems:[],
+      showEditItem:false,
+      itemNo:""
     };
 
 
@@ -53,8 +55,9 @@ this.getExistingItems();
 
     this.getExistingItems = this.getExistingItems.bind(this);
     this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
+    this.editHandler = this.editHandler.bind(this);
 
-
+    
 
 
   }
@@ -119,6 +122,46 @@ this.getExistingItems();
       }
     });
   }
+
+  editHandler(e) {
+    var submit = true;
+    console.log("in Edit State: " + JSON.stringify(this.state));
+
+    this.setState({
+      itemNameError: "", unitError: "", success: false,
+      modalSuccess: false
+    }, () => {
+      if (!this.state.itemName) {
+        this.setState({ itemNameError: "Please Enter Item Name" });
+        submit = false;}
+
+        if (!this.state.unit) {
+            this.setState({ unitError: "Please Enter Unit" });
+            submit = false;}
+
+
+
+      if (submit === true) {
+        console.log("Updating Item: ");
+        axios
+          .post("http://localhost:8001/api/editItem", {"ItemName":this.state.itemName,"unit":this.state.unit, 
+          "existingItems":this.state.existingItems,"itemNo":this.state.itemNo})
+          .then(result => {
+            console.log("RESULT.data " + JSON.stringify(result.data));
+
+             if (result.data.msg === "Success")
+              this.setState({
+
+                success: true,
+                modalSuccess: true,
+
+              },()=>{this.getExistingItems()});
+
+          });
+      }
+    });
+  }
+
   getExistingItems() {
 
     axios
@@ -135,9 +178,9 @@ this.getExistingItems();
 
 
 
-deleteSpecificItem(itemName){
+deleteSpecificItem= idx => () => {
   axios
-  .post("http://localhost:8001/api/deleteItem",{"itemName":itemName})
+  .post("http://localhost:8001/api/deleteItem",{"itemName":this.state.existingItems[idx].itemName})
   .then(result => {
     console.log("Existing RESULT.data " + JSON.stringify(result.data));
     if (result.data.msg==="Item Deleted")
@@ -159,7 +202,8 @@ deleteSpecificItem(itemName){
         <Container>
           <Row className="justify-content-center" lg="2">
             <Col md="12">
-              <Card className="mx-4">
+        
+             <Card className="mx-4">
                 <CardBody className="p-4">
                   <h1>Inventory Management</h1>
                   <br /> <br />
@@ -170,14 +214,14 @@ deleteSpecificItem(itemName){
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Item: {this.state.itemName} Created Successfully!
+                        Item: {this.state.itemName} Saved Successfully!
                       </ModalHeader>
                     </Modal>
                   )}
-                  <Form>
+                 
 
 
-
+                  {!this.state.showEditItem &&  (
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
@@ -268,7 +312,7 @@ deleteSpecificItem(itemName){
 
                           </Row>
                           <br /> <br />
-<Card><CardBody>
+
 <h3 align="center"> Existing Items</h3>
                           <br />
 
@@ -321,16 +365,31 @@ deleteSpecificItem(itemName){
                                   </td>
 
                                   <td align="center">
+                                  <Button
+                                      color="primary"
+                                        onClick={ ()=>{ this.setState({showEditItem:true,
+                                       itemName: this.state.existingItems[idx].itemName,
+                                      unit:this.state.existingItems[idx].unit,
+                                    itemNo:idx},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+
+                                        
+                                      size="lg"
+                                    >
+                                      Edit
+                                    </Button>
+                                    &nbsp; &nbsp;
 
                                     <Button
                                       color="danger"
-                                        onClick={ this.deleteSpecificItem(this.state.existingItems[idx].itemName)
+                                        onClick={ this.deleteSpecificItem(idx)}
 
-                                        }
+                                        
                                       size="lg"
                                     >
                                       Remove
-                                    </Button>
+                                    </Button>  
+
+                                   
 
 
                                   </td>
@@ -338,7 +397,7 @@ deleteSpecificItem(itemName){
                               ))}
                             </tbody>
                           </Table>
-                         </CardBody></Card>
+                       
 
 
 
@@ -348,23 +407,118 @@ deleteSpecificItem(itemName){
                         </CardBody>
 
                       </Card>
+                                        
+                   ) }
 
+{this.state.showEditItem && (
+  <Card className="mx-1">
+  <CardBody className="p-2">
+    
+    <h3 align="center"> Edit Item</h3>
+                            <br />
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Item Name</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                size="lg"
+  
+                                name="itemName"
+  
+                                id="itemName"
+                                value={this.state.itemName.charAt(0).toUpperCase() + this.state.itemName.slice(1)}
+                                onChange={e => {
+                                  this.setState(
+                                    { itemName: e.target.value }
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.itemNameError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.itemNameError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+  
+  <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Item Unit</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                size="lg"
+                                name="unit"
+                                 id="unit"
+                                value={this.state.unit.charAt(0).toUpperCase() + this.state.unit.slice(1)}
+                                onChange={e => {
+                                  this.setState(
+                                    { unit: e.target.value }
+                                    
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.unitError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.unitError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+  <br/>
+  <Row >
+                              <Col>
+                                <Button
+                                  onClick={this.editHandler}
+                                  size="lg"
+                                  color="success"
+                                  block
+                                >
+                                  Update
+                                </Button>
+                              </Col>
+  
+                              <Col>
+                                <Button
+                                  onClick={()=>{this.setState({showEditItem:false,itemName:"",unit:""})}}
+                                  size="lg"
+                                  color="secondary"
+  block
+                                >
+                                  Cancel
+                                </Button>
+                              </Col>
+  
+  
+                            </Row>
+                            
+  
+  
+  
+    </CardBody></Card>
+  
+)}
 
-
-
-                  </Form>
                 </CardBody>
               </Card>
-
-
-
-
-
-
-
-            </Col>
+                                        
+              </Col>
           </Row>
-        </Container>
+        </Container>                  
+
+
+
+
+        
       </div>
     );
   }

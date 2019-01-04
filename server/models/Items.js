@@ -45,6 +45,7 @@ var ItemsSchema = new Schema({
   unit:{
     type: String,
     trim:true,
+    lowercase:true
 
   },
 

@@ -53,6 +53,8 @@ async function createItem(req, res) {
 
   }
 
+
+  
 function existingItems(req, res) {
   console.log("in existingItems ");
 
@@ -82,13 +84,13 @@ return res.send({error:err});
 
 }
 
-async function updateFeeTemplate(req,res)
-{console.log("In Update Template for: "+ JSON.stringify(req.body));
+async function editItem(req,res)
+{console.log("In editItem for: "+ JSON.stringify(req.body));
 
 
 
-  FeeTemplate
-.updateOne({templateName:req.body.existingRows[req.body.templateNo].templateName},
+  Items
+.updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
   {$set: {templateName:req.body.templateName,
           templateRows:req.body.editRows,
           templateType:req.body.templateType
@@ -97,7 +99,7 @@ async function updateFeeTemplate(req,res)
   )
 .then(data => {
 
-return res.send({msg:"Template Updated"});
+return res.send({msg:"Item Updated"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -117,7 +119,7 @@ return res.send({error:err});
   app.post("/api/createItem", createItem);
   app.get("/api/existingItems", existingItems);
   app.post("/api/deleteItem", deleteItem);
-  app.post("/api/updateFeeTemplate", updateFeeTemplate);
+  app.post("/api/editItem", editItem);
 
 
 
