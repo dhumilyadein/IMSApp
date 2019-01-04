@@ -1,29 +1,26 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import ReactPhoneInput from "react-phone-input-2";
+import DatePicker from 'react-date-picker';
 import classnames from 'classnames';
+import Select from 'react-select';
 
 import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Col,
   Container,
   Form,
-  CardHeader,
   Input,
   InputGroup,
   InputGroupAddon,
   InputGroupText,
   Row,
-  Table,
-  Alert,
   Modal,
   ModalHeader,
   FormGroup,
   Label,
-  Badge,
   Nav,
   NavItem,
   NavLink,
@@ -31,8 +28,7 @@ import {
   TabPane
 
 } from "reactstrap";
-import { AppSwitch } from "@coreui/react";
-import axios, { post } from "axios";
+import axios from "axios";
 
 var imageContext = require.context('../../../photoTemp', true);
 
@@ -105,6 +101,11 @@ class UserDetails extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
+      class: "",
+      section: "",
+      feeTemplatesFromDBLabel: [],
+      selectedFeeTemplate: [],
+      selectedFeeTemplateLabel: [],
 
       corruptphoto: false,
       photoname: "",
@@ -132,7 +133,12 @@ class UserDetails extends Component {
       screenmode: "display", // {"dispaly", "edit"}
 
       // UserDetailsUpdate Modal will be displayed if this flag is true
-      userDetailsUpdatedFlag: false
+      userDetailsUpdatedFlag: false,
+
+      // For the Gender check box - default value false means both will be unselected by default. 
+      // Depending on the gender from DB 1 of these 2 will be set to true
+      maleGender: false,
+      femaleGender: false,
 
     };
 
@@ -145,9 +151,51 @@ class UserDetails extends Component {
     this.updateUserDetails = this.updateUserDetails.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
     this.switchToDisplayMode = this.switchToDisplayMode.bind(this);
+    this.getExistingTemplates = this.getExistingTemplates.bind(this);
 
     // Fetching data from Mongo on page load
     this.fetchUserDataOnPageLoad();
+
+  }
+
+  getExistingTemplates() {
+
+    axios
+      .get("http://localhost:8001/api/existingTemplates")
+      .then(result => {
+
+        console.log("Existing Fee Templates: " + JSON.stringify(result.data));
+        console.log("No of templates " + result.data.length);
+
+        if (result.data) {
+          var feeTemplatesFromDBLabelTemp = [];
+          var usersFeeTemplatesLabelTemp = [];
+          for (var i = 0; i < result.data.length; i++) {
+            feeTemplatesFromDBLabelTemp.push({
+              "value": result.data[i].templateName,
+              "label": result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1) + " (" + (result.data[i].templateType.toLowerCase()) + ")"
+            });
+
+            console.log("this.state.selectedFeeTemplate - " + this.state.selectedFeeTemplate);
+            this.state.selectedFeeTemplate.forEach(function (element) {
+
+              if (element === result.data[i].templateName) {
+
+                usersFeeTemplatesLabelTemp.push({
+                  "value": result.data[i].templateName,
+                  "label": result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1) + " (" + (result.data[i].templateType.toLowerCase()) + ")"
+                });
+              }
+
+            });
+          }
+          console.log("feeTemplatesFromDBLabelTemp - " + JSON.stringify(feeTemplatesFromDBLabelTemp)
+          + " usersFeeTemplatesLabelTemp - " + JSON.stringify(usersFeeTemplatesLabelTemp));
+
+          this.setState({ feeTemplatesFromDBLabel: feeTemplatesFromDBLabelTemp });
+          this.setState({ selectedFeeTemplateLabel: usersFeeTemplatesLabelTemp });
+        }
+      });
   }
 
   /**
@@ -231,6 +279,8 @@ class UserDetails extends Component {
 
     }
 
+    // Fetching fee templates on page load
+    await this.getExistingTemplates();
   }
 
   mapStudentResponseToState() {
@@ -258,21 +308,33 @@ class UserDetails extends Component {
       state: studentData.state,
       admissionno: studentData.admissionno,
       rollno: studentData.rollno,
-      doj: studentData.doj,
-      dob: studentData.dob,
+      doj: new Date(studentData.doj),
+      dob: new Date(studentData.dob),
       gender: studentData.gender,
       religion: studentData.religion,
       nationality: studentData.nationality,
       bloodgroup: studentData.bloodgroup,
       category: studentData.category,
       phone: studentData.phone,
-      photo: studentData.photo
+      photo: studentData.photo,
+      class: studentData.class,
+      section: studentData.section,
+      selectedFeeTemplate: studentData.feeTemplate
     });
 
+    if (studentData.gender && studentData.gender === "Male") {
+      this.setState({
+        maleGender: true
+      });
+    } else {
+      this.setState({
+        femaleGender: true
+      });
+    }
 
-    console.log("student details username - " + studentData.username + " password - "
+    console.log("student details username - " + studentData.username + " fee template - " + this.state.selectedFeeTemplate + " password - "
       + studentData.password + " " + this.state.firstname + " "
-      + this.state.lastname + " " + this.state.dob + " " + this.state.doj + " " + this.state.parentusername
+      + this.state.lastname + " dob - " + this.state.dob + " " + this.state.doj + " " + this.state.parentusername
       + " " + this.state.gender + " " + this.state.parentfirstname + " " + this.state.address + " " + this.state.city
       + " student photo - " + JSON.stringify(studentData.photo));
   }
@@ -359,6 +421,7 @@ class UserDetails extends Component {
    */
   changeHandler(e) {
     // console.log("Name: "+e.target.name +" Value: "+e.target.value);
+
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -370,6 +433,16 @@ class UserDetails extends Component {
       this.setState({
         [e.target.name]: String(e.target.value).toLowerCase()
       });
+
+    console.log('maleGender ' + this.state.maleGender + ' femaleGender ' + this.state.femaleGender + ' current value - ' + e.target.value);
+
+    if (e.target.value === "Male" && this.state.femaleGender) {
+      this.setState({ maleGender: true });
+      this.setState({ femaleGender: false });
+    } else if (e.target.value === "Female" && this.state.maleGender) {
+      this.setState({ femaleGender: true });
+      this.setState({ maleGender: false });
+    }
   }
 
   /**
@@ -423,7 +496,7 @@ class UserDetails extends Component {
             </Modal>
           )}
 
-          {this.state.screenmode && this.state.screenmode == 'display' && (
+          {this.state.screenmode && this.state.screenmode === 'display' && (
             <Row lg="4" style={{ width: "2500px" }}>
               <Col md="7">
 
@@ -551,18 +624,16 @@ class UserDetails extends Component {
                                     <InputGroup className="mb-3">
                                       <InputGroupAddon addonType="prepend">
                                         <InputGroupText style={{ width: "120px" }}>
-                                          Date of Brith
+                                          Date of Birth
                                 </InputGroupText>
                                       </InputGroupAddon>
 
-                                      <Input
-                                        type="date"
+                                      <DatePicker
+
                                         name="dob"
                                         id="dob"
                                         value={this.state.dob}
-                                        placeholder="Date of Birth"
-                                        autoComplete="Date of Brith"
-                                        onChange={this.changeHandler}
+                                        onChange={date=>{this.setState({dob:date})}}
                                         disabled={this.state.editMode}
                                         style={whiteTextFieldStyle}
                                       />
@@ -592,7 +663,7 @@ class UserDetails extends Component {
                                             style={{ height: "35px", width: "25px" }}
                                             onChange={this.changeHandler}
                                             disabled={this.state.editMode}
-                                            style={whiteTextFieldStyle}
+                                            checked={this.state.maleGender}
                                           />
                                           <Label
                                             className="form-check-label"
@@ -612,7 +683,7 @@ class UserDetails extends Component {
                                             style={{ height: "35px", width: "25px" }}
                                             onChange={this.changeHandler}
                                             disabled={this.state.editMode}
-                                            style={whiteTextFieldStyle}
+                                            checked={this.state.femaleGender}
                                           />
                                           <Label
                                             className="form-check-label"
@@ -862,32 +933,6 @@ class UserDetails extends Component {
                                   <CardBody className="p-2">
                                     <h5>Contact Details</h5>
 
-                                    <InputGroup className="mb-3">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "125px" }}>
-                                          Phone Number
-                                </InputGroupText>
-                                        <ReactPhoneInput
-                                          defaultCountry="in"
-                                          value={this.state.phone}
-                                          name="phone"
-                                          onChange={phone => {
-                                            console.log("phone value: " + phone);
-                                            this.setState({ phone });
-                                          }}
-                                          disabled={this.state.editMode}
-                                          style={whiteTextFieldStyle}
-                                        />
-                                      </InputGroupAddon>
-                                    </InputGroup>
-
-                                    {this.state.errors && this.state.errors.phone && (
-                                      <font color="red">
-                                        {" "}
-                                        <p>{this.state.errors.phone.msg}</p>
-                                      </font>
-                                    )}
-
                                     <Card className="mx-1">
                                       <CardBody className="p-2">
                                         <b>Address</b>
@@ -977,6 +1022,32 @@ class UserDetails extends Component {
                                         )}
                                       </CardBody>
                                     </Card>
+
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "125px" }}>
+                                          Phone Number
+                                </InputGroupText>
+                                        <ReactPhoneInput
+                                          defaultCountry="in"
+                                          value={this.state.phone}
+                                          name="phone"
+                                          onChange={phone => {
+                                            console.log("phone value: " + phone);
+                                            this.setState({ phone });
+                                          }}
+                                          disabled={this.state.editMode}
+                                          style={whiteTextFieldStyle}
+                                        />
+                                      </InputGroupAddon>
+                                    </InputGroup>
+
+                                    {this.state.errors && this.state.errors.phone && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.phone.msg}</p>
+                                      </font>
+                                    )}
                                   </CardBody>
                                 </Card>
                               </Col>
@@ -1054,6 +1125,118 @@ class UserDetails extends Component {
                                                 <p>{this.state.errors.rollno.msg}</p>
                                               </font>
                                             )}
+
+                                          <InputGroup className="mb-4">
+                                            <InputGroupAddon addonType="prepend">
+                                              <InputGroupText style={{ width: "120px" }}>
+                                                Class
+                                </InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input
+                                              name="class"
+                                              id="class"
+                                              type="select"
+                                              value={this.state.class}
+                                              onChange={this.changeHandler}
+                                              disabled={this.state.editMode}
+                                              style={whiteTextFieldStyle}
+                                            >
+                                              <option value="">Select</option>
+                                              <option value="LKG">LKG</option>
+                                              <option value="UKG">UKG</option>
+                                              <option value="I">I</option>
+                                              <option value="II">II</option>
+                                              <option value="III">III</option>
+                                              <option value="IV">IV</option>
+                                              <option value="V">V</option>
+                                              <option value="VI">VI</option>
+                                              <option value="VII">VII</option>
+                                              <option value="VIII">VIII</option>
+                                              <option value="IX">IX</option>
+                                              <option value="X">X</option>
+                                              <option value="XI">XI</option>
+                                              <option value="XII">XII</option>
+                                            </Input>
+                                          </InputGroup>
+                                          {this.state.errors && this.state.errors.class && (
+                                            <font color="red">
+                                              {" "}
+                                              <p>{this.state.errors.class.msg}</p>
+                                            </font>
+                                          )}
+
+                                          <InputGroup className="mb-4">
+                                            <InputGroupAddon addonType="prepend">
+                                              <InputGroupText style={{ width: "120px" }}>
+                                                Section
+                                </InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input
+                                              name="section"
+                                              id="section"
+                                              type="select"
+                                              value={this.state.section}
+                                              onChange={this.changeHandler}
+                                              disabled={this.state.editMode}
+                                              style={whiteTextFieldStyle}
+                                            >
+                                              <option value="">Select</option>
+                                              <option value="A">A</option>
+                                              <option value="B">B</option>
+                                              <option value="C">C</option>
+                                              <option value="D">D</option>
+                                              <option value="E">E</option>
+
+                                            </Input>
+                                          </InputGroup>
+                                          {this.state.errors && this.state.errors.section && (
+                                            <font color="red">
+                                              {" "}
+                                              <p>{this.state.errors.section.msg}</p>
+                                            </font>
+                                          )}
+
+                                          <Card className="mx-1">
+                                            <CardBody className="p-2">
+                                              <h6>Select Fee Templates</h6>
+
+
+                                              <Select
+                                                id="selectedFeeTemplate"
+                                                name="selectedFeeTemplate"
+                                                isMulti={true}
+                                                placeholder="Select or Type to search"
+                                                options={this.state.feeTemplatesFromDBLabel}
+                                                closeMenuOnSelect={false}
+                                                value={this.state.selectedFeeTemplateLabel}
+
+                                                isSearchable={true}
+                                                isDisabled={this.state.editMode}
+                                              onChange={selected => {
+                                                console.log("Selected Selected Selected Selected Selected - " + JSON.stringify(selected));
+                                                var temp = [];
+
+                                                for (var i = 0; i < selected.length; i++) { temp.push(selected[i].value) }
+                                                this.setState({
+                                                  selectedFeeTemplate: temp,
+                                                  selectedFeeTemplateLabel: selected
+                                                }, () => {
+                                                  console.log("selectedFeeTemplate - " + JSON.stringify(this.state.selectedFeeTemplate) 
+                                                  + "selectedFeeTemplateLabel - " + JSON.stringify(this.state.selectedFeeTemplateLabel));
+                                                })
+                                              }
+                                              } 
+                                              />
+                                            </CardBody>
+                                          </Card>
+
+                                          {this.state.errors && this.state.errors.selectedFeeTemplate && (
+                                            <font color="red">
+                                              {" "}
+                                              <p>{this.state.errors.selectedFeeTemplate.msg}</p>
+                                            </font>
+                                          )}
+
                                         </p>
                                       )}
                                     <InputGroup className="mb-3">
@@ -1063,16 +1246,16 @@ class UserDetails extends Component {
                                 </InputGroupText>
                                       </InputGroupAddon>
 
-                                      <Input
-                                        type="date"
+                                      <DatePicker
+
                                         name="doj"
                                         id="doj"
                                         value={this.state.doj}
-                                        autoComplete="Date of Joining"
-                                        onChange={this.changeHandler}
+                                        onChange={date=>{this.setState({doj:date})}}
                                         disabled={this.state.editMode}
                                         style={whiteTextFieldStyle}
                                       />
+
                                     </InputGroup>
                                     {this.state.errors && this.state.errors.doj && (
                                       <font color="red">
@@ -1341,7 +1524,7 @@ class UserDetails extends Component {
                                     )}
 
                                     {/* Hiding the field if screenmode is "display" */}
-                                    {(this.state.screenmode != "display") && (
+                                    {(this.state.screenmode !== "display") && (
                                       <InputGroup className="mb-3">
                                         <InputGroupAddon addonType="prepend">
                                           <InputGroupText>
@@ -1370,7 +1553,7 @@ class UserDetails extends Component {
                                     )}
 
                                     {/* Hiding the field if screenmode is "display" */}
-                                    {(this.state.screenmode != "display") && (
+                                    {(this.state.screenmode !== "display") && (
 
                                       <InputGroup className="mb-4">
                                         <InputGroupAddon addonType="prepend">
@@ -1610,7 +1793,7 @@ class UserDetails extends Component {
                                         <Card className="mx-1">
 
                                           {/* Hiding the field if screenmode is "display" */}
-                                          {(this.state.screenmode != "display") && (
+                                          {(this.state.screenmode !== "display") && (
 
                                             <FormGroup check inline>
                                               <Input
@@ -1776,7 +1959,7 @@ class UserDetails extends Component {
                                           )}
 
                                         {/* Hiding the field if screenmode is "display" */}
-                                        {(this.state.screenmode != "display") && (
+                                        {(this.state.screenmode !== "display") && (
 
                                           <InputGroup className="mb-3">
                                             <InputGroupAddon addonType="prepend">
@@ -1809,7 +1992,7 @@ class UserDetails extends Component {
                                           )}
 
                                         {/* Hiding the field if screenmode is "display" */}
-                                        {(this.state.screenmode != "display") && (
+                                        {(this.state.screenmode !== "display") && (
 
                                           <InputGroup className="mb-4">
                                             <InputGroupAddon addonType="prepend">
@@ -1882,7 +2065,7 @@ class UserDetails extends Component {
             </Col>
           </Row>
 
-          {this.state.screenmode && this.state.screenmode == 'edit' && (
+          {this.state.screenmode && this.state.screenmode === 'edit' && (
             <Row lg="4" style={{ width: "2500px" }}>
               <Col md="7">
 
