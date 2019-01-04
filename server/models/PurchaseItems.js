@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 var autoIncrement = require('mongoose-auto-increment');
 connection = mongoose.createConnection('mongodb://localhost:27017/IMS',{ useNewUrlParser: true });
 autoIncrement.initialize(connection);
-var InventoryItemsSchema = new Schema({
+var PurchaseItemsSchema = new Schema({
 
   listId: {
     type: Number,
@@ -45,7 +45,7 @@ var InventoryItemsSchema = new Schema({
   remarks:{
     type: String,
     trim:true,
-   
+
   },
 
   itemRows: {
@@ -100,16 +100,16 @@ costPerItem:{
   grandTotal: {
     type: String,
     required: true,
-   
+
   },
 
   dos: {
     type: Date,
     required: true}
 
-},  { collection: 'InventoryItems' });
+},  { collection: 'PurchaseItems' });
 
 
 
-InventoryItemsSchema.plugin(autoIncrement.plugin, { model: 'InventoryItems', field: 'listId', startAt: 1});
-module.exports = InventoryItems = mongoose.model("InventoryItems", InventoryItemsSchema);
+PurchaseItemsSchema.plugin(autoIncrement.plugin, { model: 'PurchaseItems', field: 'listId', startAt: 1});
+module.exports = PurchaseItems = mongoose.model("PurchaseItems", PurchaseItemsSchema);

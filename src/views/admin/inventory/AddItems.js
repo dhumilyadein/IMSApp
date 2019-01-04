@@ -27,12 +27,12 @@ import axios from "axios";
 class AddItems extends Component {
   constructor(props) {
     super(props);
-   
+
     this.state = {
-      
+
       erorrs: null,
       success: null,
-    
+
      grandTotal:"",
      dos:Date.now(),
       listName: "",
@@ -41,7 +41,7 @@ class AddItems extends Component {
       unit:"",
       costPerItem:"",
       totalAmount:""
-       
+
       }],
      remarks:"",
       rowError: false,
@@ -50,7 +50,7 @@ class AddItems extends Component {
       modalSuccess: false,
       visible: false,
       dosError:""
-     
+
 
     };
 
@@ -59,14 +59,14 @@ class AddItems extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleAddRow = this.handleAddRow.bind(this);
     this.handleRemoveSpecificRow = this.handleRemoveSpecificRow.bind(this);
-    
+
     this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
-   
 
-   
+
+
 
 
 
@@ -77,7 +77,7 @@ class AddItems extends Component {
 this.setState({
     erorrs: null,
       success: null,
-     
+
      grandTotal:"",
      dos:Date.now(),
       listName: "",
@@ -86,7 +86,7 @@ this.setState({
       unit:"",
       costPerItem:"",
       totalAmount:""
-       
+
       }],
       remarks:"",
       rowError: false,
@@ -95,7 +95,7 @@ this.setState({
       modalSuccess: false,
       visible: false,
       dosError:""
-     
+
 
 });
 
@@ -167,18 +167,18 @@ this.setState({
               });}
              else if (result.data.msg === "Success")
               this.setState({
-               
+
                 success: true,
                 modalSuccess: true,
-               
+
               });
-           
-          }); 
+
+          });
       }
     });
   }
 
- 
+
 
   handleChange = idx => e => {
     e.preventDefault();
@@ -205,12 +205,12 @@ this.setState({
         },()=>{
             var amount=0;
             for(var i=0;i<this.state.rows.length;i++)
-        
+
             amount=amount+this.state.rows[i].totalAmount;
 this.setState({grandTotal:amount})
 
         }
-       
+
       );
 
 }
@@ -227,7 +227,7 @@ this.setState({grandTotal:amount})
     unit:"",
     costPerItem:"",
     totalAmount:""
-     
+
     };
     this.setState({
       rows: [...this.state.rows, item]
@@ -235,21 +235,21 @@ this.setState({grandTotal:amount})
   };
 
   handleRemoveSpecificRow = idx => () => {
-   
+
    this.setState({ grandTotal:this.state.grandTotal-this.state.rows[idx].totalAmount},
     ()=>{const temp = [...this.state.rows];
         temp.splice(idx, 1);
         this.setState({ rows: temp,
         });})
-    
+
   };
 
 
-  
 
- 
 
- 
+
+
+
 
   render() {
     return (
@@ -273,10 +273,10 @@ this.setState({grandTotal:amount})
                     </Modal>
                   )}
                   <Form>
-                    
 
-                  
-                 
+
+
+
                       <Card className="mx-1">
                         <CardBody className="p-2">
                           <h3 align="center"> Add Items</h3>
@@ -293,7 +293,7 @@ this.setState({grandTotal:amount})
                               label="List Name"
                               name="listName"
                               name="listName"
-                              id="templateName"
+                              id="listName"
                               value={this.state.listName.charAt(0).toUpperCase() + this.state.listName.slice(1)}
                               onChange={e => {
                                 this.setState(
@@ -355,35 +355,35 @@ this.setState({grandTotal:amount})
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
                                 <th className="text-center">
-                                  <h4> S.No.</h4>{" "}
+                                  <h5> S.No.</h5>{" "}
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Item Name </h4>
+                                  <h5>Item Name </h5>
                                 </th>
                                 <th className="text-center">
-                                  <h4>Quantity</h4>{" "}
+                                  <h5>Quantity</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h4>Unit</h4>{" "}
+                                  <h5>Unit</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h4>Cost/Item(Rs)</h4>{" "}
+                                  <h5>Cost/Item(Rs)</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h4>Total(Rs)</h4>{" "}
+                                  <h5>Total(Rs)</h5>{" "}
                                 </th>
 
-                                
+
                                 <th className="text-center">
                                   <Button
                                     onClick={this.handleAddRow}
                                     className="btn btn-primary"
                                     color="primary"
-                                 
+
                                     block
                                   >
-                                    
+
                                     Add Row
                           </Button>
 
@@ -397,20 +397,20 @@ this.setState({grandTotal:amount})
                                     <h4>{idx + 1}</h4>
                                   </td>
                                   <td>
-                                    <InputGroup className="mb-3">
-                                      <AutosizeInput
-                                        type="text"
+                                  <AutosizeInput
+
                                         name="itemName"
                                         value={this.state.rows[idx].itemName}
                                         onChange={this.handleChange(idx)}
-                                        className="form-control"
-                                        style={{textAlign:'center'}}
-                                      
+
+                                        style={{textAlign:'center', fontSize: 25}}
+
                                         id="itemName"
-                                        placeholder="Enter Here"
-                                       
+                                        placeholder="---------"
+
                                       />
-                                    </InputGroup>
+
+
                                   </td>
                                   <td>
                                     <InputGroup className="mb-3">
@@ -565,7 +565,7 @@ this.setState({grandTotal:amount})
 
                       </Card>
 
-                      
+
 
 
                   </Form>
@@ -576,8 +576,8 @@ this.setState({grandTotal:amount})
 
 
 
-            
-                  
+
+
             </Col>
           </Row>
         </Container>

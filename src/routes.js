@@ -204,6 +204,11 @@ const ImportUser = Loadable({
   loading: Loading
 });
 
+const CreateItems = Loadable({
+  loader: () => import("./views/admin/inventory/CreateItems"),
+  loading: Loading
+});
+
 const SearchUser = Loadable({
   loader: () => import("./views/admin/searchuser/SearchUser"),
   loading: Loading
@@ -235,6 +240,12 @@ const routes = [
     path: "/admin/inventory/AddItems",
     name: "Add Items",
     component: AddItems
+  },
+
+  {
+    path: "/admin/inventory/CreateItems",
+    name: "Create Items",
+    component: CreateItems
   },
 
   {

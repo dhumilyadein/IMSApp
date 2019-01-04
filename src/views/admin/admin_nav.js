@@ -45,7 +45,7 @@ export default {
         },
     ]},
 
-      
+
     {
       divider: true,
     },
@@ -57,6 +57,7 @@ export default {
       url: '/finance',
       icon: 'fa fa-money',
       children: [
+
         {
           name: 'Add Fees',
           url: '/admin/finance/AddFees',
@@ -86,8 +87,14 @@ export default {
       name: 'Manage Inventory',
       url: '/inventory',
       icon: 'icon-basket-loaded',
-     
+
       children: [
+        {
+          name: 'Create Items',
+          url: '/admin/inventory/CreateItems',
+          icon: 'icon-bag',
+          variant: 'success',
+        },
         {
           name: 'Add Items',
           url: '/admin/inventory/AddItems',
@@ -102,8 +109,8 @@ export default {
         }]},
 
 
-  
-   
+
+
 
     {
       divider: true,

@@ -1,4 +1,5 @@
-const InventoryItems = require("../../models/InventoryItems");
+const PurchaseItems = require("../../models/PurchaseItems");
+const Items = require("../../models/Items");
 
 module.exports = function (app) {
 
@@ -11,7 +12,7 @@ var template = {
   "grandTotal":req.body.grandTotal, "remarks":req.body.remarks
 
 };
-var addItem = new InventoryItems(template);
+var addItem = new PurchaseItems(template);
 
 
 
@@ -28,11 +29,35 @@ await addItem
 
 }
 
-function existingTemplates(req, res) {
-  console.log("in Existing temp");
+async function createItem(req, res) {
+  console.log("in createItem Req.body: "+JSON.stringify(req.body))
 
-  FeeTemplate
-    .find({status:"Active"})
+  var template = {
+    "itemName": req.body.itemName, "unit": req.body.unit, "quantity": 0,
+
+  };
+  var createItem = new Items(template);
+
+
+
+
+
+  await createItem
+    .save()
+    .then(user => {
+        return res.send({msg:"Success"});
+    })
+    .catch(err => {
+      return res.send(err);
+    });
+
+  }
+
+function existingItems(req, res) {
+  console.log("in existingItems ");
+
+  Items
+    .find()
     .then(data => {
         return res.send(data);
     })
@@ -89,10 +114,11 @@ return res.send({error:err});
 
 
   app.post("/api/addItems", addItems);
-  app.get("/api/existingTemplates", existingTemplates);
+  app.post("/api/createItem", createItem);
+  app.get("/api/existingItems", existingItems);
   app.post("/api/deleteTemplate", deleteTemplate);
   app.post("/api/updateFeeTemplate", updateFeeTemplate);
- 
+
 
 
 
