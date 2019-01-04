@@ -13,6 +13,7 @@ const feetemplate = require("./src/admin/feeTemplate");
 const updateUser = require("./src/admin/updateUser");
 const addFees = require("./src/admin/addFees");
 const viewFees = require("./src/admin/viewFees");
+const inventory = require("./src/admin/inventory");
 
 const login = require("./src/login");
 const app = express();
@@ -51,5 +52,6 @@ parentSearch(app);
 updateUser(app);
 addFees(app);
 viewFees(app);
+inventory(app);
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));

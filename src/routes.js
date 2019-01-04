@@ -204,6 +204,11 @@ const ImportUser = Loadable({
   loading: Loading
 });
 
+const CreateItems = Loadable({
+  loader: () => import("./views/admin/inventory/CreateItems"),
+  loading: Loading
+});
+
 const SearchUser = Loadable({
   loader: () => import("./views/admin/searchuser/SearchUser"),
   loading: Loading
@@ -214,10 +219,41 @@ const Users = Loadable({
   loading: Loading
 });
 
+
+const AddItems = Loadable({
+  loader: () => import("./views/admin/inventory/AddItems"),
+  loading: Loading
+});
+
+const ViewItems = Loadable({
+  loader: () => import("./views/admin/inventory/ViewItems"),
+  loading: Loading
+});
+
+
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
 
   { path: "/admin", exact: true, name: "Admin", component: RegisterUser },
+
+  {
+    path: "/admin/inventory/AddItems",
+    name: "Add Items",
+    component: AddItems
+  },
+
+  {
+    path: "/admin/inventory/CreateItems",
+    name: "Create Items",
+    component: CreateItems
+  },
+
+  {
+    path: "/admin/inventory/ViewItems",
+    name: "View Items",
+    component: ViewItems
+  },
+
   {
     path: "/admin/registeruser",
     name: "Register User",
