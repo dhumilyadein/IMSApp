@@ -36,6 +36,8 @@ module.exports = function (app) {
 
         var currentTime = new Date();
         console.log("current time - " + currentTime);
+        console.log("updateUser - updateUserDetails - selectedFeeTemplate - " + req.selectedFeeTemplate);
+        
 
         var request = req.body;
 
@@ -62,6 +64,9 @@ module.exports = function (app) {
             { username: request.username },
             {
                 $set: {
+                    feeTemplate: request.selectedFeeTemplate,
+                    class: request.class,
+                    section: request.section,
                     email: request.email,
                     firstname: request.firstname,
                     lastname: request.lastname,

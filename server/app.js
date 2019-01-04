@@ -10,6 +10,7 @@ const adminSearch = require("./src/admin/searchUser");
 const studentSearch = require("./src/admin/searchStudent");
 const parentSearch = require("./src/admin/searchParent");
 const feetemplate = require("./src/admin/feeTemplate");
+const updateUser = require("./src/admin/updateUser");
 const addFees = require("./src/admin/addFees");
 const viewFees = require("./src/admin/viewFees");
 
@@ -47,6 +48,7 @@ studentSearch(app);
 feetemplate(app);
 login(app);
 parentSearch(app);
+updateUser(app);
 addFees(app);
 viewFees(app);
 var port=process.env.PORT|| 8001;
