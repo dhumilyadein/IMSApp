@@ -230,6 +230,12 @@ const ViewItems = Loadable({
   loading: Loading
 });
 
+const ClassDetails = Loadable({
+  loader: () => import("./views/admin/classmanagement/ClassDetails"),
+  loading: Loading
+});
+
+
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -307,6 +313,14 @@ const routes = [
     name: "Users",
     component: Users
   },
+  {
+    path: "/admin/classmanagement/ClassDetails",
+    name: "ClassDetails",
+    component: ClassDetails
+  },
+
+
+
   { path: "/", exact: true, name: "Home", component: DefaultLayout },
   { path: "/dashboard", name: "Dashboard", component: Dashboard },
   { path: "/theme", exact: true, name: "Theme", component: Colors },
