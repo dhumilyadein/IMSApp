@@ -14,6 +14,7 @@ const updateUser = require("./src/admin/updateUser");
 const addFees = require("./src/admin/addFees");
 const viewFees = require("./src/admin/viewFees");
 const inventory = require("./src/admin/inventory");
+const classDAO = require("./src/admin/classDAO");
 
 const login = require("./src/login");
 const app = express();
@@ -39,9 +40,6 @@ app.use(
   })
 );
 
-
-
-
 adminRegister(app);
 adminImport(app);
 adminSearch(app);
@@ -53,5 +51,7 @@ updateUser(app);
 addFees(app);
 viewFees(app);
 inventory(app);
+classDAO(app);
+
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));

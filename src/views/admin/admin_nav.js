@@ -108,7 +108,49 @@ export default {
           variant: 'success',
         }]},
 
-
+        {
+          name: 'Class Management',
+          url: '/classmanagement',
+          icon: 'icon-briefcase',
+    
+          children: [
+            {
+              name: 'Class Details',
+              url: '/admin/classmanagement/ClassDetails',
+              icon: 'icon-bag',
+              variant: 'success',
+            },
+            {
+              name: 'Notifications',
+              url: '/admin/classmanagement/Notifications',
+              icon: 'icon-bell',
+              variant: 'success',
+            },
+            {
+              name: 'Send mail/message',
+              url: '/admin/classmanagement/sendMail',
+              icon: 'icon-phone',
+              variant: 'success',
+            },
+            {
+              name: 'Add Fee template',
+              url: '/admin/classmanagement/AddFeeTemplate',
+              icon: 'icon-bag',
+              variant: 'success',
+            },
+            {
+              name: 'Schedule PT Meet',
+              url: '/admin/classmanagement/SchedulePTMeet',
+              icon: 'icon-calendar',
+              variant: 'success',
+            },
+            {
+              name: 'Promote Class',
+              url: '/admin/classmanagement/PromoteClass',
+              icon: 'icon-plus',
+              variant: 'success',
+            },
+          ]},
 
 
 
