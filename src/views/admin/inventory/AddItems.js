@@ -28,7 +28,7 @@ import axios from "axios";
 class AddItems extends Component {
   constructor(props) {
     super(props);
-
+    this.getExistingItems();
     this.state = {
 
       erorrs: null,
@@ -50,7 +50,8 @@ class AddItems extends Component {
       success: false,
       modalSuccess: false,
       visible: false,
-      dosError:""
+      dosError:"",
+      existingItems:[]
 
 
     };
@@ -65,12 +66,31 @@ class AddItems extends Component {
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
+    this.getExistingItems = this.getExistingItems.bind(this);
+    
 
 
 
 
+  }
 
+  getExistingItems() {
 
+    axios
+      .get("http://localhost:8001/api/existingItems")
+      .then(result => {
+        console.log("Existing RESULT.data " + JSON.stringify(result.data));
+        if (result.data) {
+ var temp=[];
+  for(var i=0;i<result.data.length;i++)
+   temp.push({"label":result.data[i].itemName.charAt(0).toUpperCase()+result.data[i].itemName.slice(1),
+  "value": result.data[i].itemName})
+
+            this.setState({
+            existingItems: temp
+          });
+        }
+      });
   }
 
   reset()
@@ -397,20 +417,19 @@ this.setState({grandTotal:amount})
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
-                                  <td>
-                                  <Select
-                            id="itemName"
+                                  <td   style={{width:"200px"}}>
+                                  
+                                   <Select                            id="itemName"
                             name="itemName"
-
-                          placeholder="Select Fee Template"
-                            options={this.state.feeTemplates}
+                              
+                          placeholder="Select Item"
+                            options={this.state.existingItems}
                           closeMenuOnSelect={true}
-                         value={this.state.selectedFeeTemplate}
+                         value={this.state.rows[idx].itemName}
                          isClearable={true}
-                         //menuIsOpen ={this.state.studentOpen}
-                            isSearchable={true}
-
-                            onChange={this.feeTemplateSelectHandler}
+                              isSearchable={true}
+                            
+                            onChange={this.handleChange(idx)}
                             />
 
 

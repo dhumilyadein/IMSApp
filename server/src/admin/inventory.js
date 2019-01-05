@@ -91,11 +91,9 @@ async function editItem(req,res)
 
   Items
 .updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
-  {$set: {templateName:req.body.templateName,
-          templateRows:req.body.editRows,
-          templateType:req.body.templateType
-
-  }}
+  {$set: {itemName:req.body.itemName,
+          unit:req.body.unit,
+           }}
   )
 .then(data => {
 

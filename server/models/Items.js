@@ -18,7 +18,7 @@ var ItemsSchema = new Schema({
       isAsync: true,
       validator: function(value, isValid) {
           const self = this;
-          return self.constructor.findOne({ listName: value })
+          return self.constructor.findOne({ itemName: value })
           .exec(function(err, user){
               if(err){
                   throw err;

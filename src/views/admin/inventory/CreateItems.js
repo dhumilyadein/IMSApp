@@ -106,10 +106,12 @@ this.getExistingItems();
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
-            if (result.data.code===11000)
+            if(result.data.errors)
+            { 
+            if(result.data.errors.itemName)
               this.setState({
-                itemNameError:"Item Name already exists! Please use another."
-              });
+                itemNameError:result.data.errors.itemName.message
+              });}
              else if (result.data.msg === "Success")
               this.setState({
 
@@ -142,18 +144,23 @@ this.getExistingItems();
 
 
       if (submit === true) {
-        console.log("Updating Item: ");
+        console.log("Updating Item: "+ JSON.stringify(this.state));
         axios
-          .post("http://localhost:8001/api/editItem", {"ItemName":this.state.itemName,"unit":this.state.unit, 
+          .post("http://localhost:8001/api/editItem", {"itemName":this.state.itemName,"unit":this.state.unit, 
           "existingItems":this.state.existingItems,"itemNo":this.state.itemNo})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
-
-             if (result.data.msg === "Success")
+           if(result.data.error)
+          {  if(result.data.error.code===11000)
+            this.setState({
+              itemNameError:"Item name already in use"
+            });}
+           else  if (result.data.msg === "Item Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
+                showEditItem:false
 
               },()=>{this.getExistingItems()});
 
@@ -370,7 +377,9 @@ deleteSpecificItem= idx => () => {
                                         onClick={ ()=>{ this.setState({showEditItem:true,
                                        itemName: this.state.existingItems[idx].itemName,
                                       unit:this.state.existingItems[idx].unit,
-                                    itemNo:idx},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+                                    itemNo:idx,
+                                  itemNameError:"",
+                                unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
 
                                         
                                       size="lg"
