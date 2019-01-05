@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
-import AutosizeInput from 'react-input-autosize';
+import Select from 'react-select';
+
 import {
   Button,
   Card,
@@ -397,18 +398,20 @@ this.setState({grandTotal:amount})
                                     <h4>{idx + 1}</h4>
                                   </td>
                                   <td>
-                                  <AutosizeInput
+                                  <Select
+                            id="itemName"
+                            name="itemName"
 
-                                        name="itemName"
-                                        value={this.state.rows[idx].itemName}
-                                        onChange={this.handleChange(idx)}
+                          placeholder="Select Fee Template"
+                            options={this.state.feeTemplates}
+                          closeMenuOnSelect={true}
+                         value={this.state.selectedFeeTemplate}
+                         isClearable={true}
+                         //menuIsOpen ={this.state.studentOpen}
+                            isSearchable={true}
 
-                                        style={{textAlign:'center', fontSize: 25}}
-
-                                        id="itemName"
-                                        placeholder="---------"
-
-                                      />
+                            onChange={this.feeTemplateSelectHandler}
+                            />
 
 
                                   </td>
