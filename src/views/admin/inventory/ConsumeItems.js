@@ -106,7 +106,7 @@ this.getItems();
               this.setState({ docError: "Please Select Date" });
               submit = false;}
 
-              if(parseInt(this.state.availableQuantity)<0)
+              if(parseInt(this.state.availableQuantity)===0||parseInt(this.state.quantity)>parseInt(this.state.availableQuantity))
               {
                 this.setState({ quantityError: "You can't consume more than Available quantity" });
                 submit=false;
@@ -116,7 +116,7 @@ this.getItems();
         console.log("Consuming Item: ");
         axios
           .post("http://localhost:8001/api/consumeItem", {"itemName":this.state.itemName,"consumedQuantity":this.state.quantity,
-        "availableQuantity":this.state.availableQuantity,"doc":this.state.doc, "unit":this.state.unit
+        "availableQuantity":parseInt(this.state.availableQuantity)-parseInt(this.state.quantity),"doc":this.state.doc, "unit":this.state.unit
       })
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
@@ -285,8 +285,8 @@ var tempUnit,tempQuantity;
                             onChange={e=>{
                               if(e.target.value)
                               
-                              this.setState({quantity:e.target.value,
-                              availableQuantity: parseInt(this.state.availableQuantity)- e.target.value})}}
+                              this.setState({quantity:e.target.value
+                             })}}
                             />
                           </InputGroup>
 {this.state.quantityError &&(
