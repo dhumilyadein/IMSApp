@@ -102,8 +102,8 @@ export default {
           variant: 'success',
         },
         {
-          name: 'View/Edit Items',
-          url: '/admin/inventory/ViewItems',
+          name: 'Consume Items',
+          url: '/admin/inventory/ConsumeItems',
           icon: 'icon-basket-loaded',
           variant: 'success',
         }]},

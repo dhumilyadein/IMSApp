@@ -225,8 +225,8 @@ const AddItems = Loadable({
   loading: Loading
 });
 
-const ViewItems = Loadable({
-  loader: () => import("./views/admin/inventory/ViewItems"),
+const ConsumeItems = Loadable({
+  loader: () => import("./views/admin/inventory/ConsumeItems"),
   loading: Loading
 });
 
@@ -255,9 +255,9 @@ const routes = [
   },
 
   {
-    path: "/admin/inventory/ViewItems",
-    name: "View Items",
-    component: ViewItems
+    path: "/admin/inventory/ConsumeItems",
+    name: "Consume Items",
+    component: ConsumeItems
   },
 
   {

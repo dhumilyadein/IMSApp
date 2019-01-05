@@ -51,7 +51,7 @@ var ItemsSchema = new Schema({
 
 
   quantity:{
-    type: String,
+    type: Number,
     trim:true,
     required: true,
     default:0

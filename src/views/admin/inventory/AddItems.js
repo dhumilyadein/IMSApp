@@ -51,7 +51,8 @@ class AddItems extends Component {
       modalSuccess: false,
       visible: false,
       dosError:"",
-      existingItems:[]
+      existingItems:[],
+      allItemsData:[]
 
 
     };
@@ -87,7 +88,8 @@ class AddItems extends Component {
   "value": result.data[i].itemName})
 
             this.setState({
-            existingItems: temp
+            existingItems: temp,
+            allItemsData:result.data
           });
         }
       });
@@ -349,8 +351,8 @@ this.setState({grandTotal:amount})
                               &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
-                                name="doj"
-                                id="doj"
+                                name="dos"
+                                id="dos"
                                 value={this.state.dos}
                                 onChange={date=>{this.setState({dos:date},()=>{console.log("DOS: "+this.state.dos)})}}
                               />
@@ -383,13 +385,14 @@ this.setState({grandTotal:amount})
                                   <h5>Item Name </h5>
                                 </th>
                                 <th className="text-center">
-                                  <h5>Quantity</h5>{" "}
-                                </th>
-                                <th className="text-center">
                                   <h5>Unit</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h5>Cost/Item(Rs)</h5>{" "}
+                                  <h5>Quantity</h5>{" "}
+                                </th>
+                               
+                                <th className="text-center">
+                                  <h5>Cost/Unit(Rs)</h5>{" "}
                                 </th>
                                 <th className="text-center">
                                   <h5>Total(Rs)</h5>{" "}
@@ -429,11 +432,52 @@ this.setState({grandTotal:amount})
                          isClearable={true}
                               isSearchable={true}
                             
-                            onChange={this.handleChange(idx)}
+                            onChange={selectedItem=>{
+
+                              
+                                const temp = this.state.rows;
+                                temp[idx]["itemName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
+                                selectedItem.value.slice(1),"value":selectedItem.value};
+
+                                for(var i=0;i<this.state.allItemsData.length;i++)
+                                {
+                                    if(this.state.allItemsData[i].itemName===selectedItem.value)
+                                    {
+                                        temp[idx]["unit"]=this.state.allItemsData[i].unit;
+                                        break;
+                                    }
+                                }
+
+                            
+                                this.setState(
+                                  {
+                                    rows: temp
+                                  })
+
+                            }}
                             />
 
 
                                   </td>
+                                 
+
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="unit"
+                                        type="text"
+                                        className="form-control"
+                                        value={this.state.rows[idx].unit}
+                                      
+                                        style={{textAlign:'center'}}
+                                        id="unit"
+                                        size="lg"
+                                        disabled
+                                      />
+                                    </InputGroup>
+                                  </td>
+
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
@@ -444,22 +488,6 @@ this.setState({grandTotal:amount})
                                         onChange={this.handleChange(idx)}
                                         style={{textAlign:'center'}}
                                         id="quantity"
-                                        size="lg"
-                                      />
-                                    </InputGroup>
-                                  </td>
-
-
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="unit"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].unit}
-                                        onChange={this.handleChange(idx)}
-                                        style={{textAlign:'center'}}
-                                        id="unit"
                                         size="lg"
                                       />
                                     </InputGroup>
