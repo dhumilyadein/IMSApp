@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'
+import Select from 'react-select';
+import classnames from 'classnames';
 import {
   Button,
   Card,
@@ -20,7 +22,7 @@ import {
   Row,
   Table,
   Modal,
-  ModalHeader
+  ModalHeader, TabContent, TabPane, Nav, NavItem, NavLink,   CardTitle, CardText,
 } from "reactstrap";
 
 import axios from "axios";
@@ -41,16 +43,17 @@ this.getExistingItems();
       visible: false,
       unitError:"",
       existingItems:[],
-      showEditItem:false,
+      showSearchResults:false,
       itemNo:"",
       dos:"",
-      doe:new Date(Date.now())
+      doe:new Date(Date.now()),
+      activeTab: '1'
     };
 
 
 
 
-
+    this.toggle = this.toggle.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
@@ -65,7 +68,14 @@ this.getExistingItems();
 
   }
 
-
+  toggle(tab) {
+    if (this.state.activeTab !== tab) {
+      this.setState({
+        activeTab: tab,
+        doe:new Date(Date.now()),
+      });
+    }
+  }
 
   toggleSuccess() {
     this.setState({
@@ -89,16 +99,21 @@ this.getExistingItems();
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      itemNameError: "", unitError: "", success: false,
-      modalSuccess: false
+      dateError: "",
     }, () => {
-      if (!this.state.itemName) {
-        this.setState({ itemNameError: "Please Enter Item Name" });
+      if (!this.state.dos) {
+        this.setState({ dateError: "Please select Start Date" });
         submit = false;}
 
-        if (!this.state.unit) {
-            this.setState({ unitError: "Please Enter Unit" });
+        if (!this.state.doe) {
+            this.setState({  dateError: "Please select End Date"});
             submit = false;}
+
+            if(new Date(this.state.dos).getTime()>new Date(this.state.doe).getTime())
+            {
+                this.setState({  dateError: "Start Date can't be Greater than End Date!"});
+                submit = false;}
+            
 
 
 
@@ -225,16 +240,37 @@ deleteSpecificItem= idx => () => {
 
   render() {
     return (
-      <div>
-        <Container>
-          <Row className="justify-content-center" lg="2">
-            <Col md="12">
-        
-             <Card className="mx-4">
+        <div>
+
+<Card className="mx-4">
                 <CardBody className="p-4">
-                  <h1>Inventory Management</h1>
-                  <br /> <br />
-                  {this.state.success && (
+                  <h1>Inventory Items History</h1>
+                 
+
+            <br/>
+
+        <Nav tabs>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: this.state.activeTab === '1' })}
+              onClick={() => { this.toggle('1'); }}
+            >
+             <h5>Added items</h5>
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
+              className={classnames({ active: this.state.activeTab === '2' })}
+              onClick={() => { this.toggle('2'); }}
+            >
+              <h5>Consumed items</h5>
+            </NavLink>
+          </NavItem>
+        </Nav>
+        <TabContent activeTab={this.state.activeTab}>
+          <TabPane tabId="1">
+            <Row>
+            {this.state.success && (
                     <Modal
                       isOpen={this.state.modalSuccess}
                       className={"modal-success " + this.props.className}
@@ -245,17 +281,17 @@ deleteSpecificItem= idx => () => {
                       </ModalHeader>
                     </Modal>
                   )}
+              <Col sm="12">
+             
+                 
                  
 
-
-                  {!this.state.showEditItem &&  (
-
-                      <Card className="mx-1">
-                        <CardBody className="p-2">
-                          <h3 align="center"> Items History</h3>
+              
                           
 
                           <h5> Choose Date Period</h5>
+                          <br/>
+                          <Row>
                           <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -271,25 +307,14 @@ deleteSpecificItem= idx => () => {
                                 value={this.state.dos}
                                 onChange={date=>{this.setState({dos:date},()=>{console.log("DOS: "+this.state.dos)})}}
                               />
-
-
-                            </InputGroup>
-                            {this.state.dosError &&(
-                                <font color="red"><h6>
-                                  {" "}
-                                  <p>{this.state.dosError}</p></h6>
-                                </font>
-                              )}
-
-
-<InputGroup className="mb-2">
-                              <InputGroupAddon addonType="prepend">
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+<InputGroupAddon addonType="prepend">
                                 <InputGroupText >
                                 <b> End Date</b>
                                 </InputGroupText>
                               </InputGroupAddon>
 
-                              &nbsp; &nbsp; &nbsp;
+                              &nbsp; &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
                                 name="doe"
@@ -297,53 +322,19 @@ deleteSpecificItem= idx => () => {
                                 value={this.state.doe}
                                 onChange={date=>{this.setState({doe:date},()=>{console.log("DOe: "+this.state.doe)})}}
                               />
-
-
                             </InputGroup>
-                            {this.state.doeError &&(
+                        
+                          
+                         
+ </Row>
+ {this.state.dateError &&(
                                 <font color="red"><h6>
                                   {" "}
-                                  <p>{this.state.doeError}</p></h6>
+                                  <p>{this.state.dateError}</p></h6>
                                 </font>
                               )}
 
 
-<InputGroup className="mb-4">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText>
-                                    <b>  Show:</b>
-                                    </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Input
-                                    name="department"
-                                    id="department"
-                                    type="select"
-                                    onChange={e => {
-                                        this.setState(
-                                          { showWhat: e.target.value }
-                                        );
-                                      }}
-                                    value={this.state.showWhat}
-                                  >
-                                    <option value="consumed">Consumed Items</option>
-                                    <option value="added">
-                                      Added Items
-                                    </option>
-                                    <option value="both">
-                                    Both
-                                    </option>
-                                   
-                                  </Input>
-                                </InputGroup>
-
-                                {this.state.errors &&
-                                  this.state.errors.department && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.errors.department.msg}</p>
-                                    </font>
-                                  )}
-<br/>
 <Row >
                             <Col>
                               <Button
@@ -352,7 +343,7 @@ deleteSpecificItem= idx => () => {
                                 color="success"
 
                               >
-                                View History
+                                Search
                               </Button>
                             </Col>
 
@@ -360,7 +351,7 @@ deleteSpecificItem= idx => () => {
                           </Row>
                           <br /> <br />
 
-
+{this.state.showSearchResults && <p>
 
 <h3 align="center"> Existing Items</h3>
                           <br />
@@ -450,129 +441,211 @@ deleteSpecificItem= idx => () => {
                           </Table>
                        
 
+                          </p>     }
 
 
+                       
+                    
+                                        
+               
 
+
+ 
+
+              </Col>
+            </Row>
+          </TabPane>
+          <TabPane tabId="2">
+          <Row>
+            {this.state.success && (
+                    <Modal
+                      isOpen={this.state.modalSuccess}
+                      className={"modal-success " + this.props.className}
+                      toggle={this.toggleSuccess}
+                    >
+                      <ModalHeader toggle={this.toggleSuccess}>
+                        Item: {this.state.itemName} Saved Successfully!
+                      </ModalHeader>
+                    </Modal>
+                  )}
+              <Col sm="12">
+             
+                 
+                 
+
+              
+                          
+
+                          <h5> Choose Date Period</h5>
+                          <br/>
+                          <Row>
+                          <InputGroup className="mb-2">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b> Start Date</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="dos"
+                                id="dos"
+                                value={this.state.dos}
+                                onChange={date=>{this.setState({dos:date},()=>{console.log("DOS: "+this.state.dos)})}}
+                              />
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b> End Date</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="doe"
+                                id="doe"
+                                value={this.state.doe}
+                                onChange={date=>{this.setState({doe:date},()=>{console.log("DOe: "+this.state.doe)})}}
+                              />
+                            </InputGroup>
+                          
+                           {this.state.dateError &&(
+                                <font color="red"><h6>
+                                  {" "}
+                                  <p>{this.state.dateError}</p></h6>
+                                </font>
+                              )}
+ </Row>
+
+
+<br/>
+<Row >
+                            <Col>
+                              <Button
+                                onClick={this.submitHandler}
+                                size="lg"
+                                color="success"
+
+                              >
+                                Search
+                              </Button>
+                            </Col>
+
+
+                          </Row>
                           <br /> <br />
 
-                        </CardBody>
 
-                      </Card>
-                                        
-                   ) }
+{ this.state.showSearchResults &&  <p>
+<h3 align="center"> Existing Items</h3>
+                          <br />
 
-{this.state.showEditItem && (
-  <Card className="mx-1">
-  <CardBody className="p-2">
-    
-    <h3 align="center"> Edit Item</h3>
-                            <br />
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Item Name</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-  
-                                name="itemName"
-  
-                                id="itemName"
-                                value={this.state.itemName.charAt(0).toUpperCase() + this.state.itemName.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { itemName: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.itemNameError && (
-                              <font color="red">
-                                <h6>
+
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
                                   {" "}
-                                  <p>{this.state.itemNameError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-  
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Item Unit</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-                                name="unit"
-                                 id="unit"
-                                value={this.state.unit.charAt(0).toUpperCase() + this.state.unit.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { unit: e.target.value }
-                                    
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.unitError && (
-                              <font color="red">
-                                <h6>
+                                  <h4>Item Name </h4>
+                                </th>
+                                <th className="text-center">
                                   {" "}
-                                  <p>{this.state.unitError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-  <br/>
-  <Row >
-                              <Col>
-                                <Button
-                                  onClick={this.editHandler}
-                                  size="lg"
-                                  color="success"
-                                  block
-                                >
-                                  Update
-                                </Button>
-                              </Col>
-  
-                              <Col>
-                                <Button
-                                  onClick={()=>{this.setState({showEditItem:false,itemName:"",unit:""})}}
-                                  size="lg"
-                                  color="secondary"
-  block
-                                >
-                                  Cancel
-                                </Button>
-                              </Col>
-  
-  
-                            </Row>
-                            
-  
-  
-  
-    </CardBody></Card>
-  
-)}
+                                  <h4>Unit</h4>
+                                </th>
 
-                </CardBody>
-              </Card>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Quantity</h4>
+                                </th>
+
+                                <th className="text-center">
+                                 <h4> Actions</h4>
+
+
+                                </th>
+
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.existingItems.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h5>{idx + 1}</h5>
+                                  </td>
+                                  <td align="center">
+                                    <h5> {this.state.existingItems[idx].itemName.charAt(0).toUpperCase() +
+                                      this.state.existingItems[idx].itemName.slice(1)}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingItems[idx].unit}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingItems[idx].quantity}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                  <Button
+                                      color="primary"
+                                        onClick={ ()=>{ this.setState({showEditItem:true,
+                                       itemName: this.state.existingItems[idx].itemName,
+                                      unit:this.state.existingItems[idx].unit,
+                                    itemNo:idx,
+                                  itemNameError:"",
+                                unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+
                                         
+                                      size="lg"
+                                    >
+                                      Edit
+                                    </Button>
+                                    &nbsp; &nbsp;
+
+                                    <Button
+                                      color="danger"
+                                        onClick={ this.deleteSpecificItem(idx)}
+
+                                        
+                                      size="lg"
+                                    >
+                                      Remove
+                                    </Button>  
+
+                                   
+
+
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                       
+</p>
+
+      }
+
+                                      
+                                        
+               
+
+
+ 
+
               </Col>
-          </Row>
-        </Container>                  
-
-
-
+            </Row></TabPane>
+        </TabContent>
 
         
+        </CardBody>
+              </Card>
       </div>
-    );
-  }
-}
+                  );
+}}
 
 export default ItemHistory;
