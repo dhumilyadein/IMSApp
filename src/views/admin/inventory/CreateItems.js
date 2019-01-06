@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
-import AutosizeInput from 'react-input-autosize';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Button,
   Card,
@@ -186,14 +187,31 @@ this.getExistingItems();
 
 
 deleteSpecificItem= idx => () => {
-  axios
-  .post("http://localhost:8001/api/deleteItem",{"itemName":this.state.existingItems[idx].itemName})
-  .then(result => {
-    console.log("Existing RESULT.data " + JSON.stringify(result.data));
-    if (result.data.msg==="Item Deleted")
-      this.getExistingItems();
 
+  confirmAlert({
+    title: 'Confirm to Remove',
+    message: 'Are you sure to Remove this Item?',
+    buttons: [
+      {
+        label: 'Yes',
+        onClick: () => 
+        
+        axios
+        .post("http://localhost:8001/api/deleteItem",{"itemName":this.state.existingItems[idx].itemName})
+        .then(result => {
+          console.log("Existing RESULT.data " + JSON.stringify(result.data));
+          if (result.data.msg==="Item Deleted")
+            this.getExistingItems();
+      
+        })
+      },
+      {
+        label: 'No',
+        onClick: () =>  {this.getExistingItems();}
+      }
+    ]
   })
+ 
 
 }
 

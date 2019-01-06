@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
+import { confirmAlert } from 'react-confirm-alert';
 import {
   Button,
   Card,

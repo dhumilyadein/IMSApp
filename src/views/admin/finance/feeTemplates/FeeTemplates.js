@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Button,
   Card,
@@ -368,22 +370,50 @@ templateType:""
 
 
   handleRemoveExistingSpecificRow= idx => () => {
-    const temp = [...this.state.existingRows];
-    temp.splice(idx, 1);
-    this.setState({ existingRows: temp,
-    templateName: this.state.existingRows[idx].templateName},()=>{
-      axios
-      .post("http://localhost:8001/api/deleteTemplate", this.state)
-      .then(result => {
-        console.log("RESULT.data " + JSON.stringify(result.data));
-        if (result.data.error)
-         console.log(result.data.error);
-        this.getExistingTemplates();
-      });
 
-    });
+    confirmAlert({
+      title: 'Confirm to Remove',
+      message: 'Are you sure to Remove this Template?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {
+            const temp = [...this.state.existingRows];
+            temp.splice(idx, 1);
+            this.setState({ existingRows: temp,
+            templateName: this.state.existingRows[idx].templateName},()=>{
+        
+        
+              axios
+              .post("http://localhost:8001/api/deleteTemplate", this.state)
+              .then(result => {
+                console.log("RESULT.data " + JSON.stringify(result.data));
+                if (result.data.error)
+                 console.log(result.data.error);
+                this.getExistingTemplates();
+              });
+        
+            });
 
-console.log("template Name: "+ this.state.existingRows[idx].templateName);
+          }
+          
+         
+        },
+        {
+          label: 'No',
+          onClick: () =>  {  this.getExistingTemplates();}
+        }
+      ]
+    })
+
+
+
+
+
+
+    
+
+
 
 
   };
