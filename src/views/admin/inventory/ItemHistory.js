@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css'
-import Select from 'react-select';
+
+
 import classnames from 'classnames';
 import {
   Button,
@@ -30,24 +29,18 @@ import axios from "axios";
 class ItemHistory extends Component {
   constructor(props) {
     super(props);
-this.getExistingItems();
     this.state = {
 
-      erorrs: null,
-      success: null,
-      itemName: "",
-      unit:"",
-      itemNameError: "",
-      success: false,
-      modalSuccess: false,
-      visible: false,
-      unitError:"",
+    
       existingItems:[],
       showSearchResults:false,
-      itemNo:"",
+   
       dos:"",
       doe:new Date(Date.now()),
-      activeTab: '1'
+      activeTab: '1',
+      viewItem:{},
+      showAddedItem:false
+
     };
 
 
@@ -55,13 +48,11 @@ this.getExistingItems();
 
     this.toggle = this.toggle.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
-    this.toggleSuccess = this.toggleSuccess.bind(this);
-    this.onDismiss = this.onDismiss.bind(this);
 
 
-    this.getExistingItems = this.getExistingItems.bind(this);
-    this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
-    this.editHandler = this.editHandler.bind(this);
+
+   
+ 
 
     
 
@@ -73,30 +64,17 @@ this.getExistingItems();
       this.setState({
         activeTab: tab,
         doe:new Date(Date.now()),
+        dos:"",
+        dateError:""
       });
     }
   }
 
-  toggleSuccess() {
-    this.setState({
-      modalSuccess: !this.state.modalSuccess,
-      itemName:"",
-      unit:""
-    });
-
-  }
-
-  /**
-   * @description Dismisses the alert
-   * @param {*} e
-   */
-  onDismiss() {
-    this.setState({ visible: !this.state.visible });
-  }
+ 
 
   submitHandler(e) {
     var submit = true;
-    console.log("in Submit State: " + JSON.stringify(this.state));
+    console.log("in Submit State: " + JSON.stringify(this.state.activeTab));
 
     this.setState({
       dateError: "",
@@ -118,119 +96,52 @@ this.getExistingItems();
 
 
       if (submit === true) {
-        console.log("Creating Item: ");
-        axios
-          .post("http://localhost:8001/api/createItem", {"itemName":this.state.itemName,"unit":this.state.unit})
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
 
-            if(result.data.errors)
-            { 
-            if(result.data.errors.itemName)
-              this.setState({
-                itemNameError:result.data.errors.itemName.message
-              });}
-             else if (result.data.msg === "Success")
-              this.setState({
+        if(this.state.activeTab==="1")
 
-                success: true,
-                modalSuccess: true,
+        {
+            console.log("Getting Added Items: ");
+            axios
+              .post("http://localhost:8001/api/getAddedItems", {"doe":this.state.doe,"dos":this.state.dos})
+              .then(result => {
+                console.log("RESULT.data " + JSON.stringify(result.data));
 
-              },()=>{this.getExistingItems()});
+                if(result.data.error)
+                this.setState({
+                    dateError:result.data.error
+                  });
+    
+                if(result.data.data.length===0)
+                { 
+               
+                  this.setState({
+                    dateError:"No Records Found!"
+                  });}
+                else if(result.data.data.length>0)
+                {
+                    this.setState({
+                        showSearchResults:true,
+                        existingItems:result.data.data
+                      });
 
-          });
-      }
-    });
-  }
-
-  editHandler(e) {
-    var submit = true;
-    console.log("in Edit State: " + JSON.stringify(this.state));
-
-    this.setState({
-      itemNameError: "", unitError: "", success: false,
-      modalSuccess: false
-    }, () => {
-      if (!this.state.itemName) {
-        this.setState({ itemNameError: "Please Enter Item Name" });
-        submit = false;}
-
-        if (!this.state.unit) {
-            this.setState({ unitError: "Please Enter Unit" });
-            submit = false;}
+                }
 
 
+    
+              });
 
-      if (submit === true) {
-        console.log("Updating Item: "+ JSON.stringify(this.state));
-        axios
-          .post("http://localhost:8001/api/editItem", {"itemName":this.state.itemName,"unit":this.state.unit, 
-          "existingItems":this.state.existingItems,"itemNo":this.state.itemNo})
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-           if(result.data.error)
-          {  if(result.data.error.code===11000)
-            this.setState({
-              itemNameError:"Item name already in use"
-            });}
-           else  if (result.data.msg === "Item Updated")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                showEditItem:false
-
-              },()=>{this.getExistingItems()});
-
-          });
-      }
-    });
-  }
-
-  getExistingItems() {
-
-    axios
-      .get("http://localhost:8001/api/existingItems")
-      .then(result => {
-        console.log("Existing RESULT.data " + JSON.stringify(result.data));
-        if (result.data) {
-          this.setState({
-            existingItems: result.data
-          });
         }
-      });
+
+        if(this.state.activeTab==="2")
+
+        {}
+
+       
+      }
+    });
   }
 
-
-
-deleteSpecificItem= idx => () => {
-
-  confirmAlert({
-    title: 'Confirm to Remove',
-    message: 'Are you sure to Remove this Item?',
-    buttons: [
-      {
-        label: 'Yes',
-        onClick: () => 
-        
-        axios
-        .post("http://localhost:8001/api/deleteItem",{"itemName":this.state.existingItems[idx].itemName})
-        .then(result => {
-          console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Item Deleted")
-            this.getExistingItems();
-      
-        })
-      },
-      {
-        label: 'No',
-        onClick: () =>  {this.getExistingItems();}
-      }
-    ]
-  })
  
-
-}
 
 
 
@@ -270,17 +181,7 @@ deleteSpecificItem= idx => () => {
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="1">
             <Row>
-            {this.state.success && (
-                    <Modal
-                      isOpen={this.state.modalSuccess}
-                      className={"modal-success " + this.props.className}
-                      toggle={this.toggleSuccess}
-                    >
-                      <ModalHeader toggle={this.toggleSuccess}>
-                        Item: {this.state.itemName} Saved Successfully!
-                      </ModalHeader>
-                    </Modal>
-                  )}
+           
               <Col sm="12">
              
                  
@@ -333,7 +234,7 @@ deleteSpecificItem= idx => () => {
                                   <p>{this.state.dateError}</p></h6>
                                 </font>
                               )}
-
+<br/>
 
 <Row >
                             <Col>
@@ -353,7 +254,7 @@ deleteSpecificItem= idx => () => {
 
 {this.state.showSearchResults && <p>
 
-<h3 align="center"> Existing Items</h3>
+<h3 align="center"> Search Results</h3>
                           <br />
 
 
@@ -365,16 +266,20 @@ deleteSpecificItem= idx => () => {
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Item Name </h4>
+                                  <h4>List Name </h4>
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Unit</h4>
+                                  <h4>Date</h4>
                                 </th>
 
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Quantity</h4>
+                                  <h4>Paid Amount(Rs)</h4>
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Remarks</h4>
                                 </th>
 
                                 <th className="text-center">
@@ -392,44 +297,39 @@ deleteSpecificItem= idx => () => {
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingItems[idx].itemName.charAt(0).toUpperCase() +
-                                      this.state.existingItems[idx].itemName.slice(1)}</h5>
+                                    <h5> {this.state.existingItems[idx].listName.charAt(0).toUpperCase() +
+                                      this.state.existingItems[idx].listName.slice(1)}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingItems[idx].unit}</h5>
+                                    <h5> {this.state.existingItems[idx].dos.substring(0,10)}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingItems[idx].quantity}</h5>
+                                    <h5> {this.state.existingItems[idx].grandTotal}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingItems[idx].remarks}</h5>
                                   </td>
 
                                   <td align="center">
                                   <Button
                                       color="primary"
-                                        onClick={ ()=>{ this.setState({showEditItem:true,
-                                       itemName: this.state.existingItems[idx].itemName,
-                                      unit:this.state.existingItems[idx].unit,
-                                    itemNo:idx,
-                                  itemNameError:"",
-                                unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+                                      onClick={
+                                        this.setState({
+                                            showSearchResults:false,
+                                            showAddedItem:true,
+                                            viewItem:this.state.existingItems[idx]
+                                        })
+                                    }
 
                                         
                                       size="lg"
                                     >
-                                      Edit
+                                      View
                                     </Button>
                                     &nbsp; &nbsp;
-
-                                    <Button
-                                      color="danger"
-                                        onClick={ this.deleteSpecificItem(idx)}
-
-                                        
-                                      size="lg"
-                                    >
-                                      Remove
-                                    </Button>  
 
                                    
 
@@ -445,7 +345,167 @@ deleteSpecificItem= idx => () => {
 
 
                        
-                    
+{this.state.showAddedItem && <p>
+
+<Card className="mx-1">
+<CardBody className="p-2">
+  <h3 align="center"> Add Items</h3>
+  <br />
+  <InputGroup className="mb-3">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText >
+        <b>List Name</b>
+      </InputGroupText>
+    </InputGroupAddon>
+    <Input
+     
+    
+      value={this.state.viewItem.listName.charAt(0).toUpperCase() + this.state.viewItem.listName.slice(1)}
+     disabled
+    />
+  </InputGroup>
+ 
+
+<InputGroup className="mb-2">
+      <InputGroupAddon addonType="prepend">
+        <InputGroupText >
+        <b>  Date of Submission</b>
+        </InputGroupText>
+      </InputGroupAddon>
+
+      &nbsp; &nbsp; &nbsp;
+      <Input
+
+        value={this.state.viewItem.dos.substring(0,10)}
+       disabled
+      />
+
+
+    </InputGroup>
+ 
+  <Table bordered hover>
+    <thead>
+      <tr style={{ 'backgroundColor': "palevioletred" }}>
+        <th className="text-center">
+          <h5> S.No.</h5>{" "}
+        </th>
+        <th className="text-center">
+          {" "}
+          <h5>Item Name </h5>
+        </th>
+        <th className="text-center">
+          <h5>Unit</h5>{" "}
+        </th>
+        <th className="text-center">
+          <h5>Quantity</h5>{" "}
+        </th>
+       
+        <th className="text-center">
+          <h5>Cost/Unit(Rs)</h5>{" "}
+        </th>
+        <th className="text-center">
+          <h5>Total(Rs)</h5>{" "}
+        </th>
+
+
+       
+      </tr>
+    </thead>
+    <tbody>
+      {this.state.viewItem.itemRows.map((item, idx) => (
+        <tr id="addr0" key={idx}>
+          <td align="center">
+            <h4>{idx + 1}</h4>
+          </td>
+          <td   >
+          
+          {this.state.viewItem.itemRows[idx].itemName.label}
+
+
+          </td>
+         
+
+
+          <td>
+           {this.state.viewItem.itemRows[idx].unit}
+              
+            
+          </td>
+
+          <td>
+          {this.state.viewItem.itemRows[idx].quantity}
+          </td>
+
+          <td>
+          {this.state.viewItem.itemRows[idx].costPerItem}
+          </td>
+
+          <td>
+          {this.state.viewItem.itemRows[idx].totalAmount}
+          </td>
+
+       
+        </tr>
+      ))}
+    </tbody>
+  </Table>
+
+
+<InputGroup className="mb-3">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText >
+        <b>Grand Total Amount(Rs)</b>
+      </InputGroupText>
+    </InputGroupAddon>
+    <Input
+      type="text"
+      size="lg"
+     name="grandTotal"
+      id="grandTotal"
+     value={this.state.viewItem.grandTotal}
+      disabled
+
+
+    />
+  </InputGroup>
+
+  <InputGroup className="mb-3">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText >
+        <b>Remarks</b>
+      </InputGroupText>
+    </InputGroupAddon>
+    <Input
+      type="text"
+      size="lg"
+     name="remarks"
+      id="remarks"
+     value={this.state.viewItem.remarks}
+    disabled
+
+    />
+  </InputGroup>
+
+  <br /> <br />
+  <Row>
+    <Col>
+      <Button
+        onClick={e=>{this.setState({showSearchResults:true,
+        showAddedItem:false})}}
+        size="lg"
+        color="secondary"
+        block
+      >
+        Go back
+      </Button>
+    </Col>
+
+   
+  </Row>
+</CardBody>
+
+</Card>
+</p>}
                                         
                
 
@@ -456,189 +516,7 @@ deleteSpecificItem= idx => () => {
             </Row>
           </TabPane>
           <TabPane tabId="2">
-          <Row>
-            {this.state.success && (
-                    <Modal
-                      isOpen={this.state.modalSuccess}
-                      className={"modal-success " + this.props.className}
-                      toggle={this.toggleSuccess}
-                    >
-                      <ModalHeader toggle={this.toggleSuccess}>
-                        Item: {this.state.itemName} Saved Successfully!
-                      </ModalHeader>
-                    </Modal>
-                  )}
-              <Col sm="12">
-             
-                 
-                 
-
-              
-                          
-
-                          <h5> Choose Date Period</h5>
-                          <br/>
-                          <Row>
-                          <InputGroup className="mb-2">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                <b> Start Date</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-
-                              &nbsp; &nbsp; &nbsp;
-                              <DatePicker
-
-                                name="dos"
-                                id="dos"
-                                value={this.state.dos}
-                                onChange={date=>{this.setState({dos:date},()=>{console.log("DOS: "+this.state.dos)})}}
-                              />
-&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
-<InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                <b> End Date</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-
-                              &nbsp; &nbsp; &nbsp; &nbsp;
-                              <DatePicker
-
-                                name="doe"
-                                id="doe"
-                                value={this.state.doe}
-                                onChange={date=>{this.setState({doe:date},()=>{console.log("DOe: "+this.state.doe)})}}
-                              />
-                            </InputGroup>
-                          
-                           {this.state.dateError &&(
-                                <font color="red"><h6>
-                                  {" "}
-                                  <p>{this.state.dateError}</p></h6>
-                                </font>
-                              )}
- </Row>
-
-
-<br/>
-<Row >
-                            <Col>
-                              <Button
-                                onClick={this.submitHandler}
-                                size="lg"
-                                color="success"
-
-                              >
-                                Search
-                              </Button>
-                            </Col>
-
-
-                          </Row>
-                          <br /> <br />
-
-
-{ this.state.showSearchResults &&  <p>
-<h3 align="center"> Existing Items</h3>
-                          <br />
-
-
-                          <Table bordered hover>
-                            <thead>
-                              <tr style={{ 'backgroundColor': "lightgreen" }}>
-                                <th className="text-center">
-                                  <h4> S.No.</h4>{" "}
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Item Name </h4>
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Unit</h4>
-                                </th>
-
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Quantity</h4>
-                                </th>
-
-                                <th className="text-center">
-                                 <h4> Actions</h4>
-
-
-                                </th>
-
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.existingItems.map((item, idx) => (
-                                <tr id="addr0" key={idx}>
-                                  <td align="center">
-                                    <h5>{idx + 1}</h5>
-                                  </td>
-                                  <td align="center">
-                                    <h5> {this.state.existingItems[idx].itemName.charAt(0).toUpperCase() +
-                                      this.state.existingItems[idx].itemName.slice(1)}</h5>
-                                  </td>
-
-                                  <td align="center">
-                                    <h5> {this.state.existingItems[idx].unit}</h5>
-                                  </td>
-
-                                  <td align="center">
-                                    <h5> {this.state.existingItems[idx].quantity}</h5>
-                                  </td>
-
-                                  <td align="center">
-                                  <Button
-                                      color="primary"
-                                        onClick={ ()=>{ this.setState({showEditItem:true,
-                                       itemName: this.state.existingItems[idx].itemName,
-                                      unit:this.state.existingItems[idx].unit,
-                                    itemNo:idx,
-                                  itemNameError:"",
-                                unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
-
-                                        
-                                      size="lg"
-                                    >
-                                      Edit
-                                    </Button>
-                                    &nbsp; &nbsp;
-
-                                    <Button
-                                      color="danger"
-                                        onClick={ this.deleteSpecificItem(idx)}
-
-                                        
-                                      size="lg"
-                                    >
-                                      Remove
-                                    </Button>  
-
-                                   
-
-
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                       
-</p>
-
-      }
-
-                                      
-                                        
-               
-
-
- 
-
-              </Col>
-            </Row></TabPane>
+        </TabPane>
         </TabContent>
 
         

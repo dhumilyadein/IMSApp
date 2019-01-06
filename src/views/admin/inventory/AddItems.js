@@ -338,7 +338,7 @@ this.setState({grandTotal:amount})
                               type="text"
                               size="lg"
                               label="List Name"
-                              name="listName"
+                              
                               name="listName"
                               id="listName"
                               value={this.state.listName.charAt(0).toUpperCase() + this.state.listName.slice(1)}

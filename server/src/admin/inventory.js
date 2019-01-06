@@ -157,6 +157,57 @@ return res.send({error:err});
 
 
 }
+async function getAddedItems(req,res)
+{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
+
+
+
+  PurchaseItems
+.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } }] })
+  
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+}
+
+
+async function getConsumedItems(req,res)
+{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
+
+
+
+  Items
+.updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
+  {$set: {itemName:req.body.itemName,
+          unit:req.body.unit,
+           }}
+  )
+.then(data => {
+
+return res.send({msg:"Item Updated"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+}
 
 
 
@@ -166,6 +217,9 @@ return res.send({error:err});
   app.post("/api/deleteItem", deleteItem);
   app.post("/api/editItem", editItem);
   app.post("/api/consumeItem", consumeItem);
+  app.post("/api/getAddedItems", getAddedItems);
+  app.post("/api/getConsumedItems", getConsumedItems);
+ 
   
 
 
