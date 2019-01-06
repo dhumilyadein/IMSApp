@@ -46,7 +46,7 @@ this.getItems();
    docError:"",
       itemNo:"",
       items:[],
-      doc:Date.now(),
+      doc:new Date(Date.now()),
      quantityError: "",
      availableQuantity:"",
      remarks:""

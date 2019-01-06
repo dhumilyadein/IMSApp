@@ -70,7 +70,7 @@ paidAmount:"",
 pastPendingDue:"0",
 paidAmount:"",
 remarks:"",
-dos:Date.now(),
+dos:new Date(Date.now()),
 yearError:"",
 quarterError:"",
 halfYearError:"",
@@ -133,7 +133,7 @@ selectedFeeTemplate:[],
         pastPendingDue:"",
         paidAmount:"",
         remarks:"",
-        dos:Date.now(),
+        dos:new Date(Date.now()),
         yearError:"",
         quarterError:"",
         halfYearError:"",
@@ -1065,10 +1065,10 @@ axios
                               &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
-                                name="doj"
-                                id="doj"
+                                name="dos"
+                                id="dos"
                                 value={this.state.dos}
-                                onChange={date=>{this.setState({dos:date})}}
+                                onChange={date=>{this.setState({dos:new Date(date)})}}
                               />
 
 

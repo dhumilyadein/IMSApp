@@ -106,7 +106,14 @@ export default {
           url: '/admin/inventory/ConsumeItems',
           icon: 'icon-basket-loaded',
           variant: 'success',
-        }]},
+        },
+        {
+          name: 'History',
+          url: '/admin/inventory/ItemHistory',
+          icon: 'icon-basket-loaded',
+          variant: 'success',
+        }
+      ]},
 
         {
           name: 'Class Management',

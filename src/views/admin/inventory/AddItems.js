@@ -37,7 +37,7 @@ class AddItems extends Component {
       success: null,
 
      grandTotal:"",
-     dos:Date.now(),
+     dos:new Date(Date.now()),
       listName: "",
       rows: [{ itemName:"",
       quantity:"",
@@ -104,7 +104,7 @@ this.setState({
       success: null,
 
      grandTotal:"",
-     dos:Date.now(),
+     dos:new Date(Date.now()),
       listName: "",
       rows: [{ itemName:"",
       quantity:"",
