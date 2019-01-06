@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Button,
   Card,
@@ -47,7 +48,8 @@ this.getItems();
       items:[],
       doc:Date.now(),
      quantityError: "",
-     availableQuantity:""
+     availableQuantity:"",
+     remarks:""
 
     };
 
@@ -88,51 +90,78 @@ this.getItems();
   }
 
   submitHandler(e) {
-    var submit = true;
-    console.log("in Submit State: " + JSON.stringify(this.state));
 
-    this.setState({
-      itemNameError: "", quantityError: "", success: false,
-      modalSuccess: false, docError:""
-    }, () => {
-      if (!this.state.itemName) {
-        this.setState({ itemNameError: "Please Select Item" });
-        submit = false;}
 
-        if (!this.state.quantity) {
-            this.setState({ quantityError: "Please Enter Quantity" });
-            submit = false;}
+    confirmAlert({
+      title: 'Confirm to Proceed',
+      message: 'Are you sure to Consume this Item?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => 
+         {
 
-            if (!this.state.doc) {
-              this.setState({ docError: "Please Select Date" });
+
+          var submit = true;
+          console.log("in Submit State: " + JSON.stringify(this.state));
+      
+          this.setState({
+            itemNameError: "", quantityError: "", success: false,
+            modalSuccess: false, docError:""
+          }, () => {
+            if (!this.state.itemName) {
+              this.setState({ itemNameError: "Please Select Item" });
               submit = false;}
-
-              if(parseInt(this.state.availableQuantity)===0||parseInt(this.state.quantity)>parseInt(this.state.availableQuantity))
-              {
-                this.setState({ quantityError: "You can't consume more than Available quantity" });
-                submit=false;
-              }
-
-      if (submit === true) {
-        console.log("Consuming Item: ");
-        axios
-          .post("http://localhost:8001/api/consumeItem", {"itemName":this.state.itemName,"consumedQuantity":this.state.quantity,
-        "availableQuantity":parseInt(this.state.availableQuantity)-parseInt(this.state.quantity),"doc":this.state.doc, "unit":this.state.unit
-      })
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-
-           if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-
-              },()=>{this.getItems()});
-
+      
+              if (!this.state.quantity) {
+                  this.setState({ quantityError: "Please Enter Quantity" });
+                  submit = false;}
+      
+                  if (!this.state.doc) {
+                    this.setState({ docError: "Please Select Date" });
+                    submit = false;}
+      
+                    if(parseInt(this.state.availableQuantity)===0||parseInt(this.state.quantity)>parseInt(this.state.availableQuantity))
+                    {
+                      this.setState({ quantityError: "You can't consume more than Available quantity" });
+                      submit=false;
+                    }
+      
+            if (submit === true) {
+              console.log("Consuming Item: ");
+              axios
+                .post("http://localhost:8001/api/consumeItem", {"itemName":this.state.itemName,"consumedQuantity":this.state.quantity,
+              "availableQuantity":parseInt(this.state.availableQuantity)-parseInt(this.state.quantity),
+              "remarks":this.state.remarks,"doc":this.state.doc, "unit":this.state.unit
+            })
+                .then(result => {
+                  console.log("RESULT.data " + JSON.stringify(result.data));
+      
+                 if (result.data.msg === "Success")
+                    this.setState({
+      
+                      success: true,
+                      modalSuccess: true,
+      
+                    },()=>{this.getItems()});
+      
+                });
+            }
           });
       }
-    });
+        },
+        {
+          label: 'No',
+          onClick: () =>  {this.getItems();}
+        }
+      ]
+    })
+   
+  
+
+
+
+
   }
 
 
@@ -322,6 +351,29 @@ var tempUnit,tempQuantity;
                                   <p>{this.state.docError}</p></h6>
                                 </font>
                               )}
+
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Remarks</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="remarks"
+                              id="remarks"
+                             value={this.state.remarks}
+                             onChange={e => {
+                                this.setState(
+                                  { remarks: e.target.value })}}
+
+
+                            />
+                          </InputGroup>
+
+
+
                               <br/>
 
 <Row >

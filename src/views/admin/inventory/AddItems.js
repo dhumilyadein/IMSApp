@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 
 import {
   Button,
@@ -140,6 +142,7 @@ this.setState({
   }
 
   submitHandler(e) {
+
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
     console.log("Row Length: " + this.state.rows.length);
@@ -176,31 +179,52 @@ this.setState({
             break;
           }
         }
+        if (submit === true) {
 
-      if (submit === true) {
-        console.log("Submitting Items: ");
-        axios
-          .post("http://localhost:8001/api/addItems", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-            if(result.data.errors)
-            {if (result.data.errors.listName)
-              this.setState({
-                listNameError:result.data.errors.listName.message
-              });}
-             else if (result.data.msg === "Success")
-              this.setState({
+    confirmAlert({
+        title: 'Confirm to Proceed',
+        message: 'Are you sure to Add these Items?',
+        buttons: [
+          {
+            label: 'Yes',
+            onClick: () => 
+            
+          {
+           
+                console.log("Submitting Items: ");
+                axios
+                  .post("http://localhost:8001/api/addItems", this.state)
+                  .then(result => {
+                    console.log("RESULT.data " + JSON.stringify(result.data));
+                    if(result.data.errors)
+                    {if (result.data.errors.listName)
+                      this.setState({
+                        listNameError:result.data.errors.listName.message
+                      });}
+                     else if (result.data.msg === "Success")
+                      this.setState({
+        
+                        success: true,
+                        modalSuccess: true,
+        
+                      });
+        
+                  });
+              }
+           
+          },
+          {
+            label: 'No',
+            onClick: () =>  {this.getExistingItems();}
+          }
+        ]
+      })}
 
-                success: true,
-                modalSuccess: true,
 
-              });
 
-          });
-      }
-    });
+  
+  });
   }
-
 
 
   handleChange = idx => e => {

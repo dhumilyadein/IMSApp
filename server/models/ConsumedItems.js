@@ -42,6 +42,13 @@ var ConsumedItemsSchema = new Schema({
 
   },
 
+  remarks:{
+    type: String,
+    trim:true,
+   
+
+  },
+
 
 
 
