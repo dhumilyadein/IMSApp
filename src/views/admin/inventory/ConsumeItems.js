@@ -41,7 +41,7 @@ this.getItems();
       success: false,
       modalSuccess: false,
       visible: false,
-      
+      quantity:"",
       existingItems:[],
    docError:"",
       itemNo:"",
@@ -62,10 +62,10 @@ this.getItems();
     this.onDismiss = this.onDismiss.bind(this);
 
 
-   
 
 
-    
+
+
 
 
   }
@@ -98,13 +98,13 @@ this.getItems();
       buttons: [
         {
           label: 'Yes',
-          onClick: () => 
+          onClick: () =>
          {
 
 
           var submit = true;
           console.log("in Submit State: " + JSON.stringify(this.state));
-      
+
           this.setState({
             itemNameError: "", quantityError: "", success: false,
             modalSuccess: false, docError:""
@@ -112,21 +112,21 @@ this.getItems();
             if (!this.state.itemName) {
               this.setState({ itemNameError: "Please Select Item" });
               submit = false;}
-      
+
               if (!this.state.quantity) {
                   this.setState({ quantityError: "Please Enter Quantity" });
                   submit = false;}
-      
+
                   if (!this.state.doc) {
                     this.setState({ docError: "Please Select Date" });
                     submit = false;}
-      
+
                     if(parseInt(this.state.availableQuantity)===0||parseInt(this.state.quantity)>parseInt(this.state.availableQuantity))
                     {
                       this.setState({ quantityError: "You can't consume more than Available quantity" });
                       submit=false;
                     }
-      
+
             if (submit === true) {
               console.log("Consuming Item: ");
               axios
@@ -136,15 +136,17 @@ this.getItems();
             })
                 .then(result => {
                   console.log("RESULT.data " + JSON.stringify(result.data));
-      
+
                  if (result.data.msg === "Success")
                     this.setState({
-      
+
                       success: true,
                       modalSuccess: true,
-      
+                      itemName: "",
+      unit:"", quantity:"", availableQuantity:"", remarks:""
+
                     },()=>{this.getItems()});
-      
+
                 });
             }
           });
@@ -156,8 +158,8 @@ this.getItems();
         }
       ]
     })
-   
-  
+
+
 
 
 
@@ -165,7 +167,7 @@ this.getItems();
   }
 
 
-  
+
 
 
   getItems() {
@@ -183,7 +185,7 @@ this.getItems();
             this.setState({
             items: temp,
             existingItems: result.data
-          
+
           });
         }
       });
@@ -203,7 +205,7 @@ this.getItems();
         <Container>
           <Row className="justify-content-center" lg="2">
             <Col md="12">
-        
+
              <Card className="mx-4">
                 <CardBody className="p-4">
                   <h1>Inventory Management</h1>
@@ -219,7 +221,7 @@ this.getItems();
                       </ModalHeader>
                     </Modal>
                   )}
-                 
+
 
 
 
@@ -227,28 +229,28 @@ this.getItems();
                         <CardBody className="p-2">
                           <h3 align="center"> Consume Item</h3>
                           <br />
-                         
-                            <Select  
+
+                            <Select
                             id="itemName"
                             name="itemName"
-                              
+
                           placeholder="Select Item"
                             options={this.state.items}
                           closeMenuOnSelect={true}
                         // value={this.state.rows[idx].itemName}
-                        
+
                               isSearchable={true}
-                            
+
                             onChange={selectedItem=>{
 var tempUnit,tempQuantity;
-                                             for(var i=0;i<this.state.existingItems.length;i++)  
+                                             for(var i=0;i<this.state.existingItems.length;i++)
                                              {if(this.state.existingItems[i].itemName===selectedItem.value)
                                              { tempUnit=this.state.existingItems[i].unit;
                                               tempQuantity= this.state.existingItems[i].quantity;
                                               break;}
-                                            }   
+                                            }
 
-                            
+
                                 this.setState(
                                   {
                                     itemName: selectedItem.value,
@@ -258,7 +260,7 @@ var tempUnit,tempQuantity;
 
                             }}
                             />
-                       
+
                           {this.state.itemNameError && (
                             <font color="red">
                               <h6>
@@ -299,7 +301,7 @@ var tempUnit,tempQuantity;
                               value={this.state.availableQuantity}
                            disabled                            />
                           </InputGroup>
-                        
+
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
@@ -314,7 +316,7 @@ var tempUnit,tempQuantity;
                               value={this.state.quantity}
                             onChange={e=>{
                               if(e.target.value)
-                              
+
                               this.setState({quantity:e.target.value
                              })}}
                             />
@@ -416,7 +418,7 @@ var tempUnit,tempQuantity;
                                   <h4>Quantity</h4>
                                 </th>
 
-                             
+
 
                               </tr>
                             </thead>
@@ -443,7 +445,7 @@ var tempUnit,tempQuantity;
                               ))}
                             </tbody>
                           </Table>
-                       
+
 
 
 
@@ -453,22 +455,22 @@ var tempUnit,tempQuantity;
                         </CardBody>
 
                       </Card>
-                                        
-               
+
+
 
 
 
                 </CardBody>
               </Card>
-                                        
+
               </Col>
           </Row>
-        </Container>                  
+        </Container>
 
 
 
 
-        
+
       </div>
     );
   }

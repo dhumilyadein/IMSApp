@@ -22,11 +22,11 @@ for(var i=0;i<req.body.rows.length;i++)
   await Items
   .updateOne({itemName:req.body.rows[i].itemName.value},
     {$inc: {quantity:req.body.rows[i].quantity
-           
+
              }}
     )
   .then(data => {
-   
+
 
 
   })
@@ -79,8 +79,8 @@ async function createItem(req, res) {
 
     Items
     .updateOne({itemName:req.body.itemName},
-      {$inc: {quantity:-1*parseInt(req.body.consumedQuantity) 
-             
+      {$inc: {quantity:-1*parseInt(req.body.consumedQuantity)
+
                }}
       )
     .then(data => {
@@ -92,16 +92,16 @@ async function createItem(req, res) {
      .catch(err => {
        return res.send(err);
      });
-  
-  
+
+
     })
     .catch(err => {
     return res.send({error:err});
     });
-  
+
     }
 
-  
+
 function existingItems(req, res) {
   console.log("in existingItems ");
 
@@ -164,7 +164,7 @@ async function getAddedItems(req,res)
 
   PurchaseItems
 .find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } }] })
-  
+
 .then(data => {
 
 return res.send({data});
@@ -183,23 +183,22 @@ return res.send({error:err});
 
 
 async function getConsumedItems(req,res)
-{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
+{console.log("In getConsumedItems for: "+ JSON.stringify(req.body));
 
 
 
-  Items
-.updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
-  {$set: {itemName:req.body.itemName,
-          unit:req.body.unit,
-           }}
-  )
+
+ConsumedItems
+.find({ $and: [ { doc: { $gte : new Date(req.body.dos) } }, { doc: { $lte : new Date(req.body.doe) } }] })
+
 .then(data => {
 
-return res.send({msg:"Item Updated"});
+return res.send({data});
 })
 .catch(err => {
 return res.send({error:err});
 });
+
 
 
 
@@ -219,8 +218,8 @@ return res.send({error:err});
   app.post("/api/consumeItem", consumeItem);
   app.post("/api/getAddedItems", getAddedItems);
   app.post("/api/getConsumedItems", getConsumedItems);
- 
-  
+
+
 
 
 
