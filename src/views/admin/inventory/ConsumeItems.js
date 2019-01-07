@@ -49,7 +49,8 @@ this.getItems();
       doc:new Date(Date.now()),
      quantityError: "",
      availableQuantity:"",
-     remarks:""
+     remarks:"",
+     quantity:""
 
     };
 
@@ -154,7 +155,7 @@ this.getItems();
         },
         {
           label: 'No',
-          onClick: () =>  {this.getItems();}
+        
         }
       ]
     })

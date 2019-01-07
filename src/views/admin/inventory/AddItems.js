@@ -215,7 +215,7 @@ this.setState({
           },
           {
             label: 'No',
-            onClick: () =>  {this.getExistingItems();}
+          
           }
         ]
       })}

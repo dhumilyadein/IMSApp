@@ -208,6 +208,30 @@ const CreateItems = Loadable({
   loader: () => import("./views/admin/inventory/CreateItems"),
   loading: Loading
 });
+const AddBook = Loadable({
+  loader: () => import("./views/admin/library/AddBook"),
+  loading: Loading
+});
+
+const ImportBulkBooks = Loadable({
+  loader: () => import("./views/admin/library/ImportBulkBooks"),
+  loading: Loading
+});
+
+const IssueBooks = Loadable({
+  loader: () => import("./views/admin/library/IssueBooks"),
+  loading: Loading
+});
+
+const ReturnBooks = Loadable({
+  loader: () => import("./views/admin/library/ReturnBooks"),
+  loading: Loading
+});
+
+const SearchBooks = Loadable({
+  loader: () => import("./views/admin/library/SearchBooks"),
+  loading: Loading
+});
 
 const ItemHistory = Loadable({
   loader: () => import("./views/admin/inventory/ItemHistory"),
@@ -248,6 +272,17 @@ const ClassDetails = Loadable({
 const routes = [
 
   { path: "/admin", exact: true, name: "Admin", component: RegisterUser },
+
+  { path: "/admin/library/AddBook", exact: true, name: "Add Book", component: AddBook },
+  { path: "/admin/library/ImportBulkBooks", exact: true, name: "Import Bulk Books", component: ImportBulkBooks },
+  
+  { path: "/admin/library/IssueBooks", exact: true, name: "Issue Books", component: IssueBooks },
+  { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
+  { path: "/admin/library/SearchBooks", exact: true, name: "Search/Edit Books", component: SearchBooks },
+
+
+
+
 
   {
     path: "/admin/inventory/AddItems",
