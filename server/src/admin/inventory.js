@@ -1,4 +1,5 @@
 const PurchaseItems = require("../../models/PurchaseItems");
+const ConsumedItems = require("../../models/ConsumedItems");
 const Items = require("../../models/Items");
 
 module.exports = function (app) {
@@ -15,17 +16,37 @@ var template = {
 var addItem = new PurchaseItems(template);
 
 
+for(var i=0;i<req.body.rows.length;i++)
+{
+
+  await Items
+  .updateOne({itemName:req.body.rows[i].itemName.value},
+    {$inc: {quantity:req.body.rows[i].quantity
+
+             }}
+    )
+  .then(data => {
 
 
 
-await addItem
-  .save()
-  .then(user => {
-      return res.send({msg:"Success"});
   })
   .catch(err => {
-    return res.send(err);
+  return res.send({error:err});
   });
+
+
+
+}
+
+addItem
+.save()
+.then(user => {
+    return res.send({msg:"Success"});
+})
+.catch(err => {
+  return res.send(err);
+});
+
 
 }
 
@@ -53,8 +74,34 @@ async function createItem(req, res) {
 
   }
 
+  async function consumeItem(req, res) {
+    console.log("in consumeItem Req.body: "+JSON.stringify(req.body))
 
-  
+    Items
+    .updateOne({itemName:req.body.itemName},
+      {$inc: {quantity:-1*parseInt(req.body.consumedQuantity)
+
+               }}
+      )
+    .then(data => {
+     var consumeItems = new ConsumedItems(req.body);
+     consumeItems.save()
+     .then(user => {
+         return res.send({msg:"Success"});
+     })
+     .catch(err => {
+       return res.send(err);
+     });
+
+
+    })
+    .catch(err => {
+    return res.send({error:err});
+    });
+
+    }
+
+
 function existingItems(req, res) {
   console.log("in existingItems ");
 
@@ -91,11 +138,9 @@ async function editItem(req,res)
 
   Items
 .updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
-  {$set: {templateName:req.body.templateName,
-          templateRows:req.body.editRows,
-          templateType:req.body.templateType
-
-  }}
+  {$set: {itemName:req.body.itemName,
+          unit:req.body.unit,
+           }}
   )
 .then(data => {
 
@@ -112,6 +157,56 @@ return res.send({error:err});
 
 
 }
+async function getAddedItems(req,res)
+{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
+
+
+
+  PurchaseItems
+.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } }] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+}
+
+
+async function getConsumedItems(req,res)
+{console.log("In getConsumedItems for: "+ JSON.stringify(req.body));
+
+
+
+
+ConsumedItems
+.find({ $and: [ { doc: { $gte : new Date(req.body.dos) } }, { doc: { $lte : new Date(req.body.doe) } }] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+
+}
 
 
 
@@ -120,6 +215,11 @@ return res.send({error:err});
   app.get("/api/existingItems", existingItems);
   app.post("/api/deleteItem", deleteItem);
   app.post("/api/editItem", editItem);
+  app.post("/api/consumeItem", consumeItem);
+  app.post("/api/getAddedItems", getAddedItems);
+  app.post("/api/getConsumedItems", getConsumedItems);
+
+
 
 
 

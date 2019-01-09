@@ -82,7 +82,43 @@ export default {
        {
       divider: true,
     },
+    {
+      name: 'Manage Library',
+      url: '/library',
+      icon: 'icon-basket-loaded',
 
+      children: [
+        {
+          name: 'Add Book',
+          url: '/admin/library/AddBook',
+          icon: 'icon-bag',
+          variant: 'success',
+        },
+        {
+          name: 'Import Bulk Books',
+          url: '/admin/library/ImportBulkBooks',
+          icon: 'icon-bag',
+          variant: 'success',
+        },
+        {
+          name: 'Issue Books',
+          url: '/admin/library/IssueBooks',
+          icon: 'icon-basket-loaded',
+          variant: 'success',
+        },
+        {
+          name: 'Return Books',
+          url: '/admin/library/ReturnBooks',
+          icon: 'icon-basket-loaded',
+          variant: 'success',
+        },
+        {
+          name: 'Search/Edit Books',
+          url: '/admin/library/SearchBooks',
+          icon: 'icon-basket-loaded',
+          variant: 'success',
+        }
+      ]},
     {
       name: 'Manage Inventory',
       url: '/inventory',
@@ -102,11 +138,18 @@ export default {
           variant: 'success',
         },
         {
-          name: 'View/Edit Items',
-          url: '/admin/inventory/ViewItems',
+          name: 'Consume Items',
+          url: '/admin/inventory/ConsumeItems',
           icon: 'icon-basket-loaded',
           variant: 'success',
-        }]},
+        },
+        {
+          name: 'History',
+          url: '/admin/inventory/ItemHistory',
+          icon: 'icon-basket-loaded',
+          variant: 'success',
+        }
+      ]},
 
         {
           name: 'Class Management',

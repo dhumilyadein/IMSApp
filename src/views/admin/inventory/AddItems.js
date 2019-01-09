@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 
 import {
   Button,
@@ -28,14 +30,14 @@ import axios from "axios";
 class AddItems extends Component {
   constructor(props) {
     super(props);
-
+    this.getExistingItems();
     this.state = {
 
       erorrs: null,
       success: null,
 
      grandTotal:"",
-     dos:Date.now(),
+     dos:new Date(Date.now()),
       listName: "",
       rows: [{ itemName:"",
       quantity:"",
@@ -50,7 +52,9 @@ class AddItems extends Component {
       success: false,
       modalSuccess: false,
       visible: false,
-      dosError:""
+      dosError:"",
+      existingItems:[],
+      allItemsData:[]
 
 
     };
@@ -65,12 +69,32 @@ class AddItems extends Component {
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
+    this.getExistingItems = this.getExistingItems.bind(this);
+    
 
 
 
 
+  }
 
+  getExistingItems() {
 
+    axios
+      .get("http://localhost:8001/api/existingItems")
+      .then(result => {
+        console.log("Existing RESULT.data " + JSON.stringify(result.data));
+        if (result.data) {
+ var temp=[];
+  for(var i=0;i<result.data.length;i++)
+   temp.push({"label":result.data[i].itemName.charAt(0).toUpperCase()+result.data[i].itemName.slice(1),
+  "value": result.data[i].itemName})
+
+            this.setState({
+            existingItems: temp,
+            allItemsData:result.data
+          });
+        }
+      });
   }
 
   reset()
@@ -80,7 +104,7 @@ this.setState({
       success: null,
 
      grandTotal:"",
-     dos:Date.now(),
+     dos:new Date(Date.now()),
       listName: "",
       rows: [{ itemName:"",
       quantity:"",
@@ -118,6 +142,7 @@ this.setState({
   }
 
   submitHandler(e) {
+
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
     console.log("Row Length: " + this.state.rows.length);
@@ -154,31 +179,52 @@ this.setState({
             break;
           }
         }
+        if (submit === true) {
 
-      if (submit === true) {
-        console.log("Submitting Items: ");
-        axios
-          .post("http://localhost:8001/api/addItems", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-            if(result.data.errors)
-            {if (result.data.errors.listName)
-              this.setState({
-                listNameError:result.data.errors.listName.message
-              });}
-             else if (result.data.msg === "Success")
-              this.setState({
+    confirmAlert({
+        title: 'Confirm to Proceed',
+        message: 'Are you sure to Add these Items?',
+        buttons: [
+          {
+            label: 'Yes',
+            onClick: () => 
+            
+          {
+           
+                console.log("Submitting Items: ");
+                axios
+                  .post("http://localhost:8001/api/addItems", this.state)
+                  .then(result => {
+                    console.log("RESULT.data " + JSON.stringify(result.data));
+                    if(result.data.errors)
+                    {if (result.data.errors.listName)
+                      this.setState({
+                        listNameError:result.data.errors.listName.message
+                      });}
+                     else if (result.data.msg === "Success")
+                      this.setState({
+        
+                        success: true,
+                        modalSuccess: true,
+        
+                      });
+        
+                  });
+              }
+           
+          },
+          {
+            label: 'No',
+          
+          }
+        ]
+      })}
 
-                success: true,
-                modalSuccess: true,
 
-              });
 
-          });
-      }
-    });
+  
+  });
   }
-
 
 
   handleChange = idx => e => {
@@ -292,7 +338,7 @@ this.setState({grandTotal:amount})
                               type="text"
                               size="lg"
                               label="List Name"
-                              name="listName"
+                              
                               name="listName"
                               id="listName"
                               value={this.state.listName.charAt(0).toUpperCase() + this.state.listName.slice(1)}
@@ -329,8 +375,8 @@ this.setState({grandTotal:amount})
                               &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
-                                name="doj"
-                                id="doj"
+                                name="dos"
+                                id="dos"
                                 value={this.state.dos}
                                 onChange={date=>{this.setState({dos:date},()=>{console.log("DOS: "+this.state.dos)})}}
                               />
@@ -363,13 +409,14 @@ this.setState({grandTotal:amount})
                                   <h5>Item Name </h5>
                                 </th>
                                 <th className="text-center">
-                                  <h5>Quantity</h5>{" "}
-                                </th>
-                                <th className="text-center">
                                   <h5>Unit</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h5>Cost/Item(Rs)</h5>{" "}
+                                  <h5>Quantity</h5>{" "}
+                                </th>
+                               
+                                <th className="text-center">
+                                  <h5>Cost/Unit(Rs)</h5>{" "}
                                 </th>
                                 <th className="text-center">
                                   <h5>Total(Rs)</h5>{" "}
@@ -397,24 +444,64 @@ this.setState({grandTotal:amount})
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
-                                  <td>
-                                  <Select
-                            id="itemName"
+                                  <td   style={{width:"200px"}}>
+                                  
+                                   <Select                            id="itemName"
                             name="itemName"
-
-                          placeholder="Select Fee Template"
-                            options={this.state.feeTemplates}
+                              
+                          placeholder="Select Item"
+                            options={this.state.existingItems}
                           closeMenuOnSelect={true}
-                         value={this.state.selectedFeeTemplate}
+                         value={this.state.rows[idx].itemName}
                          isClearable={true}
-                         //menuIsOpen ={this.state.studentOpen}
-                            isSearchable={true}
+                              isSearchable={true}
+                            
+                            onChange={selectedItem=>{
 
-                            onChange={this.feeTemplateSelectHandler}
+                              
+                                const temp = this.state.rows;
+                                temp[idx]["itemName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
+                                selectedItem.value.slice(1),"value":selectedItem.value};
+
+                                for(var i=0;i<this.state.allItemsData.length;i++)
+                                {
+                                    if(this.state.allItemsData[i].itemName===selectedItem.value)
+                                    {
+                                        temp[idx]["unit"]=this.state.allItemsData[i].unit;
+                                        break;
+                                    }
+                                }
+
+                            
+                                this.setState(
+                                  {
+                                    rows: temp
+                                  })
+
+                            }}
                             />
 
 
                                   </td>
+                                 
+
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="unit"
+                                        type="text"
+                                        className="form-control"
+                                        value={this.state.rows[idx].unit}
+                                      
+                                        style={{textAlign:'center'}}
+                                        id="unit"
+                                        size="lg"
+                                        disabled
+                                      />
+                                    </InputGroup>
+                                  </td>
+
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
@@ -425,22 +512,6 @@ this.setState({grandTotal:amount})
                                         onChange={this.handleChange(idx)}
                                         style={{textAlign:'center'}}
                                         id="quantity"
-                                        size="lg"
-                                      />
-                                    </InputGroup>
-                                  </td>
-
-
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="unit"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].unit}
-                                        onChange={this.handleChange(idx)}
-                                        style={{textAlign:'center'}}
-                                        id="unit"
                                         size="lg"
                                       />
                                     </InputGroup>

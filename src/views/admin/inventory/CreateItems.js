@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
-import AutosizeInput from 'react-input-autosize';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Button,
   Card,
@@ -57,7 +58,7 @@ this.getExistingItems();
     this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
     this.editHandler = this.editHandler.bind(this);
 
-    
+
 
 
   }
@@ -106,10 +107,12 @@ this.getExistingItems();
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
-            if (result.data.code===11000)
+            if(result.data.errors)
+            {
+            if(result.data.errors.itemName)
               this.setState({
-                itemNameError:"Item Name already exists! Please use another."
-              });
+                itemNameError:result.data.errors.itemName.message
+              });}
              else if (result.data.msg === "Success")
               this.setState({
 
@@ -142,18 +145,23 @@ this.getExistingItems();
 
 
       if (submit === true) {
-        console.log("Updating Item: ");
+        console.log("Updating Item: "+ JSON.stringify(this.state));
         axios
-          .post("http://localhost:8001/api/editItem", {"ItemName":this.state.itemName,"unit":this.state.unit, 
+          .post("http://localhost:8001/api/editItem", {"itemName":this.state.itemName,"unit":this.state.unit,
           "existingItems":this.state.existingItems,"itemNo":this.state.itemNo})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
-
-             if (result.data.msg === "Success")
+           if(result.data.error)
+          {  if(result.data.error.code===11000)
+            this.setState({
+              itemNameError:"Item name already in use"
+            });}
+           else  if (result.data.msg === "Item Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
+                showEditItem:false
 
               },()=>{this.getExistingItems()});
 
@@ -179,14 +187,31 @@ this.getExistingItems();
 
 
 deleteSpecificItem= idx => () => {
-  axios
-  .post("http://localhost:8001/api/deleteItem",{"itemName":this.state.existingItems[idx].itemName})
-  .then(result => {
-    console.log("Existing RESULT.data " + JSON.stringify(result.data));
-    if (result.data.msg==="Item Deleted")
-      this.getExistingItems();
 
+  confirmAlert({
+    title: 'Confirm to Remove',
+    message: 'Are you sure to Remove this Item?',
+    buttons: [
+      {
+        label: 'Yes',
+        onClick: () =>
+
+        axios
+        .post("http://localhost:8001/api/deleteItem",{"itemName":this.state.existingItems[idx].itemName})
+        .then(result => {
+          console.log("Existing RESULT.data " + JSON.stringify(result.data));
+          if (result.data.msg==="Item Deleted")
+            this.getExistingItems();
+
+        })
+      },
+      {
+        label: 'No',
+        onClick: () =>  {this.getExistingItems();}
+      }
+    ]
   })
+
 
 }
 
@@ -202,7 +227,7 @@ deleteSpecificItem= idx => () => {
         <Container>
           <Row className="justify-content-center" lg="2">
             <Col md="12">
-        
+
              <Card className="mx-4">
                 <CardBody className="p-4">
                   <h1>Inventory Management</h1>
@@ -218,7 +243,7 @@ deleteSpecificItem= idx => () => {
                       </ModalHeader>
                     </Modal>
                   )}
-                 
+
 
 
                   {!this.state.showEditItem &&  (
@@ -370,9 +395,11 @@ deleteSpecificItem= idx => () => {
                                         onClick={ ()=>{ this.setState({showEditItem:true,
                                        itemName: this.state.existingItems[idx].itemName,
                                       unit:this.state.existingItems[idx].unit,
-                                    itemNo:idx},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+                                    itemNo:idx,
+                                  itemNameError:"",
+                                unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
 
-                                        
+
                                       size="lg"
                                     >
                                       Edit
@@ -383,13 +410,13 @@ deleteSpecificItem= idx => () => {
                                       color="danger"
                                         onClick={ this.deleteSpecificItem(idx)}
 
-                                        
+
                                       size="lg"
                                     >
                                       Remove
-                                    </Button>  
+                                    </Button>
 
-                                   
+
 
 
                                   </td>
@@ -397,7 +424,7 @@ deleteSpecificItem= idx => () => {
                               ))}
                             </tbody>
                           </Table>
-                       
+
 
 
 
@@ -407,13 +434,13 @@ deleteSpecificItem= idx => () => {
                         </CardBody>
 
                       </Card>
-                                        
+
                    ) }
 
 {this.state.showEditItem && (
   <Card className="mx-1">
   <CardBody className="p-2">
-    
+
     <h3 align="center"> Edit Item</h3>
                             <br />
                             <InputGroup className="mb-3">
@@ -425,9 +452,9 @@ deleteSpecificItem= idx => () => {
                               <Input
                                 type="text"
                                 size="lg"
-  
+
                                 name="itemName"
-  
+
                                 id="itemName"
                                 value={this.state.itemName.charAt(0).toUpperCase() + this.state.itemName.slice(1)}
                                 onChange={e => {
@@ -445,7 +472,7 @@ deleteSpecificItem= idx => () => {
                                 </h6>{" "}
                               </font>
                             )}
-  
+
   <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -461,7 +488,7 @@ deleteSpecificItem= idx => () => {
                                 onChange={e => {
                                   this.setState(
                                     { unit: e.target.value }
-                                    
+
                                   );
                                 }}
                               />
@@ -486,7 +513,7 @@ deleteSpecificItem= idx => () => {
                                   Update
                                 </Button>
                               </Col>
-  
+
                               <Col>
                                 <Button
                                   onClick={()=>{this.setState({showEditItem:false,itemName:"",unit:""})}}
@@ -497,28 +524,28 @@ deleteSpecificItem= idx => () => {
                                   Cancel
                                 </Button>
                               </Col>
-  
-  
+
+
                             </Row>
-                            
-  
-  
-  
+
+
+
+
     </CardBody></Card>
-  
+
 )}
 
                 </CardBody>
               </Card>
-                                        
+
               </Col>
           </Row>
-        </Container>                  
+        </Container>
 
 
 
 
-        
+
       </div>
     );
   }

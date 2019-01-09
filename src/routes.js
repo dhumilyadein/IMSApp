@@ -208,6 +208,37 @@ const CreateItems = Loadable({
   loader: () => import("./views/admin/inventory/CreateItems"),
   loading: Loading
 });
+const AddBook = Loadable({
+  loader: () => import("./views/admin/library/AddBook"),
+  loading: Loading
+});
+
+const ImportBulkBooks = Loadable({
+  loader: () => import("./views/admin/library/ImportBulkBooks"),
+  loading: Loading
+});
+
+const IssueBooks = Loadable({
+  loader: () => import("./views/admin/library/IssueBooks"),
+  loading: Loading
+});
+
+const ReturnBooks = Loadable({
+  loader: () => import("./views/admin/library/ReturnBooks"),
+  loading: Loading
+});
+
+const SearchBooks = Loadable({
+  loader: () => import("./views/admin/library/SearchBooks"),
+  loading: Loading
+});
+
+const ItemHistory = Loadable({
+  loader: () => import("./views/admin/inventory/ItemHistory"),
+  loading: Loading
+});
+
+
 
 const SearchUser = Loadable({
   loader: () => import("./views/admin/searchuser/SearchUser"),
@@ -225,8 +256,8 @@ const AddItems = Loadable({
   loading: Loading
 });
 
-const ViewItems = Loadable({
-  loader: () => import("./views/admin/inventory/ViewItems"),
+const ConsumeItems = Loadable({
+  loader: () => import("./views/admin/inventory/ConsumeItems"),
   loading: Loading
 });
 
@@ -248,10 +279,27 @@ const routes = [
 
   { path: "/admin", exact: true, name: "Admin", component: RegisterUser },
 
+  { path: "/admin/library/AddBook", exact: true, name: "Add Book", component: AddBook },
+  { path: "/admin/library/ImportBulkBooks", exact: true, name: "Import Bulk Books", component: ImportBulkBooks },
+  
+  { path: "/admin/library/IssueBooks", exact: true, name: "Issue Books", component: IssueBooks },
+  { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
+  { path: "/admin/library/SearchBooks", exact: true, name: "Search/Edit Books", component: SearchBooks },
+
+
+
+
+
   {
     path: "/admin/inventory/AddItems",
     name: "Add Items",
     component: AddItems
+  },
+
+  {
+    path: "/admin/inventory/ItemHistory",
+    name: "Items History",
+    component: ItemHistory
   },
 
   {
@@ -261,9 +309,9 @@ const routes = [
   },
 
   {
-    path: "/admin/inventory/ViewItems",
-    name: "View Items",
-    component: ViewItems
+    path: "/admin/inventory/ConsumeItems",
+    name: "Consume Items",
+    component: ConsumeItems
   },
 
   {
