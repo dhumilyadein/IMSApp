@@ -235,6 +235,12 @@ const ClassDetails = Loadable({
   loading: Loading
 });
 
+const CreateClass = Loadable({
+  loader: () => import("./views/admin/classmanagement/CreateClass"),
+  loading: Loading
+});
+
+
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -318,6 +324,12 @@ const routes = [
     name: "ClassDetails",
     component: ClassDetails
   },
+  {
+    path: "/admin/classmanagement/CreateClass",
+    name: "CreateClass",
+    component: CreateClass
+  },
+  
 
 
 

@@ -115,6 +115,12 @@ export default {
     
           children: [
             {
+              name: 'Create Class',
+              url: '/admin/classmanagement/CreateClass',
+              icon: 'icon-bag',
+              variant: 'success',
+            },
+            {
               name: 'Class Details',
               url: '/admin/classmanagement/ClassDetails',
               icon: 'icon-bag',

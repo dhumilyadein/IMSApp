@@ -15,15 +15,20 @@ module.exports = function (app) {
     check("section")
       .not()
       .isEmpty()
-      .withMessage("Please Enter section")
+      .withMessage("Please Enter section"),
+
+      check("subjects")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter Subjects")
   ];
 
   /**
-     * @description Post method for searchAllClassDetails service
+     * @description Post method for fetchAllClassDetails service
      */
-  function searchAllClassDetails(req, res) {
+  function fetchAllClassDetails(req, res) {
 
-    console.log("searchAllClassDetails ENTRY");
+    console.log("fetchAllClassDetails ENTRY");
 
     //var searchJSON = {};
 
@@ -56,7 +61,7 @@ module.exports = function (app) {
     Class.find()
       .then(function (classDetails) {
 
-        console.log("classDAO - searchAllClassDetails - All Class details -  " + classDetails);
+        console.log("classDAO - fetchAllClassDetails - All Class details -  " + classDetails);
 
         res.send(classDetails);
       })
@@ -70,6 +75,7 @@ module.exports = function (app) {
 
     //console.log("req.body.AllData - " + JSON.stringify(req.body.AllData));
 
+    var response = {};
     if (req.body.AllData) {
 
       req.body.AllData.forEach(element => {
@@ -83,8 +89,13 @@ module.exports = function (app) {
         }
 
         var classData = {
-          "class": element.class, "section": element.section, "usernames": element.usernames
+          "class": element.class, 
+          "section": element.section, 
+          "subjects": element.subjects,
+          "studentsData": element.studentsData
         };
+
+        console.log("server - classData - " + JSON.stringify(classData));
 
         var classObj = new Class(classData);
 
@@ -93,7 +104,7 @@ module.exports = function (app) {
         classObj
           .save()
           .then(classObj => {
-            //return res.json(user);
+            console.log("Data inserted successfully in class");
           })
           .catch(err => {
             console.log("err err err - " + err);
@@ -103,35 +114,53 @@ module.exports = function (app) {
       });
     } else {
 
+      console.log("NORMAL FLOW - " + JSON.stringify(req.body));
+      
       var errors = validationResult(req);
-
       if (!errors.isEmpty()) {
-        return res.send({ errors: errors.mapped() });
+        console.log("THROWING VALIDATOIN ERROR");
+        response = { errors: errors.mapped() };
+        console.log("server final response - " + JSON.stringify(response));
+    return res.send(response);
+        //return res.send({ errors: errors.mapped() });
       }
 
       var classData = {
-        "class": req.body.class, "section": req.body.section, "usernames": req.body.usernames
+        "class": req.body.class, 
+        "section": req.body.section, 
+        "subjects": req.body.subjects,
+        "studentsData": req.body.studentsData,
       };
+
+      console.log("NORMAL FLOW server - classData - " + JSON.stringify(classData));
 
       var classObj = new Class(classData);
       classObj
         .save()
         .then(classObj => {
-          //return res.json(user);
+          console.log("Data inserted successfully in class");
+          console.log("server time success - " + new Date().getMinutes() + " " + new Date().getMilliseconds());
+          response = { reqbody: req.body, message: "Class details inserted successfully" };
+          console.log("server final response - " + JSON.stringify(response));
+    return res.send(response);
         })
         .catch(err => {
-          console.log("err " + err);
-          return res.send(err);
+          console.log("Catching server err - " + err);
+          console.log("server time error - " + + new Date().getMinutes() + " " + new Date().getMilliseconds());
+          response = { errors: err };
+          console.log("server final response - " + JSON.stringify(response));
+    return res.send(response);
+          //return res.send();
         });
 
     }
-
-    return res.send({ data: req.body, message: "Calss details inserted successfully" });
+    // console.log("server final response - " + JSON.stringify(response));
+    // return res.send(response);
 
   }
 
-  app.get("/api/searchAllClassDetails", searchAllClassDetails, (req, res) => {
-    console.log("searchAllClassDetails get service running");
+  app.get("/api/fetchAllClassDetails", fetchAllClassDetails, (req, res) => {
+    console.log("fetchAllClassDetails get service running");
   });
 
   app.post("/api/insertClassDetails", insertClassDetailsValidation, insertClassDetails, (req, res) => {
