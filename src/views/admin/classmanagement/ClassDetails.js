@@ -198,6 +198,16 @@ class ClassDetails extends Component {
                   <Col>
 
 
+                    {/* {this.state.classes.map(classData => 
+                      <Button
+                            value={classData.class}
+                            onClick={this.classButtonClickHandler}
+                            block color="info"
+                          > <h4> {classData.class} </h4> </Button>
+                    )}
+
+<br /><br /><br /><br /><br /><br /> */}
+
                     <Row className="align-items-center" className="mb-3" >
 
                       <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
