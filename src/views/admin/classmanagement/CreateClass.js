@@ -70,6 +70,8 @@ class ClassDetails extends Component {
 
       // classCreatedFlag Modal will be displayed if this flag is true
       classCreatedFlag: false,
+
+      dbErrors: "",
     };
 
     //this.update = this.update.bind(this);
@@ -219,7 +221,7 @@ class ClassDetails extends Component {
           }
 
         }
-        return this.setState({ errors: res.data.errors });
+        return this.setState({ dbErrors: res.data.errors });
       } else {
 
         console.log('Inserting class details in the Database - ' + JSON.stringify(insertClassDetailsRequest));
@@ -244,45 +246,49 @@ class ClassDetails extends Component {
     this.setState(
       {
         classesView: true,
-        sectionView: false,
-        studentsView: false,
+      sectionView: false,
+      studentsView: false,
 
-        // Response of insertClassDetails
-        insertClassDetailsResponseMessage: "",
+      // Response of insertClassDetails
+      insertClassDetailsResponseMessage: "",
 
-        className: "",
-        classNameError: "",
+      className: "",
+      classNameError: "",
 
-        section: "",
+      section: "",
 
-        isLoading: false,
-        defaultSections: [
-          { value: "A", label: "A" },
-          { value: "B", label: "B" },
-          { value: "C", label: "C" },
-        ],
-        sections: [],
-        selectedOptions: [],
+      isLoading: false,
+      defaultSections: [
+        { value: "A", label: "A" },
+        { value: "B", label: "B" },
+        { value: "C", label: "C" },
+      ],
+      sections: [],
+      selectedOptions: [],
 
-        defaultSubjects: [
-          { value: "English", label: "English" },
-          { value: "Hindi", label: "Hindi" },
-          { value: "Science", label: "Science" },
-          { value: "Maths", label: "Maths" },
-          { value: "SocialScience", label: "SocialScience" },
-          { value: "Sanskrit", label: "Sanskrit" },
-          { value: "Physics", label: "Physics" },
-          { value: "Biology", label: "Biology" },
-          { value: "Chemistry", label: "Chemistry" }
-        ],
-        subjects: [],
-        selectedSubjects: [],
-        selectedSubjectsStrArray: [],
+      defaultSubjects: [
+        { value: "English", label: "English" },
+        { value: "Hindi", label: "Hindi" },
+        { value: "Science", label: "Science" },
+        { value: "Maths", label: "Maths" },
+        { value: "SocialScience", label: "SocialScience" },
+        { value: "Sanskrit", label: "Sanskrit" },
+        { value: "Physics", label: "Physics" },
+        { value: "Biology", label: "Biology" },
+        { value: "Chemistry", label: "Chemistry" }
+      ],
+      subjects: [],
+      selectedSubjects: [],
+      selectedSubjectsStrArray: [],
 
-        showModalFlag: false,
+      showModalFlag: false,
+      modalMessage: "",
+      modalColor: "",
 
-        // classCreatedFlag Modal will be displayed if this flag is true
-        classCreatedFlag: false,
+      // classCreatedFlag Modal will be displayed if this flag is true
+      classCreatedFlag: false,
+
+      dbErrors: "",
       }
     );
   }
@@ -343,11 +349,11 @@ class ClassDetails extends Component {
                   }}
                 />
               </InputGroup>
-              {this.state.errors && this.state.errors.class && (
+              {this.state.dbErrors && this.state.dbErrors.class && (
                 <font color="red">
                   <h6>
                     {" "}
-                    <p>{this.state.errors.class.msg} </p>
+                    <p>{this.state.dbErrors.class.msg} </p>
                   </h6>{" "}
                 </font>
               )}
@@ -367,11 +373,11 @@ class ClassDetails extends Component {
                 options={this.state.defaultSections}
               />
 
-              {this.state.errors && this.state.errors.section && (
+              {this.state.dbErrors && this.state.dbErrors.section && (
                 <font color="red">
                   <h6>
                     {" "}
-                    <p>{this.state.errors.section.msg} </p>
+                    <p>{this.state.dbErrors.section.msg} </p>
                   </h6>{" "}
                 </font>
               )}
@@ -388,16 +394,18 @@ class ClassDetails extends Component {
                 value={this.state.selectedSubjects}
                 onChange={this.handleSubjectChange}
                 isMulti={true}
+                isOpen={true}
+                closeMenuOnSelect={false}
                 autosize
                 onCreateOption={this.handleSubjectCreate}
                 options={this.state.defaultSubjects}
               />
 
-              {this.state.errors && this.state.errors.subjects && (
+              {this.state.dbErrors && this.state.dbErrors.subjects && (
                 <font color="red">
                   <h6>
                     {" "}
-                    <p>{this.state.errors.subjects.msg}</p>
+                    <p>{this.state.dbErrors.subjects.msg}</p>
                   </h6>{" "}
                 </font>
               )}

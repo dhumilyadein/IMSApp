@@ -17,10 +17,23 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Please Enter section"),
 
-      check("subjects")
+    check("subjects")
       .not()
       .isEmpty()
       .withMessage("Please Enter Subjects")
+  ];
+
+  const updateClassValidation = [
+    check("class")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter class"),
+
+    check("section")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter section"),
+
   ];
 
   /**
@@ -83,16 +96,21 @@ module.exports = function (app) {
         console.log("element - " + JSON.stringify(element));
 
         var errors = validationResult(element);
-  
+
         if (!errors.isEmpty()) {
           return res.send({ errors: errors.mapped() });
         }
 
+        var currentTime = new Date();
+        console.log("current time - " + currentTime);
+
         var classData = {
-          "class": element.class, 
-          "section": element.section, 
+          "class": element.class,
+          "section": element.section,
           "subjects": element.subjects,
-          "studentsData": element.studentsData
+          "studentsData": element.studentsData,
+          "createdAt": currentTime,
+          "updatedAt": currentTime
         };
 
         console.log("server - classData - " + JSON.stringify(classData));
@@ -115,21 +133,27 @@ module.exports = function (app) {
     } else {
 
       console.log("NORMAL FLOW - " + JSON.stringify(req.body));
-      
+
       var errors = validationResult(req);
       if (!errors.isEmpty()) {
         console.log("THROWING VALIDATOIN ERROR");
         response = { errors: errors.mapped() };
         console.log("server final response - " + JSON.stringify(response));
-    return res.send(response);
+        return res.send(response);
         //return res.send({ errors: errors.mapped() });
       }
 
+      var currentTime = new Date();
+      console.log("current time - " + currentTime);
+
+
       var classData = {
-        "class": req.body.class, 
-        "section": req.body.section, 
+        "class": req.body.class,
+        "section": req.body.section,
         "subjects": req.body.subjects,
         "studentsData": req.body.studentsData,
+        "createdAt": currentTime,
+        "updatedAt": currentTime
       };
 
       console.log("NORMAL FLOW server - classData - " + JSON.stringify(classData));
@@ -139,17 +163,15 @@ module.exports = function (app) {
         .save()
         .then(classObj => {
           console.log("Data inserted successfully in class");
-          console.log("server time success - " + new Date().getMinutes() + " " + new Date().getMilliseconds());
           response = { reqbody: req.body, message: "Class details inserted successfully" };
           console.log("server final response - " + JSON.stringify(response));
-    return res.send(response);
+          return res.send(response);
         })
         .catch(err => {
           console.log("Catching server err - " + err);
-          console.log("server time error - " + + new Date().getMinutes() + " " + new Date().getMilliseconds());
           response = { errors: err };
           console.log("server final response - " + JSON.stringify(response));
-    return res.send(response);
+          return res.send(response);
           //return res.send();
         });
 
@@ -159,12 +181,67 @@ module.exports = function (app) {
 
   }
 
+  async function updateClassDetails(req, res) {
+
+    console.log("classDAO - updateClassDetails - Enter");
+
+    //Initial validation like fields empty check
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      console.log("ClassDAO - updateClassDetails - Errors in classDAO - THROWING VALIDATOIN ERROR");
+      response = { errors: errors.mapped() };
+      console.log("server final response - " + JSON.stringify(response));
+      return res.send(response);
+    }
+
+    var currentTime = new Date();
+
+    var request = req.body;
+    var objForUpdate = {};
+    var studentsDataJSON = {};
+
+    if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
+
+    if(request.subjects) objForUpdate.subjects = request.subjects;
+    objForUpdate.updatedAt = currentTime;
+    console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
+
+    console.log("req.body - " + JSON.stringify(req.body));
+
+    await Class.findOneAndUpdate(
+      { $and : [{"class": request.class}, {"section": request.section }] },
+      {
+        $set: objForUpdate,
+        $push: studentsDataJSON
+      }
+    ).then(function (classData) {
+
+      console.log("Class details udpated successfully");
+      response = { reqbody: req.body, message: "Class details updated successfully" };
+      console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(response));
+      return res.send(response);
+    }).catch(function (err) {
+      console.log("Catching server err - " + err);
+      response = { errors: err };
+      console.log("ClassDAO - updateClassDetails - Errors in classDAO - server final response - " + JSON.stringify(response));
+      return res.send(response);
+    });
+
+  }
+
   app.get("/api/fetchAllClassDetails", fetchAllClassDetails, (req, res) => {
     console.log("fetchAllClassDetails get service running");
   });
 
   app.post("/api/insertClassDetails", insertClassDetailsValidation, insertClassDetails, (req, res) => {
     console.log("insertClassDetails post service running");
+  });
+
+  app.post("/api/updateClassDetails", updateClassValidation, updateClassDetails, (req, res) => {
+    console.log("ClassDAO - updateClassDetails post method call");
+
   });
 
   app.get("/", (req, res) => res.json("classDAO"));

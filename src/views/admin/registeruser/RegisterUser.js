@@ -54,7 +54,11 @@ class RegisterUser extends Component {
       classes: [],
       classDetails: {},
       sectionArray: [],
+      classDetailsUpdatedFlag: false,
+      studentsDataArray: [],
+
       sectionView: false,
+      studentsView: false,
 
       loader: false,
       admintype: "Office Admin",
@@ -145,8 +149,12 @@ class RegisterUser extends Component {
     this.fetchClasses = this.fetchClasses.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
 
+    this.updateClassDetails = this.updateClassDetails.bind(this);
+    this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
+
     // Fetching class details on page load for class drop down
     this.fetchClassDetails();
+    
   }
 
 
@@ -209,7 +217,11 @@ class RegisterUser extends Component {
       classes: [],
       classDetails: {},
       sectionArray: [],
+      classDetailsUpdatedFlag: false,
+      studentsDataArray: [],
+
       sectionView: false,
+      studentsView: false,
 
       photoerror: null,
       loader: false,
@@ -344,6 +356,9 @@ class RegisterUser extends Component {
 
                     });
                   });
+
+                this.updateClassDetails();
+
               } else if (this.state.role.indexOf("admin") !== -1 || this.state.role.indexOf("teacher") !== -1) {
                 this.setState({ roleerror: false, errors: null });
                 axios
@@ -583,28 +598,94 @@ class RegisterUser extends Component {
     var sectionArrayTemp = [];
     this.state.classDetails.forEach(element => {
       if (element["class"] === selectedClass) {
+
         sectionArrayTemp.push(element["section"]);
+
       }
     });
 
     // Sorting array alphabetically
     sectionArrayTemp.sort();
 
-    this.setState({ sectionArray: sectionArrayTemp })
+    this.setState({
+       sectionArray: sectionArrayTemp,
+      })
 
-    console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp);
+    console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
 
     // Switching view to section view
     this.setState({ sectionView: true });
   }
 
+  sectionChangeHandler(e) {
+
+    var selectedSection = e.currentTarget.value;
+    console.log("e.target.name - " + [e.currentTarget.name] + " selectedSection - " + selectedSection);
+    this.setState({ section: selectedSection });
+
+    // var studentsDataArrayTemp = [];
+    // this.state.classDetails.forEach(element => {
+    //   if (element["class"] === this.state.class && element["section" === this.state.section]) {
+
+    //     studentsDataArrayTemp = element["studentsData"];
+    //   }
+    // });
+
+    // this.setState({
+    //    studentsDataArray : studentsDataArrayTemp
+    //   })
+
+    // console.log("Selected class - " + this.state.class + " Sections - " + selectedSection 
+    // + " studentsDataArray - " + this.state.studentsDataArray);
+
+    // // Switching view to section view
+    // this.setState({ studentsView: true });
+  }
+
+  async updateClassDetails() {
+
+    // var studentsDataArrayTemp = this.state.studentsDataArray;
+
+    // studentsDataArrayTemp.push({
+    //   "rollno": this.state.rollno,
+    //   "username": this.state.username,
+    //   "firstname": this.state.firstname,
+    //   "lastname": this.state.lastname,
+    // });
+
+    //console.log("studentsDataArrayTemp - " + studentsDataArrayTemp);
+
+    var updateClassDetailsRequest = {
+      "class": this.state.class,
+      "section": this.state.section,
+      "studentsData": {
+        "rollno": this.state.rollno,
+        "username": this.state.username,
+        "firstname": this.state.firstname,
+        "lastname": this.state.lastname,
+      }
+    }
+
+    console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
+      + JSON.stringify(updateClassDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          classDetailsUpdatedFlag: true
+        });
+      }
+    });
+  }
+
   render() {
     return (
 
-
       <div style={{ width: "1000px" }}>
-
-
 
         <Container style={{ width: "2500px" }}>
 
@@ -612,7 +693,6 @@ class RegisterUser extends Component {
             <Col md="7">
               <Card className="mx-4">
                 <CardBody className="p-2">
-
 
                   <Form>
                     {this.state.studentRegSuccess && (
@@ -1195,7 +1275,7 @@ class RegisterUser extends Component {
                                         id="section"
                                         type="select"
                                         value={this.state.section}
-                                        onChange={this.changeHandler}
+                                        onChange={this.sectionChangeHandler}
                                       >
                                         <option value="">Select</option>
                                         {this.state.sectionArray.map(element => {
@@ -1237,8 +1317,8 @@ class RegisterUser extends Component {
                                             selectedFeeTemplate: temp,
                                             selectedFeeTemplateValue: selected
                                           }, () => {
-                                              console.log("Selected Fee Templ: " + JSON.stringify(this.state.selectedFeeTemplate));
-                                            })
+                                            console.log("Selected Fee Templ: " + JSON.stringify(this.state.selectedFeeTemplate));
+                                          })
 
 
 

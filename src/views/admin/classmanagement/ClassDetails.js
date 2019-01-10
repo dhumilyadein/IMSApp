@@ -270,7 +270,6 @@ class ClassDetails extends Component {
                       <th scope="col">Roll Number</th>
                       <th scope="col">Full name</th>
                       <th scope="col">Username</th>
-                      <th scope="col">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -293,9 +292,6 @@ class ClassDetails extends Component {
 
                           </th>
                           {/* <td>{user.role}</td> */}
-                          <td>
-                            {studentData.status}
-                          </td>
                         </tr>
                       )
                     }
