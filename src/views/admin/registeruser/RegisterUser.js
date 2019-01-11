@@ -150,7 +150,6 @@ class RegisterUser extends Component {
     this.classChangeHandler = this.classChangeHandler.bind(this);
 
     this.updateClassDetails = this.updateClassDetails.bind(this);
-    this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
 
     // Fetching class details on page load for class drop down
     this.fetchClassDetails();
@@ -617,43 +616,7 @@ class RegisterUser extends Component {
     this.setState({ sectionView: true });
   }
 
-  sectionChangeHandler(e) {
-
-    var selectedSection = e.currentTarget.value;
-    console.log("e.target.name - " + [e.currentTarget.name] + " selectedSection - " + selectedSection);
-    this.setState({ section: selectedSection });
-
-    // var studentsDataArrayTemp = [];
-    // this.state.classDetails.forEach(element => {
-    //   if (element["class"] === this.state.class && element["section" === this.state.section]) {
-
-    //     studentsDataArrayTemp = element["studentsData"];
-    //   }
-    // });
-
-    // this.setState({
-    //    studentsDataArray : studentsDataArrayTemp
-    //   })
-
-    // console.log("Selected class - " + this.state.class + " Sections - " + selectedSection 
-    // + " studentsDataArray - " + this.state.studentsDataArray);
-
-    // // Switching view to section view
-    // this.setState({ studentsView: true });
-  }
-
   async updateClassDetails() {
-
-    // var studentsDataArrayTemp = this.state.studentsDataArray;
-
-    // studentsDataArrayTemp.push({
-    //   "rollno": this.state.rollno,
-    //   "username": this.state.username,
-    //   "firstname": this.state.firstname,
-    //   "lastname": this.state.lastname,
-    // });
-
-    //console.log("studentsDataArrayTemp - " + studentsDataArrayTemp);
 
     var updateClassDetailsRequest = {
       "class": this.state.class,
@@ -666,7 +629,7 @@ class RegisterUser extends Component {
       }
     }
 
-    console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
+    console.log("RegisterUser - updateClassDetails - updateClassDetailsRequest - "
       + JSON.stringify(updateClassDetailsRequest));
 
     await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
@@ -1275,7 +1238,7 @@ class RegisterUser extends Component {
                                         id="section"
                                         type="select"
                                         value={this.state.section}
-                                        onChange={this.sectionChangeHandler}
+                                        onChange={this.changeHandler}
                                       >
                                         <option value="">Select</option>
                                         {this.state.sectionArray.map(element => {

@@ -43,6 +43,19 @@ class UserDetails extends Component {
     super(props);
 
     this.state = {
+
+      class: "",
+      section: "",
+
+      classes: [],
+      classDetails: {},
+      sectionArray: [],
+      classDetailsUpdatedFlag: false,
+      studentsDataArray: [],
+
+      sectionView: false,
+      studentsView: false,
+
       admintype: "Office Admin",
       username: "",
       email: "",
@@ -101,8 +114,6 @@ class UserDetails extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
-      class: "",
-      section: "",
       feeTemplatesFromDBLabel: [],
       selectedFeeTemplate: [],
       selectedFeeTemplateLabel: [],
@@ -152,6 +163,11 @@ class UserDetails extends Component {
     this.copyAddress = this.copyAddress.bind(this);
     this.switchToDisplayMode = this.switchToDisplayMode.bind(this);
     this.getExistingTemplates = this.getExistingTemplates.bind(this);
+    this.classChangeHandler = this.classChangeHandler.bind(this);
+    this.fetchClassDetails = this.fetchClassDetails.bind(this);
+    this.fetchClasses = this.fetchClasses.bind(this);
+    this.setInitialClassSections = this.setInitialClassSections.bind(this);
+    this.updateClassDetails = this.updateClassDetails.bind(this);
 
     // Fetching data from Mongo on page load
     this.fetchUserDataOnPageLoad();
@@ -281,6 +297,9 @@ class UserDetails extends Component {
 
     // Fetching fee templates on page load
     await this.getExistingTemplates();
+
+    // Fetching class details on page load for class drop down
+    await this.fetchClassDetails();
   }
 
   mapStudentResponseToState() {
@@ -336,7 +355,7 @@ class UserDetails extends Component {
       + studentData.password + " " + this.state.firstname + " "
       + this.state.lastname + " dob - " + this.state.dob + " " + this.state.doj + " " + this.state.parentusername
       + " " + this.state.gender + " " + this.state.parentfirstname + " " + this.state.address + " " + this.state.city
-      + " student photo - " + JSON.stringify(studentData.photo));
+      + " CLASS - " + this.state.class + " SECTION - " + this.state.section);
   }
 
   mapParentResponseToState() {
@@ -372,6 +391,7 @@ class UserDetails extends Component {
     this.setState({
       screenmode: "edit",
     });
+
   }
 
   switchToDisplayMode() {
@@ -401,11 +421,13 @@ class UserDetails extends Component {
         this.setState({
           userDetailsUpdatedFlag: true
         });
-
-        //Switching mode after updating the details
-        this.switchToDisplayMode();
       }
     });
+
+    await this.updateClassDetails();
+
+    //Switching mode after updating the details
+    this.switchToDisplayMode();
 
   }
 
@@ -445,6 +467,95 @@ class UserDetails extends Component {
     }
   }
 
+  classChangeHandler(e) {
+
+    var selectedClass = e.currentTarget.value;
+    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
+    this.setState({ class: selectedClass });
+
+    var sectionArrayTemp = [];
+    this.state.classDetails.forEach(element => {
+      if (element["class"] === selectedClass) {
+
+        sectionArrayTemp.push(element["section"]);
+
+      }
+    });
+
+    // Sorting array alphabetically
+    sectionArrayTemp.sort();
+
+    this.setState({
+       sectionArray: sectionArrayTemp,
+      })
+
+    console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
+
+    // Switching view to section view
+    this.setState({ sectionView: true });
+  }
+
+  // Fetching section of the class initially populated for the user
+  setInitialClassSections() {
+
+    var selectedClass = this.state.class;
+
+    var sectionArrayTemp = [];
+    this.state.classDetails.forEach(element => {
+      if (element["class"] === selectedClass) {
+
+        sectionArrayTemp.push(element["section"]);
+      }
+    });
+    // Sorting array alphabetically
+    sectionArrayTemp.sort();
+
+    this.setState({
+       sectionArray: sectionArrayTemp,
+      })
+
+    console.log("Initiallly Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
+  }
+
+  fetchClassDetails() {
+
+    axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
+
+      if (cRes.data.errors) {
+
+        return this.setState({ errors: cRes.data.errors });
+
+      } else {
+
+        this.setState({ classDetails: cRes.data });
+
+        console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
+
+        this.fetchClasses();
+      }
+    });
+  }
+
+  /**
+   * @description - fetches unique classes from the class detail from DB
+   */
+  fetchClasses() {
+
+    var classArray = [];
+    this.state.classDetails.forEach(element => {
+
+      console.log("element.class - " + element.class);
+      classArray.push(element.class);
+    });
+    console.log("classArray - " + classArray);
+    var uniqueItems = Array.from(new Set(classArray));
+
+    this.setState({ classes: uniqueItems });
+
+    this.setInitialClassSections();
+    console.log("Unique classes - " + this.state.classes);
+  }
+
   /**
    * Auto copy parent address if the 'Address is same' check box slelected
    **/
@@ -468,6 +579,35 @@ class UserDetails extends Component {
         parentaddresscheck: false
       });
     }
+  }
+
+  async updateClassDetails() {
+
+    var updateClassDetailsRequest = {
+      "class": this.state.class,
+      "section": this.state.section,
+      "studentsData": {
+        "rollno": this.state.rollno,
+        "username": this.state.username,
+        "firstname": this.state.firstname,
+        "lastname": this.state.lastname,
+      }
+    }
+
+    console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
+      + JSON.stringify(updateClassDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          classDetailsUpdatedFlag: true
+        });
+      }
+    });
   }
 
   render() {
@@ -1137,25 +1277,15 @@ class UserDetails extends Component {
                                               id="class"
                                               type="select"
                                               value={this.state.class}
-                                              onChange={this.changeHandler}
+                                              onChange={this.classChangeHandler}
                                               disabled={this.state.editMode}
                                               style={whiteTextFieldStyle}
                                             >
                                               <option value="">Select</option>
-                                              <option value="LKG">LKG</option>
-                                              <option value="UKG">UKG</option>
-                                              <option value="I">I</option>
-                                              <option value="II">II</option>
-                                              <option value="III">III</option>
-                                              <option value="IV">IV</option>
-                                              <option value="V">V</option>
-                                              <option value="VI">VI</option>
-                                              <option value="VII">VII</option>
-                                              <option value="VIII">VIII</option>
-                                              <option value="IX">IX</option>
-                                              <option value="X">X</option>
-                                              <option value="XI">XI</option>
-                                              <option value="XII">XII</option>
+                                      {this.state.classes.map(element => {
+                                        return (<option key={element} value={element}>{element}</option>);
+                                      }
+                                      )}
                                             </Input>
                                           </InputGroup>
                                           {this.state.errors && this.state.errors.class && (
@@ -1181,11 +1311,10 @@ class UserDetails extends Component {
                                               style={whiteTextFieldStyle}
                                             >
                                               <option value="">Select</option>
-                                              <option value="A">A</option>
-                                              <option value="B">B</option>
-                                              <option value="C">C</option>
-                                              <option value="D">D</option>
-                                              <option value="E">E</option>
+                                        {this.state.sectionArray.map(element => {
+                                          return (<option key={element} value={element}>{element}</option>);
+                                        }
+                                        )}
 
                                             </Input>
                                           </InputGroup>

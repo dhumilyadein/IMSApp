@@ -49,6 +49,7 @@ class ClassDetails extends Component {
       classDetails: {},
       classes: [],
       selectedClass: "",
+      section: "",
       sectionArray: [],
       studentsDataArray: [],
 
@@ -125,18 +126,22 @@ class ClassDetails extends Component {
     console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp);
 
     // Switching view to section view
-    this.setState({ sectionView: true });
+    this.setState({ 
+      sectionView: true,
+      studentsView: false,
+      section: ""
+     });
   }
 
   sectionChangeHandler(e) {
 
-    var selectedSection = e.currentTarget.value;
-    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedSection);
-    this.setState({ selectedSection: selectedSection });
+    var section = e.currentTarget.value;
+    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + section);
+    this.setState({ section: section });
 
     var studentsDataArrayTemp = null;
     this.state.classDetails.forEach(element => {
-      if (element["class"] === this.state.selectedClass && element["section"] === selectedSection) {
+      if (element["class"] === this.state.selectedClass && element["section"] === section) {
         studentsDataArrayTemp = element["studentsData"];
       }
     });
@@ -147,11 +152,13 @@ class ClassDetails extends Component {
     this.setState({ studentsDataArray: studentsDataArrayTemp })
 
     console.log("sectionButtonClickHandler - Selected class - " + this.state.selectedClass +
-      " selected Section - " + selectedSection
+      " selected Section - " + section
       + " selected usernames - " + studentsDataArrayTemp);
 
     // Switching view to students view
-    this.setState({ studentsView: true });
+    this.setState({ 
+      studentsView: true 
+    });
   }
 
 
@@ -258,49 +265,55 @@ class ClassDetails extends Component {
           </Card>
 
           {this.state.studentsView && this.state.selectedClass && this.state.sectionArray && this.state.studentsDataArray && (
-            <Card>
-              <CardHeader>
-                <i className="fa fa-align-justify"></i> Students <small className="text-muted">Listing Class Students</small>
-              </CardHeader>
-              <CardBody>
+            <div className="animated fadeIn">
+              <Row>
+                <Col>
+                  <Card>
+                    <CardHeader>
+                      <i className="fa fa-align-justify"></i> Students <small className="text-muted">Listing Class Students</small>
+                    </CardHeader>
+                    <CardBody>
 
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th scope="col">Roll Number</th>
-                      <th scope="col">Full name</th>
-                      <th scope="col">Username</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* {userList.map((user, index) =>
+                      <Table responsive hover>
+                        <thead>
+                          <tr>
+                            <th scope="col" width="20%">Roll Number</th>
+                            <th scope="col">Full name</th>
+                            <th scope="col">Username</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* {userList.map((user, index) =>
                       <UserRow key={index} user={user}/>
                     )} */}
 
-                    {/* {students} */}
+                          {/* {students} */}
 
-                    {
-                      this.state.studentsDataArray.map(studentData =>
-                        //this.state.tempArray.map(item => 
-                        <tr key={studentData.username}>
+                          {
+                            this.state.studentsDataArray.map(studentData =>
+                              //this.state.tempArray.map(item => 
+                              <tr key={studentData.username}>
 
-                          <td>{studentData.rollno}</td>
-                          <td>{studentData.firstname + " " + studentData.lastname}</td>
-                          <th scope="row">
+                                <td>{studentData.rollno}</td>
+                                <td>{studentData.firstname + " " + studentData.lastname}</td>
+                                <th scope="row">
 
-                            <a href="#">{studentData.username}</a>
+                                  <a href="#">{studentData.username}</a>
 
-                          </th>
-                          {/* <td>{user.role}</td> */}
-                        </tr>
-                      )
-                    }
+                                </th>
+                                {/* <td>{user.role}</td> */}
+                              </tr>
+                            )
+                          }
 
-                  </tbody>
-                </Table>
+                        </tbody>
+                      </Table>
 
-              </CardBody>
-            </Card>
+                    </CardBody>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
           )}
 
         </Container>

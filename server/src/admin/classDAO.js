@@ -204,14 +204,14 @@ module.exports = function (app) {
 
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
 
-    if(request.subjects) objForUpdate.subjects = request.subjects;
+    if (request.subjects) objForUpdate.subjects = request.subjects;
     objForUpdate.updatedAt = currentTime;
     console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
     console.log("req.body - " + JSON.stringify(req.body));
 
     await Class.findOneAndUpdate(
-      { $and : [{"class": request.class}, {"section": request.section }] },
+      { $and: [{ "class": request.class }, { "section": request.section }] },
       {
         $set: objForUpdate,
         $push: studentsDataJSON
