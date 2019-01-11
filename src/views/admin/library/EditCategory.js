@@ -121,7 +121,7 @@ for(var i=0;i<result.data.length;i++)
        success: false,
       modalSuccess: false, categoryError:""
     }, () => {
-      if (!this.state.EditCategory) {
+      if (!this.state.newCategory) {
         this.setState({ categoryError: "Please Enter New Category Name" });
         submit = false;}
 
@@ -281,13 +281,13 @@ for(var i=0;i<result.data.length;i++)
                               id="bookName"
                               value={this.state.newCategory}
                               onChange={e => {
-                                var temp={"value":e.target.value,"label":e.target.value}
+
                                 this.setState(
-                                  { category: temp},
+                                  { newCategory: e.target.value},
                                   () => {
                                     console.log(
                                       "Category: " +
-                                      JSON.stringify(this.state.category)
+                                      JSON.stringify(this.state.newCategory)
                                     );
                                   }
                                 );
@@ -319,7 +319,7 @@ block
                             </Col>
                             <Col>
                               <Button
-                                onClick={e=>{this.setState({showEdit:false, showOptions:false})}}
+                                onClick={e=>{this.setState({showEdit:false, showOptions:true})}}
                                 size="lg"
                                 color="secondary"
 block
