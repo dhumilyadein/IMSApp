@@ -48,9 +48,19 @@ class RegisterUser extends Component {
 
 
     this.state = {
-      class:"",
-      section:"",
-      loader:false,
+      class: "",
+      section: "",
+
+      classes: [],
+      classDetails: {},
+      sectionArray: [],
+      classDetailsUpdatedFlag: false,
+      studentsDataArray: [],
+
+      sectionView: false,
+      studentsView: false,
+
+      loader: false,
       admintype: "Office Admin",
       username: "",
       email: "",
@@ -111,15 +121,15 @@ class RegisterUser extends Component {
       nationality: "",
       bloodgroup: "",
       category: "",
-      feeTemplate:[],
-      selectedFeeTemplate:[],
-      selectedFeeTemplateValue:[],
+      feeTemplate: [],
+      selectedFeeTemplate: [],
+      selectedFeeTemplateValue: [],
       corruptphoto: false,
       photoname: "",
       phone: "",
       parentaddresscheck: false,
       roleerror: false,
-      photoerror:null,
+      photoerror: null,
 
     };
 
@@ -134,6 +144,17 @@ class RegisterUser extends Component {
     this.fileChange = this.fileChange.bind(this);
     this.copyAddress = this.copyAddress.bind(this);
     this.photoUpload = this.photoUpload.bind(this);
+
+    this.fetchClassDetails = this.fetchClassDetails.bind(this);
+    this.fetchClasses = this.fetchClasses.bind(this);
+    this.classChangeHandler = this.classChangeHandler.bind(this);
+
+    this.updateClassDetails = this.updateClassDetails.bind(this);
+    this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
+
+    // Fetching class details on page load for class drop down
+    this.fetchClassDetails();
+    
   }
 
 
@@ -146,18 +167,18 @@ class RegisterUser extends Component {
         console.log("Existing Fee Templates: " + JSON.stringify(result.data));
         console.log("No of templates " + result.data.length);
         if (result.data) {
-          var temp=[];
-         for(var i=0;i<result.data.length;i++)
-         {
-           temp.push({"value":result.data[i].templateName,
-           "label":result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1)+" ("+(result.data[i].templateType.toLowerCase())+")"
-          });
+          var temp = [];
+          for (var i = 0; i < result.data.length; i++) {
+            temp.push({
+              "value": result.data[i].templateName,
+              "label": result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1) + " (" + (result.data[i].templateType.toLowerCase()) + ")"
+            });
 
 
 
-         }
-         console.log("Temp: "+JSON.stringify(temp));
-         this.setState({feeTemplate:temp});
+          }
+          console.log("Temp: " + JSON.stringify(temp));
+          this.setState({ feeTemplate: temp });
         }
       });
   }
@@ -190,20 +211,30 @@ class RegisterUser extends Component {
 
 
     this.setState({
-      class:"",
-      section:"",
-      photoerror:null,
-      loader:false,
+      class: "",
+      section: "",
+
+      classes: [],
+      classDetails: {},
+      sectionArray: [],
+      classDetailsUpdatedFlag: false,
+      studentsDataArray: [],
+
+      sectionView: false,
+      studentsView: false,
+
+      photoerror: null,
+      loader: false,
       admintype: "Office Admin",
-      selectedFeeTemplate:[],
-      selectedFeeTemplateValue:[],
-      feeTemplate:[],
+      selectedFeeTemplate: [],
+      selectedFeeTemplateValue: [],
+      feeTemplate: [],
       empRegSuccess: false,
       modalSuccess: true,
       parentpassword_con: "",
       parentusername: "",
-      occupation:"",
-      relation:"",
+      occupation: "",
+      relation: "",
       parentpassword: "",
       username: "",
       email: "",
@@ -271,106 +302,111 @@ class RegisterUser extends Component {
    * @description Handles the form submit request
    * @param {*} e
    */
- photoUpload()
-{console.log("in PhotoUpload for file - "+this.state.photoname)
+  photoUpload() {
+    console.log("in PhotoUpload for file - " + this.state.photoname)
 
-  const data = new FormData();  //photo upload
-  this.setState({photoname:this.state.photo.name},()=>{
+    const data = new FormData();  //photo upload
+    this.setState({ photoname: this.state.photo.name }, () => {
 
-    data.append('file', this.state.photo, this.state.photoname);
-    axios
-  .post("http://localhost:8001/api/photoUploading", data)
-  .then(res => {
-    console.log("in Photo Res " + JSON.stringify(res.data));
-    if (res.data.error_code === 1) {
+      data.append('file', this.state.photo, this.state.photoname);
+      axios
+        .post("http://localhost:8001/api/photoUploading", data)
+        .then(res => {
+          console.log("in Photo Res " + JSON.stringify(res.data));
+          if (res.data.error_code === 1) {
 
-     return this.setState({
-        corruptphoto:true,
-        loader:false
-
-
+            return this.setState({
+              corruptphoto: true,
+              loader: false
 
 
 
-      });
-
-     }
-
-     else{
-
-      if(!this.state.photoerror && this.state.corruptphoto===false&&this.state.photo)
-      {  if (this.state.role[0] === "student") {
-         console.log("in STUDENT");
 
 
-         axios
-           .post("http://localhost:8001/api/studentRegister", this.state)
-           .then(result => {
-             console.log("RESULT.data " + JSON.stringify(result.data));
-             if (result.data.errors) {
-              this.setState({loader:false});
+            });
 
-               return this.setState(result.data);
-             }
+          }
 
-             this.resetForm();
+          else {
 
-             return this.setState({
-               userdata: result.data.data,
-               errors: null,
-               studentRegSuccess: true,
-               modalSuccess: true,
-               loader:false
+            if (!this.state.photoerror && this.state.corruptphoto === false && this.state.photo) {
+              if (this.state.role[0] === "student") {
+                console.log("in STUDENT");
 
 
-             });
-           });
-       } else if(this.state.role.indexOf("admin")!==-1 || this.state.role.indexOf("teacher")!==-1 ){
-         this.setState({ roleerror: false,  errors:null });
-         axios
-           .post("http://localhost:8001/api/empRegister", this.state)
-           .then(result => {
-             console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
-             if (result.data.errors) {
-              this.setState({loader:false});
-               return this.setState(result.data);
-             }
-             this.resetForm();
-             return this.setState({
-               userdata: result.data.data,
-               errors: null,
-               empRegSuccess: true,
-               modalSuccess: true,
-               loader:false
+                axios
+                  .post("http://localhost:8001/api/studentRegister", this.state)
+                  .then(result => {
+                    console.log("RESULT.data " + JSON.stringify(result.data));
+                    if (result.data.errors) {
+                      this.setState({ loader: false });
 
-             });
-           });
-       }}}
+                      return this.setState(result.data);
+                    }
+
+                    this.resetForm();
+
+                    return this.setState({
+                      userdata: result.data.data,
+                      errors: null,
+                      studentRegSuccess: true,
+                      modalSuccess: true,
+                      loader: false
 
 
-  })
-  });
+                    });
+                  });
+
+                this.updateClassDetails();
+
+              } else if (this.state.role.indexOf("admin") !== -1 || this.state.role.indexOf("teacher") !== -1) {
+                this.setState({ roleerror: false, errors: null });
+                axios
+                  .post("http://localhost:8001/api/empRegister", this.state)
+                  .then(result => {
+                    console.log("EMP-RESULT.DATA " + JSON.stringify(result.data));
+                    if (result.data.errors) {
+                      this.setState({ loader: false });
+                      return this.setState(result.data);
+                    }
+                    this.resetForm();
+                    return this.setState({
+                      userdata: result.data.data,
+                      errors: null,
+                      empRegSuccess: true,
+                      modalSuccess: true,
+                      loader: false
+
+                    });
+                  });
+              }
+            }
+          }
 
 
-}
+        })
+    });
+
+
+  }
 
   submitHandler(e) {
     //var tempdata = {"role":["student"],"userdata":null,"studentRegSuccess":false,"errors":null,"importErrors":null,"status":"Active","disabled":true,"checked":{"adminChecked":false,"teacherChecked":false,"studentChecked":true},"visible":true,"studentmodalSuccess":true,"admintype":"Office Admin","nophoto":false,"corruptphoto":false,"photoname":"Book1.xlsx","roleerror":false,"firstname":"dfdfd","lastname":"dfdf","dob":"2018-11-08","gender":"Female","bloodgroup":"B-","nationality":"Indian","religion":"Sikh","category":"OBC","photo":"tempphotodata","admissionno":"4545","rollno":"56565","doj":"2018-11-20","phone":"+91 56565-56565","address":"dfdf","city":"dfdf","postalcode":"dfdf","state":"dfdfdf","username":"yuyg","email":"fdfdf@df.co","password":"pass","password_con":"pass","parentfirstname":"fgfg","parentlastname":"hjhjhj","relation":"Father","occupation":"fgfgfg","parentemail":"dfdf@gh.cd","parentphone1":"+91 56656-56565","parentphone2":"+91 45454-54545","parentaddress":"dfdf","parentcity":"dfdf","parentpostalcode":"dfdf","parentstate":"dfdfdf","parentusername":"gngngn","parentpassword":"pass","parentpassword_con":"pass"};
 
     e.preventDefault();
-    this.setState({ roleerror: false, errors:null, loader:true});
+    this.setState({ roleerror: false, errors: null, loader: true });
     // console.log(JSON.stringify(this.state));
     //console.log("in STUDENT" + this.state.role[0]);
 
     if (this.state.role.length === 0) {
-      this.setState({ roleerror: true, loader:false });
+      this.setState({ roleerror: true, loader: false });
 
     }
 
-   if(this.state.photo===null)
-   this.setState({photoerror: "Please select Photo",loader:false})
-   else
-   this.photoUpload();
+    if (this.state.photo === null)
+      this.setState({ photoerror: "Please select Photo", loader: false })
+    else
+      this.photoUpload();
 
 
 
@@ -386,15 +422,15 @@ class RegisterUser extends Component {
     this.setState({
       [e.target.name]: e.target.value
     });
-    if(e.target.value==="Experienced")
-    this.setState({experiencedetails:""});
-    if(e.target.value==="Fresher")
-    this.setState({experiencedetails:"NA"});
-if(e.target.name==="username"||e.target.name==="parentusername")
-this.setState({
-  [e.target.name]:  String(e.target.value).toLowerCase()
-  });
-}
+    if (e.target.value === "Experienced")
+      this.setState({ experiencedetails: "" });
+    if (e.target.value === "Fresher")
+      this.setState({ experiencedetails: "NA" });
+    if (e.target.name === "username" || e.target.name === "parentusername")
+      this.setState({
+        [e.target.name]: String(e.target.value).toLowerCase()
+      });
+  }
 
   copyAddress(e) {
     if (e.target.checked === true) {
@@ -424,7 +460,7 @@ this.setState({
    */
   roleHandler = e => {
 
-    this.setState({roleerror:false})
+    this.setState({ roleerror: false })
     if (e.target.checked && this.state.role.indexOf(e.target.name) === -1) {
       const temp = this.state.role;
       temp.push(e.target.name);
@@ -485,11 +521,11 @@ this.setState({
 
     console.log(
       "studentChecked - " +
-        this.state.checked.studentChecked +
-        " adminChecked - " +
-        this.state.checked.adminChecked +
-        " teacherChecked - " +
-        this.state.checked.teacherChecked
+      this.state.checked.studentChecked +
+      " adminChecked - " +
+      this.state.checked.adminChecked +
+      " teacherChecked - " +
+      this.state.checked.teacherChecked
     );
   };
 
@@ -500,36 +536,163 @@ this.setState({
 
 
   fileChange = event => {
-   try{ const file = event.target.files[0];
-    this.setState(
-      { photo: file, nophoto: false, photoerror:null, corruptphoto:false,photoname:file.name },
-      () => console.log("file:  " + this.state.photoname)
-    );}
+    try {
+      const file = event.target.files[0];
+      this.setState(
+        { photo: file, nophoto: false, photoerror: null, corruptphoto: false, photoname: file.name },
+        () => console.log("file:  " + this.state.photoname)
+      );
+    }
     catch (err) {
       console.log("Photo Upload error: No file selected: " + err);
-      this.setState({photo:null,photoerror:null, corruptphoto:false});
+      this.setState({ photo: null, photoerror: null, corruptphoto: false });
       document.getElementById("photo").value = null;
 
     }
   };
 
+  fetchClassDetails() {
 
+    axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
+
+      if (cRes.data.errors) {
+
+        return this.setState({ errors: cRes.data.errors });
+
+      } else {
+
+        this.setState({ classDetails: cRes.data });
+
+        console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
+
+        this.fetchClasses();
+      }
+    });
+  }
+
+  /**
+   * @description - fetches unique classes from the class detail from DB
+   */
+  fetchClasses() {
+
+    var classArray = [];
+    this.state.classDetails.forEach(element => {
+
+      console.log("element.class - " + element.class);
+      classArray.push(element.class);
+    });
+    console.log("classArray - " + classArray);
+    var uniqueItems = Array.from(new Set(classArray));
+
+    this.setState({ classes: uniqueItems });
+
+    console.log("Unique classes - " + this.state.classes);
+  }
+
+  classChangeHandler(e) {
+
+    var selectedClass = e.currentTarget.value;
+    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
+    this.setState({ class: selectedClass });
+
+    var sectionArrayTemp = [];
+    this.state.classDetails.forEach(element => {
+      if (element["class"] === selectedClass) {
+
+        sectionArrayTemp.push(element["section"]);
+
+      }
+    });
+
+    // Sorting array alphabetically
+    sectionArrayTemp.sort();
+
+    this.setState({
+       sectionArray: sectionArrayTemp,
+      })
+
+    console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
+
+    // Switching view to section view
+    this.setState({ sectionView: true });
+  }
+
+  sectionChangeHandler(e) {
+
+    var selectedSection = e.currentTarget.value;
+    console.log("e.target.name - " + [e.currentTarget.name] + " selectedSection - " + selectedSection);
+    this.setState({ section: selectedSection });
+
+    // var studentsDataArrayTemp = [];
+    // this.state.classDetails.forEach(element => {
+    //   if (element["class"] === this.state.class && element["section" === this.state.section]) {
+
+    //     studentsDataArrayTemp = element["studentsData"];
+    //   }
+    // });
+
+    // this.setState({
+    //    studentsDataArray : studentsDataArrayTemp
+    //   })
+
+    // console.log("Selected class - " + this.state.class + " Sections - " + selectedSection 
+    // + " studentsDataArray - " + this.state.studentsDataArray);
+
+    // // Switching view to section view
+    // this.setState({ studentsView: true });
+  }
+
+  async updateClassDetails() {
+
+    // var studentsDataArrayTemp = this.state.studentsDataArray;
+
+    // studentsDataArrayTemp.push({
+    //   "rollno": this.state.rollno,
+    //   "username": this.state.username,
+    //   "firstname": this.state.firstname,
+    //   "lastname": this.state.lastname,
+    // });
+
+    //console.log("studentsDataArrayTemp - " + studentsDataArrayTemp);
+
+    var updateClassDetailsRequest = {
+      "class": this.state.class,
+      "section": this.state.section,
+      "studentsData": {
+        "rollno": this.state.rollno,
+        "username": this.state.username,
+        "firstname": this.state.firstname,
+        "lastname": this.state.lastname,
+      }
+    }
+
+    console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
+      + JSON.stringify(updateClassDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          classDetailsUpdatedFlag: true
+        });
+      }
+    });
+  }
 
   render() {
     return (
 
-
       <div style={{ width: "1000px" }}>
-
-
 
         <Container style={{ width: "2500px" }}>
 
-                 <Row lg="4" style={{ width: "2500px" }}>
+          <Row lg="4" style={{ width: "2500px" }}>
             <Col md="7">
               <Card className="mx-4">
                 <CardBody className="p-2">
-
 
                   <Form>
                     {this.state.studentRegSuccess && (
@@ -558,9 +721,9 @@ this.setState({
                         toggle={this.toggleSuccess}
                       >
                         <ModalHeader toggle={this.toggleSuccess}>
-                         {this.state.userdata.firstname}{" "}
+                          {this.state.userdata.firstname}{" "}
                           {this.state.userdata.lastname}{" "}
-                           Registered Successfully!
+                          Registered Successfully!
                         </ModalHeader>
                       </Modal>
                     )}
@@ -568,7 +731,7 @@ this.setState({
                     <Row lg="2">
                       <Col>
                         <Card className="mx-1">
-                        <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}><h5>Select User Roles</h5></CardHeader>
+                          <CardHeader style={{ backgroundColor: 'lightgreen', borderColor: 'black' }}><h5>Select User Roles</h5></CardHeader>
                           <CardBody className="p-2">
 
 
@@ -673,7 +836,7 @@ this.setState({
 
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                            <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}><h5>Basic Details</h5></CardHeader>
+                            <CardHeader style={{ backgroundColor: 'lightgreen', borderColor: 'black' }}><h5>Basic Details</h5></CardHeader>
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
@@ -730,7 +893,7 @@ this.setState({
                                 name="dob"
                                 id="dob"
                                 value={this.state.dob}
-                                onChange={date=>{this.setState({dob:date})}}
+                                onChange={date => { this.setState({ dob: date }) }}
                               />
                             </InputGroup>
 
@@ -795,64 +958,64 @@ this.setState({
                             )}
                             {(this.state.role.indexOf("teacher") !== -1 ||
                               this.state.role.indexOf("admin") !== -1) && (
-                              <p>
-                                <InputGroup className="mb-4">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText style={{ width: "120px" }}>
-                                      Marital Status
+                                <p>
+                                  <InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Marital Status
                                     </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Input
-                                    name="maritalstatus"
-                                    id="maritalstatus"
-                                    type="select"
-                                    onChange={this.changeHandler}
-                                    value={this.state.maritalstatus}
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="maritalstatus"
+                                      id="maritalstatus"
+                                      type="select"
+                                      onChange={this.changeHandler}
+                                      value={this.state.maritalstatus}
 
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Single">Single</option>
-                                    <option value="Married">Married</option>
-                                    <option value="Divorced">Divorced</option>
-                                    <option value="Widowed">Widowed</option>
-                                  </Input>
-                                </InputGroup>
-                                {this.state.errors &&
-                                  this.state.errors.maritalstatus && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>
-                                        {this.state.errors.maritalstatus.msg}
-                                      </p>
-                                    </font>
-                                  )}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Single">Single</option>
+                                      <option value="Married">Married</option>
+                                      <option value="Divorced">Divorced</option>
+                                      <option value="Widowed">Widowed</option>
+                                    </Input>
+                                  </InputGroup>
+                                  {this.state.errors &&
+                                    this.state.errors.maritalstatus && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>
+                                          {this.state.errors.maritalstatus.msg}
+                                        </p>
+                                      </font>
+                                    )}
 
-                                <InputGroup className="mb-3">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText style={{ width: "120px" }}>
-                                      Qualification
+                                  <InputGroup className="mb-3">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Qualification
                                     </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Input
-                                    type="text"
-                                    name="qualification"
-                                    id="qualification"
-                                    value={this.state.qualification}
-                                    autoComplete="qualification"
-                                    onChange={this.changeHandler}
-                                  />
-                                </InputGroup>
-                                {this.state.errors &&
-                                  this.state.errors.qualification && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>
-                                        {this.state.errors.qualification.msg}
-                                      </p>
-                                    </font>
-                                  )}
-                              </p>
-                            )}
+                                    </InputGroupAddon>
+                                    <Input
+                                      type="text"
+                                      name="qualification"
+                                      id="qualification"
+                                      value={this.state.qualification}
+                                      autoComplete="qualification"
+                                      onChange={this.changeHandler}
+                                    />
+                                  </InputGroup>
+                                  {this.state.errors &&
+                                    this.state.errors.qualification && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>
+                                          {this.state.errors.qualification.msg}
+                                        </p>
+                                      </font>
+                                    )}
+                                </p>
+                              )}
                             <InputGroup className="mb-4">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText style={{ width: "120px" }}>
@@ -1010,7 +1173,7 @@ this.setState({
                       <Col>
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                           <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}> <h5>Official Details</h5></CardHeader>
+                            <CardHeader style={{ backgroundColor: 'lightgreen', borderColor: 'black' }}> <h5>Official Details</h5></CardHeader>
 
                             {this.state.role.indexOf("teacher") === -1 &&
                               this.state.role.indexOf("admin") === -1 && (
@@ -1073,125 +1236,118 @@ this.setState({
                                       </font>
                                     )}
 
-<InputGroup className="mb-4">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                 Class
+                                  <InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Class
                                 </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="class"
-                                id="class"
-                                type="select"
-                                value={this.state.class}
-                                onChange={this.changeHandler}
-                              >
-                                <option value="">Select</option>
-                                <option value="LKG">LKG</option>
-                                <option value="UKG">UKG</option>
-                                <option value="I">I</option>
-                                <option value="II">II</option>
-                                <option value="III">III</option>
-                                <option value="IV">IV</option>
-                                <option value="V">V</option>
-                                <option value="VI">VI</option>
-                                <option value="VII">VII</option>
-                                <option value="VIII">VIII</option>
-                                <option value="IX">IX</option>
-                                <option value="X">X</option>
-                                <option value="XI">XI</option>
-                                <option value="XII">XII</option>
-                                   </Input>
-                            </InputGroup>
-                            {this.state.errors && this.state.errors.class && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.class.msg}</p>
-                              </font>
-                            )}
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="class"
+                                      id="class"
+                                      type="select"
+                                      value={this.state.class}
+                                      onChange={this.classChangeHandler}
+                                    >
+                                      <option value="">Select</option>
+                                      {this.state.classes.map(element => {
+                                        return (<option key={element} value={element}>{element}</option>);
+                                      }
+                                      )}
+                                    </Input>
+                                  </InputGroup>
+                                  {this.state.errors && this.state.errors.class && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.errors.class.msg}</p>
+                                    </font>
+                                  )}
 
-<InputGroup className="mb-4">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                 Section
+                                  {this.state.sectionView && this.state.sectionArray && (
+                                    <InputGroup className="mb-4">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Section
                                 </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="section"
-                                id="section"
-                                type="select"
-                                value={this.state.section}
-                                onChange={this.changeHandler}
-                              >
-                                <option value="">Select</option>
-                                <option value="A">A</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="D">D</option>
-                                <option value="E">E</option>
+                                      </InputGroupAddon>
+                                      <Input
+                                        name="section"
+                                        id="section"
+                                        type="select"
+                                        value={this.state.section}
+                                        onChange={this.sectionChangeHandler}
+                                      >
+                                        <option value="">Select</option>
+                                        {this.state.sectionArray.map(element => {
+                                          return (<option key={element} value={element}>{element}</option>);
+                                        }
+                                        )}
 
-                                   </Input>
-                            </InputGroup>
-                            {this.state.errors && this.state.errors.section && (
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.errors.section.msg}</p>
-                              </font>
-                            )}
+                                      </Input>
+                                    </InputGroup>
+                                  )}
+                                  {this.state.errors && this.state.errors.section && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.errors.section.msg}</p>
+                                    </font>
+                                  )}
 
-<Card className="mx-1">
-                          <CardBody className="p-2">
-                            <h6>Select Fee Templates</h6>
-
-
-                            <Select
-                            id="selectedFeeTemplate"
-                            name="selectedFeeTemplate"
-                             isMulti={true}
-                          placeholder="Select or Type to search"
-                            options={this.state.feeTemplate}
-                          closeMenuOnSelect={false}
-                         value={this.state.selectedFeeTemplateValue}
-
-                            isSearchable={true}
-                            onChange={selected=>{console.log("Selected: "+JSON.stringify(selected));
-                            var temp=[];
-
-                            for(var i=0;i<selected.length;i++)
-                            {temp.push(selected[i].value)}
-                            this.setState({selectedFeeTemplate:temp,
-                            selectedFeeTemplateValue:selected},()=>
-                            {console.log("Selected Fee Templ: "+JSON.stringify(this.state.selectedFeeTemplate));
-                          })
+                                  <Card className="mx-1">
+                                    <CardBody className="p-2">
+                                      <h6>Select Fee Templates</h6>
 
 
+                                      <Select
+                                        id="selectedFeeTemplate"
+                                        name="selectedFeeTemplate"
+                                        isMulti={true}
+                                        placeholder="Select or Type to search"
+                                        options={this.state.feeTemplate}
+                                        closeMenuOnSelect={false}
+                                        value={this.state.selectedFeeTemplateValue}
 
+                                        isSearchable={true}
+                                        onChange={selected => {
+                                          console.log("Selected: " + JSON.stringify(selected));
+                                          var temp = [];
 
-
-
-
-                          }
-
-
-
-                            } />
+                                          for (var i = 0; i < selected.length; i++) { temp.push(selected[i].value) }
+                                          this.setState({
+                                            selectedFeeTemplate: temp,
+                                            selectedFeeTemplateValue: selected
+                                          }, () => {
+                                            console.log("Selected Fee Templ: " + JSON.stringify(this.state.selectedFeeTemplate));
+                                          })
 
 
 
 
 
 
-                           </CardBody>
-                        </Card>
-                        {this.state.errors && this.state.errors.selectedFeeTemplate && (
-                            <font color="red">
-                              {" "}
-                             <p>{this.state.errors.selectedFeeTemplate.msg}</p>
-                            </font>
-                          )}
+
+                                        }
 
 
-                                 </p>
+
+                                        } />
+
+
+
+
+
+
+                                    </CardBody>
+                                  </Card>
+                                  {this.state.errors && this.state.errors.selectedFeeTemplate && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.errors.selectedFeeTemplate.msg}</p>
+                                    </font>
+                                  )}
+
+
+                                </p>
                               )}
 
 
@@ -1208,7 +1364,7 @@ this.setState({
                                 name="doj"
                                 id="doj"
                                 value={this.state.doj}
-                                onChange={date=>{this.setState({doj:date})}}
+                                onChange={date => { this.setState({ doj: date }) }}
                               />
                             </InputGroup>
                             {this.state.errors && this.state.errors.doj && (
@@ -1220,199 +1376,199 @@ this.setState({
 
                             {(this.state.role.indexOf("teacher") !== -1 ||
                               this.state.role.indexOf("admin") !== -1) && (
-                              <p>
-                                <InputGroup className="mb-3">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText style={{ width: "120px" }}>
-                                      Employee No
-                                    </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Input
-                                    type="text"
-                                    name="employeeno"
-                                    id="employeeno"
-                                    value={this.state.employeeno}
-                                    autoComplete="employeeno"
-                                    onChange={this.changeHandler}
-                                  />
-                                </InputGroup>
-                                {this.state.errors &&
-                                  this.state.errors.employeeno && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.errors.employeeno.msg}</p>
-                                    </font>
-                                  )}
-
-                                <InputGroup className="mb-3">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText style={{ width: "100px" }}>
-                                      Type
-                                    </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Col md="9">
-                                    <FormGroup check inline>
-                                      <Input
-                                        className="form-check-input"
-                                        type="radio"
-                                        id="type1"
-                                        name="type"
-                                        value="Fresher"
-                                        style={{
-                                          height: "35px",
-                                          width: "25px"
-                                        }}
-                                        onChange={this.changeHandler}
-                                      />
-                                      <Label
-                                        className="form-check-label"
-                                        check
-                                        htmlFor="inline-radio1"
-                                      >
-                                        Fresher
-                                      </Label>
-                                    </FormGroup>
-                                    <FormGroup check inline>
-                                      <Input
-                                        className="form-check-input"
-                                        type="radio"
-                                        id="type2"
-                                        name="type"
-                                        value="Experienced"
-                                        style={{
-                                          height: "35px",
-                                          width: "25px"
-                                        }}
-                                        onChange={this.changeHandler}
-                                      />
-                                      <Label
-                                        className="form-check-label"
-                                        check
-                                        htmlFor="inline-radio1"
-                                      >
-                                        Experienced
-                                      </Label>
-                                    </FormGroup>
-                                  </Col>
-                                </InputGroup>
-
-                                {this.state.errors && this.state.errors.type && (
-                                  <font color="red">
-                                    {" "}
-                                    <p>{this.state.errors.type.msg}</p>
-                                  </font>
-                                )}
-
-                                {this.state.type === "Experienced" && (
+                                <p>
                                   <InputGroup className="mb-3">
                                     <InputGroupAddon addonType="prepend">
-                                      <InputGroupText
-                                        style={{ width: "150px" }}
-                                      >
-                                        Experience Details
-                                      </InputGroupText>
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Employee No
+                                    </InputGroupText>
                                     </InputGroupAddon>
-                                    <textarea
-                                      style={{ width: "200px" }}
-                                      name="experiencedetails"
-                                      value={this.state.experiencedetails}
+                                    <Input
+                                      type="text"
+                                      name="employeeno"
+                                      id="employeeno"
+                                      value={this.state.employeeno}
+                                      autoComplete="employeeno"
                                       onChange={this.changeHandler}
                                     />
-
-                                    {this.state.errors &&
-                                      this.state.errors.experiencedetails && (
-                                        <font color="red">
-                                          {" "}
-                                          <p>
-                                            {
-                                              this.state.errors
-                                                .experiencedetails.msg
-                                            }
-                                          </p>
-                                        </font>
-                                      )}
                                   </InputGroup>
-                                )}
+                                  {this.state.errors &&
+                                    this.state.errors.employeeno && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.employeeno.msg}</p>
+                                      </font>
+                                    )}
 
-                                <InputGroup className="mb-4">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText style={{ width: "120px" }}>
-                                      Department
+                                  <InputGroup className="mb-3">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "100px" }}>
+                                        Type
                                     </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Input
-                                    name="department"
-                                    id="department"
-                                    type="select"
-                                    onChange={this.changeHandler}
-                                    value={this.state.department}
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Department1">
-                                      Department1
-                                    </option>
-                                    <option value="Department2">
-                                      Department2
-                                    </option>
-                                    <option value="Department3">
-                                      Department3
-                                    </option>
-                                    <option value="Department4">
-                                      Department4
-                                    </option>
-                                  </Input>
-                                </InputGroup>
+                                    </InputGroupAddon>
+                                    <Col md="9">
+                                      <FormGroup check inline>
+                                        <Input
+                                          className="form-check-input"
+                                          type="radio"
+                                          id="type1"
+                                          name="type"
+                                          value="Fresher"
+                                          style={{
+                                            height: "35px",
+                                            width: "25px"
+                                          }}
+                                          onChange={this.changeHandler}
+                                        />
+                                        <Label
+                                          className="form-check-label"
+                                          check
+                                          htmlFor="inline-radio1"
+                                        >
+                                          Fresher
+                                      </Label>
+                                      </FormGroup>
+                                      <FormGroup check inline>
+                                        <Input
+                                          className="form-check-input"
+                                          type="radio"
+                                          id="type2"
+                                          name="type"
+                                          value="Experienced"
+                                          style={{
+                                            height: "35px",
+                                            width: "25px"
+                                          }}
+                                          onChange={this.changeHandler}
+                                        />
+                                        <Label
+                                          className="form-check-label"
+                                          check
+                                          htmlFor="inline-radio1"
+                                        >
+                                          Experienced
+                                      </Label>
+                                      </FormGroup>
+                                    </Col>
+                                  </InputGroup>
 
-                                {this.state.errors &&
-                                  this.state.errors.department && (
+                                  {this.state.errors && this.state.errors.type && (
                                     <font color="red">
                                       {" "}
-                                      <p>{this.state.errors.department.msg}</p>
+                                      <p>{this.state.errors.type.msg}</p>
                                     </font>
                                   )}
 
-                                <InputGroup className="mb-4">
-                                  <InputGroupAddon addonType="prepend">
-                                    <InputGroupText style={{ width: "120px" }}>
-                                      Designation
-                                    </InputGroupText>
-                                  </InputGroupAddon>
-                                  <Input
-                                    name="designation"
-                                    id="designation"
-                                    type="select"
-                                    onChange={this.changeHandler}
-                                    value={this.state.designation}
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="designation1">
-                                      designation1
-                                    </option>
-                                    <option value="designation2">
-                                      designation2
-                                    </option>
-                                    <option value="designation3">
-                                      designation3
-                                    </option>
-                                    <option value="designation4">
-                                      designation4
-                                    </option>
-                                  </Input>
-                                </InputGroup>
-                                {this.state.errors &&
-                                  this.state.errors.designation && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.errors.designation.msg}</p>
-                                    </font>
+                                  {this.state.type === "Experienced" && (
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText
+                                          style={{ width: "150px" }}
+                                        >
+                                          Experience Details
+                                      </InputGroupText>
+                                      </InputGroupAddon>
+                                      <textarea
+                                        style={{ width: "200px" }}
+                                        name="experiencedetails"
+                                        value={this.state.experiencedetails}
+                                        onChange={this.changeHandler}
+                                      />
+
+                                      {this.state.errors &&
+                                        this.state.errors.experiencedetails && (
+                                          <font color="red">
+                                            {" "}
+                                            <p>
+                                              {
+                                                this.state.errors
+                                                  .experiencedetails.msg
+                                              }
+                                            </p>
+                                          </font>
+                                        )}
+                                    </InputGroup>
                                   )}
-                              </p>
-                            )}
+
+                                  <InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Department
+                                    </InputGroupText>
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="department"
+                                      id="department"
+                                      type="select"
+                                      onChange={this.changeHandler}
+                                      value={this.state.department}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Department1">
+                                        Department1
+                                    </option>
+                                      <option value="Department2">
+                                        Department2
+                                    </option>
+                                      <option value="Department3">
+                                        Department3
+                                    </option>
+                                      <option value="Department4">
+                                        Department4
+                                    </option>
+                                    </Input>
+                                  </InputGroup>
+
+                                  {this.state.errors &&
+                                    this.state.errors.department && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.department.msg}</p>
+                                      </font>
+                                    )}
+
+                                  <InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Designation
+                                    </InputGroupText>
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="designation"
+                                      id="designation"
+                                      type="select"
+                                      onChange={this.changeHandler}
+                                      value={this.state.designation}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="designation1">
+                                        designation1
+                                    </option>
+                                      <option value="designation2">
+                                        designation2
+                                    </option>
+                                      <option value="designation3">
+                                        designation3
+                                    </option>
+                                      <option value="designation4">
+                                        designation4
+                                    </option>
+                                    </Input>
+                                  </InputGroup>
+                                  {this.state.errors &&
+                                    this.state.errors.designation && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.designation.msg}</p>
+                                      </font>
+                                    )}
+                                </p>
+                              )}
                           </CardBody>
                         </Card>
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                          <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}>  <h5>Login Details</h5></CardHeader>
+                            <CardHeader style={{ backgroundColor: 'lightgreen', borderColor: 'black' }}>  <h5>Login Details</h5></CardHeader>
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText>
@@ -1511,7 +1667,7 @@ this.setState({
 
                         <Card className="mx-1">
                           <CardBody className="p-2">
-                           <CardHeader> <h5>Contact Details</h5></CardHeader>
+                            <CardHeader> <h5>Contact Details</h5></CardHeader>
 
 
                             <Card className="mx-1">
@@ -1622,13 +1778,13 @@ this.setState({
                           </CardBody>
                         </Card>
 
-                        </Col>
+                      </Col>
                       <Col>
                         {this.state.role.indexOf("student") !== -1 && (
                           <p>
                             <Card className="mx-1">
                               <CardBody className="p-2">
-                             <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}>   <h5>Parent Details</h5></CardHeader>
+                                <CardHeader style={{ backgroundColor: 'lightgreen', borderColor: 'black' }}>   <h5>Parent Details</h5></CardHeader>
                                 <InputGroup className="mb-3">
                                   <InputGroupAddon addonType="prepend">
                                     <InputGroupText style={{ width: "110px" }}>
@@ -1931,7 +2087,7 @@ this.setState({
 
                             <Card className="mx-1">
                               <CardBody className="p-2">
-                               <CardHeader style={{backgroundColor: 'lightgreen', borderColor: 'black'}}> <h5>Parent Login Details</h5></CardHeader>
+                                <CardHeader style={{ backgroundColor: 'lightgreen', borderColor: 'black' }}> <h5>Parent Login Details</h5></CardHeader>
                                 <InputGroup className="mb-3">
                                   <InputGroupAddon addonType="prepend">
                                     <InputGroupText>
@@ -2022,14 +2178,14 @@ this.setState({
 
                     <Row className="align-items-center">
                       <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                      {!this.state.loader &&  <Button
+                        {!this.state.loader && <Button
                           type="submit"
                           onClick={this.submitHandler}
                           block
                           color="success"
                         >
                           {" "}
-                           <h4>  Register</h4>
+                          <h4>  Register</h4>
                         </Button>}
 
 
@@ -2037,13 +2193,13 @@ this.setState({
                           <div align="center"><ReactLoading type="spin"
                             color="	#006400"
                             height='2%' width='10%' />
-    <br/>
+                            <br />
 
- <font color="DarkGreen">  <h4>Registering...</h4></font></div> }
+                            <font color="DarkGreen">  <h4>Registering...</h4></font></div>}
                       </Col>
                       <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
                         <Button block onClick={this.resetForm} color="info">
-                        <h4>  Reset</h4>
+                          <h4>  Reset</h4>
                         </Button>
                       </Col>
                     </Row>

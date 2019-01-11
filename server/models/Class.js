@@ -14,13 +14,21 @@ var ClassSchema = new Schema({
   },
   studentsData: {
     type: Array,
-    lowercase:true
   },
   subjects: {
     type: Array,
     required: true,
-    lowercase:true
-  }
+  },
+  createdAt: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
 },  { collection: 'Class' });
 
 // Composite primary key (class + section)
