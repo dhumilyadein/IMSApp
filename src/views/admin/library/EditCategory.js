@@ -321,7 +321,7 @@ block
                               <Button
                                 onClick={e=>{this.setState({showEdit:false, showOptions:false})}}
                                 size="lg"
-                                color="success"
+                                color="secondary"
 block
                               >
                                 Cancel
