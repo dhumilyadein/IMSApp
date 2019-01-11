@@ -65,11 +65,32 @@ showOptions:false,
     this.onDismiss = this.onDismiss.bind(this);
 
     this.getCategories=this.getCategories.bind(this);
+this.reset=this.reset.bind(this);
+this.deleteCategory=this.deleteCategory.bind(this);
 
 
 
 
+  }
 
+  reset(){
+
+    this.setState({  erorrs: null,
+
+
+      category:[],
+ 
+      newCategory:"",
+ 
+ categoryError:"",
+ showEdit:false,
+ showOptions:false,
+ 
+       success: false,
+       modalSuccess: false,
+       visible: false,
+ 
+       defaultcategories:[]})
   }
 
   getCategories()
@@ -91,6 +112,49 @@ for(var i=0;i<result.data.length;i++)
         });
       }
     });
+
+  }
+
+  deleteCategory()
+  {
+
+    confirmAlert({
+      title: 'Confirm to Proceed',
+      message: 'Are you sure to Delete this Category?',
+      buttons: [
+        {size:"lg",
+          label: 'Yes',
+          onClick: () =>
+
+        {
+
+              console.log("Deleting Category: ");
+              axios
+                .post("http://localhost:8001/api/deleteCategory", {"category":this.state.category.value})
+                .then(result => {
+                  console.log("RESULT.data " + JSON.stringify(result.data));
+                if (result.data.msg === "Deleted")
+                    this.setState({
+                      success: true,
+                      modalSuccess: true,
+                      showOptions: false,
+                      showEdit: false,
+                      modelMessage:this.state.category.label+" Deleted Successfully!"
+
+                    });
+                    
+
+                });
+            }
+
+        },
+        {
+          label: 'No',
+
+        }
+      ]
+    })
+
 
   }
 
@@ -125,59 +189,31 @@ for(var i=0;i<result.data.length;i++)
         this.setState({ categoryError: "Please Enter New Category Name" });
         submit = false;}
 
+   if (submit === true) {
 
-
-        if (Object.keys(this.state.category).length===0) {
-            this.setState({ categoryError: "Please Select Category" });
-            submit = false;}
-
-
-
-
-        if (submit === true) {
-
-    confirmAlert({
-        title: 'Confirm to Proceed',
-        message: 'Are you sure to Add this Book?',
-        buttons: [
-          {
-            label: 'Yes',
-            onClick: () =>
-
-          {
-
-                console.log("Submitting Items: ");
+   
+                console.log("Updating Category: ");
                 axios
-                  .post("http://localhost:8001/api/addBook", this.state)
+                  .post("http://localhost:8001/api/editCategory", {"oldCategory":this.state.category.value,
+                  "newCategory":this.state.newCategory})
                   .then(result => {
                     console.log("RESULT.data " + JSON.stringify(result.data));
-                    if(result.data.error)
-                    {if (result.data.error.errors.bookName)
-                      this.setState({
-                        bookNameError:result.data.error.errors.bookName.message
-                      });
-                     if (result.data.error.errors.bookId)
-                    this.setState({
-                      bookIdError:result.data.error.errors.bookId.message
-                    });}
-                     else if (result.data.msg === "Success")
-                      this.setState({
+                 
+                      if (result.data.msg === "Updated")
+                   {   this.setState({
 
                         success: true,
                         modalSuccess: true,
+                        modelMessage:this.state.newCategory+" Saved Successfully!"
 
-                      });
+                      } );}
 
                   });
               }
 
-          },
-          {
-            label: 'No',
-
-          }
-        ]
-      })}
+         
+      
+     
 
 
 
@@ -212,7 +248,7 @@ for(var i=0;i<result.data.length;i++)
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                      {this.state.category} Category saved Successfully!
+                      {this.state.modelMessage} 
                       </ModalHeader>
                     </Modal>
                   )}
@@ -231,7 +267,7 @@ for(var i=0;i<result.data.length;i++)
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
                 this.setState({category:selected,
                 newCategory:selected.label,
-              showOptions:true});}}
+              showOptions:true,showEdit:false});}}
 
                 autosize
 
@@ -296,6 +332,14 @@ for(var i=0;i<result.data.length;i++)
                           </InputGroup>
 
 
+{this.state.categoryError && (
+  <font color="red">
+    <h6>
+      {" "}
+      <p>{this.state.categoryError} </p>
+    </h6>{" "}
+  </font>
+)}
 
 
 
@@ -314,7 +358,7 @@ for(var i=0;i<result.data.length;i++)
                                 color="success"
 block
                               >
-                                Submit
+                                Update
                               </Button>
                             </Col>
                             <Col>
@@ -331,14 +375,6 @@ block
 
     </Row></div>}
 
-{this.state.categoryError && (
-  <font color="red">
-    <h6>
-      {" "}
-      <p>{this.state.categoryError} </p>
-    </h6>{" "}
-  </font>
-)}
                         </CardBody>
 
                       </Card>

@@ -82,27 +82,25 @@ BookCategories
 }
 
 
-async function getpendingFeeAmount(req,res)
-{console.log("In getpendingFeeAmount for: "+ JSON.stringify(req.body));
+async function deleteCategory(req,res)
+{console.log("In deleteCategory for: "+ JSON.stringify(req.body));
 
 
-Student
-      .findOne({username:req.body.username})
-      .then(data => {
-        //console.log("Student Result: "+JSON.stringify(data))
-          return res.send(data.pendingFeeAmount);
-      })
-      .catch(err => {
-        return res.send({error:err});
-      });
-
+BookCategories
+.deleteOne({category:req.body.category})
+.then(data => {
+  return res.send({msg:"Deleted"});
+})
+.catch(err => {
+return res.send({error:err});
+});
 
 
 
 }
 
 function addBook(req,res)
-{
+{var add=true;
   console.log("in addBook: "+JSON.stringify(req.body));
 
   if(req.body.category.__isNew__)
@@ -112,11 +110,12 @@ addCategory.save()
    console.log("Category saved: "+JSON.stringify(user));
 })
 .catch(err => {
+add=false;
   console.log("Category Error: "+JSON.stringify(err));
 });
 
 }
-
+if(add){
 var tempBook={"bookId":req.body.bookId, "bookName":req.body.bookName, "category":req.body.category.label,"author":req.body.author,
 "publisher":req.body.publisher , "quantity":req.body.quantity, "cost":req.body.cost,   "doa":req.body.doa,
  "description":req.body.description,"uniqueBookIds" : req.body.uniqueBookIds  }
@@ -134,24 +133,28 @@ var addBook = new Books(tempBook);
     return res.send({error});
   });
 
-
+}
+else{ return res.send({error:"Couldn't update Category"});}
 
 }
 
-function getStudentByRollNo(req,res)
+function editCategory(req,res)
 
-{ console.log("In getStudentByRollNo: "+req.body.rollNo);
+{ console.log("In editCategory: "+JSON.stringify(req.body));
 
-  Student
-  .findOne({rollno:req.body.rollNo})
+  BookCategories
+  .updateOne({category:req.body.oldCategory},
+    {$set: {category:req.body.newCategory,
+
+
+    }})
   .then(data => {
     //console.log("Student Result: "+JSON.stringify(data))
-      return res.send({"firstname":data.firstname,"lastname":data.lastname,
-      "username":data.username, "feeTemplate":data.feeTemplate, "class":data.class, "section":data.section
+      return res.send({msg:"Updated"
     });
   })
-  .catch(err => {console.log("Error"+err);
-    return res.send({error:"Not Found"});
+  .catch(error => {console.log("Error " +error);
+    return res.send({error});
   });
 }
 
@@ -161,9 +164,9 @@ function getStudentByRollNo(req,res)
   app.post("/api/selectfeeTemplate", selectfeeTemplate);
    app.get("/api/getCategories", getCategories);
 
-   app.post("/api/getpendingFeeAmount", getpendingFeeAmount);
+   app.post("/api/deleteCategory", deleteCategory);
    app.post("/api/addBook", addBook);
-   app.post("/api/getStudentByRollNo", getStudentByRollNo);
+   app.post("/api/editCategory", editCategory);
 
 
 

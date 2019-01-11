@@ -287,7 +287,7 @@ uniqueBookIdsError:"",
 
                               name="bookName"
                               id="bookName"
-                              value={this.state.bookName}
+                              value={this.state.bookName.charAt(0).toUpperCase()+this.state.bookName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { bookName: e.target.value },
