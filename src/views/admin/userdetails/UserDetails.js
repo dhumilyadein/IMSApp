@@ -52,6 +52,8 @@ class UserDetails extends Component {
       sectionArray: [],
       classDetailsUpdatedFlag: false,
       studentsDataArray: [],
+      previousClass: null,
+      previousSection: null,
 
       sectionView: false,
       studentsView: false,
@@ -471,6 +473,9 @@ class UserDetails extends Component {
 
     var selectedClass = e.currentTarget.value;
     console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
+    
+    var previousClass = this.state.class;
+    this.setState({ previousClass: previousClass });
     this.setState({ class: selectedClass });
 
     var sectionArrayTemp = [];
@@ -493,6 +498,13 @@ class UserDetails extends Component {
 
     // Switching view to section view
     this.setState({ sectionView: true });
+  }
+
+  sectionChangeHandler(e) {
+
+    var previousSection = this.state.section;
+    this.setState({ previousSection : previousSection });
+      this.setState({ section: e.target.value });
   }
 
   // Fetching section of the class initially populated for the user
@@ -591,7 +603,9 @@ class UserDetails extends Component {
         "username": this.state.username,
         "firstname": this.state.firstname,
         "lastname": this.state.lastname,
-      }
+      },
+      "previousClass" : this.state.previousClass,
+      "previousSection" : this.state.previousSection
     }
 
     console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
@@ -608,6 +622,11 @@ class UserDetails extends Component {
         });
       }
     });
+  }
+
+  removeUserFromPreviousClass () {
+
+    
   }
 
   render() {

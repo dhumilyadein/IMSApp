@@ -200,15 +200,43 @@ module.exports = function (app) {
 
     var request = req.body;
     var objForUpdate = {};
+
+    console.log("ClassDAO - updateClassDetails req.body - " + JSON.stringify(req.body));
+
+    if(request.previousClass && request.previousSection) {
+
+      var username = {};
+      var pullStudentsDataJSON = {};
+
+      if (request.studentsData.username) username.username = request.studentsData.username;
+      if(username.username) pullStudentsDataJSON.studentsData = username;
+
+      console.log("pullStudentsDataJSON - " + pullStudentsDataJSON);
+
+      await Class.findOneAndUpdate(
+        { $and: [{ "class": request.previousClass }, { "section": request.previousSection }] },
+        {
+          $pull: { "studentsData" : { "username" : request.studentsData.username} }
+        }
+      ).then(function (classData) {
+  
+        console.log("Class details udpated successfully");
+        response = { reqbody: req.body, message: "Class details updated successfully" };
+        console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(response));
+        return res.send(response);
+      }).catch(function (err) {
+        console.log("Catching server err - " + err);
+        response = { errors: err };
+        console.log("ClassDAO - updateClassDetails - Errors in classDAO - server final response - " + JSON.stringify(response));
+        return res.send(response);
+      });
+    }
+
     var studentsDataJSON = {};
-
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
-
     if (request.subjects) objForUpdate.subjects = request.subjects;
     objForUpdate.updatedAt = currentTime;
     console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
-
-    console.log("req.body - " + JSON.stringify(req.body));
 
     await Class.findOneAndUpdate(
       { $and: [{ "class": request.class }, { "section": request.section }] },
