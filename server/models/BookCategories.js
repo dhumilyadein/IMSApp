@@ -10,17 +10,17 @@ var BookCategoriesSchema = new Schema({
     required: true,
     unique:true
   },
-  categoryName: {
+  category: {
     type: String,
     required: true,
     unique:true,
- 
+
 
     trim:true,
-   lowercase:true
+
   },
 
- 
+
 
   createdAt: {
     type: Date,

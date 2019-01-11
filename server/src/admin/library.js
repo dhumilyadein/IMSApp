@@ -1,6 +1,6 @@
 const BookCategories = require("../../models/BookCategories");
-const FeeTemplate = require("../../models/FeeTemplatesModel");
-const FeeRecord = require("../../models/FeeRecords");
+const Books = require("../../models/Books");
+
 
 module.exports = function (app) {
 
@@ -105,71 +105,36 @@ function addBook(req,res)
 {
   console.log("in addBook: "+JSON.stringify(req.body));
 
-  for(var i=0;i<req.body.uniqueBookIds;i++)
-  {
-req.body.uniqueBookIds[i]["isIssued"]="N";
+  if(req.body.category.__isNew__)
+{var addCategory = new BookCategories({"category":req.body.category.label});
+addCategory.save()
+.then(user => {
+   console.log("Category saved: "+JSON.stringify(user));
+})
+.catch(err => {
+  console.log("Category Error: "+JSON.stringify(err));
+});
 
-  }
-  console.log("in addBook: "+JSON.stringify(req.body.uniqueBookIds));
+}
 
-
-
-  if(parseInt(req.body.totalDueAmount)>0)
-
-  {
-    Student
-    .updateOne({username:req.body.selectedStudent.value},
-      {$set: {pendingFeeAmount:req.body.totalDueAmount,
-
-
-      }}
-      )
-    .then(data => {
-      var addFee = new FeeRecord(template);
-
-      addFee
-     .save()
-     .then(user => {
-         return res.send({msg:"Success",pendingAmount:"Updated"});
-     })
-     .catch(err => {
-       return res.send({error:err});
-     });
-
-    })
-    .catch(err => {
-     res.send({error:err});
-    });
+var tempBook={"bookId":req.body.bookId, "bookName":req.body.bookName, "category":req.body.category.label,"author":req.body.author,
+"publisher":req.body.publisher , "quantity":req.body.quantity, "cost":req.body.cost,   "doa":req.body.doa,
+ "description":req.body.description,"uniqueBookIds" : req.body.uniqueBookIds  }
 
 
 
-  }
-else{
-  Student
-  .updateOne({username:req.body.selectedStudent.value},
-    {$set: {pendingFeeAmount:req.body.totalDueAmount,
 
-
-    }}
-    )
-    .then(user => {
-     console.log("Pending amount 0 updated");
+var addBook = new Books(tempBook);
+  addBook
+  .save()
+  .then(user => {
+      return res.send({msg:"Success"});
   })
-  .catch(err => {
-    console.log("Pending amount error 0");  });
+  .catch(error => {
+    return res.send({error});
+  });
 
 
-  var addFee = new FeeRecord(template);
-
-     addFee
-    .save()
-    .then(user => {
-        return res.send({msg:"Success"});
-    })
-    .catch(err => {
-      return res.send({error:err});
-    });
-  }
 
 }
 
@@ -194,7 +159,7 @@ function getStudentByRollNo(req,res)
   app.post("/api/selectStudentBySection", selectStudentBySection);
 
   app.post("/api/selectfeeTemplate", selectfeeTemplate);
-   app.post("/api/getCategories", getCategories);
+   app.get("/api/getCategories", getCategories);
 
    app.post("/api/getpendingFeeAmount", getpendingFeeAmount);
    app.post("/api/addBook", addBook);

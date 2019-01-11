@@ -32,13 +32,13 @@ import axios from "axios";
 
 class AddBook extends Component {
   constructor(props) {
-   
+
     super(props);
  this.getCategories();
     this.state = {
 
       erorrs: null,
-     
+
       uniqueBookIds:[],
      bookId:"",
      bookName:"",
@@ -55,13 +55,13 @@ categoryError:"",
 bookIdError:"",
 bookNameError:"",
 uniqueBookIdsError:"",
-     
+
       success: false,
       modalSuccess: false,
       visible: false,
-    
+
       defaultcategories:[]
-     
+
 
     };
 
@@ -73,7 +73,7 @@ uniqueBookIdsError:"",
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
     this.getCategories=this.getCategories.bind(this);
-    
+
 
 
 
@@ -90,12 +90,12 @@ uniqueBookIdsError:"",
       if (result.data) {
 var temp=[];
 for(var i=0;i<result.data.length;i++)
- temp.push({"label":result.data[i].categoryName.charAt(0).toUpperCase()+result.data[i].categoryName.slice(1),
-"value": result.data[i].categoryName})
+ temp.push({"label":result.data[i].category.charAt(0).toUpperCase()+result.data[i].category.slice(1),
+"value": result.data[i].category})
 
           this.setState({
           defaultcategories: temp,
-        
+
         });
       }
     });
@@ -105,26 +105,31 @@ for(var i=0;i<result.data.length;i++)
   reset()
   {
 this.setState({
-    erorrs: null,
-      success: null,
+  erorrs: null,
 
-     grandTotal:"",
-     dos:new Date(Date.now()),
-      listName: "",
-      rows: [{ itemName:"",
-      quantity:"",
-      unit:"",
-      costPerItem:"",
-      totalAmount:""
+  uniqueBookIds:[],
+ bookId:"",
+ bookName:"",
+ author:"",
+ publisher:"",
+ quantity:"",
+ doa:new Date(Date.now()),
+ category:[],
+ location:"",
+ description:"",
+ cost:"",
+quantityError:"",
+categoryError:"",
+bookIdError:"",
+bookNameError:"",
+uniqueBookIdsError:"",
 
-      }],
-      remarks:"",
-      rowError: false,
-      listNameError: "",
-      success: false,
-      modalSuccess: false,
-      visible: false,
-      dosError:""
+  success: false,
+  modalSuccess: false,
+  visible: false,
+
+  defaultcategories:[]
+
 
 
 });
@@ -136,6 +141,7 @@ this.setState({
       modalSuccess: !this.state.modalSuccess
     });
     this.reset();
+    this.getCategories();
   }
 
   /**
@@ -150,7 +156,7 @@ this.setState({
 
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
-   
+
     this.setState({
       bookNameError: "", bookIdError: "", success: false,
       modalSuccess: false, quantityError:"",categoryError:"", uniqueBookIdsError:""
@@ -175,8 +181,8 @@ this.setState({
                else if (this.state.uniqueBookIds.length!=parseInt(this.state.quantity)) {
                     this.setState({ uniqueBookIdsError: "No of Unique Books Ids should be equal to Quantity" });
                     submit = false;}
-     
-        
+
+
         if (submit === true) {
 
     confirmAlert({
@@ -185,47 +191,51 @@ this.setState({
         buttons: [
           {
             label: 'Yes',
-            onClick: () => 
-            
+            onClick: () =>
+
           {
-           
+
                 console.log("Submitting Items: ");
                 axios
                   .post("http://localhost:8001/api/addBook", this.state)
                   .then(result => {
                     console.log("RESULT.data " + JSON.stringify(result.data));
-                    if(result.data.errors)
-                    {if (result.data.errors.listName)
+                    if(result.data.error)
+                    {if (result.data.error.errors.bookName)
                       this.setState({
-                        listNameError:result.data.errors.listName.message
-                      });}
+                        bookNameError:result.data.error.errors.bookName.message
+                      });
+                     if (result.data.error.errors.bookId)
+                    this.setState({
+                      bookIdError:result.data.error.errors.bookId.message
+                    });}
                      else if (result.data.msg === "Success")
                       this.setState({
-        
+
                         success: true,
                         modalSuccess: true,
-        
+
                       });
-        
+
                   });
               }
-           
+
           },
           {
             label: 'No',
-          
+
           }
         ]
       })}
 
 
 
-  
+
   });
   }
 
 
- 
+
 
 
 
@@ -234,7 +244,7 @@ this.setState({
 
 
   render() {
- 
+
     return (
       <div>
         <Container>
@@ -273,8 +283,8 @@ this.setState({
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="bookName"
                               id="bookName"
                               value={this.state.bookName}
@@ -310,8 +320,8 @@ this.setState({
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="bookId"
                               id="bookId"
                               value={this.state.bookId.charAt(0).toUpperCase()+
@@ -341,22 +351,22 @@ this.setState({
 
 
 
-                          
+
                           <Row><Col>      <Creatable
-                
+
                 value={this.state.category}
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
                 this.setState({category:selected});}}
-                
+
                 autosize
                 onCreateOption={this.handleSubjectCreate}
                 options={this.state.defaultcategories}
-                isSearchable={true}     
-                placeholder="Select or type Category"       />
+                isSearchable={true}
+                placeholder="Select or type Category to Add"       />
 
 </Col></Row>
                           <br/>
-                    
+
                           {this.state.categoryError && (
                             <font color="red">
                               <h6>
@@ -366,7 +376,7 @@ this.setState({
                             </font>
                           )}
 
-                          
+
 
 <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
@@ -377,8 +387,8 @@ this.setState({
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="author"
                               id="author"
                               value={this.state.author}
@@ -395,7 +405,7 @@ this.setState({
                               }}
                             />
                           </InputGroup>
-                         
+
 
 <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
@@ -406,8 +416,8 @@ this.setState({
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="publisher"
                               id="publisher"
                               value={this.state.publisher}
@@ -434,8 +444,8 @@ this.setState({
                             <Input
                               type="number"
                               size="lg"
-                          
-                              
+
+
                               name="quantity"
                               id="quantity"
                               value={this.state.quantity}
@@ -464,7 +474,7 @@ if(this.state.bookId){ var temp=[];
                                 }
 
                                 else{this.setState({bookIdError:"Please enter Book Id first",quantity:""})}
-                                   
+
                                   }
                                 );
                               }}
@@ -488,8 +498,8 @@ if(this.state.bookId){ var temp=[];
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="location"
                               id="location"
                               value={this.state.location}
@@ -516,8 +526,8 @@ if(this.state.bookId){ var temp=[];
                             <Input
                               type="number"
                               size="lg"
-                          
-                              
+
+
                               name="cost"
                               id="cost"
                               value={this.state.cost}
@@ -534,7 +544,7 @@ if(this.state.bookId){ var temp=[];
                               }}
                             />
                           </InputGroup>
-                         
+
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
@@ -550,7 +560,7 @@ if(this.state.bookId){ var temp=[];
                               onChange={e => {
                                 this.setState(
                                   { description: e.target.value },
-                                  
+
                                 );
                               }}
                             />
@@ -563,15 +573,15 @@ if(this.state.bookId){ var temp=[];
                               </InputGroupText>
                             </InputGroupAddon>
                             <Creatable
-                
+
                 value={this.state.uniqueBookIds}
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
                 this.setState({uniqueBookIds:selected});}}
                 isMulti={true}
                 autosize
                 isClearable={false}
-             
-               
+
+
                     />
                           </InputGroup>
                           {this.state.uniqueBookIdsError && (
@@ -602,7 +612,7 @@ if(this.state.bookId){ var temp=[];
 
 
                             </InputGroup>
-                          
+
 
 
 

@@ -9,7 +9,8 @@ var BooksSchema = new Schema({
     type: String,
     required: true,
     unique:true,
-    trim,
+    trim:true,
+    lowecase:true,
     validate: {
         isAsync: true,
         validator: function(value, isValid) {
@@ -28,7 +29,7 @@ var BooksSchema = new Schema({
                 else{
                     return isValid(true);
                 }
-  
+
             })
         },
         message:  'The Book Id is already in use'
@@ -39,6 +40,7 @@ var BooksSchema = new Schema({
     type: String,
     required: true,
     unique:true,
+    lowercase:true,
     validate: {
       isAsync: true,
       validator: function(value, isValid) {
@@ -64,34 +66,35 @@ var BooksSchema = new Schema({
   },
 
     trim:true,
-   
+
   },
 
   publisher:{
     type: String,
     trim:true,
-    
+
+
 
   },
 
   author:{
     type: String,
     trim:true,
-   
+
 
   },
 
   location:{
     type: String,
     trim:true,
-   
+
 
   },
 
   description:{
     type: String,
     trim:true,
-   
+
 
   },
 
@@ -105,20 +108,20 @@ var BooksSchema = new Schema({
   cost:{
     type: Number,
     trim:true,
-   
+
 
   },
 
   doa:{
     type: Date,
     trim:true,
-   
+
 
   },
   category:{
     type: String,
     trim:true,
-    
+
     required:true
 
   },
@@ -127,7 +130,7 @@ var BooksSchema = new Schema({
   quantity:{
     type: Number,
     required: true,
-   
+
 
 },
 
