@@ -20,6 +20,12 @@ export default {
           variant: 'success',
         },
         {
+          name: 'Import Users',
+          url: '/admin/importUser',
+          icon: 'icon-people',
+          variant: 'success',
+        },
+        {
           name: 'Search Users',
           url: '/admin/searchUser',
           icon: 'icon-magnifier',
@@ -37,12 +43,7 @@ export default {
           icon: 'icon-user-follow',
           variant: 'success',
         },
-        {
-          name: 'Import Users',
-          url: '/admin/importUser',
-          icon: 'icon-people',
-          variant: 'success',
-        },
+      
     ]},
 
 

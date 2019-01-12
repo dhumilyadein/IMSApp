@@ -43,12 +43,9 @@ class importBulkBooks extends Component {
       corruptFile: false,
       filename: null,
       loader: false,
-      zipFile: null,
-      noZipFile: false,
-      corruptZipFile: false,
-      zipFilename: null,
+     
       showErrors: false,
-      zipFile: null
+  
 
 
 
@@ -67,7 +64,7 @@ class importBulkBooks extends Component {
   }
 
   reset = e => {
-    document.getElementById("zipfile").value = null;
+
     document.getElementById("file").value = null;
     this.setState({
       userdata: null,
@@ -113,11 +110,11 @@ class importBulkBooks extends Component {
   fileHandler = e => {
     e.preventDefault() // Stop form submit
     const excel = new FormData();
-    const zip = new FormData();
+   var submit=true;
     console.log("file" + this.state.filename);
-    this.setState({ loader: false, importErrors: null, showErrors: false, disableButton: false,impSuccess:false });
+    this.setState({ loader: true, importErrors: null, showErrors: false, disableButton: true,impSuccess:false });
     if (!this.state.file)
-
+{submit=false
       this.setState({
 
         noFile: true,
@@ -127,65 +124,21 @@ class importBulkBooks extends Component {
         loader: false,
         disableButton: false
 
-      });
-    if (!this.state.zipFile) {
-      this.setState({
+      });}
+  
 
-        noZipFile: true,
-        modalSuccess: true,
-        corruptZipFile: false,
-        impSuccess: false,
-        loader: false,
-        disableButton: false
+    if (submit) {
+      console.log("importing books");
 
-      });
-    }
-
-    if (this.state.noZipFile === false && this.state.corruptZipFile === false
-      && this.state.noFile === false && this.state.corruptFile === false && this.state.file && this.state.zipFile) {
-      console.log("in Zip");
-
-      zip.append('file', this.state.zipFile, this.state.zipFilename);
-
-      axios
-        .post("http://localhost:8001/api/photoZipUploading", zip)
-        .then(res => {
-          console.log("in Zip Res " + JSON.stringify(res.data));
-          if (res.data.error_code === 1) {
-
-            this.setState({
-
-              corruptZipFile: true,
-              modalSuccess: true,
-              noZipFile: false,
-              loader: false,
-              disableButton: false,
-              impSuccess: false,
-
-
-
-
-            });
-          }
-          if (res.data.success === true) {
-
-            this.setState({
-
-              corruptZipFile: false,
-              modalSuccess: true,
-
-              noZipFile: false,
-              loader: true
-            }, () => {
               excel.append('file', this.state.file, this.state.filename);
-              //excel.append('zipfilename', this.state.zipFilename.replace(/\.[^/.]+$/, ""));
+             
               axios
-                .post("http://localhost:8001/api/importExcel", excel)
+                .post("http://localhost:8001/api/importBooks", excel)
                 .then(res => {
                   console.log("in Import Res " + JSON.stringify(res.data));
                   if (res.data.error_code === 1) {
 
-                    //document.getElementById("zipfile").value = "";
+                   
                     this.setState({
 
                       corruptFile: true,
@@ -218,7 +171,7 @@ class importBulkBooks extends Component {
                   }
                   else if (res.data.errors) {
                     console.log("in import errors");
-                    document.getElementById("zipfile").value = null;
+                   
                     document.getElementById("file").value = null;
                     this.setState({
 
@@ -239,23 +192,10 @@ class importBulkBooks extends Component {
                 })
 
 
-            });
+            }
 
 
-          }
-
-
-        });
-
-
-
-
-
-
-
-
-
-    }
+         
   }
 
 
@@ -263,11 +203,9 @@ class importBulkBooks extends Component {
   fileChange = event => {
     try {
       const file = event.target.files[0];
-      if (event.target.name === "file")
+     
         this.setState({ file: file, noFile: false, corruptFile: false, filename: file.name, importErrors: null }, () => console.log("file:  " + this.state.file.name));
-      else
-        this.setState({ zipFile: file, noZipFile: false, corruptZipFile: false, zipFilename: file.name, importErrors: null }, () => console.log("zipfile:  " + this.state.zipFile.name));
-
+     
     }
     catch (err) {
       console.log("File Upload error: No file selected: " + JSON.stringify(err));
@@ -300,15 +238,12 @@ class importBulkBooks extends Component {
 
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">
-                        <div> <font color="red"> <h6> Please make sure the number of Records in Excel sheet matches the total number of Photos in zip file.</h6> </font>
+                        <div> 
+                        <font color="red"><h6>  BookName, BookId, Category and Quantity are mandatory fields</h6></font>
                           
-                          <font color="red"><h6>  Please make sure each Photo's name matches the Username in the Excel sheet.</h6></font>
-                         
-
-                          <font color="red"> <h6> Please make sure Photos.zip contains only JPG format photos and no Folder(s).</h6></font>
-                       
                           <font color="red"><h6>  If you face any unexpected behaviour, click Reset or Refresh your browser's tab and try again.</h6></font>
                           <br />
+                        
                         </div>
 
                       </InputGroupAddon>
@@ -331,29 +266,7 @@ class importBulkBooks extends Component {
                       && <font color="red">  <h5>Please select a valid XLS or XLSX file only.</h5></font>
                     }
 
-                    <InputGroup className="mb-3">
-                      <InputGroupAddon addonType="prepend">
-
-                      </InputGroupAddon>
-                      <h4>Upload Photos Zip</h4>
-                      <Input
-                        type="file"
-                        name="zipfile"
-                        id="zipfile"
-
-
-                        onChange={this.fileChange}
-                      />
-                    </InputGroup>
-
-                    {this.state.noZipFile
-                      && <font color="red">  <h5>Please choose the Photos Zip file</h5></font>
-                    }
-
-                    {this.state.corruptZipFile
-                      && <font color="red">  <h5>Please select a valid Zip file only.</h5></font>
-                    }
-
+                   
 
                     <Row className="align-items-center">
                       <Col col="6" sm="2" md="3" xl className="mb-3 mb-xl-0">
@@ -361,13 +274,14 @@ class importBulkBooks extends Component {
                       {!this.state.loader && 
                         <Button type="submit" block color="success"
                          onClick={this.fileHandler} disabled={this.state.disableButton}
-                          style={{ width: "200px" }}><h4> Import sheet </h4>  </Button>}
+                          style={{ width: "200px" }}><h4> Import Books </h4>  </Button>}
 
                         {this.state.loader && <font color="Green">  <h5>Importing sheet...</h5></font>}
                         {this.state.loader &&
                           <ReactLoading type="bars"
                             color="	#006400"
                             height='2%' width='20%' />
+
                         }
                       </Col>
                       <Col><Button block onClick={this.reset} color="info" style={{ width: "200px" }}>

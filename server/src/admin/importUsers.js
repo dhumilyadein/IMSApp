@@ -10,6 +10,7 @@ const Parent = require("../../models/Parent");
 const Teacher = require("../../models/Teacher");
 const Admin = require("../../models/Admin");
 const FeeTemplate = require("../../models/FeeTemplatesModel");
+const Class=require("../../models/Class")
 
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
@@ -191,6 +192,19 @@ break;
 
       if (!request.section)
       valError["Section"] = "Section can't be empty";
+
+if(request.class&&request.section)
+{  const ClassCheck = await Class.findOne({
+  class: request.class,
+  section:request.section
+});
+if (!ClassCheck)
+  valError["ClassError"] =
+    "Class: " + request.class+" "+request.section + "  doesn't Exist! Please create class first.";
+}
+
+
+
 
       if (!request.rollno) valError["RollNo"] = "Roll No can't be empty";
 
