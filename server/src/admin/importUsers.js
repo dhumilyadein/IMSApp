@@ -2,7 +2,7 @@ var unzipper = require("unzipper");
 var fs = require("fs");
 var lodash = require("lodash");
 var path = require("path");
-
+var axios =require("axios");
 const rimraf = require("rimraf");
 const User = require("../../models/User");
 const Student = require("../../models/Student");
@@ -87,6 +87,38 @@ var zipUpload = multer({
 }).single("file");
 
 module.exports = function(app) {
+  async function updateClassDetails(request) {
+
+  
+
+    var updateClassDetailsRequest = {
+      "class": request.class,
+      "section": request.section,
+      "studentsData": {
+        "rollno": request.rollno,
+        "username": request.username,
+        "firstname": request.firstname,
+        "lastname": request.lastname,
+      }
+    }
+
+
+
+    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        console.log("Class Update Error:" +JSON.stringify(res.data));
+        return res.data.errors;
+      } else {
+
+        console.log("Class details Updated");
+
+      }
+    });
+  }
+
+
+
   async function importValidation(request) {
     var valError = {};
     console.log("in IMPORT VAL  " + request.username);
@@ -201,6 +233,13 @@ if(request.class&&request.section)
 if (!ClassCheck)
   valError["ClassError"] =
     "Class: " + request.class+" "+request.section + "  doesn't Exist! Please create class first.";
+}
+else
+{console.log()
+  var error= updateClassDetails(request);
+  if(error)
+  valError["ClassError"] =
+  "Class: " + request.class+" "+request.section + " : " +JSON.stringify(error);
 }
 
 
