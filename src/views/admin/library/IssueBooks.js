@@ -40,52 +40,58 @@ class IssueBooks extends Component {
 
     constructor(props) {
         super(props);
+        this.fetchClassDetails();
         this.state = {
 
-class:"",
-section:"",
-classError:"",
-
-            studentResults: [],
-            studentOpen:true,
-
-            activeTab:"1",
-feeTemplates:[],
-selectedStudent:[],
-error:"",
-showFeeTemplate:false,
-templateRows: [{ feeType: "", amount: "" }],
-templateType:"",
-totalAmount:"",
-year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
-showMonth:false,
-showQuarter: false,
-showHalfYearly:false,
-month:"",
-quarter:"",
-halfYear:"",
-totalDueAmount:"",
-lateFeeFine:"0",
-paidAmount:"",
-pastPendingDue:"0",
-paidAmount:"",
-remarks:"",
-dos:new Date(Date.now()),
-yearError:"",
-quarterError:"",
-halfYearError:"",
-monthError:"",
-paidAmountError:"",
-dosError:"",
-sectionError:"",
-modalSuccess:false,
-success:false,
-studentName:"",
-modelMessage:"",
-rollNo:"",
-showRollFeeTemplate:false
-,
-studentError:""
+            class:"",
+            section:"",
+            classError:"",
+            
+            studentsDataArray:[],
+                        studentOpen:true,
+            
+                        activeTab:"1",
+            feeTemplates:[],
+            selectedStudent:[],
+            error:"",
+            showFeeTemplate:false,
+            templateRows: [{ feeType: "", amount: "" }],
+            templateType:"",
+            totalAmount:"",
+            year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
+            showMonth:false,
+            showQuarter: false,
+            showHalfYearly:false,
+            month:"",
+            quarter:"",
+            halfYear:"",
+            totalDueAmount:"",
+            lateFeeFine:"0",
+            paidAmount:"",
+            pastPendingDue:"0",
+            paidAmount:"",
+            remarks:"",
+            dos:new Date(Date.now()),
+            yearError:"",
+            quarterError:"",
+            halfYearError:"",
+            monthError:"",
+            paidAmountError:"",
+            dosError:"",
+            sectionError:"",
+            modalSuccess:false,
+            success:false,
+            studentName:"",
+            rollNo:"",
+            showRollFeeTemplate:false
+            ,
+            studentError:"",
+            classDetails:[],
+            classes:[],
+            sectionArray: [],
+            studentsDataArray:[]
+            
+    
 
         };
 
@@ -97,7 +103,7 @@ studentError:""
          this.toggle = this.toggle.bind(this);
          this.feeTemplateSelectHandler = this.feeTemplateSelectHandler.bind(this);
          this.toggleSuccess = this.toggleSuccess.bind(this);
-         this.getStudentByRollNo = this.getStudentByRollNo.bind(this);
+        
 this.reset=this.reset.bind(this);
 
     }
@@ -293,113 +299,108 @@ if(!this.state.paidAmount)
     }
 
 
-    classChangeHandler(e) {
+    fetchClassDetails() {
 
-      this.setState({class: e.target.value, error:"",feeTemplates:[],section:"",
-       classError:"",studentResults:[],selectedStudent:[], selectedFeeTemplate:[], showFeeTemplate:false},
-
-       ()=>{console.log("in Class change: "+this.state.class);
-
-      axios
-      .post("http://localhost:8001/api/selectStudentByClass", {"class": this.state.class})
-      .then(result => {
-          console.log("result.data " + JSON.stringify(result.data));
-
-          if (result.data.length>0) {
-            var temp=[];
-           for(var i=0;i<result.data.length;i++)
-           {
-             temp.push({"value":result.data[i].username,
-             "label":result.data[i].firstname.charAt(0).toUpperCase() + result.data[i].firstname.slice(1)+" "+
-             result.data[i].lastname.charAt(0).toUpperCase() + result.data[i].lastname.slice(1)+
-              " ("+(result.data[i].username.toLowerCase())+")"
-            });}
-            this.setState({studentResults:temp});
+        axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
+    
+          if (cRes.data.errors) {
+    
+            return this.setState({ errors: cRes.data.errors });
+    
+          } else {
+    
+            this.setState({ classDetails: cRes.data },()=>{
+  
+              var classArray = [];
+        this.state.classDetails.forEach(element => {
+    
+          console.log("element.class - " + element.class);
+          classArray.push(element.class);
+        });
+       // console.log("classArray - " + classArray);
+       var uniqueItems = Array.from(new Set(classArray));
+     
+  
+  
+        this.setState({ classes: uniqueItems });
+            });
+    
+            console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
+    
+          
           }
-
-          else if (result.data.errors) {
-
-            return this.setState({error:result.data.errors});
-          }
-
-
-      });
-
-    });
-
-
-
-
-    }
-
-    sectionChangeHandler(e) {
-      console.log("in section change: "+e.target.value);
-      this.setState({selectedStudent:[]});
-if(!this.state.class)
-{this.setState({classError:"Please select Class first"});
-
-return;}
-
-if(!e.target.value)
-{ axios
-  .post("http://localhost:8001/api/selectStudentByClass", {"class": this.state.class})
-  .then(result => {
-      console.log("result.data " + JSON.stringify(result.data));
-
-      if (result.data.length>0) {
-        var temp=[];
-       for(var i=0;i<result.data.length;i++)
-       {
-         temp.push({"value":result.data[i].username,
-         "label":result.data[i].firstname.charAt(0).toUpperCase() + result.data[i].firstname.slice(1)+" "+
-         result.data[i].lastname.charAt(0).toUpperCase() + result.data[i].lastname.slice(1)+
-          " ("+(result.data[i].username.toLowerCase())+")"
-        });}
-        this.setState({studentResults:temp});
+        });
       }
-
-      else if (result.data.errors) {
-
-        return this.setState({error:result.data.errors});
+    
+      /**
+       * @description - fetches unique classes from the class detail from DB
+       */
+    
+    
+      classChangeHandler(e) {
+    
+        var selectedClass = e.currentTarget.value;
+        console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
+        this.setState({ class: selectedClass,
+        section:"",selectedStudent:[],showFeeTemplate:false, selectedFeeTemplate:[] });
+    
+        var sectionArrayTemp = [];
+        this.state.classDetails.forEach(element => {
+          if (element["class"] === selectedClass) {
+    
+            sectionArrayTemp.push(element["section"]);
+    
+          }
+        });
+    
+        // Sorting array alphabetically
+        sectionArrayTemp.sort();
+    
+        this.setState({
+           sectionArray: sectionArrayTemp,
+          })
+    
+        console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
+    
+        // Switching view to section view
+       
       }
-
-
-  });}
-
-      this.setState({section: e.target.value, studentResults:[]},()=>{console.log("in section change: "+this.state.section);
-
-      axios
-      .post("http://localhost:8001/api/selectStudentBySection", {"class": this.state.class, "section":this.state.section})
-      .then(result => {
-          console.log("result.data " + JSON.stringify(result.data));
-
-          if (result.data.length>0) {
-            var temp=[];
-           for(var i=0;i<result.data.length;i++)
-           {
-             temp.push({"value":result.data[i].username,
-             "label":result.data[i].firstname.charAt(0).toUpperCase() + result.data[i].firstname.slice(1)+" "+
-             result.data[i].lastname.charAt(0).toUpperCase() + result.data[i].lastname.slice(1)+
-              " ("+(result.data[i].username.toLowerCase())+")"
-            });}
-            this.setState({studentResults:temp});
-          }
-
-          else if (result.data.error) {
-
-              return this.setState({error:result.data.error});
-          }
-
-
-
-      });
-
-    });
-
-
-
-
-    }
+    
+      sectionChangeHandler(e) {
+    
+       
+        this.setState({ section: e.currentTarget.value },()=>{
+          this.state.classDetails.forEach(element => {
+    
+           
+            if (element.class === this.state.class && element.section === this.state.section) {
+                  this.setState({
+                studentsDataArray : element.studentsData
+               },()=>{ console.log("studentsDataArray: "+ JSON.stringify(this.state.studentsDataArray));
+                var temp=[];
+                this.state.studentsDataArray.forEach(element=>{
+                temp.push({"value":element.username,
+                "label":element.firstname+" "+element.lastname+"("+element.username+")"})
+                
+                })
+                this.setState({studentsDataArray:temp});
+  
+               });
+            }
+          });
+  
+  
+          
+  
+        });
+    
+       
+                  
+    
+       
+    
+     
+      }
 
     studentSelectedHandler(e){
 if(e)
@@ -574,72 +575,62 @@ axios
               <Card className="mx-5">
                           <CardBody className="p-1">
 
-                            <br/><InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                 Class
+                          <InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Class
                                 </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="class"
-                                id="class"
-                                type="select"
-                                value={this.state.class}
-                                onChange={ this.classChangeHandler}
-                              >
-                                <option value="">Select</option>
-                                <option value="LKG">LKG</option>
-                                <option value="UKG">UKG</option>
-                                <option value="I">I</option>
-                                <option value="II">II</option>
-                                <option value="III">III</option>
-                                <option value="IV">IV</option>
-                                <option value="V">V</option>
-                                <option value="VI">VI</option>
-                                <option value="VII">VII</option>
-                                <option value="VIII">VIII</option>
-                                <option value="IX">IX</option>
-                                <option value="X">X</option>
-                                <option value="XI">XI</option>
-                                <option value="XII">XII</option>
-                                   </Input>
-                            </InputGroup>
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="class"
+                                      id="class"
+                                      type="select"
+                                      value={this.state.class}
+                                      onChange={this.classChangeHandler}
+                                    >
+                                      <option value="">Select</option>
+                                      {this.state.classes.map(element => {
+                                        return (<option key={element} value={element}>{element}</option>);
+                                      }
+                                      )}
+                                    </Input>
+                                  </InputGroup>
+                                  { this.state.classError && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.classError}</p>
+                                    </font>
+                                  )}
 
-                            {this.state.classError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.classError}</p>
-                              </font>
-                            )}
-
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                 Section
+                                    <InputGroup className="mb-4">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Section
                                 </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="section"
-                                id="section"
-                                type="select"
-                                value={this.state.section}
-                                onChange={this.sectionChangeHandler}
-                              >
-                                <option value="">Select</option>
-                                <option value="A">A</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="D">D</option>
-                                <option value="E">E</option>
+                                      </InputGroupAddon>
+                                      <Input
+                                        name="section"
+                                        id="section"
+                                        type="select"
+                                        value={this.state.section}
+                                        onChange={this.sectionChangeHandler}
+                                      >
+                                        <option value="">Select</option>
+                                        {this.state.sectionArray.map(element => {
+                                          return (<option key={element} value={element}>{element}</option>);
+                                        }
+                                        )}
 
-                                   </Input>
-                            </InputGroup>
-                            {this.state.sectionError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.sectionError}</p>
-                              </font>
-                            )}
+                                      </Input>
+                                    </InputGroup>
+                                  
+                                  {this.state.sectionError && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.sectionError}</p>
+                                    </font>
+                                  )}
+
 
 
                      <Select
@@ -647,7 +638,7 @@ axios
                             name="studentSelect"
 
                           placeholder="Select Student or Type to search"
-                            options={this.state.studentResults}
+                            options={this.state.studentsDataArray}
                           closeMenuOnSelect={true}
                          value={this.state.selectedStudent}
                          isClearable={true}
@@ -664,6 +655,7 @@ axios
                                 <p>{this.state.studentError}</p>
                               </font>
                             )}
+                            <br/>
                             <br/>
 <Select
                             id="feeTemplates"
