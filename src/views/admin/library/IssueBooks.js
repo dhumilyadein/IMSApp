@@ -47,18 +47,17 @@ class IssueBooks extends Component {
             class:"",
             section:"",
             classError:"",
-
+rowError:"",
             studentsDataArray:[],
                         studentOpen:true,
 
                         activeTab:"1",
-            feeTemplates:[],
+
             selectedStudent:[],
             error:"",
-            showFeeTemplate:false,
-            bookRows: [{ feeType: "", amount: "" }],
-            templateType:"",
-            totalAmount:"",
+
+
+
             year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
 
             remarks:"",
@@ -70,8 +69,8 @@ class IssueBooks extends Component {
             success:false,
             studentName:"",
             rollNo:"",
-            showRollFeeTemplate:false
-            ,
+
+
             studentError:"",
             classDetails:[],
             classes:[],
@@ -91,7 +90,7 @@ class IssueBooks extends Component {
 
         this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-         this.feeSubmitHandler = this.feeSubmitHandler.bind(this);
+         this.submitHandler = this.submitHandler.bind(this);
          this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
          this.toggle = this.toggle.bind(this);
 
@@ -123,13 +122,15 @@ this.reset=this.reset.bind(this);
 
     reset()
     {
+      this.fetchClassDetails();
+      this.getExistingBooks();
       this.setState( {
 
         class:"",
         section:"",
         classError:"",
-selectedFeeTemplate:[],
-                    studentResults: [],
+
+        studentsDataArray:[],
                     studentOpen:true,
 
                     activeTab:"1",
@@ -137,37 +138,35 @@ selectedFeeTemplate:[],
         selectedStudent:[],
         error:"",
         showFeeTemplate:false,
-        templateRows: [{ feeType: "", amount: "" }],
+        bookRows: [{ feeType: "", amount: "" }],
         templateType:"",
         totalAmount:"",
         year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
-        showMonth:false,
-        showQuarter: false,
-        showHalfYearly:false,
-        month:"",
-        quarter:"",
-        halfYear:"",
-        totalDueAmount:"",
-        lateFeeFine:"0",
-        paidAmount:"",
-        pastPendingDue:"",
-        paidAmount:"",
+
         remarks:"",
-        dos:new Date(Date.now()),
-        yearError:"",
-        quarterError:"",
-        halfYearError:"",
-        monthError:"",
-        paidAmountError:"",
-        dosError:"",
+        doi:new Date(Date.now()),
+
+        doiError:"",
         sectionError:"",
         modalSuccess:false,
         success:false,
         studentName:"",
         rollNo:"",
-        showRollFeeTemplate:false,
-        studentError:""
+        showRollFeeTemplate:false
+        ,
+        studentError:"",
+        classDetails:[],
+        classes:[],
+        sectionArray: [],
+        studentsDataArray:[],
+        existingBooks:[],
+        allBooksData:[],
 
+        rows: [{ bookName:"",
+        availableQuantity:"",
+        uniqueBookId:"",
+
+        }],
                 });
 
 
@@ -234,49 +233,24 @@ selectedFeeTemplate:[],
     }
 
 
-    feeSubmitHandler(e){
+    submitHandler(e){
       e.preventDefault();
 console.log("In FeeSubmit:"+ JSON.stringify(this.state));
 var submit=true;
 
-this.setState({yearError:"", quarterError:"",studentError:"", monthError:"",halfYearError:"",dosError:"", paidAmountError:"",sectionError:"", error:"", success: false,
+this.setState({classError:"", studentError:"", doiError:"",rowError:"" ,sectionError:"", error:"", success: false,
 modalSuccess: false})
 
-if(!this.state.year||this.state.year.length!=9)
+
+
+if(!this.state.class)
 {
-this.setState({yearError:"Please Enter Year correctly (Eg. 2018-19)"});
-submit=false;
-
-}
-if(this.state.templateType==="Monthly")
-if(!this.state.month)
-{
-this.setState({monthError:"Please Select month"});
-submit=false;
-
-}
-if(this.state.templateType==="Quarterly")
-if(!this.state.quarter)
-{
-this.setState({quarterError:"Please Select Quarter"});
-submit=false;
-
-}
-
-if(this.state.templateType==="Half Yearly")
-if(!this.state.halfYear)
-{
-this.setState({halfYearError:"Please Select Half Year"});
-submit=false;
-
-}
-
-if(!this.state.paidAmount)
-{
-  this.setState({paidAmountError:"Please Enter Paid Amount"});
+  this.setState({classError:"Please Select Class"});
   submit=false;
 
   }
+
+
 
   if(!this.state.section)
 {
@@ -285,9 +259,9 @@ if(!this.state.paidAmount)
 
   }
 
-  if(!this.state.dos)
+  if(!this.state.doi)
 {
-  this.setState({dosError:"Please Enter Date of Submission"});
+  this.setState({doiError:"Please Enter Date of Issue"});
   submit=false;
 
   }
@@ -316,11 +290,9 @@ if(!this.state.paidAmount)
                 class:"",
                 section:"",
 
-                selectedFeeTemplate:[],
-                showFeeTemplate:false,
-                paidAmount:"",
 
-                studentResults: [],
+
+
 
 
                 halfYear:"",
@@ -397,7 +369,7 @@ if(!this.state.paidAmount)
         var selectedClass = e.currentTarget.value;
         console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
         this.setState({ class: selectedClass,
-        section:"",selectedStudent:[],showFeeTemplate:false, selectedFeeTemplate:[] });
+        section:"",selectedStudent:[] });
 
         var sectionArrayTemp = [];
         this.state.classDetails.forEach(element => {
@@ -435,7 +407,7 @@ if(!this.state.paidAmount)
                 var temp=[];
                 this.state.studentsDataArray.forEach(element=>{
                 temp.push({"value":element.username,
-                "label":element.firstname+" "+element.lastname+"("+element.username+")"})
+                "label":element.firstname.charAt(0).toUpperCase()+element.firstname.slice(1)+" "+element.lastname.charAt(0).toUpperCase()+element.lastname.slice(1)+" ("+element.username+")"})
 
                 })
                 this.setState({studentsDataArray:temp});
@@ -461,42 +433,7 @@ if(!this.state.paidAmount)
 if(e)
      { console.log("In Student "+(e.value));
 
-this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},()=>{
-
-  axios
-  .post("http://localhost:8001/api/selectfeeTemplate", {"selectedStudent":this.state.selectedStudent})
-  .then(result => {
-      console.log("result.data " + JSON.stringify(result.data));
-
-      if (result.data) {
-        var temp=[];
-       for(var i=0;i<result.data.length;i++)
-       {
-        temp.push({"value":result.data[i],
-        "label":result.data[i]
-       });
-
-      }
-        this.setState({feeTemplates:temp});
-      }
-
-      else if (result.data.error) {
-
-         this.setState({error:result.data.error.message});
-      }
-
-
-
-
-
-});
-
-
-
-
-})
-
-
+this.setState({selectedStudent:e});
 
 
     }
@@ -628,6 +565,12 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
 
                             onChange={this.studentSelectedHandler}
                             />
+   {this.state.studentError && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.studentError}</p>
+                                    </font>
+                                  )}
 
 <br/>
 
@@ -808,6 +751,25 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
 
 
 <br/>
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Remarks</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="remarks"
+                              id="remarks"
+                             value={this.state.remarks}
+                             onChange={e => {
+                                this.setState(
+                                  { remarks: e.target.value })}}
+
+
+                            />
+                          </InputGroup>
 
 {this.state.error &&
                               <font color="red">
@@ -815,6 +777,30 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                 <p>{this.state.error}</p>
                               </font>
                             }
+<Row>
+                            <Col>
+                              <Button
+                                onClick={this.submitHandler}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                                Submit
+                              </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={this.reset}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                             Reset
+                              </Button>
+                            </Col>
+                          </Row>
+
 
 </CardBody></Card>
               </Col>
