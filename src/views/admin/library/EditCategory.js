@@ -79,17 +79,17 @@ this.deleteCategory=this.deleteCategory.bind(this);
 
 
       category:[],
- 
+
       newCategory:"",
- 
+
  categoryError:"",
  showEdit:false,
  showOptions:false,
- 
+
        success: false,
        modalSuccess: false,
        visible: false,
- 
+
        defaultcategories:[]})
   }
 
@@ -142,7 +142,7 @@ for(var i=0;i<result.data.length;i++)
                       modelMessage:this.state.category.label+" Deleted Successfully!"
 
                     });
-                    
+
 
                 });
             }
@@ -191,14 +191,14 @@ for(var i=0;i<result.data.length;i++)
 
    if (submit === true) {
 
-   
+
                 console.log("Updating Category: ");
                 axios
                   .post("http://localhost:8001/api/editCategory", {"oldCategory":this.state.category.value,
                   "newCategory":this.state.newCategory})
                   .then(result => {
                     console.log("RESULT.data " + JSON.stringify(result.data));
-                 
+
                       if (result.data.msg === "Updated")
                    {   this.setState({
 
@@ -211,9 +211,9 @@ for(var i=0;i<result.data.length;i++)
                   });
               }
 
-         
-      
-     
+
+
+
 
 
 
@@ -248,7 +248,7 @@ for(var i=0;i<result.data.length;i++)
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                      {this.state.modelMessage} 
+                      {this.state.modelMessage}
                       </ModalHeader>
                     </Modal>
                   )}

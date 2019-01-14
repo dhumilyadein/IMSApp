@@ -45,7 +45,7 @@ module.exports = function (app) {
   async function importValidation(request) {
     var valError = {};
     console.log("in IMPORT VAL  " + request.bookName);
-  
+
 
     try {
 
@@ -99,7 +99,7 @@ module.exports = function (app) {
 
       if (!request.quantity) valError["Quantity"] = "Quantity can't be empty";
 
-     
+
     } catch (e) {
       console.log(e);
     }
@@ -148,7 +148,7 @@ module.exports = function (app) {
             {
               input: req.file.path,
               output: null, //since we don't need output.json
-             
+
             },
             async function(err, result) {
               if (err) {
@@ -170,7 +170,7 @@ module.exports = function (app) {
                 // impValResult length check
 
                 if (Object.keys(impValResult).length === 0) {
-                
+
 
                   var temp=[];
                   for(var c=0;c<result[i].quantity;c++)
@@ -198,7 +198,7 @@ var addBook = new Books(result[i]);
   });
 
 
-                 
+
                 } else {
                   importErrors[
                     "    record# " + (i + 1) + " of Book: " + result[i].bookName
