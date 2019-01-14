@@ -656,6 +656,7 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                 </font>
                               )}
 
+<br/>
 <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -682,7 +683,7 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                     className="btn btn-primary"
                                     color="primary"
 
-                                    block
+
                                   >
 
                                     Add Row
@@ -713,14 +714,23 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
 
 
                                 const temp = this.state.rows;
-                                temp[idx]["itemName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
+                                temp[idx]["bookName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
                                 selectedItem.value.slice(1),"value":selectedItem.value};
 
-                                for(var i=0;i<this.state.allItemsData.length;i++)
+                                for(var i=0;i<this.state.allBooksData.length;i++)
                                 {
-                                    if(this.state.allItemsData[i].itemName===selectedItem.value)
+                                    if(this.state.allBooksData[i].bookName===selectedItem.value)
                                     {
-                                        temp[idx]["unit"]=this.state.allItemsData[i].unit;
+                                      for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
+{
+
+  if(this.state.allBooksData[i].uniqueBookIds[u].isIssued===false)
+  temp[idx]["uniqueBookId"]=this.state.allBooksData[i].uniqueBookIds[u].value;
+  break;
+}
+
+                                        temp[idx]["quantity"]=this.state.allBooksData[i].quantity;
+
                                         break;
                                     }
                                 }
@@ -742,13 +752,13 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
-                                        name="unit"
+                                        name="quantity"
                                         type="text"
                                         className="form-control"
-                                        value={this.state.rows[idx].unit}
+                                        value={this.state.rows[idx].quantity}
 
                                         style={{textAlign:'center'}}
-                                        id="unit"
+                                        id="quantity"
                                         size="lg"
                                         disabled
                                       />
@@ -758,11 +768,11 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
-                                        name="quantity"
-                                        type="number"
+                                        name="uniqueBookId"
+                                        type="text"
                                         className="form-control"
-                                        value={this.state.rows[idx].quantity}
-                                        onChange={this.handleChange(idx)}
+                                        value={this.state.rows[idx].uniqueBookId}
+                                        disabled
                                         style={{textAlign:'center'}}
                                         id="quantity"
                                         size="lg"
@@ -770,36 +780,7 @@ this.setState({selectedStudent:e,selectedFeeTemplate:[],showFeeTemplate:false},(
                                     </InputGroup>
                                   </td>
 
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="costPerItem"
-                                        type="number"
-                                        className="form-control"
-                                        value={this.state.rows[idx].costPerItem}
-                                        onChange={this.handleChange(idx)}
-                                        style={{textAlign:'center'}}
-                                        id="costPerItem"
-                                        size="lg"
-                                      />
-                                    </InputGroup>
-                                  </td>
 
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="totalAmount"
-                                        type="number"
-                                        className="form-control"
-                                        value={this.state.rows[idx].totalAmount}
-                                        onChange={this.handleChange(idx)}
-                                        style={{textAlign:'center'}}
-                                        id="totalAmount"
-                                        size="lg"
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </td>
 
                                   <td align="center">
                                     <Button
