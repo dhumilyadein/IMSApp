@@ -2,7 +2,7 @@ var unzipper = require("unzipper");
 var fs = require("fs");
 var lodash = require("lodash");
 var path = require("path");
-var axios =require("axios");
+var Request = require("request");
 const rimraf = require("rimraf");
 const User = require("../../models/User");
 const Student = require("../../models/Student");
@@ -88,8 +88,8 @@ var zipUpload = multer({
 
 module.exports = function(app) {
   async function updateClassDetails(request) {
+console.log( "Update Class: "+JSON.stringify(request));
 
-  
 
     var updateClassDetailsRequest = {
       "class": request.class,
@@ -102,19 +102,39 @@ module.exports = function(app) {
       }
     }
 
+    var currentTime = new Date();
 
 
-    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+    var objForUpdate = {};
+    var studentsDataJSON = {};
 
-      if (res.data.errors) {
-        console.log("Class Update Error:" +JSON.stringify(res.data));
-        return res.data.errors;
-      } else {
+    if (updateClassDetailsRequest.studentsData) studentsDataJSON.studentsData = updateClassDetailsRequest.studentsData;
 
-        console.log("Class details Updated");
+    if(request.subjects) objForUpdate.subjects = request.subjects;
+    objForUpdate.updatedAt = currentTime;
+    console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
+
+    await Class.findOneAndUpdate(
+      { $and : [{"class": request.class}, {"section": request.section }] },
+      {
+        $set: objForUpdate,
+        $push: studentsDataJSON
       }
+    ).then(function (classData) {
+
+      console.log("Class details udpated successfully");
+
+      console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(classData));
+
+    }).catch(function (err) {
+      console.log("Catching Class Update server err - " + err);
+
+
+
     });
+
+
   }
 
 
@@ -233,14 +253,14 @@ if(request.class&&request.section)
 if (!ClassCheck)
   valError["ClassError"] =
     "Class: " + request.class+" "+request.section + "  doesn't Exist! Please create class first.";
+
+    else
+{console.log("in Class Update Else")
+   updateClassDetails(request);
+
 }
-else
-{console.log()
-  var error= updateClassDetails(request);
-  if(error)
-  valError["ClassError"] =
-  "Class: " + request.class+" "+request.section + " : " +JSON.stringify(error);
 }
+
 
 
 
