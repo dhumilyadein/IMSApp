@@ -1,5 +1,6 @@
 const BookCategories = require("../../models/BookCategories");
 const Books = require("../../models/Books");
+const IssuedBooks = require("../../models/IssuedBooks");
 const rimraf = require("rimraf");
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
@@ -329,8 +330,77 @@ function editCategory(req,res)
   });
 }
 
-  app.post("/api/importBooks", importBooks);
+function issueBook(req,res)
+{var add=true;
+  console.log("in issueBook: "+JSON.stringify(req.body));
 
+  
+var issueBook = new IssuedBooks(req.body);
+issueBook
+  .save()
+  .then(user => {
+    console.log("in issueBook Save "+JSON.stringify(user))
+    var temp=[]; var count=0;
+
+  var books =req.body.issuedBookDetails;
+  for(var b=0;b<books.length;b++)
+  {
+  console.log("BookName "+JSON.stringify(books[i].bookName.value))
+Books.findOne({bookName:books[i].bookName.value})
+.then(book=>{ console.log("in findOneBook "+JSON.stringify(book))
+  
+  temp=book.uniqueBookIds;
+
+  for(var i=0;i<temp.length;i++)
+ {
+  if(temp[i].value===books[i].uniqueBookId)
+  {
+temp[i].isIssued=true;
+
+
+break;
+
+  }
+  
+}
+
+Books.updateOne({bookName:books[i].bookName.value,},
+  {$set: {uniqueBookIds:temp},
+  $inc: {quantity:-1}
+})
+.then(data=>{count++})
+.catch(error=>{return res.send({error});})
+
+})
+.catch(error => {
+  return res.send({error});
+});
+
+   
+}
+
+if(count===books.length)
+return res.send({msg:"Success"});
+
+
+
+})
+
+
+
+.catch(error=>{return res.send(error)})
+
+
+ 
+
+
+
+}
+
+
+  app.post("/api/importBooks", importBooks);
+ 
+  app.post("/api/issueBook", issueBook);
    app.get("/api/getCategories", getCategories);
 
    app.post("/api/deleteCategory", deleteCategory);

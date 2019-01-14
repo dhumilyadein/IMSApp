@@ -80,7 +80,7 @@ rowError:"",
             allBooksData:[],
 
             rows: [{ bookName:"",
-            availableQuantity:"",
+            quantity:"",
             uniqueBookId:"",
 
             }],
@@ -163,7 +163,7 @@ this.reset=this.reset.bind(this);
         allBooksData:[],
 
         rows: [{ bookName:"",
-        availableQuantity:"",
+        quantity:"",
         uniqueBookId:"",
 
         }],
@@ -196,7 +196,7 @@ this.reset=this.reset.bind(this);
       e.preventDefault();
       this.setState({ rowError: "" });
       const item = { bookName:"",
-      availableQuantity:"",
+      quantity:"",
       uniqueBookId:"",
 
 
@@ -273,12 +273,43 @@ if(!this.state.class)
 
     }
 
-  if(submit)
-  { this.setState({totalDueAmount:document.getElementById("totalDueAmount").value,
-                    studentName:this.state.selectedStudent.label},()=>{
 
+this.state.rows.forEach(element=>{
+if (!element.bookName){
+this.setState({rowError:"Please select the book(s) in each row"});
+submit=false;
+return;}
+
+
+})
+
+for(var i=0;i<this.state.rows.length;i++)
+
+{for(var j=0;j<this.state.rows.length;j++)
+{
+  if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
+{
+  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+" Duplcate books Not allowed!"});
+submit=false;
+break;
+}
+
+
+}
+}
+
+
+
+
+
+
+
+  if(submit)
+  { 
+console.log("Issuing Book ");
     axios
-    .post("http://localhost:8001/api/feeSubmit", this.state)
+    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":Array.from(new Set(this.state.rows)),"class":this.state.class,
+"section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "student":this.state.selectedStudent.label })
     .then(result => {
         console.log("result.data " + JSON.stringify(result.data));
 
@@ -287,18 +318,8 @@ if(!this.state.class)
 
                 success: true,
                 modalSuccess: true,
-                class:"",
-                section:"",
-
-
-
-
-
-
-                halfYear:"",
-                remarks:"",
-                quarter:"",
-                month:""
+                modelMessage:"Book Issued Successfully to "+this.state.selectedStudent.label
+              
 
 
 
@@ -311,7 +332,7 @@ if(!this.state.class)
 
 
     });
-  })
+  
 
 
   }
@@ -410,6 +431,7 @@ if(!this.state.class)
                 "label":element.firstname.charAt(0).toUpperCase()+element.firstname.slice(1)+" "+element.lastname.charAt(0).toUpperCase()+element.lastname.slice(1)+" ("+element.username+")"})
 
                 })
+                temp.sort();
                 this.setState({studentsDataArray:temp});
 
                });
@@ -726,6 +748,7 @@ this.setState({selectedStudent:e});
 
 
                                   <td align="center">
+                                  { idx>0 &&
                                     <Button
                                       className="btn btn-danger btn-sg"
                                       onClick={this.handleRemoveSpecificRow(
@@ -734,7 +757,7 @@ this.setState({selectedStudent:e});
                                       size="lg"
                                     >
                                       Remove
-                                    </Button>
+                                    </Button>}
                                   </td>
                                 </tr>
                               ))}
