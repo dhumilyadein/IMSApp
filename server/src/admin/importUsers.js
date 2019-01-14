@@ -129,7 +129,7 @@ console.log( "Update Class: "+JSON.stringify(request));
 
     }).catch(function (err) {
       console.log("Catching Class Update server err - " + err);
-
+return err;
 
 
     });
@@ -256,8 +256,10 @@ if (!ClassCheck)
 
     else
 {console.log("in Class Update Else")
-   updateClassDetails(request);
-
+  error= updateClassDetails(request);
+if(Object.keys(error).length>0)
+valError["ClassError"] =
+"Class: " + request.class+" "+request.section + " "+JSON.stringify(error);
 }
 }
 

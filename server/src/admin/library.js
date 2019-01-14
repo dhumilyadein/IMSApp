@@ -219,7 +219,19 @@ var addBook = new Books(result[i]);
       });
     });
   }
+  function gettingBooks(req, res) {
+    console.log("in gettingBooks ");
 
+    Books
+      .find()
+      .then(data => {
+          return res.send(data);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+
+    }
 
 async function getCategories(req,res)
 {console.log("In getCategories for: "+ JSON.stringify(req.body));
@@ -324,7 +336,7 @@ function editCategory(req,res)
    app.post("/api/deleteCategory", deleteCategory);
    app.post("/api/addBook", addBook);
    app.post("/api/editCategory", editCategory);
-
+   app.get("/api/gettingBooks", gettingBooks);
 
 
 
