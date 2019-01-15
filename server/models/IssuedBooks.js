@@ -8,13 +8,13 @@ var issuedBooksSchema = new Schema({
   issuedBookDetails: {
     type: Array,
     required: true,
-   
+
   },
   class: {
     type: String,
     required: true,
     trim:true,
- 
+
   },
 
   section:{
@@ -25,25 +25,25 @@ var issuedBooksSchema = new Schema({
   },
 
 
-  student:{
+  issuedTo:{
     type: String,
     trim:true,
     required: true,
-  
+
 
 },
 
 remarks:{
   type: String,
   trim:true,
- 
+
 
 
 },
 
 doi:{
   type: Date,
- 
+
   required: true,
 
 

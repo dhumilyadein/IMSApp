@@ -79,24 +79,27 @@ rowError:"",
             existingBooks:[],
             allBooksData:[],
 
-            rows: [{ bookName:"",
+            rows: [{ bookName:null,
             quantity:"",
             uniqueBookId:"",
 
             }],
-
+            existingStaff:[],
+            selectedStaff:[],
+            staffError:"",
         };
 
 
         this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-         this.submitHandler = this.submitHandler.bind(this);
+         this.studentSubmitHandler = this.studentSubmitHandler.bind(this);
          this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
          this.toggle = this.toggle.bind(this);
 
          this.toggleSuccess = this.toggleSuccess.bind(this);
           this.getExistingBooks=this.getExistingBooks.bind(this);
 this.reset=this.reset.bind(this);
+this.fetchStaff=this.fetchStaff.bind(this);
 
     }
 
@@ -129,18 +132,17 @@ this.reset=this.reset.bind(this);
         class:"",
         section:"",
         classError:"",
-
+rowError:"",
         studentsDataArray:[],
                     studentOpen:true,
 
                     activeTab:"1",
-        feeTemplates:[],
+
         selectedStudent:[],
         error:"",
-        showFeeTemplate:false,
-        bookRows: [{ feeType: "", amount: "" }],
-        templateType:"",
-        totalAmount:"",
+
+
+
         year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
 
         remarks:"",
@@ -152,8 +154,8 @@ this.reset=this.reset.bind(this);
         success:false,
         studentName:"",
         rollNo:"",
-        showRollFeeTemplate:false
-        ,
+
+
         studentError:"",
         classDetails:[],
         classes:[],
@@ -162,11 +164,15 @@ this.reset=this.reset.bind(this);
         existingBooks:[],
         allBooksData:[],
 
-        rows: [{ bookName:"",
+        rows: [{ bookName:null,
         quantity:"",
         uniqueBookId:"",
 
         }],
+        existingStaff:[],
+        selectedStaff:[],
+        staffError:"",
+
                 });
 
 
@@ -222,6 +228,9 @@ this.reset=this.reset.bind(this);
           activeTab: tab
         });
       }
+if(tab==="2")
+this.fetchStaff();
+
     }
 
     toggleSuccess() {
@@ -233,7 +242,7 @@ this.reset=this.reset.bind(this);
     }
 
 
-    submitHandler(e){
+    studentSubmitHandler(e){
       e.preventDefault();
 console.log("In FeeSubmit:"+ JSON.stringify(this.state));
 var submit=true;
@@ -289,7 +298,7 @@ for(var i=0;i<this.state.rows.length;i++)
 {
   if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
 {
-  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+" Duplcate books Not allowed!"});
+  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!"});
 submit=false;
 break;
 }
@@ -305,11 +314,11 @@ break;
 
 
   if(submit)
-  { 
+  {
 console.log("Issuing Book ");
     axios
-    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":Array.from(new Set(this.state.rows)),"class":this.state.class,
-"section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "student":this.state.selectedStudent.label })
+    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":this.state.rows,"class":this.state.class,
+"section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStudent.label })
     .then(result => {
         console.log("result.data " + JSON.stringify(result.data));
 
@@ -318,8 +327,7 @@ console.log("Issuing Book ");
 
                 success: true,
                 modalSuccess: true,
-                modelMessage:"Book Issued Successfully to "+this.state.selectedStudent.label
-              
+                modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label
 
 
 
@@ -327,12 +335,12 @@ console.log("Issuing Book ");
 
               else if (result.data.error) {
 
-                return this.setState({error:result.data.error});
+                 this.setState({error:JSON.stringify(result.data.error)});
             }
 
 
     });
-  
+
 
 
   }
@@ -346,6 +354,118 @@ console.log("Issuing Book ");
 
     }
 
+    staffSubmitHandler(e){
+      e.preventDefault();
+console.log("In Staff Issue:"+ JSON.stringify(this.state));
+var submit=true;
+
+this.setState({ staffError:"", doiError:"",rowError:"" , error:"", success: false,
+modalSuccess: false});
+
+
+
+
+  if(!this.state.doi)
+{
+  this.setState({doiError:"Please Enter Date of Issue"});
+  submit=false;
+
+  }
+
+  if(!this.state.selectedStaff.value)
+  {
+    this.setState({staffError:"Please Select Staff/Employee"});
+    submit=false;
+
+    }
+
+
+this.state.rows.forEach(element=>{
+if (!element.bookName){
+this.setState({rowError:"Please select the book(s) in each row"});
+submit=false;
+return;}
+
+
+})
+
+for(var i=0;i<this.state.rows.length;i++)
+
+{for(var j=0;j<this.state.rows.length;j++)
+{
+  if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
+{
+  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!"});
+submit=false;
+break;
+}
+
+
+}
+}
+
+  if(submit)
+  {
+console.log("Issuing Book  Staff");
+    axios
+    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":this.state.rows,"class":"NA",
+"section":"NA", "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStaff.label })
+    .then(result => {
+        console.log("result.data " + JSON.stringify(result.data));
+
+        if (result.data.msg === "Success")
+              this.setState({
+
+                success: true,
+                modalSuccess: true,
+                modalMessage:this.state.rows.length+ "books issued to: "+this.state.selectedStaff.label
+
+
+
+              });
+
+              else if (result.data.error) {
+
+                 this.setState({error:JSON.stringify(result.data.error)});
+            }
+
+
+    });
+
+
+
+  }
+
+
+
+
+
+
+
+
+    }
+
+    fetchStaff()
+    {
+      axios
+      .get("http://localhost:8001/api/gettingStaff")
+      .then(result => {
+        console.log("Existing Staff data " + JSON.stringify(result.data));
+        if (result.data) {
+ var temp=[];
+  for(var i=0;i<result.data.length;i++)
+   temp.push({"label":result.data[i].firstname.charAt(0).toUpperCase()+result.data[i].firstname.slice(1)+
+   " "+result.data[i].lastname.charAt(0).toUpperCase()+result.data[i].lastname.slice(1)+" ("+result.data[i].username+")",
+  "value": result.data[i].username})
+
+            this.setState({
+            existingStaff: temp,
+
+          });
+        }
+      });
+
+    }
 
     fetchClassDetails() {
 
@@ -500,17 +620,17 @@ this.setState({selectedStudent:e});
         <TabContent activeTab={this.state.activeTab}>
           <TabPane tabId="1">
             <Row>
-            {this.state.success && (
-                    <Modal
-                      isOpen={this.state.modalSuccess}
-                      className={"modal-success " + this.props.className}
-                      toggle={this.toggleSuccess}
-                    >
-                      <ModalHeader toggle={this.toggleSuccess}>
-                       {this.state.modelMessage}
-                      </ModalHeader>
-                    </Modal>
-                  )}
+{this.state.success && (
+  <Modal
+    isOpen={this.state.modalSuccess}
+    className={"modal-success " + this.props.className}
+    toggle={this.toggleSuccess}
+  >
+    <ModalHeader toggle={this.toggleSuccess}>
+      {this.state.rows.length} books issued to Student: {this.state.selectedStudent.label}
+    </ModalHeader>
+  </Modal>
+)}
               <Col sm="12">
               <Card className="mx-5">
                           <CardBody className="p-1">
@@ -671,7 +791,7 @@ this.setState({selectedStudent:e});
                           placeholder="Select Book"
                             options={this.state.existingBooks}
                           closeMenuOnSelect={true}
-                         value={this.state.rows[idx].BookName}
+                         value={this.state.rows[idx].bookName}
                          isClearable={true}
                               isSearchable={true}
 
@@ -689,14 +809,15 @@ this.setState({selectedStudent:e});
                                       for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
 {
 
-  if(this.state.allBooksData[i].uniqueBookIds[u].isIssued===false)
+  if(!this.state.allBooksData[i].uniqueBookIds[u].isIssued)
+ { console.log(this.state.allBooksData[i].uniqueBookIds[u].isIssued);
   temp[idx]["uniqueBookId"]=this.state.allBooksData[i].uniqueBookIds[u].value;
-  break;
+  break;}
 }
 
                                         temp[idx]["quantity"]=this.state.allBooksData[i].quantity;
 
-                                        break;
+
                                     }
                                 }
 
@@ -797,13 +918,13 @@ this.setState({selectedStudent:e});
 {this.state.error &&
                               <font color="red">
                                 {" "}
-                                <p>{this.state.error}</p>
+                                <p>{JSON.stringify(this.state.error)}</p>
                               </font>
                             }
 <Row>
                             <Col>
                               <Button
-                                onClick={this.submitHandler}
+                                onClick={this.studentSubmitHandler}
                                 size="lg"
                                 color="success"
                                 block
@@ -828,530 +949,275 @@ this.setState({selectedStudent:e});
 </CardBody></Card>
               </Col>
             </Row>
+
+
           </TabPane>
           <TabPane tabId="2">
-            <Row>
-              <Col sm="6">
 
-              <Card>
+          <Row>
 
-<CardBody>
+              <Col sm="12">
+              <Card className="mx-5">
+                          <CardBody className="p-1">
 
-{this.state.success && (
-                    <Modal
-                      isOpen={this.state.modalSuccess}
-                      className={"modal-success " + this.props.className}
-                      toggle={this.toggleSuccess}
-                    >
-                      <ModalHeader toggle={this.toggleSuccess}>
-                        Student: {this.state.studentName}'s Fee Submitted Successfully!
-                      </ModalHeader>
-                    </Modal>
-                  )}
+                                         <Select
+                            id="staffSelect"
+                            name="staffSelect"
 
-
-<InputGroup className="mb-3">
-                                    <InputGroupAddon addonType="prepend">
-                                      <InputGroupText
-                                        style={{ width: "120px" }}
-                                      >
-                                        Roll No
-                                      </InputGroupText>
-                                    </InputGroupAddon>
-                                    <Input
-                                      type="number"
-                                      name="rollno"
-                                      id="rollno"
-                                      value={this.state.rollNo}
-                                      autoComplete="rollno"
-                                      onChange={e=>{this.setState({rollNo:e.target.value})}}
-                                    />
-                                  </InputGroup>
-                                  {this.state.rollNoError && (
-                            <font color="red">
-                              <h6>
-                                {" "}
-                                <p>{this.state.rollNoError} </p>
-                              </h6>{" "}
-                            </font>)}
-
-
-                          <Button
-                          type="submit"
-                          onClick={this.getStudentByRollNo}
-                          block
-                          color="success"
-                        >
-                          {" "}
-                           <h4>  Search</h4>
-                        </Button>
-         <br/>
-{this.state.error &&
-  <font color="red">
-    {" "}
-    <p>{this.state.error}</p>
-  </font>
-}
-
-                        </CardBody></Card>
-
-{this.state.showRollFeeTemplate && <Card> <CardBody>
-
-  <InputGroup className="mb-3">
-                                    <InputGroupAddon addonType="prepend">
-                                      <InputGroupText
-                                        style={{ width: "120px" }}
-                                      >
-                                        Student Name
-                                      </InputGroupText>
-                                    </InputGroupAddon>
-                                    <Input
-                                      type="text"
-                                      name="studentName"
-                                      id="studentName"
-                                      value={this.state.studentName}
-                                      autoComplete="studentName"
-                                     disabled
-                                     />
-                                  </InputGroup>
-
-                                  <br/>
-                                  <Select
-                            id="rollFeeTemplates"
-                            name="rollFeeTemplates"
-
-                          placeholder="Select Fee Template"
-                            options={this.state.feeTemplates}
+                          placeholder="Select Staff/Employee or Type to search"
+                            options={this.state.existingStaff}
                           closeMenuOnSelect={true}
-                         value={this.state.selectedFeeTemplate}
+                         value={this.state.selectedStaff}
                          isClearable={true}
                          //menuIsOpen ={this.state.studentOpen}
                             isSearchable={true}
 
-                            onChange={this.feeTemplateSelectHandler}
+                            onChange={selected=>{this.setState({selectedStaff:selected})}}
                             />
-                            <br/>
-
-{this.state.showFeeTemplate&& <p>
-
-  <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Template Type</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            size="lg"
-                           name="templateType"
-                            id="templateType"
-                            value={this.state.templateType}
-                          disabled
-
-
-
-                          />
-                        </InputGroup>
-
-  <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Year</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            size="lg"
-                           name="year"
-                            id="year"
-                            value={this.state.year}
-                            onChange={e => {this.setState({year:e.target.value})}}
-
-
-
-
-                          />
-                        </InputGroup>
-                        {this.state.yearError &&(
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.yearError}</p>
-                            </font>
-                          )}
-
-
-
-{this.state.showMonth&&(<p>
-                        <InputGroup className="mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText style={{ width: "120px" }}>
-                             <b>  Month</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              name="month"
-                              id="month"
-                              type="select"
-                              value={this.state.month}
-                              onChange={e=>{this.setState({month:e.target.value})}}
-                            >
-                              <option value="">Select Month</option>
-                              <option value="January">January</option>
-                              <option value="February">February</option>
-                              <option value="March">March</option>
-                              <option value="April">April</option>
-                              <option value="May">May</option>
-                              <option value="June">June</option>
-                              <option value="July">July</option>
-                              <option value="August">August</option>
-                              <option value="September">September</option>
-                              <option value="October">October</option>
-                              <option value="November">November</option>
-                              <option value="December">December</option>
-                                 </Input>
-
-                          </InputGroup>
-                          {this.state.monthError &&(
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.monthError}</p>
-                            </font>
-                          )}
-                          </p>
-
-
-                          )
-
-
-
-
-
-                        }
-
-{this.state.showQuarter&& <p>
-<InputGroup className="mb-3">
-    <InputGroupAddon addonType="prepend">
-      <InputGroupText style={{ width: "120px" }}>
-     <b>  Quarter</b>
-      </InputGroupText>
-    </InputGroupAddon>
-    <Input
-      name="quarter"
-      id="quarter"
-      type="select"
-      value={this.state.quarter}
-      onChange={e=>{this.setState({quarter:e.target.value})}}
-    >
-      <option value="">Select Quarter</option>
-      <option value="Apr-Jun">Apr-Jun</option>
-      <option value="Jul-Sep">Jul-Sep</option>
-      <option value="Oct-Dec">Oct-Dec</option>
-      <option value="Jan-Mar">Jan-Mar</option>
-
-         </Input>
-
-
-  </InputGroup>
-  {this.state.quarterError &&(
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.quarterError}</p>
-                            </font>
-                          )}
-  </p>}
-
-  {this.state.showHalfYearly&& <p>
-<InputGroup className="mb-3">
-    <InputGroupAddon addonType="prepend">
-      <InputGroupText style={{ width: "120px" }}>
-     <b>  Half Year</b>
-      </InputGroupText>
-    </InputGroupAddon>
-    <Input
-      name="halfYear"
-      id="halfYear"
-      type="select"
-      value={this.state.halfYear}
-      onChange={e=>{this.setState({halfYear:e.target.value})}}
-    >
-      <option value="">Select Half Year</option>
-      <option value="Apr-Sep">Apr-Sep</option>
-      <option value="Oct-Mar">Oct-Mar</option>
-
-
-         </Input>
-
-
-  </InputGroup>
-  {this.state.halfYearError &&(
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.halfYearError}</p>
-                            </font>
-                          )}
-  </p>}
-
-
-<Table bordered hover
->
-                          <thead>
-                            <tr style={{ 'backgroundColor': "palevioletred" }}>
-                              <th className="text-center">
-                                <h4> S.No.</h4>{" "}
-                              </th>
-                              <th className="text-center">
-                                {" "}
-                                <h4>Fee Category </h4>
-                              </th>
-                              <th className="text-center">
-                                <h4> Amount(Rs)</h4>{" "}
-                              </th>
-
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {this.state.templateRows.map((item, idx) => (
-                              <tr id="addr0" key={idx}>
-                                <td align="center">
-                                  <h4>{idx + 1}</h4>
-                                </td>
-                                <td align="center">
-                                  <InputGroup className="mb-3">
-                                    <Input
-                                      type="text"
-                                      name="feeType"
-                                      value={this.state.templateRows[idx].feeType.charAt(0).toUpperCase()
-                                         + this.state.templateRows[idx].feeType.slice(1)}
-
-                                      className="form-control"
-                                      size="lg"
-                                      id="feeType"
-                                      disabled
-                                     style={{textAlign:'center'}}
-                                    />
-                                  </InputGroup>
-                                </td>
-                                <td align="center">
-                                  <InputGroup className="mb-3">
-                                    <Input
-                                      name="amount"
-                                      type="number"
-                                      className="form-control"
-                                      value={this.state.templateRows[idx].amount}
-                                      style={{textAlign:'center'}}
-                                      id="amount"
-                                      size="lg"
-                                      disabled
-                                    />
-                                  </InputGroup>
-                                </td>
-
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-
-                      <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Total Fee Amount(Rs)</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            size="lg"
-                           name="totalAmount"
-                            id="totalAmount"
-                            value={this.state.totalAmount}
-                          disabled
-
-
-
-                          />
-                        </InputGroup>
-
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Late Fee Fine(Rs)</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="number"
-                            size="lg"
-                           name="lateFeeFine"
-                            id="lateFeeFine"
-                            value={this.state.lateFeeFine}
-                            onChange={e=>{this.setState({lateFeeFine:e.target.value})}}
-
-
-
-                          />
- </InputGroup>
-
-
-
- <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Past Due Amount(Rs)</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="number"
-                            size="lg"
-                           name="pastPendingDue"
-                            id="pastPendingDue"
-                            value={this.state.pastPendingDue}
-                            onChange={e=>{this.setState({pastPendingDue:e.target.value})}}
-
-
-
-                          />
-                        </InputGroup>
-
-<InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Total Due Amount(Rs)</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            size="lg"
-                           name="totalDueAmount"
-                            id="totalDueAmount"
-                            value={
-                            ( parseInt(this.state.totalAmount)+(parseInt(this.state.pastPendingDue)||0)+
-                              (parseInt(this.state.lateFeeFine)||0))-(parseInt(this.state.paidAmount)||0)
-                           }
-                            disabled
-
-
-                          />
-                        </InputGroup>
-
-
-
-
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Paid Fee Amount (Rs)</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="number"
-                            size="lg"
-                           name="paidAmount"
-                            id="paidAmount"
-                            value={this.state.paidAmount}
-                            onChange={e=>{this.setState({paidAmount:e.target.value})}}
-
-                         />
-
-                        </InputGroup>
-
-                        {this.state.paidAmountError &&(
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.paidAmountError}</p>
-                            </font>
-                          )}
-
-                        <InputGroup className="mb-2">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText >
-                              <b>  Date of Submission</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-
-                            &nbsp; &nbsp; &nbsp;
-                            <DatePicker
-
-                              name="doj"
-                              id="doj"
-                              value={this.state.dos}
-                              onChange={date=>{this.setState({dos:date})}}
-                            />
-
-
-                          </InputGroup>
-                          {this.state.dosError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.dosError}</p>
-                              </font>
-                            )}
-
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText >
-                              <b>Remarks</b>
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="textarea"
-                            size="lg"
-                           name="remarks"
-                            id="remarks"
-                            value={this.state.remarks}
-                            onChange={e=>{this.setState({remarks:e.target.value})}}
-
-
-
-
-                          />
-                        </InputGroup>
-
-<br/> <Row>
-                          <Col>
-                            <Button
-                              onClick={this.feeSubmitHandler}
-                              size="lg"
-                              color="success"
-                              block
-                              type="submit"
-                            >
-                              Submit
-                            </Button>
-                          </Col>
-
-                          <Col>
-                            <Button
-                              onClick={() => {
-                                this.reset();
-                                this.setState({activeTab:"2"})
-
-                              }}
-                              size="lg"
-                              color="secondary"
-                              block
-                            >
-                              Cancel
-                            </Button>
-                          </Col>
-                        </Row>
-
-                        </p>
-                      }
-
-
+   {this.state.staffError && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.staffError}</p>
+                                    </font>
+                                  )}
 
 <br/>
 
+<InputGroup className="mb-2">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b>  Date of Issue</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="doi"
+                                id="doi"
+                                value={this.state.doi}
+                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOS: "+this.state.doi)})}}
+                              />
+
+
+                            </InputGroup>
+                            {this.state.doiError &&(
+                                <font color="red"><h6>
+                                  {" "}
+                                  <p>{this.state.doiError}</p></h6>
+                                </font>
+                              )}
+
+<br/>
+<Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "palevioletred" }}>
+                                <th className="text-center">
+                                  <h5> S.No.</h5>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h5>Book Name </h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Available Quantity</h5>{" "}
+                                </th>
+                                <th className="text-center">
+                                  <h5>Unique Book Id</h5>{" "}
+                                </th>
 
 
 
 
-  </CardBody>
+                                <th className="text-center">
+                                  <Button
+                                    onClick={this.handleAddRow}
+                                    className="btn btn-primary"
+                                    color="primary"
 
-  </Card>}
+
+                                  >
+
+                                    Add Row
+                          </Button>
+
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.rows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                  <td   style={{width:"200px"}}>
+
+                                   <Select                            id="bookName"
+                            name="bookName"
+
+                          placeholder="Select Book"
+                            options={this.state.existingBooks}
+                          closeMenuOnSelect={true}
+                         value={this.state.rows[idx].bookName}
+                         isClearable={true}
+                              isSearchable={true}
+
+                            onChange={selectedItem=>{
 
 
+                                const temp = this.state.rows;
+                                temp[idx]["bookName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
+                                selectedItem.value.slice(1),"value":selectedItem.value};
+
+                                for(var i=0;i<this.state.allBooksData.length;i++)
+                                {
+                                    if(this.state.allBooksData[i].bookName===selectedItem.value)
+                                    {
+                                      for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
+{
+
+  if(!this.state.allBooksData[i].uniqueBookIds[u].isIssued)
+ { console.log(this.state.allBooksData[i].uniqueBookIds[u].isIssued);
+  temp[idx]["uniqueBookId"]=this.state.allBooksData[i].uniqueBookIds[u].value;
+  break;}
+}
+
+                                        temp[idx]["quantity"]=this.state.allBooksData[i].quantity;
+
+
+                                    }
+                                }
+
+
+                                this.setState(
+                                  {
+                                    rows: temp
+                                  })
+
+                            }}
+                            />
+
+
+                                  </td>
+
+
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="quantity"
+                                        type="text"
+                                        className="form-control"
+                                        value={this.state.rows[idx].quantity}
+
+                                        style={{textAlign:'center'}}
+                                        id="quantity"
+                                        size="lg"
+                                        disabled
+                                      />
+                                    </InputGroup>
+                                  </td>
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="uniqueBookId"
+                                        type="text"
+                                        className="form-control"
+                                        value={this.state.rows[idx].uniqueBookId}
+                                        disabled
+                                        style={{textAlign:'center'}}
+                                        id="quantity"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+
+
+
+                                  <td align="center">
+                                  { idx>0 &&
+                                    <Button
+                                      className="btn btn-danger btn-sg"
+                                      onClick={this.handleRemoveSpecificRow(
+                                        idx
+                                      )}
+                                      size="lg"
+                                    >
+                                      Remove
+                                    </Button>}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                          {this.state.rowError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.rowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+
+<br/>
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Remarks</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="remarks"
+                              id="remarks"
+                             value={this.state.remarks}
+                             onChange={e => {
+                                this.setState(
+                                  { remarks: e.target.value })}}
+
+
+                            />
+                          </InputGroup>
+
+{this.state.error &&
+                              <font color="red">
+                                {" "}
+                                <p>{JSON.stringify(this.state.error)}</p>
+                              </font>
+                            }
+<Row>
+                            <Col>
+                              <Button
+                                onClick={this.staffSubmitHandler}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                                Submit
+                              </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={this.reset}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                             Reset
+                              </Button>
+                            </Col>
+                          </Row>
+
+
+</CardBody></Card>
               </Col>
             </Row>
-          </TabPane>
+
+           </TabPane>
         </TabContent>
 
 

@@ -1,6 +1,7 @@
 const BookCategories = require("../../models/BookCategories");
 const Books = require("../../models/Books");
 const IssuedBooks = require("../../models/IssuedBooks");
+const Users = require("../../models/User");
 const rimraf = require("rimraf");
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
@@ -330,30 +331,35 @@ function editCategory(req,res)
   });
 }
 
-function issueBook(req,res)
-{var add=true;
+async function issueBook(req,res)
+{var temp=[]; var count=0;
+  var books =req.body.issuedBookDetails;
+
+
   console.log("in issueBook: "+JSON.stringify(req.body));
 
-  
+
 var issueBook = new IssuedBooks(req.body);
-issueBook
+await issueBook
   .save()
   .then(user => {
-    console.log("in issueBook Save "+JSON.stringify(user))
-    var temp=[]; var count=0;
+    console.log("in issueBook Save "+JSON.stringify(user))})
 
-  var books =req.body.issuedBookDetails;
+.catch(error=>{return res.send(error)})
+
+
+
   for(var b=0;b<books.length;b++)
   {
-  console.log("BookName "+JSON.stringify(books[i].bookName.value))
-Books.findOne({bookName:books[i].bookName.value})
-.then(book=>{ console.log("in findOneBook "+JSON.stringify(book))
-  
+  console.log("BookName "+JSON.stringify(books[b].bookName.value))
+ await Books.findOne({bookName:books[b].bookName.value})
+  .then (book=> { console.log("in findOneBook "+JSON.stringify(book));
+
   temp=book.uniqueBookIds;
 
   for(var i=0;i<temp.length;i++)
  {
-  if(temp[i].value===books[i].uniqueBookId)
+  if(temp[i].value===books[b].uniqueBookId)
   {
 temp[i].isIssued=true;
 
@@ -361,45 +367,60 @@ temp[i].isIssued=true;
 break;
 
   }
-  
+
 }
 
-Books.updateOne({bookName:books[i].bookName.value,},
+
+
+})
+.catch(error => { console.log("Book findOne error "+JSON.stringify(error))
+  return res.send({error});
+});
+
+await Books.updateOne({bookName:books[b].bookName.value,},
   {$set: {uniqueBookIds:temp},
   $inc: {quantity:-1}
 })
 .then(data=>{count++})
-.catch(error=>{return res.send({error});})
+.catch(error=>{
+  console.log("Book UpdateOne error "+JSON.stringify(error))
+  return res.send({error});})
 
-})
-.catch(error => {
-  return res.send({error});
-});
 
-   
 }
+
+
 
 if(count===books.length)
 return res.send({msg:"Success"});
 
 
 
-})
 
 
 
-.catch(error=>{return res.send(error)})
 
-
- 
 
 
 
 }
 
+function gettingStaff(req, res) {
+  console.log("in gettingBooks ");
+
+  Users
+    .find({ $or:[ {role:"admin"}, {role:"teacher"} ]})
+    .then(data => {
+        return res.send(data);
+    })
+    .catch(err => {
+      return res.send({error:err});
+    });
+
+  }
 
   app.post("/api/importBooks", importBooks);
- 
+
   app.post("/api/issueBook", issueBook);
    app.get("/api/getCategories", getCategories);
 
@@ -407,6 +428,8 @@ return res.send({msg:"Success"});
    app.post("/api/addBook", addBook);
    app.post("/api/editCategory", editCategory);
    app.get("/api/gettingBooks", gettingBooks);
+   app.get("/api/gettingStaff", gettingStaff);
+
 
 
 
