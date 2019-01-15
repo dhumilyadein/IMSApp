@@ -225,7 +225,7 @@ var addBook = new Books(result[i]);
     console.log("in gettingBooks ");
 
     Books
-      .find()
+      .find({quantity:{$gt:0}})
       .then(data => {
           return res.send(data);
       })

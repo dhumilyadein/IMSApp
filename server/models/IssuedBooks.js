@@ -58,8 +58,8 @@ doi:{
     type: Date,
     required: true,
     default: Date.now
-  },
-
+  }
+  
 
 },  { collection: 'issuedBooks' });
 
