@@ -249,7 +249,7 @@ this.fetchStaff();
     }
 
 
- async   studentSubmitHandler(e){
+    studentSubmitHandler(e){
       e.preventDefault();
 console.log("In FeeSubmit:"+ JSON.stringify(this.state));
 var submit=true;
@@ -436,7 +436,7 @@ console.log("Issuing Book  Staff");
 
                 success: true,
                 modalSuccess: true,
-                modalMessage:this.state.rows.length+ "books issued to: "+this.state.selectedStaff.label
+                modalMessage:this.state.rows.length+ " books issued to: "+this.state.selectedStaff.label
 
 
 

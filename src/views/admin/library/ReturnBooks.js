@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import classnames from 'classnames';
 import DatePicker from 'react-date-picker';
+import ReactLoading from 'react-loading';
 import {
     Badge,
     Button,
@@ -55,7 +56,7 @@ rowError:"",
 
             selectedStudent:[],
             error:"",
-
+loader:false,
 
 
             year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
@@ -87,7 +88,9 @@ rowError:"",
             existingStaff:[],
             selectedStaff:[],
             staffError:"",
-            modalMessage:""
+            modalMessage:"",
+            wholeClass:false,
+            hideStudents:false
         };
 
 
@@ -128,7 +131,9 @@ this.fetchStaff=this.fetchStaff.bind(this);
 
     reset()
     {
-     
+      this.fetchClassDetails();
+      this.getExistingBooks();
+      this.fetchStaff();
       this.setState( {
 
        section:"",
@@ -136,14 +141,16 @@ this.fetchStaff=this.fetchStaff.bind(this);
 rowError:"",
         studentsDataArray:[],
                     studentOpen:true,
-
-                  
+                   
+                   
+                    loader:false,
 
         selectedStudent:[],
         error:"",
 
 
 
+        year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
 
         remarks:"",
         doi:new Date(Date.now()),
@@ -173,12 +180,7 @@ rowError:"",
         selectedStaff:[],
         staffError:"",
         modalMessage:""
-                },()=>{
-                    this.fetchClassDetails();
-                    this.getExistingBooks();
-                    this.fetchStaff();
                 });
-
 
 
     }
@@ -253,14 +255,15 @@ console.log("In FeeSubmit:"+ JSON.stringify(this.state));
 var submit=true;
 
 this.setState({classError:"", studentError:"", doiError:"",rowError:"" ,sectionError:"", error:"", success: false,
-modalSuccess: false})
+modalSuccess: false,loader:true})
 
 
 
 if(!this.state.class)
 {
-  this.setState({classError:"Please Select Class"});
+  this.setState({classError:"Please Select Class", loader:false});
   submit=false;
+  
 
   }
 
@@ -268,21 +271,21 @@ if(!this.state.class)
 
   if(!this.state.section)
 {
-  this.setState({sectionError:"Please Select Section"});
+  this.setState({sectionError:"Please Select Section",loader:false});
   submit=false;
 
   }
 
   if(!this.state.doi)
 {
-  this.setState({doiError:"Please Enter Date of Issue"});
+  this.setState({doiError:"Please Enter Date of Issue",loader:false});
   submit=false;
 
   }
 
   if(!this.state.selectedStudent.value)
   {
-    this.setState({studentError:"Please Select Student"});
+    this.setState({studentError:"Please Select Student",loader:false});
     submit=false;
 
     }
@@ -290,9 +293,14 @@ if(!this.state.class)
 
 this.state.rows.forEach(element=>{
 if (!element.bookName){
-this.setState({rowError:"Please select the book(s) in each row"});
+this.setState({rowError:"Please select the book(s) in each row",loader:false});
 submit=false;
 return;}
+
+if (!element.dor){
+  this.setState({rowError:"Please select the Return Due date in each row",loader:false});
+  submit=false;
+  return;}
 
 
 })
@@ -303,7 +311,7 @@ for(var i=0;i<this.state.rows.length;i++)
 {
   if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
 {
-  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!"});
+  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!",loader:false});
 submit=false;
 break;
 }
@@ -311,11 +319,6 @@ break;
 
 }
 }
-
-
-
-
-
 
 
   if(submit)
@@ -350,7 +353,7 @@ console.log("Issuing Book ");
 
   }
 
-
+ 
 
 
 
@@ -385,14 +388,24 @@ modalSuccess: false});
     }
 
 
-this.state.rows.forEach(element=>{
-if (!element.bookName){
+for(var i =0;i<this.state.rows.length;i++){
+if (!this.state.rows[i].bookName){
 this.setState({rowError:"Please select the book(s) in each row"});
 submit=false;
 return;}
 
+if (!this.state.rows[i].dor){
+  this.setState({rowError:"Please select the Return Due date in each row"});
+  submit=false;
+  return;}
 
-})
+  
+
+
+
+
+
+}
 
 for(var i=0;i<this.state.rows.length;i++)
 
@@ -423,7 +436,7 @@ console.log("Issuing Book  Staff");
 
                 success: true,
                 modalSuccess: true,
-                modalMessage:this.state.rows.length+ "books issued to: "+this.state.selectedStaff.label
+                modalMessage:this.state.rows.length+ " books issued to: "+this.state.selectedStaff.label
 
 
 
@@ -609,7 +622,7 @@ this.setState({selectedStudent:e});
               onClick={() => { this.toggle('1'); }}
 
             >
-            <h5>  Return Books from Student </h5>
+            <h5>  Return Book from Student </h5>
             </NavLink>
           </NavItem>
           <NavItem>
@@ -719,8 +732,8 @@ this.setState({selectedStudent:e});
                                     </font>
                                   )}
 
-<br/>
 
+<br/>
 <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -763,7 +776,9 @@ this.setState({selectedStudent:e});
                                 <th className="text-center">
                                   <h5>Unique Book Id</h5>{" "}
                                 </th>
-
+                                <th className="text-center">
+                                  <h5>Return due date</h5>{" "}
+                                </th>
 
 
 
@@ -871,6 +886,24 @@ this.setState({selectedStudent:e});
                                     </InputGroup>
                                   </td>
 
+                               
+
+                                  <td align="center">
+
+                                  <DatePicker
+
+name="dor"
+id="dor"
+value={this.state.rows[idx].dor}
+onChange={date=>{ var temp=this.state.rows;
+temp[idx]["dor"]=date;
+
+this.setState({rows:temp})}
+
+}
+/>
+                                  </td>
+
 
 
                                   <td align="center">
@@ -928,14 +961,23 @@ this.setState({selectedStudent:e});
                             }
 <Row>
                             <Col>
-                              <Button
+                            {!this.state.loader &&    <Button
                                 onClick={this.studentSubmitHandler}
                                 size="lg"
                                 color="success"
                                 block
                               >
                                 Submit
-                              </Button>
+                              </Button>}
+
+                              {this.state.loader &&
+                          <div align="center"><ReactLoading type="spin"
+                            color="	#006400"
+                            height='2%' width='10%' />
+                            <br />
+
+                            <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
+
                             </Col>
 
                             <Col>
@@ -1030,7 +1072,9 @@ this.setState({selectedStudent:e});
                                 <th className="text-center">
                                   <h5>Unique Book Id</h5>{" "}
                                 </th>
-
+                                <th className="text-center">
+                                  <h5>Return due date</h5>{" "}
+                                </th>
 
 
 
@@ -1136,6 +1180,24 @@ this.setState({selectedStudent:e});
                                         size="lg"
                                       />
                                     </InputGroup>
+                                  </td>
+
+                               
+
+                                  <td align="center">
+
+                                  <DatePicker
+
+name="dor"
+id="dor"
+value={this.state.rows[idx].dor}
+onChange={date=>{ var temp=this.state.rows;
+temp[idx]["dor"]=date;
+
+this.setState({rows:temp})}
+
+}
+/>
                                   </td>
 
 
