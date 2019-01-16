@@ -42,7 +42,7 @@ class IssueBooks extends Component {
     constructor(props) {
         super(props);
         this.fetchClassDetails();
-        this.getExistingBooks();
+       
         this.state = {
 
             class:"",
@@ -62,9 +62,9 @@ loader:false,
             year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
 
             remarks:"",
-            doi:new Date(Date.now()),
+            dor:new Date(Date.now()),
 
-            doiError:"",
+            dorError:"",
             sectionError:"",
             modalSuccess:false,
             success:false,
@@ -113,7 +113,7 @@ this.fetchStaff=this.fetchStaff.bind(this);
     reset()
     {
       this.fetchClassDetails();
-      this.getExistingBooks();
+      
       this.fetchStaff();
       this.setState( {
 
@@ -490,9 +490,10 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
 
 
         this.setState({ classes: uniqueItems });
+        console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
             });
 
-            console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
+            
 
 
           }
@@ -718,25 +719,25 @@ this.setState({selectedStudent:e});
 <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
-                                <b>  Date of Issue</b>
+                                <b>  Date of Return</b>
                                 </InputGroupText>
                               </InputGroupAddon>
 
                               &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
-                                name="doi"
-                                id="doi"
-                                value={this.state.doi}
-                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOS: "+this.state.doi)})}}
+                                name="dor"
+                                id="dor"
+                                value={this.state.dor}
+                                onChange={date=>{this.setState({dor:date},()=>{console.log("DOR: "+this.state.dor)})}}
                               />
 
 
                             </InputGroup>
-                            {this.state.doiError &&(
+                            {this.state.dorError &&(
                                 <font color="red"><h6>
                                   {" "}
-                                  <p>{this.state.doiError}</p></h6>
+                                  <p>{this.state.dorError}</p></h6>
                                 </font>
                               )}
 
@@ -748,32 +749,34 @@ this.setState({selectedStudent:e});
                                   <h5> S.No.</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  {" "}
+                               
                                   <h5>Book Name </h5>
                                 </th>
                                 <th className="text-center">
-                                  <h5>Available Quantity</h5>{" "}
+                                  <h5>Unique Book Id</h5>
                                 </th>
+                                                            
                                 <th className="text-center">
-                                  <h5>Unique Book Id</h5>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <h5>Return due date</h5>{" "}
+                                  <h5>Date of Issue</h5>
                                 </th>
 
+                                <th className="text-center">
+                                  <h5>Expected Return Date</h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Delay(in Day)</h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Late Fine/Day(Rs)</h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Total Fine(Rs)</h5>
+                                </th>
 
+                              
 
                                 <th className="text-center">
-                                  <Button
-                                    onClick={this.handleAddRow}
-                                    className="btn btn-primary"
-                                    color="primary"
-
-
-                                  >
-
-                                    Add Row
-                          </Button>
+                                <h5>Actions</h5>
 
                                 </th>
                               </tr>
@@ -785,51 +788,8 @@ this.setState({selectedStudent:e});
                                     <h4>{idx + 1}</h4>
                                   </td>
                                   <td   style={{width:"200px"}}>
-
-                                   <Select                            id="bookName"
-                            name="bookName"
-
-                          placeholder="Select Book"
-                            options={this.state.existingBooks}
-                          closeMenuOnSelect={true}
-                         value={this.state.rows[idx].bookName}
-                         isClearable={true}
-                              isSearchable={true}
-
-                            onChange={selectedItem=>{
-
-
-                                const temp = this.state.rows;
-                                temp[idx]["bookName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
-                                selectedItem.value.slice(1),"value":selectedItem.value};
-
-                                for(var i=0;i<this.state.allBooksData.length;i++)
-                                {
-                                    if(this.state.allBooksData[i].bookName===selectedItem.value)
-                                    {
-                                      for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
-{
-
-  if(!this.state.allBooksData[i].uniqueBookIds[u].isIssued)
- { console.log(this.state.allBooksData[i].uniqueBookIds[u].isIssued);
-  temp[idx]["uniqueBookId"]=this.state.allBooksData[i].uniqueBookIds[u].value;
-  break;}
-}
-
-                                        temp[idx]["quantity"]=this.state.allBooksData[i].quantity;
-
-
-                                    }
-                                }
-
-
-                                this.setState(
-                                  {
-                                    rows: temp
-                                  })
-
-                            }}
-                            />
+{this.state.rows[idx].bookName}
+                        
 
 
                                   </td>
@@ -837,67 +797,57 @@ this.setState({selectedStudent:e});
 
 
                                   <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="quantity"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].quantity}
-
-                                        style={{textAlign:'center'}}
-                                        id="quantity"
-                                        size="lg"
-                                        disabled
-                                      />
-                                    </InputGroup>
+                                  {this.state.rows[idx].uniqueBookId}
                                   </td>
 
                                   <td>
-                                    <InputGroup className="mb-3">
+                                  {this.state.rows[idx].doi}
+                                  </td>
+
+
+
+                                  <td align="center">
+
+{this.state.rows[idx].dor}
+                                  </td>
+
+                                  <td align="center">
+
+{this.state.rows[idx].delay}
+                                  </td>
+
+                                  <td align="center">
+
+                                
                                       <Input
-                                        name="uniqueBookId"
+                                        name="latefine"
                                         type="text"
                                         className="form-control"
-                                        value={this.state.rows[idx].uniqueBookId}
-                                        disabled
+                                        value={this.state.rows[idx].lateFine}
+
                                         style={{textAlign:'center'}}
-                                        id="quantity"
-                                        size="lg"
+                                        id="latefine"
+                                        size="sm"
+                                        
                                       />
-                                    </InputGroup>
+                                
+                                  </td>
+                                  <td align="center">
+
+{this.state.rows[idx].totalFine}
                                   </td>
 
 
-
                                   <td align="center">
-
-                                  <DatePicker
-
-name="dor"
-id="dor"
-value={this.state.rows[idx].dor}
-onChange={date=>{ var temp=this.state.rows;
-temp[idx]["dor"]=date;
-
-this.setState({rows:temp})}
-
-}
-/>
-                                  </td>
-
-
-
-                                  <td align="center">
-                                  { idx>0 &&
-                                    <Button
+                                                                    <Button
                                       className="btn btn-danger btn-sg"
                                       onClick={this.handleRemoveSpecificRow(
                                         idx
                                       )}
                                       size="lg"
                                     >
-                                      Remove
-                                    </Button>}
+                                      Return
+                                    </Button>
                                   </td>
                                 </tr>
                               ))}

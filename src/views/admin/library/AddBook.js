@@ -37,7 +37,7 @@ class AddBook extends Component {
  this.getCategories();
     this.state = {
 
-      erorrs: null,
+      erorr: "",
 
       uniqueBookIds:[],
      bookId:"",
@@ -105,7 +105,7 @@ for(var i=0;i<result.data.length;i++)
   reset()
   {
 this.setState({
-  erorrs: null,
+  erorr: "",
 
   uniqueBookIds:[],
  bookId:"",
@@ -205,10 +205,16 @@ uniqueBookIdsError:"",
                       this.setState({
                         bookNameError:result.data.error.errors.bookName.message
                       });
-                     if (result.data.error.errors.bookId)
+                     else if (result.data.error.errors.bookId)
                     this.setState({
                       bookIdError:result.data.error.errors.bookId.message
-                    });}
+                    });
+
+                    else
+                    this.setState({
+                      error:result.data.error
+                    });
+                  }
                      else if (result.data.msg === "Success")
                       this.setState({
 
@@ -619,7 +625,14 @@ if(this.state.bookId){ var temp=[];
 
 
 
-
+                            {this.state.error && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.error} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
 
 
 

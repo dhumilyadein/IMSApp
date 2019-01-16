@@ -5,11 +5,7 @@ connection = mongoose.createConnection('mongodb://localhost:27017/IMS',{ useNewU
 autoIncrement.initialize(connection);
 var BookCategoriesSchema = new Schema({
 
-  categoryId: {
-    type: Number,
-    required: true,
-    unique:true
-  },
+ 
   category: {
     type: String,
     required: true,
@@ -38,7 +34,7 @@ lowercase:true,
 
 
 
-BookCategoriesSchema.plugin(autoIncrement.plugin, { model: 'BookCategories', field: 'categoryId', startAt: 1});
+
 module.exports = BookCategories = mongoose.model("BookCategories", BookCategoriesSchema);
 
 

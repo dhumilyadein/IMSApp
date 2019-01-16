@@ -272,13 +272,13 @@ return res.send({error:err});
 
 }
 
-function addBook(req,res)
+async function addBook(req,res)
 {var add=true;
   console.log("in addBook: "+JSON.stringify(req.body));
 
   if(req.body.category.__isNew__)
 {var addCategory = new BookCategories({"category":req.body.category.label});
-addCategory.save()
+await addCategory.save()
 .then(user => {
    console.log("Category saved: "+JSON.stringify(user));
 })
@@ -297,7 +297,7 @@ var tempBook={"bookId":req.body.bookId, "bookName":req.body.bookName, "category"
 
 
 var addBook = new Books(tempBook);
-  addBook
+await  addBook
   .save()
   .then(user => {
       return res.send({msg:"Success"});
