@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert';
+import { Creatable } from "react-select";
+
 
 import 'react-confirm-alert/src/react-confirm-alert.css';
 
@@ -30,31 +32,36 @@ import axios from "axios";
 
 class AddBook extends Component {
   constructor(props) {
-   
+
     super(props);
- 
+ this.getCategories();
     this.state = {
 
-      erorrs: null,
-     
+      erorr: "",
 
+      uniqueBookIds:[],
      bookId:"",
      bookName:"",
      author:"",
      publisher:"",
      quantity:"",
      doa:new Date(Date.now()),
-     category:"",
+     category:[],
      location:"",
      description:"",
      cost:"",
-referenceUniqueId: [],
-     
+quantityError:"",
+categoryError:"",
+bookIdError:"",
+bookNameError:"",
+uniqueBookIdsError:"",
+
       success: false,
       modalSuccess: false,
       visible: false,
-      doaError:"",
-     
+
+      defaultcategories:[]
+
 
     };
 
@@ -65,38 +72,64 @@ referenceUniqueId: [],
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
-    
+    this.getCategories=this.getCategories.bind(this);
+
 
 
 
 
   }
 
- 
+  getCategories()
+  {
+
+    axios
+    .get("http://localhost:8001/api/getCategories")
+    .then(result => {
+      console.log("Existing RESULT.data " + JSON.stringify(result.data));
+      if (result.data) {
+var temp=[];
+for(var i=0;i<result.data.length;i++)
+ temp.push({"label":result.data[i].category.charAt(0).toUpperCase()+result.data[i].category.slice(1),
+"value": result.data[i].category})
+
+          this.setState({
+          defaultcategories: temp,
+
+        });
+      }
+    });
+
+  }
 
   reset()
   {
 this.setState({
-    erorrs: null,
-      success: null,
+  erorr: "",
 
-     grandTotal:"",
-     dos:new Date(Date.now()),
-      listName: "",
-      rows: [{ itemName:"",
-      quantity:"",
-      unit:"",
-      costPerItem:"",
-      totalAmount:""
+  uniqueBookIds:[],
+ bookId:"",
+ bookName:"",
+ author:"",
+ publisher:"",
+ quantity:"",
+ doa:new Date(Date.now()),
+ category:[],
+ location:"",
+ description:"",
+ cost:"",
+quantityError:"",
+categoryError:"",
+bookIdError:"",
+bookNameError:"",
+uniqueBookIdsError:"",
 
-      }],
-      remarks:"",
-      rowError: false,
-      listNameError: "",
-      success: false,
-      modalSuccess: false,
-      visible: false,
-      dosError:""
+  success: false,
+  modalSuccess: false,
+  visible: false,
+
+  defaultcategories:[]
+
 
 
 });
@@ -108,6 +141,7 @@ this.setState({
       modalSuccess: !this.state.modalSuccess
     });
     this.reset();
+    this.getCategories();
   }
 
   /**
@@ -122,89 +156,92 @@ this.setState({
 
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.rows.length);
+
     this.setState({
-      rowError: "", listNameError: "", success: false,
-      modalSuccess: false, dosError:""
+      bookNameError: "", bookIdError: "", success: false,
+      modalSuccess: false, quantityError:"",categoryError:"", uniqueBookIdsError:""
     }, () => {
-      if (!this.state.listName) {
-        this.setState({ listNameError: "Please Enter List Name" });
+      if (!this.state.bookName) {
+        this.setState({ bookNameError: "Please Enter Book Name" });
         submit = false;}
 
-        if (!this.state.dos) {
-            this.setState({ dosError: "Please Enter Date of Submission" });
+        if (!this.state.bookId) {
+            this.setState({ bookIdError: "Please Enter Book id" });
             submit = false;}
 
-        if (this.state.rows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Row" });
-        submit = false;
-      } else
-        for (var i = 0; i < this.state.rows.length; i++) {
-          if (
-            this.state.rows[i].itemName === "" ||
-            this.state.rows[i].costPerItem === ""||
-            this.state.rows[i].quantity === ""||
-            this.state.rows[i].totalAmount === ""||
-            this.state.rows[i].unit === ""
+        if (Object.keys(this.state.category).length===0) {
+            this.setState({ categoryError: "Please Select Category" });
+            submit = false;}
 
-          ) {
-            this.setState({
-              rowError: "Please fill all the table fields first"
-            });
-            submit = false;
+            if (!this.state.quantity) {
+                this.setState({ quantityError: "Please Enter Quantity" });
+                submit = false;}
 
-            break;
-          }
-        }
+
+               else if (this.state.uniqueBookIds.length!=parseInt(this.state.quantity)) {
+                    this.setState({ uniqueBookIdsError: "No of Unique Books Ids should be equal to Quantity" });
+                    submit = false;}
+
+
         if (submit === true) {
 
     confirmAlert({
         title: 'Confirm to Proceed',
-        message: 'Are you sure to Add these Items?',
+        message: 'Are you sure to Add this Book?',
         buttons: [
           {
             label: 'Yes',
-            onClick: () => 
-            
+            onClick: () =>
+
           {
-           
+
                 console.log("Submitting Items: ");
                 axios
-                  .post("http://localhost:8001/api/addItems", this.state)
+                  .post("http://localhost:8001/api/addBook", this.state)
                   .then(result => {
                     console.log("RESULT.data " + JSON.stringify(result.data));
-                    if(result.data.errors)
-                    {if (result.data.errors.listName)
+                    if(result.data.error)
+                    {if (result.data.error.errors.bookName)
                       this.setState({
-                        listNameError:result.data.errors.listName.message
-                      });}
+                        bookNameError:result.data.error.errors.bookName.message
+                      });
+                     else if (result.data.error.errors.bookId)
+                    this.setState({
+                      bookIdError:result.data.error.errors.bookId.message
+                    });
+
+                    else
+                    this.setState({
+                      error:result.data.error
+                    });
+                  }
                      else if (result.data.msg === "Success")
                       this.setState({
-        
+
                         success: true,
                         modalSuccess: true,
-        
+
                       });
-        
+
                   });
               }
-           
+
           },
           {
             label: 'No',
-          
+
           }
         ]
       })}
 
 
 
-  
+
   });
   }
 
 
- 
+
 
 
 
@@ -213,7 +250,7 @@ this.setState({
 
 
   render() {
- 
+
     return (
       <div>
         <Container>
@@ -230,7 +267,7 @@ this.setState({
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Book: {this.state.bookName} saved Successfully!
+                      {this.state.quantity} {this.state.bookName} Books saved Successfully!
                       </ModalHeader>
                     </Modal>
                   )}
@@ -252,18 +289,18 @@ this.setState({
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="bookName"
                               id="bookName"
-                              value={this.state.bookName}
+                              value={this.state.bookName.charAt(0).toUpperCase()+this.state.bookName.slice(1)}
                               onChange={e => {
                                 this.setState(
                                   { bookName: e.target.value },
                                   () => {
                                     console.log(
                                       "List name: " +
-                                      this.state.bookNameError
+                                      this.state.bookName
                                     );
                                   }
                                 );
@@ -289,14 +326,16 @@ this.setState({
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="bookId"
                               id="bookId"
-                              value={this.state.bookId}
+                              value={this.state.bookId.charAt(0).toUpperCase()+
+                                this.state.bookId.slice(1)}
                               onChange={e => {
                                 this.setState(
-                                  { bookId: e.target.value },
+                                  { bookId: e.target.value,
+                                quantity:"" },
                                   () => {
                                     console.log(
                                       "List name: " +
@@ -318,43 +357,22 @@ this.setState({
 
 
 
-                          
-                          <Row><Col> <Select
-                            id="itemName"
-                            name="itemName"
-                           autoSize={true}
-                          placeholder="Select Item"
-                            options={this.state.items}
-                          closeMenuOnSelect={true}
-                        // value={this.state.rows[idx].itemName}
 
-                              isSearchable={true}
+                          <Row><Col>      <Creatable
 
-                            onChange={selectedItem=>{
-var tempUnit,tempQuantity;
-                                             for(var i=0;i<this.state.existingItems.length;i++)
-                                             {if(this.state.existingItems[i].itemName===selectedItem.value)
-                                             { tempUnit=this.state.existingItems[i].unit;
-                                              tempQuantity= this.state.existingItems[i].quantity;
-                                              break;}
-                                            }
+                value={this.state.category}
+                onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
+                this.setState({category:selected});}}
 
+                autosize
+                onCreateOption={this.handleSubjectCreate}
+                options={this.state.defaultcategories}
+                isSearchable={true}
+                placeholder="Select or type Category to Add"       />
 
-                                this.setState(
-                                  {
-                                    itemName: selectedItem.value,
-                                    unit:tempUnit,
-                                    availableQuantity:tempQuantity
-                                  })
-
-                            }}
-                            />
-
-</Col>&nbsp;    <Col> <Input type= "text"/> </Col> <Col col="6" sm="4" md="2" xl className="mb-3 mb-xl-0">
-                <Button block color="success" className="btn-pill">Add</Button>
-              </Col></Row>
+</Col></Row>
                           <br/>
-                    
+
                           {this.state.categoryError && (
                             <font color="red">
                               <h6>
@@ -364,7 +382,7 @@ var tempUnit,tempQuantity;
                             </font>
                           )}
 
-                          
+
 
 <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
@@ -375,8 +393,8 @@ var tempUnit,tempQuantity;
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="author"
                               id="author"
                               value={this.state.author}
@@ -393,7 +411,7 @@ var tempUnit,tempQuantity;
                               }}
                             />
                           </InputGroup>
-                         
+
 
 <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
@@ -404,8 +422,8 @@ var tempUnit,tempQuantity;
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="publisher"
                               id="publisher"
                               value={this.state.publisher}
@@ -432,8 +450,8 @@ var tempUnit,tempQuantity;
                             <Input
                               type="number"
                               size="lg"
-                          
-                              
+
+
                               name="quantity"
                               id="quantity"
                               value={this.state.quantity}
@@ -442,14 +460,40 @@ var tempUnit,tempQuantity;
                                   { quantity: e.target.value },
                                   () => {
                                     console.log(
-                                      "List name: " +
+                                      "Quantity: " +
                                       this.state.quantity
                                     );
+if(this.state.bookId){ var temp=[];
+                                    for(var i=0;i<this.state.quantity;i++)
+                                    {
+                                        temp.push({"label":this.state.bookId.charAt(0).toUpperCase()+
+                                        this.state.bookId.slice(1)
+                                        +"-"+(i+1),
+                                    "value":this.state.bookId.charAt(0).toUpperCase()+
+                                    this.state.bookId.slice(1)
+                                    +"-"+(i+1),"isIssued":false})
+
+
+                                    }
+                                    console.log(JSON.stringify(temp));
+                                    this.setState({uniqueBookIds:temp});
+                                }
+
+                                else{this.setState({bookIdError:"Please enter Book Id first",quantity:""})}
+
                                   }
                                 );
                               }}
                             />
                           </InputGroup>
+                          {this.state.quantityError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.quantityError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
 
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
@@ -460,8 +504,8 @@ var tempUnit,tempQuantity;
                             <Input
                               type="text"
                               size="lg"
-                          
-                              
+
+
                               name="location"
                               id="location"
                               value={this.state.location}
@@ -488,8 +532,8 @@ var tempUnit,tempQuantity;
                             <Input
                               type="number"
                               size="lg"
-                          
-                              
+
+
                               name="cost"
                               id="cost"
                               value={this.state.cost}
@@ -506,7 +550,7 @@ var tempUnit,tempQuantity;
                               }}
                             />
                           </InputGroup>
-                         
+
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
@@ -514,7 +558,7 @@ var tempUnit,tempQuantity;
                               </InputGroupText>
                             </InputGroupAddon>
                             <Input
-                              type="number"
+                              type="text"
                               size="lg"
                                name="description"
                               id="description"
@@ -522,7 +566,7 @@ var tempUnit,tempQuantity;
                               onChange={e => {
                                 this.setState(
                                   { description: e.target.value },
-                                  
+
                                 );
                               }}
                             />
@@ -531,24 +575,32 @@ var tempUnit,tempQuantity;
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
-                                <b>ReferenceUniqueId</b>
+                                <b>Unique Book Ids</b>
                               </InputGroupText>
                             </InputGroupAddon>
-                            <Input
-                              type="number"
-                              size="lg"
-                               name="description"
-                              id="description"
-                              value={this.state.description}
-                              onChange={e => {
-                                this.setState(
-                                  { description: e.target.value },
-                                  
-                                );
-                              }}
-                            />
+                            <Creatable
+
+                value={this.state.uniqueBookIds}
+                onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
+                this.setState({uniqueBookIds:selected});}}
+                isMulti={true}
+                autosize
+                isClearable={false}
+                onCreateOption={e=>{
+                this.state.uniqueBookIds.push({"label":e,"value":e,"isIssued":false})
+                console.log(JSON.stringify(this.state.uniqueBookIds));}}
+
+
+                    />
                           </InputGroup>
-                         
+                          {this.state.uniqueBookIdsError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.uniqueBookIdsError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
 
 
 <InputGroup className="mb-2">
@@ -569,11 +621,18 @@ var tempUnit,tempQuantity;
 
 
                             </InputGroup>
-                          
 
 
 
 
+                            {this.state.error && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.error} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
 
 
 

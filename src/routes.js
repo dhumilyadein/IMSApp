@@ -228,6 +228,11 @@ const ReturnBooks = Loadable({
   loading: Loading
 });
 
+const EditCategory = Loadable({
+  loader: () => import("./views/admin/library/EditCategory"),
+  loading: Loading
+});
+
 const SearchBooks = Loadable({
   loader: () => import("./views/admin/library/SearchBooks"),
   loading: Loading
@@ -285,10 +290,11 @@ const routes = [
 
   { path: "/admin/library/AddBook", exact: true, name: "Add Book", component: AddBook },
   { path: "/admin/library/ImportBulkBooks", exact: true, name: "Import Bulk Books", component: ImportBulkBooks },
-  
+
   { path: "/admin/library/IssueBooks", exact: true, name: "Issue Books", component: IssueBooks },
   { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
   { path: "/admin/library/SearchBooks", exact: true, name: "Search/Edit Books", component: SearchBooks },
+  { path: "/admin/library/EditCategory", exact: true, name: "EditCategory", component: EditCategory },
 
 
 
@@ -387,6 +393,7 @@ const routes = [
     component: ClassTimeTable
   },
   
+
 
 
 

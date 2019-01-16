@@ -2,7 +2,7 @@ var unzipper = require("unzipper");
 var fs = require("fs");
 var lodash = require("lodash");
 var path = require("path");
-
+var Request = require("request");
 const rimraf = require("rimraf");
 const User = require("../../models/User");
 const Student = require("../../models/Student");
@@ -10,6 +10,7 @@ const Parent = require("../../models/Parent");
 const Teacher = require("../../models/Teacher");
 const Admin = require("../../models/Admin");
 const FeeTemplate = require("../../models/FeeTemplatesModel");
+const Class=require("../../models/Class")
 
 var multer = require("multer");
 var xlstojson = require("xls-to-json-lc");
@@ -86,6 +87,58 @@ var zipUpload = multer({
 }).single("file");
 
 module.exports = function(app) {
+  async function updateClassDetails(request) {
+console.log( "Update Class: "+JSON.stringify(request));
+
+
+    var updateClassDetailsRequest = {
+      "class": request.class,
+      "section": request.section,
+      "studentsData": {
+        "rollno": request.rollno,
+        "username": request.username,
+        "firstname": request.firstname,
+        "lastname": request.lastname,
+      }
+    }
+
+    var currentTime = new Date();
+
+
+    var objForUpdate = {};
+    var studentsDataJSON = {};
+
+    if (updateClassDetailsRequest.studentsData) studentsDataJSON.studentsData = updateClassDetailsRequest.studentsData;
+
+    if(request.subjects) objForUpdate.subjects = request.subjects;
+    objForUpdate.updatedAt = currentTime;
+    console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
+
+
+    await Class.findOneAndUpdate(
+      { $and : [{"class": request.class}, {"section": request.section }] },
+      {
+        $set: objForUpdate,
+        $push: studentsDataJSON
+      }
+    ).then(function (classData) {
+
+      console.log("Class details udpated successfully");
+
+      console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(classData));
+
+    }).catch(function (err) {
+      console.log("Catching Class Update server err - " + err);
+return err;
+
+
+    });
+
+
+  }
+
+
+
   async function importValidation(request) {
     var valError = {};
     console.log("in IMPORT VAL  " + request.username);
@@ -191,6 +244,28 @@ break;
 
       if (!request.section)
       valError["Section"] = "Section can't be empty";
+
+if(request.class&&request.section)
+{  const ClassCheck = await Class.findOne({
+  class: request.class,
+  section:request.section
+});
+if (!ClassCheck)
+  valError["ClassError"] =
+    "Class: " + request.class+" "+request.section + "  doesn't Exist! Please create class first.";
+
+    else
+{console.log("in Class Update Else")
+  error= updateClassDetails(request);
+if(Object.keys(error).length>0)
+valError["ClassError"] =
+"Class: " + request.class+" "+request.section + " "+JSON.stringify(error);
+}
+}
+
+
+
+
 
       if (!request.rollno) valError["RollNo"] = "Roll No can't be empty";
 

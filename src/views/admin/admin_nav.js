@@ -20,6 +20,12 @@ export default {
           variant: 'success',
         },
         {
+          name: 'Import Users',
+          url: '/admin/importUser',
+          icon: 'icon-people',
+          variant: 'success',
+        },
+        {
           name: 'Search Users',
           url: '/admin/searchUser',
           icon: 'icon-magnifier',
@@ -37,12 +43,7 @@ export default {
           icon: 'icon-user-follow',
           variant: 'success',
         },
-        {
-          name: 'Import Users',
-          url: '/admin/importUser',
-          icon: 'icon-people',
-          variant: 'success',
-        },
+      
     ]},
 
 
@@ -91,31 +92,37 @@ export default {
         {
           name: 'Add Book',
           url: '/admin/library/AddBook',
-          icon: 'icon-bag',
+          icon: 'icon-notebook',
           variant: 'success',
         },
         {
           name: 'Import Bulk Books',
           url: '/admin/library/ImportBulkBooks',
-          icon: 'icon-bag',
+          icon: 'icon-notebook',
           variant: 'success',
         },
         {
           name: 'Issue Books',
           url: '/admin/library/IssueBooks',
-          icon: 'icon-basket-loaded',
+          icon: 'icon-book-open',
           variant: 'success',
         },
         {
           name: 'Return Books',
           url: '/admin/library/ReturnBooks',
-          icon: 'icon-basket-loaded',
+          icon: 'icon-book-open',
           variant: 'success',
         },
         {
           name: 'Search/Edit Books',
           url: '/admin/library/SearchBooks',
-          icon: 'icon-basket-loaded',
+          icon: 'icon-book-open',
+          variant: 'success',
+        },
+        {
+          name: 'Edit Category',
+          url: '/admin/library/EditCategory',
+          icon: 'icon-book-open',
           variant: 'success',
         }
       ]},
@@ -155,7 +162,7 @@ export default {
           name: 'Class Management',
           url: '/classmanagement',
           icon: 'icon-briefcase',
-    
+
           children: [
             {
               name: 'Create Class',

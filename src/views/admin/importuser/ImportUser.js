@@ -48,8 +48,8 @@ class ImportUser extends Component {
       corruptZipFile: false,
       zipFilename: null,
       showErrors: false,
-      zipFile: null
-
+      disableButton: false
+      
 
 
 
@@ -87,7 +87,7 @@ class ImportUser extends Component {
       corruptZipFile: false,
       zipFilename: null,
       showErrors: false,
-      zipFile: null,
+      
       disableButton: false
     })
 
@@ -306,8 +306,8 @@ class ImportUser extends Component {
                          
 
                           <font color="red"> <h6> Please make sure Photos.zip contains only JPG format photos and no Folder(s).</h6></font>
-                       
-                          <font color="red"><h6>  If you face any unexpected behaviour, click Reset or Refresh your browser's tab and try again.</h6></font>
+                          <font color="red"> <h6> Please make sure Fee Templates, Student's Class & Section entered in the sheet, are available before Importing Users. </h6></font>
+                           <font color="red"><h6> If you face any unexpected behaviour, click Reset or Refresh your browser's tab and try again.</h6></font>
                           <br />
                         </div>
 
