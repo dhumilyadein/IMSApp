@@ -271,6 +271,10 @@ const CreateClass = Loadable({
   loading: Loading
 });
 
+const ClassTimeTable = Loadable({
+  loader: () => import("./views/admin/classmanagement/ClassTimeTable"),
+  loading: Loading
+});
 
 
 
@@ -376,6 +380,11 @@ const routes = [
     path: "/admin/classmanagement/CreateClass",
     name: "CreateClass",
     component: CreateClass
+  },
+  {
+    path: "/admin/classmanagement/ClassTimeTable",
+    name: "ClassTimeTable",
+    component: ClassTimeTable
   },
   
 

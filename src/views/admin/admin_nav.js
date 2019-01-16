@@ -170,6 +170,12 @@ export default {
               variant: 'success',
             },
             {
+              name: 'Time Table',
+              url: '/admin/classmanagement/ClassTimeTable',
+              icon: 'icon-bag',
+              variant: 'success',
+            },
+            {
               name: 'Notifications',
               url: '/admin/classmanagement/Notifications',
               icon: 'icon-bell',

@@ -48,7 +48,7 @@ class ClassDetails extends Component {
 
       classDetails: {},
       classes: [],
-      selectedClass: "",
+      class: "",
       section: "",
       sectionArray: [],
       studentsDataArray: [],
@@ -109,7 +109,7 @@ class ClassDetails extends Component {
 
     var selectedClass = e.currentTarget.value;
     console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
-    this.setState({ selectedClass: selectedClass });
+    this.setState({ class: selectedClass });
 
     var sectionArrayTemp = [];
     this.state.classDetails.forEach(element => {
@@ -141,7 +141,7 @@ class ClassDetails extends Component {
 
     var studentsDataArrayTemp = null;
     this.state.classDetails.forEach(element => {
-      if (element["class"] === this.state.selectedClass && element["section"] === section) {
+      if (element["class"] === this.state.class && element["section"] === section) {
         studentsDataArrayTemp = element["studentsData"];
       }
     });
@@ -151,7 +151,7 @@ class ClassDetails extends Component {
 
     this.setState({ studentsDataArray: studentsDataArrayTemp })
 
-    console.log("sectionButtonClickHandler - Selected class - " + this.state.selectedClass +
+    console.log("sectionButtonClickHandler - Selected class - " + this.state.class +
       " selected Section - " + section
       + " selected usernames - " + studentsDataArrayTemp);
 
@@ -264,7 +264,7 @@ class ClassDetails extends Component {
             </CardBody>
           </Card>
 
-          {this.state.studentsView && this.state.selectedClass && this.state.sectionArray && this.state.studentsDataArray && (
+          {this.state.studentsView && this.state.class && this.state.sectionArray && this.state.studentsDataArray && (
             <div className="animated fadeIn">
               <Row>
                 <Col>
