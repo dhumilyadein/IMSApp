@@ -103,31 +103,12 @@ loader:false,
          this.toggle = this.toggle.bind(this);
 
          this.toggleSuccess = this.toggleSuccess.bind(this);
-          this.getExistingBooks=this.getExistingBooks.bind(this);
+
 this.reset=this.reset.bind(this);
 this.fetchStaff=this.fetchStaff.bind(this);
 
     }
 
-    getExistingBooks() {
-
-      axios
-        .get("http://localhost:8001/api/gettingBooks")
-        .then(result => {
-          console.log("Existing Book.data " + JSON.stringify(result.data));
-          if (result.data) {
-   var temp=[];
-    for(var i=0;i<result.data.length;i++)
-     temp.push({"label":result.data[i].bookName.charAt(0).toUpperCase()+result.data[i].bookName.slice(1),
-    "value": result.data[i].bookName})
-
-              this.setState({
-              existingBooks: temp,
-              allBooksData:result.data
-            });
-          }
-        });
-    }
 
     reset()
     {
@@ -141,8 +122,8 @@ this.fetchStaff=this.fetchStaff.bind(this);
 rowError:"",
         studentsDataArray:[],
                     studentOpen:true,
-                   
-                   
+
+
                     loader:false,
 
         selectedStudent:[],
@@ -166,7 +147,7 @@ rowError:"",
         studentError:"",
         classDetails:[],
         classes:[],
-       
+
         studentsDataArray:[],
         existingBooks:[],
         allBooksData:[],
@@ -263,7 +244,7 @@ if(!this.state.class)
 {
   this.setState({classError:"Please Select Class", loader:false});
   submit=false;
-  
+
 
   }
 
@@ -353,7 +334,7 @@ console.log("Issuing Book ");
 
   }
 
- 
+
 
 
 
@@ -399,7 +380,7 @@ if (!this.state.rows[i].dor){
   submit=false;
   return;}
 
-  
+
 
 
 
@@ -886,7 +867,7 @@ this.setState({selectedStudent:e});
                                     </InputGroup>
                                   </td>
 
-                               
+
 
                                   <td align="center">
 
@@ -1182,7 +1163,7 @@ this.setState({rows:temp})}
                                     </InputGroup>
                                   </td>
 
-                               
+
 
                                   <td align="center">
 

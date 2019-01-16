@@ -580,6 +580,9 @@ if(this.state.bookId){ var temp=[];
                 isMulti={true}
                 autosize
                 isClearable={false}
+                onCreateOption={e=>{
+                this.state.uniqueBookIds.push({"label":e,"value":e,"isIssued":false})
+                console.log(JSON.stringify(this.state.uniqueBookIds));}}
 
 
                     />

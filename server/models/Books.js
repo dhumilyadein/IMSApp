@@ -10,7 +10,7 @@ var BooksSchema = new Schema({
     required: true,
     unique:true,
     trim:true,
-    lowecase:true,
+    lowercase:true,
     validate: {
         isAsync: true,
         validator: function(value, isValid) {
