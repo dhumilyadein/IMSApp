@@ -333,13 +333,20 @@ function editCategory(req,res)
 
 async function issueBook(req,res)
 {var temp=[]; var count=0;
-  var books =req.body.issuedBookDetails;
+  var books =req.body;
 
 
-  console.log("in issueBook: "+JSON.stringify(req.body));
+  console.log("in issueBook: "+JSON.stringify(books));
+
+  for(var i=0;i<books.issuedBookDetails.length;i++)
+
+  
+books.issuedBookDetails[i]["isReturned"]=false
+
+  
 
 
-var issueBook = new IssuedBooks(req.body);
+  var issueBook = new IssuedBooks(books);
 await issueBook
   .save()
   .then(user => {
@@ -349,36 +356,12 @@ await issueBook
 
 
 
-  for(var b=0;b<books.length;b++)
+  for(var b=0;b<books.issuedBookDetails.length;b++)
   {
-  console.log("BookName "+JSON.stringify(books[b].bookName.value))
- await Books.findOne({bookName:books[b].bookName.value})
-  .then (book=> { console.log("in findOneBook "+JSON.stringify(book));
-
-  temp=book.uniqueBookIds;
-
-  for(var i=0;i<temp.length;i++)
- {
-  if(temp[i].value===books[b].uniqueBookId)
-  {
-temp[i].isIssued=true;
-
-
-break;
-
-  }
-
-}
-
-
-
-})
-.catch(error => { console.log("Book findOne error "+JSON.stringify(error))
-  return res.send({error});
-});
-
-await Books.updateOne({bookName:books[b].bookName.value,},
-  {$set: {uniqueBookIds:temp},
+  console.log("BookName "+JSON.stringify(books.issuedBookDetails[b].bookName.value))
+var uniqueId=books.issuedBookDetails[b].uniqueBookId;
+await Books.updateOne({bookName:books.issuedBookDetails[b].bookName.value,"uniqueBookIds.value":uniqueId},
+  {"$set": {"uniqueBookIds.$.isIssued":true},
   $inc: {quantity:-1}
 })
 .then(data=>{count++})
@@ -391,7 +374,7 @@ await Books.updateOne({bookName:books[b].bookName.value,},
 
 
 
-if(count===books.length)
+if(count===books.issuedBookDetails.length)
 return res.send({msg:"Success"});
 
 
@@ -423,7 +406,7 @@ function gettingStaff(req, res) {
   {console.log("gettingIssuedBooks: "+JSON.stringify(req.body))
 
     IssuedBooks
-    .find({ issuedTo:req.body.issuedTo, dor:null} )
+    .find({ issuedTo:req.body.issuedTo,'issuedBookDetails.actualReturnDate':null} )
     .then(data => {
         return res.send(data);
     })
@@ -432,8 +415,70 @@ function gettingStaff(req, res) {
     });
 
   }
-  app.post("/api/importBooks", importBooks);
 
+
+  async function returnBook(req,res)
+  {var temp=[]; var success=true;
+    var book =req.body.issuedBook;
+  
+  
+    console.log("in returnBook: "+JSON.stringify(req.body));
+  
+  
+ 
+   
+     await  IssuedBooks.updateOne({"issuedBookDetails.uniqueBookId": book.uniqueBookId,"issuedTo": req.body.issuedTo,
+       "issuedBookDetails.actualReturnDate":""  }, 
+      {'$set': {
+        'issuedBookDetails.$.delayInReturn': book.delay,
+        'issuedBookDetails.$.totalFine': book.totalFine,
+
+        'issuedBookDetails.$.actualReturnDate': req.body.dor,
+        
+    }})
+     
+      .then(user => {
+        console.log("IssuedBook returned: "+book.bookName)})
+    
+    .catch(error=>{
+      success=false;
+      return res.send(error)})
+
+
+   
+   
+  await Books.updateOne({bookName:book.bookName.toLowerCase(),"uniqueBookIds.value":book.uniqueBookId },
+    {'$set': {'issuedBookDetails.$.isIssued': false},
+    $inc: {quantity:1}
+  })
+  .then(data=>{console.log("Book Updated "+JSON.stringify(data))}  )
+  .catch(error=>{
+    success=false;
+    console.log("Book UpdateOne error "+JSON.stringify(error))
+    return res.send({error});})
+  
+  
+  
+  
+  
+  
+  if(success===true)
+  return res.send({msg:"Success"});
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  }
+
+
+  app.post("/api/importBooks", importBooks);
+  app.post("/api/returnBook", returnBook);
   app.post("/api/issueBook", issueBook);
    app.get("/api/getCategories", getCategories);
 
