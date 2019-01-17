@@ -42,9 +42,9 @@ class IssueBooks extends Component {
     constructor(props) {
         super(props);
         this.fetchClassDetails();
-       
-        this.state = {
 
+        this.state = {
+          lateFineDisabled:false,
             class:"",
             section:"",
             classError:"",
@@ -113,7 +113,7 @@ this.fetchStaff=this.fetchStaff.bind(this);
     reset()
     {
       this.fetchClassDetails();
-      
+
       this.fetchStaff();
       this.setState( {
 
@@ -166,48 +166,7 @@ rowError:"",
 
     }
 
-    handleChange = idx => e => {
-      e.preventDefault();
 
-      const { name, value } = e.target;
-      const temp = this.state.rows;
-      temp[idx][name] = value;
-
-      this.setState(
-        {
-          rows: temp
-        },
-        () => {
-          console.log("Change State: " + JSON.stringify(this.state));
-
-
-        }
-      );
-
-
-    };
-    handleAddRow = e => {
-      e.preventDefault();
-      this.setState({ rowError: "" });
-      const item = { bookName:"",
-      quantity:"",
-      uniqueBookId:"",
-
-
-      };
-      this.setState({
-        rows: [...this.state.rows, item]
-      });
-    };
-
-    handleRemoveSpecificRow = idx => () => {
-
-    const temp = [...this.state.rows];
-          temp.splice(idx, 1);
-          this.setState({ rows: temp,
-          });
-
-    };
 
 
     toggle(tab) { this.reset();
@@ -493,7 +452,7 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
         console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
             });
 
-            
+
 
 
           }
@@ -573,9 +532,46 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
 
     studentSelectedHandler(e){
 if(e)
-     { console.log("In Student "+(e.value));
+     { console.log("In Student "+JSON.stringify(e));
+     this.setState({
+      selectedStudent: e
 
-this.setState({selectedStudent:e});
+    });
+
+     axios
+     .post("http://localhost:8001/api/gettingIssuedBooks",{"issuedTo":e.label})
+     .then(result => {
+       console.log("Issued book data " + JSON.stringify(result.data));
+       if (result.data) {
+var temp=[];
+for(var i=0;i<result.data.length;i++)
+for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
+{
+
+  temp.push({"bookName":result.data[i].issuedBookDetails[j].bookName.label,
+			"uniqueBookId":result.data[i].issuedBookDetails[j].uniqueBookId,
+			"doi":result.data[i].doi.substring(0,10),
+			"dor":result.data[i].issuedBookDetails[j].dor.substring(0,10),
+			"delay":Math.ceil((new Date(this.state.dor).getTime() - new Date(result.data[i].issuedBookDetails[j].dor).getTime())/ (1000 * 3600 * 24))
+
+ })
+
+
+
+}
+
+
+           this.setState({
+           rows: temp
+
+         });
+       }
+       else if(result.data.error)
+       this.setState({
+        error: result.data.error
+
+      });
+     });
 
 
     }
@@ -655,6 +651,7 @@ this.setState({selectedStudent:e});
                                       )}
                                     </Input>
                                   </InputGroup>
+
                                   { this.state.classError && (
                                     <font color="red">
                                       {" "}
@@ -749,13 +746,13 @@ this.setState({selectedStudent:e});
                                   <h5> S.No.</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                               
+
                                   <h5>Book Name </h5>
                                 </th>
                                 <th className="text-center">
                                   <h5>Unique Book Id</h5>
                                 </th>
-                                                            
+
                                 <th className="text-center">
                                   <h5>Date of Issue</h5>
                                 </th>
@@ -773,7 +770,7 @@ this.setState({selectedStudent:e});
                                   <h5>Total Fine(Rs)</h5>
                                 </th>
 
-                              
+
 
                                 <th className="text-center">
                                 <h5>Actions</h5>
@@ -787,20 +784,20 @@ this.setState({selectedStudent:e});
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
-                                  <td   style={{width:"200px"}}>
+                                  <td   align="center">
 {this.state.rows[idx].bookName}
-                        
+
 
 
                                   </td>
 
 
 
-                                  <td>
+                                  <td align="center">
                                   {this.state.rows[idx].uniqueBookId}
                                   </td>
 
-                                  <td>
+                                  <td align="center">
                                   {this.state.rows[idx].doi}
                                   </td>
 
@@ -818,7 +815,7 @@ this.setState({selectedStudent:e});
 
                                   <td align="center">
 
-                                
+
                                       <Input
                                         name="latefine"
                                         type="text"
@@ -828,9 +825,26 @@ this.setState({selectedStudent:e});
                                         style={{textAlign:'center'}}
                                         id="latefine"
                                         size="sm"
-                                        
+
+                                        onChange={e=>{ e.preventDefault();
+
+                                          const { name, value } = e.target;
+                                          const temp = this.state.rows;
+                                          temp[idx][name] = value;
+                                          if(temp[idx].delay>0)
+                                          temp[idx]["totalFine"]= value * temp[idx].delay;
+                                          else
+                                          {temp[idx]["totalFine"]= 0;
+                                                                                 }
+                                          this.setState(
+                                            {
+                                              rows: temp
+                                            }
+
+                                          );}}
+
                                       />
-                                
+
                                   </td>
                                   <td align="center">
 
@@ -841,9 +855,35 @@ this.setState({selectedStudent:e});
                                   <td align="center">
                                                                     <Button
                                       className="btn btn-danger btn-sg"
-                                      onClick={this.handleRemoveSpecificRow(
-                                        idx
-                                      )}
+                                      onClick={e=>{
+
+                                        axios
+                                        .post("http://localhost:8001/api/returnBook", {"issuedBookDetails":this.state.rows,"class":this.state.class,
+                                    "section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStudent.label })
+                                        .then(result => {
+                                            console.log("result.data " + JSON.stringify(result.data));
+
+                                            if (result.data.msg === "Success")
+                                                  this.setState({
+
+                                                    success: true,
+                                                    modalSuccess: true,
+                                                    modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label
+
+
+
+                                                  });
+
+                                                  else if (result.data.error) {
+
+                                                     this.setState({error:JSON.stringify(result.data.error)});
+                                                }
+
+
+                                        });
+
+
+                                      }}
                                       size="lg"
                                     >
                                       Return
@@ -863,26 +903,6 @@ this.setState({selectedStudent:e});
                           )}
 
 
-<br/>
-<InputGroup className="mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText >
-                                <b>Remarks</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              type="text"
-                              size="lg"
-                             name="remarks"
-                              id="remarks"
-                             value={this.state.remarks}
-                             onChange={e => {
-                                this.setState(
-                                  { remarks: e.target.value })}}
-
-
-                            />
-                          </InputGroup>
 
 {this.state.error &&
                               <font color="red">
@@ -890,38 +910,7 @@ this.setState({selectedStudent:e});
                                 <p>{JSON.stringify(this.state.error)}</p>
                               </font>
                             }
-<Row>
-                            <Col>
-                            {!this.state.loader &&    <Button
-                                onClick={this.studentSubmitHandler}
-                                size="lg"
-                                color="success"
-                                block
-                              >
-                                Submit
-                              </Button>}
 
-                              {this.state.loader &&
-                          <div align="center"><ReactLoading type="spin"
-                            color="	#006400"
-                            height='2%' width='10%' />
-                            <br />
-
-                            <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
-
-                            </Col>
-
-                            <Col>
-                              <Button
-                                onClick={this.reset}
-                                size="lg"
-                                color="secondary"
-                                block
-                              >
-                             Reset
-                              </Button>
-                            </Col>
-                          </Row>
 
 
 </CardBody></Card>
@@ -1137,9 +1126,7 @@ this.setState({rows:temp})}
                                   { idx>0 &&
                                     <Button
                                       className="btn btn-danger btn-sg"
-                                      onClick={this.handleRemoveSpecificRow(
-                                        idx
-                                      )}
+                                      //onClick={this.handleRemoveSpecificRow(idx)}
                                       size="lg"
                                     >
                                       Remove
