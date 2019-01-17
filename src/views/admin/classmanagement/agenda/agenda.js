@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import moment from 'moment';
-import { ReactAgenda, guid, getUnique, getLast, getFirst } from 'react-agenda';
+import { guid, getUnique, getLast, getFirst } from 'react-agenda';
 import {
   Button,
   ButtonDropdown,
@@ -22,6 +22,7 @@ import {
   Row,
   Table
 } from "reactstrap";
+import ReactAgenda from '../modal/reactAgenda.js';
 import ReactAgendaCtrl from '../modal/reactAgendaCtrl.js';
 import Modal from '../modal/Modal.js'
 
@@ -41,28 +42,32 @@ var colors = {
 var items = [
   {
     _id: guid(),
-    name: 'Meeting , dev staff!',
+    name: 'English',
+    teacher: 'Aman',
     startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0),
     endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0),
     classes: 'color-1 color-4'
   },
   {
     _id: guid(),
-    name: 'Working lunch , Holly',
+    name: 'Hindi',
+    teacher: 'Ravi',
     startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 11, 0),
     endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 13, 0),
     classes: 'color-2'
   },
   {
     _id: guid(),
-    name: 'Conference , plaza',
+    name: 'Maths',
+    teacher: 'Prashant',
     startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 11, 0),
     endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 14, 30),
     classes: 'color-4'
   },
   {
     _id: 'event-4',
-    name: 'Customers issues review',
+    name: 'Science',
+    teacher: 'Surbhi',
     startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 10, 0),
     endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 15, 0),
     classes: 'color-3'
@@ -70,14 +75,16 @@ var items = [
   },
   {
     _id: 'event-5',
-    name: 'Group activity',
+    name: 'Social',
+    teacher: 'Tina',
     startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3, 10, 0),
     endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3, 16, 30),
     classes: 'color-4'
   },
   {
     _id: 'event-6',
-    name: 'Fun Day !',
+    name: 'Sanskrit',
+    teacher: 'Deepak',
     startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 9, 14),
     endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 17),
     classes: 'color-3'
@@ -284,7 +291,7 @@ export default class Agenda extends Component {
                   // minDate={new Date(now.getFullYear() - 1, now.getFullYear() + 1)}
                   // maxDate={new Date(now.getFullYear() - 1, now.getFullYear() + 1)}
                   startDate={this.state.startDate}
-                  startAtTime={10}
+                  startAtTime={0}
                   cellHeight={this.state.cellHeight}
                   locale="en-gb"
                   items={this.state.items}

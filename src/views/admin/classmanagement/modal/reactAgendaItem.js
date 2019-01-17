@@ -2,8 +2,12 @@ import moment from 'moment'
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 import {getLast, getFirst} from './helpers.js';
-import './reactAgendaItem.css';
+import '../classmanagementcss/reactAgendaItem.css';
 
+const blueColor = {
+  'color': 'blue',
+  // 'font-size': '14px'
+}
 export default class ReactAgendaItem extends Component {
   constructor(props) {
     super(props);
@@ -110,8 +114,10 @@ if(elem){
 
             <div className="agenda-item-description">
               <section>{this.props.item.name}</section>
+              <section style={blueColor}>{this.props.item.teacher}</section>
             <small>
-              , {duratL} - {duratE} , {duratH}
+              {duratL} - {duratE} 
+              {/* {duratH} */}
             </small>
           </div>
 

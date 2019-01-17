@@ -109,12 +109,43 @@ export default class ReactAgenda extends Component {
   getBodyRows() {
     var rows = [];
     var interval = (60 / this.props.rowsPerHour);
-    for (var i = 0; i < 24 * this.props.rowsPerHour; i++) {
-      rows.push(moment(this.state.date).startOf('day').add(Math.floor(i * interval), 'minutes'));
+
+    var startHour = 9;
+    var endHour = 15;
+
+    var duration = endHour - startHour;
+    console.log("Duration duration duration duration duration - " + duration);
+    
+    for (var i = 0; i < duration * this.props.rowsPerHour; i++) {
+
+      var mStart = moment(this.state.date).utcOffset(0);
+      mStart.set({hour:startHour,minute:0,second:0,millisecond:0})
+      mStart.toISOString();
+      mStart.format();
+
+      var mEnd = moment(this.state.date).utcOffset(0);
+      mEnd.set({hour:endHour,minute:0,second:0,millisecond:0})
+      mEnd.toISOString();
+      mEnd.format();
+
+      rows.push(mStart.add(Math.floor(i * interval), 'minutes'));
+      console.log("this.props.rowsPerHour - " + this.props.rowsPerHour + " this.state.date - " + this.state.date + " rows - " + rows);
     }
     return rows;
 
   }
+
+  // getBodyRows() {
+  //   var rows = [];
+  //   var interval = (60 / this.props.rowsPerHour);
+  //   for (var i = 0; i < 24 * this.props.rowsPerHour; i++) {
+
+  //     rows.push(moment(this.state.date).startOf('day').add(Math.floor(i * interval), 'minutes'));
+  //     console.log("this.props.rowsPerHour - " + this.props.rowsPerHour + " this.state.date - " + this.state.date + " rows - " + rows);
+  //   }
+  //   return rows;
+
+  // }
 
   getMinuteCells(rowMoment) {
     var cells = [];
@@ -555,15 +586,21 @@ export default class ReactAgenda extends Component {
     var renderBodyRows = function(row, i) {
       if (i % this.props.rowsPerHour === 0 ) {
         var ref = "hour-" + Math.floor(i / this.props.rowsPerHour);
+
+        console.log("row 1 - " + row + " timeLabel 1 - " + timeLabel + " ref - " + ref + " i - " + i);
+
         var timeLabel = moment(row);
+        console.log("row - " + row + " timeLabel - " + timeLabel);
         var differ = timeLabel.diff(timeNow, 'minutes')
 
+        //kapil change here
         timeLabel.locale(this.props.locale);
         return (
           <tr key={"row-" + i} ref={ref} draggable={false} className="agenda__row   --hour-start">
           <td className={differ <= 60 && differ >= 0
               ? 'disable-select agenda__cell --time-now'
-              : 'disable-select agenda__cell --time'} rowSpan={this.props.rowsPerHour}>{timeLabel.format('LT')}
+              : 'disable-select agenda__cell --time'} rowSpan={this.props.rowsPerHour}>
+              {timeLabel.format('LT')}
             </td>
             {this.getMinuteCells(row).map(renderMinuteCells, this)}
           </tr>
