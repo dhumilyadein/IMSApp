@@ -45,9 +45,27 @@ doi:{
   type: Date,
 
   required: true,
+},
 
+
+
+dor:{
+  type: Date,
 
 },
+
+returnDelayInDays:{
+  type:Number,
+  trim:true
+},
+
+lateFine:{
+  type:Number,
+  trim:true
+},
+
+
+
 
   createdAt: {
     type: Date,
@@ -59,7 +77,7 @@ doi:{
     required: true,
     default: Date.now
   }
-  
+
 
 },  { collection: 'issuedBooks' });
 

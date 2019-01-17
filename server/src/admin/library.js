@@ -419,6 +419,19 @@ function gettingStaff(req, res) {
 
   }
 
+  function gettingIssuedBooks(req,res)
+  {console.log("gettingIssuedBooks: "+JSON.stringify(req.body))
+
+    IssuedBooks
+    .find({ issuedTo:req.body.issuedTo, dor:null} )
+    .then(data => {
+        return res.send(data);
+    })
+    .catch(err => {
+      return res.send({error:err});
+    });
+
+  }
   app.post("/api/importBooks", importBooks);
 
   app.post("/api/issueBook", issueBook);
@@ -429,7 +442,7 @@ function gettingStaff(req, res) {
    app.post("/api/editCategory", editCategory);
    app.get("/api/gettingBooks", gettingBooks);
    app.get("/api/gettingStaff", gettingStaff);
-
+   app.post("/api/gettingIssuedBooks", gettingIssuedBooks);
 
 
 
