@@ -1,3 +1,6 @@
+/**
+ * For scheduler excel sheet
+ */
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment'
@@ -114,7 +117,6 @@ export default class ReactAgenda extends Component {
     var endHour = 15;
 
     var duration = endHour - startHour;
-    console.log("Duration duration duration duration duration - " + duration);
     
     for (var i = 0; i < duration * this.props.rowsPerHour; i++) {
 
@@ -129,7 +131,6 @@ export default class ReactAgenda extends Component {
       mEnd.format();
 
       rows.push(mStart.add(Math.floor(i * interval), 'minutes'));
-      console.log("this.props.rowsPerHour - " + this.props.rowsPerHour + " this.state.date - " + this.state.date + " rows - " + rows);
     }
     return rows;
 
@@ -587,10 +588,7 @@ export default class ReactAgenda extends Component {
       if (i % this.props.rowsPerHour === 0 ) {
         var ref = "hour-" + Math.floor(i / this.props.rowsPerHour);
 
-        console.log("row 1 - " + row + " timeLabel 1 - " + timeLabel + " ref - " + ref + " i - " + i);
-
         var timeLabel = moment(row);
-        console.log("row - " + row + " timeLabel - " + timeLabel);
         var differ = timeLabel.diff(timeNow, 'minutes')
 
         //kapil change here

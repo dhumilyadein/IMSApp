@@ -38,7 +38,10 @@ var colors = {
   "color-5": "rgba(170, 59, 123, 1)"
 }
 
-
+/*
+these parameters go to reactAgendaItem.js and 
+then are fetched in reactAgendaItem using {this.props.item.name} 
+*/
 var items = [
   {
     _id: guid(),
@@ -128,9 +131,7 @@ export default class Agenda extends Component {
 
     var curr = new Date;
     var firstday = curr.getDate() - curr.getDay() + 1;
-    console.log("curr.getDate() - " + curr.getDate() + " curr.getDay - " + curr.getDay());
     var currentWeekStartDate = new Date(curr.setDate(firstday));
-    console.log("current date - " + new Date() + " currentWeekStartDate - " + currentWeekStartDate);
     return currentWeekStartDate;
   }
 
@@ -150,8 +151,12 @@ export default class Agenda extends Component {
   }
   handleItemEdit(item, openModal) {
 
+    console.log("handleItemEdit");
     if (item && openModal === true) {
+
       this.setState({ selected: [item] })
+      console.log("handleItemEdit - item" + JSON.stringify([item]));
+
       return this._openModal();
     }
 
@@ -160,6 +165,7 @@ export default class Agenda extends Component {
   }
   handleCellSelection(item, openModal) {
 
+    console.log("handleCellSelection");
     if (this.state.selected && this.state.selected[0] === item) {
       return this._openModal();
     }
@@ -179,7 +185,7 @@ export default class Agenda extends Component {
 
   handleDateRangeChange(startDate, endDate) {
 
-    console.log("handleDateRangeChange startDate - " + startDate + " enddate - " + endDate
+    console.log("Agenda.js - handleDateRangeChange startDate - " + startDate + " enddate - " + endDate
       + " this.state.startDate" + this.state.startDate);
 
     if (startDate > this.state.startDate) {
@@ -205,6 +211,7 @@ export default class Agenda extends Component {
     console.log("handleRangeSelection ");
     // this.setState({ startDate: startDate })
     this.setState({ selected: selected, showCtrl: true })
+    console.log("handleRangeSelection selected - " + selected);
     this._openModal();
 
   }
@@ -224,27 +231,35 @@ export default class Agenda extends Component {
 
   handleItemChange(items, item) {
 
+    console.log("handleItemChange");
     this.setState({ items: items })
   }
 
   handleItemSize(items, item) {
 
+    console.log("handleItemSize");
     this.setState({ items: items })
 
   }
 
   removeEvent(items, item) {
 
+    console.log("removeEvent");
     this.setState({ items: items });
   }
 
   addNewEvent(items, newItems) {
 
+    console.log("Agenda.js - addNewEvent - " + " newItems - " + JSON.stringify(newItems) + " \nitems - " + items + " \nthis.state.items - " 
+    + JSON.stringify(this.state.items) 
+    + " \nthis.state.items - " + JSON.stringify(this.state.items));
+    
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
   }
   editEvent(items, item) {
 
+    console.log("editEvent");
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
   }
@@ -313,6 +328,7 @@ export default class Agenda extends Component {
                 {
                   this.state.showModal ? <Modal clickOutside={this._closeModal} >
                     <div className="modal-nude ">
+                    {/* For pop up Modal */}
                       <ReactAgendaCtrl items={this.state.items} itemColors={colors} selectedCells={this.state.selected} Addnew={this.addNewEvent} edit={this.editEvent} />
 
                     </div>

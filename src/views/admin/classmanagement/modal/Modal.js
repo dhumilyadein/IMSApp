@@ -4,9 +4,7 @@ import PropTypes from 'prop-types';
 
 class ModalView extends Component {
   render() {
-    console.log("ModalView");
     if(this.props.frameless){
-      console.log("frameless");
       return <div className="modal-nude  box-card">
               <a onClick={this.props.closeFunc} className="modal-close">X</a>
                 <div className="modal-title"> {this.props.title}</div>
@@ -14,7 +12,6 @@ class ModalView extends Component {
         </div>
     }
 
-    console.log("with frame");
     return <div className="modal-nude  box-card">
       <a onClick={this.props.closeFunc} className="modal-close">X</a>
               <div className="modal-title"> {this.props.title}</div>
@@ -82,7 +79,6 @@ closeFunc(e){
 
   _render(){
 
-    console.log("_render");
     ReactDOM.render( <ModalView children={this.props.children} closeFunc={this.closeFunc} title={this.props.title} frameless={this.props.frameless}/>
                       , this.modalWrapperTarget )
   }
@@ -102,7 +98,6 @@ componentDidUpdate(){
 
   render() {
     
-    console.log("noscript");
     return <noscript/>
   }
 }

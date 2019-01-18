@@ -1,3 +1,6 @@
+/**
+ * For showing appointment
+ */
 import moment from 'moment'
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
@@ -94,6 +97,9 @@ if(elem){
     var duratH = moment.duration(this.props.item.duration._milliseconds, 'Milliseconds').humanize();
     var duratL = moment(this.props.item.startDateTime).format("HH:mm")
     var duratE = moment(this.props.item.endDateTime).format("HH:mm")
+
+    // {this.props.item.teacher} is used to fetch parameters that are set in 
+    // agends.js class items[]
 
     return <div style={this.state.wrapper} className="agenda-cell-item" onMouseEnter={this.raiseZindex} onMouseLeave={this.lowerZindex}>
 

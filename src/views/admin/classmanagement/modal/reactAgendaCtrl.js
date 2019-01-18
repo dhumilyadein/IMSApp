@@ -1,4 +1,6 @@
-// @flow
+/**
+ * For Pop up Modal UI
+ */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
@@ -45,7 +47,9 @@ export default class ReactAgendaCtrl extends Component {
       name: '',
       classes: 'priority-1',
       startDateTime: now,
-      endDateTime: now
+      endDateTime: now,
+
+      teacher: '',
     }
     this.handleDateChange = this.handleDateChange.bind(this)
     this.addEvent = this.addEvent.bind(this)
@@ -73,7 +77,7 @@ export default class ReactAgendaCtrl extends Component {
   if (!this.props.selectedCells) {
     let start = now
     let endT = moment(now).add(15, 'Minutes');
-    return this.setState({editMode: false, name: '', startDateTime: start, endDateTime: endT});
+    return this.setState({editMode: false, name: '', teacher:'', startDateTime: start, endDateTime: endT});
   }
 
   if (this.props.selectedCells && this.props.selectedCells[0] && this.props.selectedCells[0]._id) {
@@ -81,31 +85,35 @@ export default class ReactAgendaCtrl extends Component {
     let start = moment(this.props.selectedCells[0].startDateTime);
     let endT = moment(this.props.selectedCells[0].endDateTime);
 
-    return this.setState({editMode: true, name: this.props.selectedCells[0].name, classes: this.props.selectedCells[0].classes, startDateTime: start, endDateTime: endT});
+    return this.setState({editMode: true, name: this.props.selectedCells[0].name, teacher: this.props.selectedCells[0].teacher, classes: this.props.selectedCells[0].classes, startDateTime: start, endDateTime: endT});
 
   }
 
   if (this.props.selectedCells && this.props.selectedCells.length === 1) {
     let start = moment(getFirst(this.props.selectedCells));
     let endT = moment(getLast(this.props.selectedCells)).add(15, 'Minutes');
-    return this.setState({editMode: false, name: '', startDateTime: start, endDateTime: endT});
+    return this.setState({editMode: false, name: '', teacher:'', startDateTime: start, endDateTime: endT});
   }
 
   if (this.props.selectedCells && this.props.selectedCells.length > 0) {
     let start = moment(getFirst(this.props.selectedCells));
     let endT = moment(getLast(this.props.selectedCells)) || now;
-    this.setState({editMode: false, name: '', startDateTime: start, endDateTime: endT});
+    this.setState({editMode: false, name: '', teacher:'', startDateTime: start, endDateTime: endT});
   }
 
 }
 
   handleChange(event) {
+
+    console.log("handleChange");
     if(event.target.tagName === 'BUTTON'){
       event.preventDefault();
     }
 
     var data = this.state;
     data[event.target.name] = event.target.value;
+
+    console.log("handleChange - " + event.target.name + " " + event.target.value);
 
     this.setState(data);
   }
@@ -138,6 +146,7 @@ dispatchEvent(obj) {
       var lasobj = {
         _id: guid(),
         name: obj.name,
+        teacher: obj.teacher,
         startDateTime: new Date(start),
         endDateTime: new Date(endT),
         classes: obj.classes
@@ -154,7 +163,10 @@ dispatchEvent(obj) {
 }
 
 addEvent(e) {
-  if (this.state.name.length < 1) {
+
+  console.log("ReactAgendaCtrl.js - addEvent");
+
+  if (this.state.name.length < 1 || this.state.teacher.length < 1) {
     return;
   }
 
@@ -165,6 +177,7 @@ addEvent(e) {
     if (Object.values(obj).length > 1) {
       var newObj = {
         name: this.state.name,
+        teacher: this.state.teacher,
         startDateTime: new Date(this.state.startDateTime),
         endDateTime: new Date(this.state.endDateTime),
         classes: this.state.classes,
@@ -179,6 +192,7 @@ addEvent(e) {
 
   var newObj = {
     name: this.state.name,
+    teacher: this.state.teacher,
     startDateTime: new Date(this.state.startDateTime),
     endDateTime: new Date(this.state.endDateTime),
     classes: this.state.classes
@@ -193,6 +207,7 @@ updateEvent(e) {
     var newObj = {
       _id: this.props.selectedCells[0]._id,
       name: this.state.name,
+      teacher: this.state.teacher,
       startDateTime: new Date(this.state.startDateTime),
       endDateTime: new Date(this.state.endDateTime),
       classes: this.state.classes
@@ -244,12 +259,20 @@ render() {
           <div className="agendCtrls-label-wrapper">
             <div className="agendCtrls-label-inline">
               <label>Event name edit</label>
-              <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input" value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/>
+              <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input" 
+              value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/>
             </div>
             <div className="agendCtrls-label-inline ">
               <label>Color</label>
               <div className="agendCtrls-radio-wrapper">
                 {colors}</div>
+            </div>
+          </div>
+          <div className="agendCtrls-label-wrapper">
+            <div className="agendCtrls-label-inline">
+              <label>Teacher</label>
+              <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
+              value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
             </div>
           </div>
           <div className="agendCtrls-timePicker-wrapper">
@@ -278,7 +301,7 @@ render() {
                                                 check
                                                 htmlFor="inline-checkbox1"
                                               >
-                                                Address same as Student Address
+                                                Repeat appointment every week
                                     </Label>
           </div>
 
@@ -303,6 +326,13 @@ render() {
               {colors}</div>
           </div>
         </div>
+        <div className="agendCtrls-label-wrapper">
+            <div className="agendCtrls-label-inline">
+              <label>Teacher</label>
+              <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
+              value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
+            </div>
+          </div>
         <div className="agendCtrls-timePicker-wrapper">
           <div className="agendCtrls-time-picker">
             <label >Start Date</label>
