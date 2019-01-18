@@ -47,26 +47,6 @@ doi:{
   required: true,
 },
 
-
-
-dor:{
-  type: Date,
-
-},
-
-returnDelayInDays:{
-  type:Number,
-  trim:true
-},
-
-lateFine:{
-  type:Number,
-  trim:true
-},
-
-
-
-
   createdAt: {
     type: Date,
     required: true,

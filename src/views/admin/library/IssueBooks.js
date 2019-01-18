@@ -336,7 +336,7 @@ console.log("Issuing Book ");
 
                 success: true,
                 modalSuccess: true,
-                modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label,
+                modalMessage:this.state.rows.length+ " books issued to Student: "+this.state.selectedStudent.label,
                 loader:false
 
 
@@ -613,7 +613,7 @@ this.setState({
 
   success: true,
   modalSuccess: true,
-  modalMessage:this.state.rows.length+ "books issued to Class: "+this.state.class+" "+this.state.section,
+  modalMessage:this.state.rows.length+ " books issued to Class: "+this.state.class+" "+this.state.section,
   loader:false
 
 });

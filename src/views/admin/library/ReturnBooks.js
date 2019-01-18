@@ -2,7 +2,12 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import classnames from 'classnames';
 import DatePicker from 'react-date-picker';
-import ReactLoading from 'react-loading';
+
+import { confirmAlert } from 'react-confirm-alert';
+
+
+
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import {
     Badge,
     Button,
@@ -60,7 +65,7 @@ loader:false,
 
 
             year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
-
+showBooks:false,
             remarks:"",
             dor:new Date(Date.now()),
 
@@ -104,67 +109,13 @@ loader:false,
 
          this.toggleSuccess = this.toggleSuccess.bind(this);
 
-this.reset=this.reset.bind(this);
+
 this.fetchStaff=this.fetchStaff.bind(this);
 
     }
 
 
-    reset()
-    {
-      this.fetchClassDetails();
-
-      this.fetchStaff();
-      this.setState( {
-
-       section:"",
-        classError:"",
-rowError:"",
-        studentsDataArray:[],
-                    studentOpen:true,
-
-
-                    loader:false,
-
-        selectedStudent:[],
-        error:"",
-
-
-
-        year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
-
-        remarks:"",
-        doi:new Date(Date.now()),
-
-        doiError:"",
-        sectionError:"",
-        modalSuccess:false,
-        success:false,
-        studentName:"",
-        rollNo:"",
-
-
-        studentError:"",
-        classDetails:[],
-        classes:[],
-
-        studentsDataArray:[],
-        existingBooks:[],
-        allBooksData:[],
-
-        rows: [{ bookName:"",
-        quantity:"",
-        uniqueBookId:"",
-
-        }],
-        existingStaff:[],
-        selectedStaff:[],
-        staffError:"",
-        modalMessage:""
-                });
-
-
-    }
+   
 
 
 
@@ -175,8 +126,7 @@ rowError:"",
           activeTab: tab
         });
       }
-if(tab==="2")
-this.fetchStaff();
+
 
     }
 
@@ -554,7 +504,11 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
 			"dor":result.data[i].issuedBookDetails[j].dor.substring(0,10),
 			"delay":Math.ceil((new Date(this.state.dor).getTime() - new Date(result.data[i].issuedBookDetails[j].dor).getTime())/ (1000 * 3600 * 24))
 
- })
+ });
+
+console.log(JSON.stringify(temp[j].delay));
+if(temp[j].delay<0)
+temp[j]["delay"]=0;
 
 
 
@@ -562,7 +516,8 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
 
 
            this.setState({
-           rows: temp
+           rows: temp,
+           showBooks:true
 
          });
        }
@@ -739,6 +694,7 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
                               )}
 
 <br/>
+{this.state.showBooks && <p>
 <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -817,13 +773,13 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
 
 
                                       <Input
-                                        name="latefine"
+                                        name="lateFine"
                                         type="text"
                                         className="form-control"
                                         value={this.state.rows[idx].lateFine}
 
                                         style={{textAlign:'center'}}
-                                        id="latefine"
+                                        id="lateFine"
                                         size="sm"
 
                                         onChange={e=>{ e.preventDefault();
@@ -831,11 +787,10 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
                                           const { name, value } = e.target;
                                           const temp = this.state.rows;
                                           temp[idx][name] = value;
-                                          if(temp[idx].delay>0)
+                                        
                                           temp[idx]["totalFine"]= value * temp[idx].delay;
-                                          else
-                                          {temp[idx]["totalFine"]= 0;
-                                                                                 }
+                                         
+                                                                                 
                                           this.setState(
                                             {
                                               rows: temp
@@ -855,32 +810,71 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
                                   <td align="center">
                                                                     <Button
                                       className="btn btn-danger btn-sg"
-                                      onClick={e=>{
-
-                                        axios
-                                        .post("http://localhost:8001/api/returnBook", {"issuedBookDetails":this.state.rows,"class":this.state.class,
-                                    "section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStudent.label })
-                                        .then(result => {
-                                            console.log("result.data " + JSON.stringify(result.data));
-
-                                            if (result.data.msg === "Success")
-                                                  this.setState({
-
-                                                    success: true,
-                                                    modalSuccess: true,
-                                                    modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label
+                                      onClick={e=>{ var submit= true;
+                                        this.setState({rowError:""});
+                                        console.log(this.state.rows[idx].lateFine);
+if(!this.state.rows[idx].lateFine && this.state.rows[idx].delay>0)
+{
+  this.setState({rowError: "Please enter Late Fine/day for Book: "+this.state.rows[idx].bookName});
+  submit=false;
+}
 
 
+if (submit === true) {
 
-                                                  });
+  confirmAlert({
+      title: 'Confirm to Proceed',
+      message: 'Are you sure to Return this Book?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () =>
 
-                                                  else if (result.data.error) {
+        {
 
-                                                     this.setState({error:JSON.stringify(result.data.error)});
-                                                }
+              console.log("Returning Book ");
+
+              axios
+              .post("http://localhost:8001/api/returnBook", {"issuedBook":this.state.rows[idx],"dor": this.state.dor,
+              "issuedTo":this.state.selectedStudent.label})
+              .then(result => {
+                  console.log("result.data " + JSON.stringify(result.data));
+
+                  if (result.data.msg === "Success")
+                        this.setState({
+
+                          success: true,
+                          modalSuccess: true,
+                          modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label
 
 
-                                        });
+
+                        });
+
+                        else if (result.data.error) {
+
+                           this.setState({error:JSON.stringify(result.data.error)});
+                      }
+
+
+              });
+
+
+                          }
+
+        },
+        {
+          label: 'No',
+
+        }
+      ]
+    })}
+
+
+
+
+
+                                     
 
 
                                       }}
@@ -901,6 +895,7 @@ for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
                               </h6>{" "}
                             </font>
                           )}
+</p>}
 
 
 
