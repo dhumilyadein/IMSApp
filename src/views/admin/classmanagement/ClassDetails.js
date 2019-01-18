@@ -28,6 +28,9 @@ import {
 import axios from "axios";
 import MapsTransferWithinAStation from "material-ui/SvgIcon";
 
+import './classmanagementcss/index.css';
+import Agenda from './agenda/agenda.js'
+
 var imageContext = require.context('../../../photoTemp', true);
 
 const whiteTextFieldStyle = {
@@ -53,7 +56,10 @@ class ClassDetails extends Component {
       sectionArray: [],
       studentsDataArray: [],
 
-      tempArray: ["kapil", "mayank"]
+      tempArray: ["kapil", "mayank"],
+
+      timeTableView: false,
+      subjectArray: []
 
     };
 
@@ -61,6 +67,7 @@ class ClassDetails extends Component {
     this.fetchClasses = this.fetchClasses.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
+    this.showTimeTable = this.showTimeTable.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
@@ -159,6 +166,24 @@ class ClassDetails extends Component {
     this.setState({ 
       studentsView: true 
     });
+  }
+
+  showTimeTable() {
+
+    var subjectArray = null;
+    this.state.classDetails.forEach(element => {
+      if (element["class"] === this.state.class && element["section"] === this.state.section) {
+        subjectArray = element["subjects"];
+      }
+    });
+
+    this.setState({ 
+      studentsView: false,
+      timeTableView: true,
+      subjectArray: subjectArray
+    });
+
+    console.log("ClassDetails - subjectArray - " + subjectArray);
   }
 
 
@@ -265,7 +290,22 @@ class ClassDetails extends Component {
           </Card>
 
           {this.state.studentsView && this.state.class && this.state.sectionArray && this.state.studentsDataArray && (
+
             <div className="animated fadeIn">
+
+<Row>
+  <Col>
+  <Button
+                    onClick={this.showTimeTable}
+                    size="lg"
+                    color="success"
+                    block
+                  >
+                    Time Table
+                              </Button>
+        </Col>
+        </Row>
+<br/>
               <Row>
                 <Col>
                   <Card>
@@ -314,6 +354,11 @@ class ClassDetails extends Component {
                 </Col>
               </Row>
             </div>
+          )}
+
+          { this.state.timeTableView && (
+
+            <Agenda subjects={this.state.subjectArray}/>
           )}
 
         </Container>

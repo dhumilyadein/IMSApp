@@ -95,7 +95,9 @@ var items = [
 ];
 
 export default class Agenda extends Component {
+  
   constructor(props) {
+
     super(props);
 
     this.state = {
@@ -107,7 +109,8 @@ export default class Agenda extends Component {
       rowsPerHour: 4,
       numberOfDays: 6,
       // startDate: new Date()
-      startDate: this.getCurrentWeek()
+      startDate: this.getCurrentWeek(),
+      subjectsArray: this.props.subjects
     }
     this.handleRangeSelection = this.handleRangeSelection.bind(this)
     this.handleItemEdit = this.handleItemEdit.bind(this)
@@ -124,6 +127,9 @@ export default class Agenda extends Component {
 
     // Get first day of the current week.
     this.getCurrentWeek();
+
+    // this.setState
+    console.log("Agenda.js - subjects - " + this.state.subjectsArray);
 
   }
 
@@ -329,7 +335,9 @@ export default class Agenda extends Component {
                   this.state.showModal ? <Modal clickOutside={this._closeModal} >
                     <div className="modal-nude ">
                     {/* For pop up Modal */}
-                      <ReactAgendaCtrl items={this.state.items} itemColors={colors} selectedCells={this.state.selected} Addnew={this.addNewEvent} edit={this.editEvent} />
+                      <ReactAgendaCtrl items={this.state.items} itemColors={colors} 
+                      selectedCells={this.state.selected} Addnew={this.addNewEvent} 
+                      edit={this.editEvent} subjectsArray={this.props.subjects}/>
 
                     </div>
                   </Modal> : ''

@@ -16,7 +16,7 @@ class ClassTimeTable extends Component {
 
     return (
 
-       <Agenda/>
+       <Agenda />
       // <Modal clickOutside={this._closeModal} >
       //               <div className="modal-content">
       //                 <ReactAgendaCtrl items={this.state.items} selectedCells={this.state.selected} Addnew={this.addNewEvent} edit={this.editEvent} />

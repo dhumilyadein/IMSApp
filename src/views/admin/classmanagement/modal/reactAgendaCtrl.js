@@ -30,6 +30,7 @@ import {
   TabPane
 
 } from "reactstrap";
+import { Creatable } from "react-select";
 
 var now = new Date();
 
@@ -38,18 +39,24 @@ const whiteTextFieldStyle = {
 }
 
 export default class ReactAgendaCtrl extends Component {
+  
   constructor() {
+  
     super();
+  
     this.state = {
       editMode: false,
       showCtrl: false,
       multiple: {},
-      name: '',
+      name: '', // this is actually subject name
       classes: 'priority-1',
       startDateTime: now,
       endDateTime: now,
 
       teacher: '',
+      defaultSubjects: null,
+      subjects: [],
+      selectedSubject: []
     }
     this.handleDateChange = this.handleDateChange.bind(this)
     this.addEvent = this.addEvent.bind(this)
@@ -57,16 +64,55 @@ export default class ReactAgendaCtrl extends Component {
     this.dispatchEvent = this.dispatchEvent.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleEdit = this.handleEdit.bind(this)
+    this.handleSubjectChange = this.handleSubjectChange.bind(this);
+    this.handleSubjectCreate = this.handleSubjectCreate.bind(this);
+    this.setDefaultSubjects = this.setDefaultSubjects.bind(this);
+
   }
+
+  setDefaultSubjects() {
+
+    console.log("reactAgendaCtrl - setDefaultSubjects setDefaultSubjects - " + this.props.subjectsArray);
+    var defaultSubjectsTemp = [];
+
+    this.props.subjectsArray.forEach(function(key) {
+
+      var subjectJSON= {};
+      if (key) {
+        subjectJSON.value = key;
+        subjectJSON.label = key;
+      }
+      if(subjectJSON) {
+        defaultSubjectsTemp.push(subjectJSON);
+      }
+
+    })
+
+    this.setState({
+      defaultSubjects : defaultSubjectsTemp
+    }, () => {
+      console.log("ReactAgendaCtrl defaultSubjects - " + JSON.stringify(defaultSubjectsTemp));
+  });
+ 
+}
 
   componentDidMount() {
 
   if (this.props.itemColors) {
+
+    console.log("this.props this.props.itemColors - " + this.props.itemColors);
     this.setState({
       classes: Object.keys(this.props.itemColors)[0]
     })
 
   }
+
+  if (this.props.subjectsArray && this.state.defaultSubjects === null) {
+
+    console.log("this.props.subjectsArray - " + this.props.subjectsArray);
+    this.setDefaultSubjects();
+  }
+
   setTimeout(function() {
     if(this.refs.eventName){
         this.refs.eventName.focus()
@@ -111,9 +157,13 @@ export default class ReactAgendaCtrl extends Component {
     }
 
     var data = this.state;
-    data[event.target.name] = event.target.value;
+    if("name" === event.target.name) {
+    data[event.target.name] = event.target.value.value;
+    } else {
+      data[event.target.name] = event.target.value;
+    }
 
-    console.log("handleChange - " + event.target.name + " " + event.target.value);
+    console.log("handleChange - " + event.target.name + " " + event.target.value.value);
 
     this.setState(data);
   }
@@ -236,6 +286,50 @@ handleEdit(e) {
   this.updateEvent(e);
 }
 
+handleSubjectChange = (newValue, actionMeta) => {
+  console.log("reactAgendaCtrl - selected value - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+  this.setState({ name: newValue.value,
+    selectedSubject: newValue
+   }, () => {
+    console.log(`state name : ${JSON.stringify(this.state.name)}`)
+  });
+  console.groupEnd();
+};
+
+handleSubjectCreate = (createdSubject) => {
+
+  var subjectsTemp = [];
+
+  // We do not assume how users would like to add newly created options to the existing options list.
+  // Instead we pass users through the new value in the onCreate prop
+  this.setState({ isLoading: true });
+  this.setState({ subjects: this.state.defaultSubjects });
+
+  console.log('Wait a moment... input value -  ' + createdSubject);
+  console.log("Initial Available subjects - " + JSON.stringify(this.state.subjects));
+
+  var createdOption = { "label": createdSubject, "value": createdSubject };
+
+  subjectsTemp = this.state.defaultSubjects;
+  subjectsTemp.push(createdOption);
+  this.setState({
+    subjects: subjectsTemp,
+  }, () => {
+    console.log("Available subjects - " + JSON.stringify(this.state.subjects));
+  });
+
+  console.log("check check name - " + JSON.stringify(this.state.name));
+  this.setState({
+    name: createdOption.value,
+    selectedSubject: createdOption
+  }, () => {
+    console.log("Selected Subject - " + JSON.stringify(this.state.name.value));
+  });
+
+};
+
+
+
 render() {
   var itc = Object.keys(this.props.itemColors)
   var colors = itc.map(function(item, idx) {
@@ -256,11 +350,42 @@ render() {
     return (
       <div className="agendCtrls-wrapper" style={divStyle}>
         <form onSubmit={this.handleEdit}>
+
+        <div className="agendCtrls-label-wrapper">
+            <div className="agendCtrls-label-inline">
+              <label>Teacher</label>
+              <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
+              value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
+            </div>
+          </div>
+
           <div className="agendCtrls-label-wrapper">
             <div className="agendCtrls-label-inline">
-              <label>Event name edit</label>
-              <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input" 
-              value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/>
+              <label>Subject name edit</label>
+              {/* <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input" 
+              value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/> */}
+              
+              <Creatable
+                simpleValue
+                name="name"
+                value={this.state.selectedSubject}
+                onChange={this.handleSubjectChange}
+                isMulti={false}
+                isOpen={false}
+                closeMenuOnSelect={true}
+                autosize
+                onCreateOption={this.handleSubjectCreate}
+                options={this.state.defaultSubjects}
+              />
+
+              {this.state.dbErrors && this.state.dbErrors.subjects && (
+                <font color="red">
+                  <h6>
+                    {" "}
+                    <p>{this.state.dbErrors.subjects.msg}</p>
+                  </h6>{" "}
+                </font>
+              )}
             </div>
             <div className="agendCtrls-label-inline ">
               <label>Color</label>
@@ -268,13 +393,7 @@ render() {
                 {colors}</div>
             </div>
           </div>
-          <div className="agendCtrls-label-wrapper">
-            <div className="agendCtrls-label-inline">
-              <label>Teacher</label>
-              <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
-              value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
-            </div>
-          </div>
+          
           <div className="agendCtrls-timePicker-wrapper">
             <div className="agendCtrls-time-picker">
               <label >Start Date</label>
@@ -283,7 +402,8 @@ render() {
             <div className="agendCtrls-time-picker">
               <label >End Date</label>
               <Rdate value={this.state.endDateTime} onChange={this.handleDateChange.bind(null, 'endDateTime')} input={false} viewMode="time" ></Rdate>
-            </div>
+              </div>
+              </div>
 
             <Input
                                                 className="form-check-input"
@@ -303,8 +423,8 @@ render() {
                                               >
                                                 Repeat appointment every week
                                     </Label>
-          </div>
-
+          
+<br /> <br />
           <input type="submit" value="Save"/>
         </form>
       </div>
@@ -315,17 +435,7 @@ render() {
   return (
     <div className="agendCtrls-wrapper" style={divStyle}>
       <form onSubmit={this.handleSubmit}>
-        <div className="agendCtrls-label-wrapper">
-          <div className="agendCtrls-label-inline">
-            <label>Event name non edit</label>
-            <input type="text" ref="eventName" autoFocus name="name" className="agendCtrls-event-input" value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/>
-          </div>
-          <div className="agendCtrls-label-inline">
-            <label>Color</label>
-            <div className="agendCtrls-radio-wrapper">
-              {colors}</div>
-          </div>
-        </div>
+        
         <div className="agendCtrls-label-wrapper">
             <div className="agendCtrls-label-inline">
               <label>Teacher</label>
@@ -333,6 +443,31 @@ render() {
               value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
             </div>
           </div>
+          <div className="agendCtrls-label-wrapper">
+          <div className="agendCtrls-label-inline">
+            <label>Subject name non edit</label>
+            {/* <input type="text" ref="eventName" autoFocus name="name" className="agendCtrls-event-input" 
+            value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/> */}
+
+<Creatable
+                simpleValue
+                name="name"
+                value={this.state.selectedSubject}
+                onChange={this.handleSubjectChange}
+                isMulti={false}
+                isOpen={false}
+                closeMenuOnSelect={true}
+                autosize
+                onCreateOption={this.handleSubjectCreate}
+                options={this.state.defaultSubjects}
+              />
+          </div>
+          <div className="agendCtrls-label-inline">
+            <label>Color</label>
+            <div className="agendCtrls-radio-wrapper">
+              {colors}</div>
+          </div>
+        </div>
         <div className="agendCtrls-timePicker-wrapper">
           <div className="agendCtrls-time-picker">
             <label >Start Date</label>
