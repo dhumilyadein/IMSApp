@@ -38,62 +38,6 @@ var colors = {
   "color-5": "rgba(170, 59, 123, 1)"
 }
 
-/*
-these parameters go to reactAgendaItem.js and 
-then are fetched in reactAgendaItem using {this.props.item.name} 
-*/
-var items = [
-  {
-    _id: guid(),
-    name: 'English',
-    teacher: 'Aman',
-    startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0),
-    endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0),
-    classes: 'color-1 color-4'
-  },
-  {
-    _id: guid(),
-    name: 'Hindi',
-    teacher: 'Ravi',
-    startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 11, 0),
-    endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 13, 0),
-    classes: 'color-2'
-  },
-  {
-    _id: guid(),
-    name: 'Maths',
-    teacher: 'Prashant',
-    startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 11, 0),
-    endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 14, 30),
-    classes: 'color-4'
-  },
-  {
-    _id: 'event-4',
-    name: 'Science',
-    teacher: 'Surbhi',
-    startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 10, 0),
-    endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 15, 0),
-    classes: 'color-3'
-
-  },
-  {
-    _id: 'event-5',
-    name: 'Social',
-    teacher: 'Tina',
-    startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3, 10, 0),
-    endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3, 16, 30),
-    classes: 'color-4'
-  },
-  {
-    _id: 'event-6',
-    name: 'Sanskrit',
-    teacher: 'Deepak',
-    startDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 9, 14),
-    endDateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 17),
-    classes: 'color-3'
-  }
-];
-
 export default class Agenda extends Component {
   
   constructor(props) {
@@ -112,7 +56,8 @@ export default class Agenda extends Component {
       startDate: this.getCurrentWeek(),
       subjectsArray: this.props.subjects,
       selectedClass: this.props.selectedClass,
-      selectedSection: this.props.selectedSection
+      selectedSection: this.props.selectedSection,
+      timeTable: this.props.timeTable
     }
     this.handleRangeSelection = this.handleRangeSelection.bind(this)
     this.handleItemEdit = this.handleItemEdit.bind(this)
@@ -132,7 +77,6 @@ export default class Agenda extends Component {
     this.getCurrentWeek();
 
     // this.setState
-    console.log("Agenda.js - subjects - " + this.state.subjectsArray);
 
   }
 
@@ -144,10 +88,16 @@ export default class Agenda extends Component {
     return currentWeekStartDate;
   }
 
+  /*
+these parameters go to reactAgendaItem.js and 
+then are fetched in reactAgendaItem using {this.props.item.name} 
+*/
   componentDidMount() {
 
-    this.setState({ items: items })
-
+    // this.setState({ items: items })
+    this.setState({ items: this.state.timeTable }, () => {
+      console.log("Agenda.js - timeTable - " + this.state.timeTable);
+    })
 
   }
 
@@ -160,11 +110,10 @@ export default class Agenda extends Component {
   }
   handleItemEdit(item, openModal) {
 
-    console.log("handleItemEdit");
     if (item && openModal === true) {
 
       this.setState({ selected: [item] })
-      console.log("handleItemEdit - item" + JSON.stringify([item]));
+      console.log("Agenda.js - handleItemEdit - item" + JSON.stringify([item]));
 
       return this._openModal();
     }
@@ -174,7 +123,7 @@ export default class Agenda extends Component {
   }
   handleCellSelection(item, openModal) {
 
-    console.log("handleCellSelection");
+    console.log("Agenda.js - handleCellSelection");
     if (this.state.selected && this.state.selected[0] === item) {
       return this._openModal();
     }
@@ -199,15 +148,9 @@ export default class Agenda extends Component {
 
     if (startDate > this.state.startDate) {
 
-      console.log("date is after");
-      console.log("today - " + moment(this.state.startDate) + " next - " + moment().day(1 + 7));
-
       this.setState({ startDate: moment(this.state.startDate).day(1 + 7) })
 
     } else if (startDate < this.state.startDate) {
-
-      console.log("date is before");
-      console.log("today - " + moment(this.state.startDate) + " next - " + moment().day(-6 + 7));
 
       this.setState({ startDate: moment(this.state.startDate).day(1 - 7) })
 
@@ -217,10 +160,9 @@ export default class Agenda extends Component {
 
   handleRangeSelection(selected) {
 
-    console.log("handleRangeSelection ");
     // this.setState({ startDate: startDate })
     this.setState({ selected: selected, showCtrl: true })
-    console.log("handleRangeSelection selected - " + selected);
+    console.log("agenda - handleRangeSelection selected - " + selected);
     this._openModal();
 
   }
@@ -230,7 +172,6 @@ export default class Agenda extends Component {
   }
   _closeModal(e) {
 
-    console.log("_closeModal _closeModal _closeModal");
     if (e) {
       e.stopPropagation();
       e.preventDefault();
@@ -240,20 +181,20 @@ export default class Agenda extends Component {
 
   handleItemChange(items, item) {
 
-    console.log("handleItemChange");
+    console.log("agenda - handleItemChange");
     this.setState({ items: items })
   }
 
   handleItemSize(items, item) {
 
-    console.log("handleItemSize");
+    console.log("agenda - handleItemSize");
     this.setState({ items: items })
 
   }
 
   removeEvent(items, item) {
 
-    console.log("removeEvent");
+    console.log("agenda - removeEvent");
     this.setState({ items: items });
   }
 
@@ -270,7 +211,7 @@ export default class Agenda extends Component {
   }
   editEvent(items, item) {
 
-    console.log("editEvent");
+    console.log("agenda - editEvent");
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
   }

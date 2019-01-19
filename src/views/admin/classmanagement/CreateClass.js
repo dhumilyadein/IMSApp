@@ -371,6 +371,7 @@ class ClassDetails extends Component {
                 autosize
                 onCreateOption={this.handleCreate}
                 options={this.state.defaultSections}
+                openMenuOnFocus={true}
               />
 
               {this.state.dbErrors && this.state.dbErrors.section && (
@@ -399,6 +400,7 @@ class ClassDetails extends Component {
                 autosize
                 onCreateOption={this.handleSubjectCreate}
                 options={this.state.defaultSubjects}
+                openMenuOnFocus={true}
               />
 
               {this.state.dbErrors && this.state.dbErrors.subjects && (

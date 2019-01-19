@@ -13,7 +13,7 @@ var ClassSchema = new Schema({
     required: true,
   },
   studentsData: {
-    type: Array,
+    type: Array
   },
   subjects: {
     type: Array,
@@ -21,6 +21,35 @@ var ClassSchema = new Schema({
   },
   timeTable: {
     type: Array,
+
+    name: {
+      type: String,
+      required: true,
+    },
+    teacher: {
+      type: String,
+      required: true,
+    },
+    startDateTime: {
+      type: Date,
+      required: true,
+    },
+    endDateTime: {
+      type: Date,
+      required: true,
+    },
+    classes: {
+      type: String,
+      required: true,
+    },
+    _id: {
+      type: String,
+      required: true,
+    },
+    duration: {
+      type: String,
+      required: true,
+    }
   },
   createdAt: {
     type: Date,

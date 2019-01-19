@@ -59,7 +59,8 @@ class ClassDetails extends Component {
       tempArray: ["kapil", "mayank"],
 
       timeTableView: false,
-      subjectArray: []
+      subjectArray: [],
+      timeTableArray: []
 
     };
 
@@ -136,6 +137,7 @@ class ClassDetails extends Component {
     this.setState({ 
       sectionView: true,
       studentsView: false,
+      timeTableView: false,
       section: ""
      });
   }
@@ -171,19 +173,22 @@ class ClassDetails extends Component {
   showTimeTable() {
 
     var subjectArray = null;
+    var timeTableArrayTemp = null;
     this.state.classDetails.forEach(element => {
       if (element["class"] === this.state.class && element["section"] === this.state.section) {
         subjectArray = element["subjects"];
+        timeTableArrayTemp = element["timeTable"];
       }
     });
 
     this.setState({ 
       studentsView: false,
       timeTableView: true,
-      subjectArray: subjectArray
+      subjectArray: subjectArray,
+      timeTableArray: timeTableArrayTemp
     });
 
-    console.log("ClassDetails - subjectArray - " + subjectArray);
+    console.log("ClassDetails - subjectArray - " + subjectArray + " timeTableArray - " + JSON.stringify(timeTableArrayTemp));
   }
 
 
@@ -358,7 +363,8 @@ class ClassDetails extends Component {
 
           { this.state.timeTableView && (
 
-            <Agenda subjects={this.state.subjectArray} selectedClass={this.state.class} selectedSection={this.state.section}/>
+            <Agenda subjects={this.state.subjectArray} selectedClass={this.state.class} 
+            selectedSection={this.state.section} timeTable={this.state.timeTableArray}/>
           )}
 
         </Container>

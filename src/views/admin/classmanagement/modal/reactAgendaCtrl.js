@@ -252,6 +252,9 @@ addEvent(e) {
 }
 
 updateEvent(e) {
+
+  console.log("reactAgendaCtrl - updateEvent");
+  
   if (this.props.selectedCells[0]._id && this.props.items) {
 
     var newObj = {

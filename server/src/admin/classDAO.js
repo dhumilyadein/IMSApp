@@ -235,7 +235,30 @@ module.exports = function (app) {
     var studentsDataJSON = {};
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
     if (request.subjects) objForUpdate.subjects = request.subjects;
-    if (request.timeTable) objForUpdate.timeTable = request.timeTable;
+    // if (request.timeTable) objForUpdate.timeTable = request.timeTable;
+    
+    // Storing date as date (converting string date to date type)
+    if (request.timeTable) {
+
+      var timeTableArrayTemp = [];
+
+      request.timeTable.forEach(element => {
+
+        var timeTableTemp = {};
+        
+        timeTableTemp._id = element._id;
+        timeTableTemp.name = element.name;
+        timeTableTemp.teacher = element.teacher;
+        timeTableTemp.classes = element.classes;
+        timeTableTemp.startDateTime = new Date(element.startDateTime);
+        timeTableTemp.endDateTime = new Date(element.endDateTime);
+
+        timeTableArrayTemp.push(timeTableTemp);
+      });
+
+      objForUpdate.timeTable = timeTableArrayTemp;
+    }
+
     objForUpdate.updatedAt = currentTime;
 
     var udpateJSON = {};

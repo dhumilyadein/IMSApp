@@ -71,9 +71,38 @@ export function mapItems(itemsArray, rowsPerHour, timezone) {
       return false
     }
     var interval = (60 / rowsPerHour);
-    var offsetMinutes = item.startDateTime.getMinutes() % interval;
-    var start = moment(item.startDateTime).subtract(offsetMinutes, "minutes").toDate();
-    var end = moment(item.endDateTime);
+
+    var offsetMinutes;
+    var start;
+    var end;
+
+    if(item.startDateTime instanceof Date) {
+      offsetMinutes = item.startDateTime.getMinutes() % interval;
+      start = moment(item.startDateTime).subtract(offsetMinutes, "minutes").toDate();
+    } else {
+
+      var sdt = new Date(item.startDateTime);
+      offsetMinutes = sdt.getMinutes() % interval;
+      start = moment(sdt).subtract(offsetMinutes, "minutes").toDate();
+
+      console.log("Helpers.js - mapItems - \nitem.startDateTime string - " 
+      + item.startDateTime + " \nitem.startDateTime date - " + sdt
+      + "\nstart - " + start);
+    }
+    
+    if(item.endDateTime instanceof Date) {
+
+      end = moment(item.endDateTime);
+    } else {
+
+      var edt = new Date(item.endDateTime);
+      end = moment(edt);
+
+      console.log("Helpers.js - mapItems - \nitem.endDateTime string - " 
+      + item.endDateTime + " \nitem.endDateTime date - " + edt
+      + "\nstart - " + end);
+    }
+
     var duration = moment.duration(end.diff(start));
     item.duration = duration
     var rows = Math.ceil(duration.asHours() / (interval / 60));
