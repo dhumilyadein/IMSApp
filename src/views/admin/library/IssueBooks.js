@@ -3,6 +3,7 @@ import Select from 'react-select';
 import classnames from 'classnames';
 import DatePicker from 'react-date-picker';
 import ReactLoading from 'react-loading';
+import moment from 'moment';
 import {
     Badge,
     Button,
@@ -36,6 +37,7 @@ import {
 
 import axios, { post } from "axios";
 import { stat } from 'fs';
+
 
 
 class IssueBooks extends Component {
@@ -83,7 +85,7 @@ loader:false,
 
             rows: [{ bookName:"",
             quantity:"",
-            uniqueBookId:"",
+            uniqueBookId:"", dor:""
 
             }],
             existingStaff:[],
@@ -921,7 +923,7 @@ this.setState({selectedStudent:e});
                                 name="doi"
                                 id="doi"
                                 value={this.state.doi}
-                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOS: "+this.state.doi)})}}
+                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOI: "+this.state.doi)})}}
                               />
 
 
@@ -1070,9 +1072,9 @@ name="dor"
 id="dor"
 value={this.state.rows[idx].dor}
 onChange={date=>{ var temp=this.state.rows;
-temp[idx]["dor"]=date;
+temp[idx]["dor"]=new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
 
-this.setState({rows:temp})}
+this.setState({rows:temp},()=>console.log(JSON.stringify(this.state.rows)))}
 
 }
 />
@@ -1253,7 +1255,7 @@ this.setState({rows:temp})}
                                 name="doi"
                                 id="doi"
                                 value={this.state.doi}
-                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOS: "+this.state.doi)})}}
+                                onChange={date=>{this.setState({doi:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.doi)})}}
                               />
 
 
@@ -1395,7 +1397,7 @@ this.setState({rows:temp})}
 name="dor"
 id="dor"
 value={this.state.rows[idx].dor}
-onChange={date=>{ var temp=this.state.rows;
+onChange={date=>{ console.log(" " +date);var temp=this.state.rows;
 temp[idx]["dor"]=date;
 
 this.setState({rows:temp})}

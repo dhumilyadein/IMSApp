@@ -153,7 +153,7 @@ class RegisterUser extends Component {
 
     // Fetching class details on page load for class drop down
     this.fetchClassDetails();
-    
+
   }
 
 
@@ -856,7 +856,7 @@ class RegisterUser extends Component {
                                 name="dob"
                                 id="dob"
                                 value={this.state.dob}
-                                onChange={date => { this.setState({ dob: date }) }}
+                                onChange={date => { this.setState({ dob: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }) }}
                               />
                             </InputGroup>
 
@@ -1327,7 +1327,7 @@ class RegisterUser extends Component {
                                 name="doj"
                                 id="doj"
                                 value={this.state.doj}
-                                onChange={date => { this.setState({ doj: date }) }}
+                                onChange={date => { this.setState({ doj: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }) }}
                               />
                             </InputGroup>
                             {this.state.errors && this.state.errors.doj && (

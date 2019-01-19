@@ -616,7 +616,7 @@ if(this.state.bookId){ var temp=[];
                                 name="doa"
                                 id="doa"
                                 value={this.state.doa}
-                                onChange={date=>{this.setState({doa:date},()=>{console.log("DOS: "+this.state.doa)})}}
+                                onChange={date=>{this.setState({doa:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.doa)})}}
                               />
 
 

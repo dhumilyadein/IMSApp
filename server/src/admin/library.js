@@ -340,10 +340,10 @@ async function issueBook(req,res)
 
   for(var i=0;i<books.issuedBookDetails.length;i++)
 
-  
+
 books.issuedBookDetails[i]["isReturned"]=false
 
-  
+
 
 
   var issueBook = new IssuedBooks(books);
@@ -406,7 +406,7 @@ function gettingStaff(req, res) {
   {console.log("gettingIssuedBooks: "+JSON.stringify(req.body))
 
     IssuedBooks
-    .find({ issuedTo:req.body.issuedTo,'issuedBookDetails.actualReturnDate':null} )
+    .find({ issuedTo:req.body.issuedTo,'issuedBookDetails.isReturned':false} )
     .then(data => {
         return res.send(data);
     })
@@ -420,35 +420,35 @@ function gettingStaff(req, res) {
   async function returnBook(req,res)
   {var temp=[]; var success=true;
     var book =req.body.issuedBook;
-  
-  
+
+
     console.log("in returnBook: "+JSON.stringify(req.body));
-  
-  
- 
-   
+
+
+
+
      await  IssuedBooks.updateOne({"issuedBookDetails.uniqueBookId": book.uniqueBookId,"issuedTo": req.body.issuedTo,
-       "issuedBookDetails.actualReturnDate":""  }, 
+       "issuedBookDetails.actualReturnDate":""  },
       {'$set': {
         'issuedBookDetails.$.delayInReturn': book.delay,
         'issuedBookDetails.$.totalFine': book.totalFine,
 
         'issuedBookDetails.$.actualReturnDate': req.body.dor,
-        
+
     }})
-     
+
       .then(user => {
         console.log("IssuedBook returned: "+book.bookName)})
-    
+
     .catch(error=>{
       success=false;
       return res.send(error)})
 
 
-   
-   
+
+
   await Books.updateOne({bookName:book.bookName.toLowerCase(),"uniqueBookIds.value":book.uniqueBookId },
-    {'$set': {'issuedBookDetails.$.isIssued': false},
+    {'$set': {'uniqueBookIds.$.isIssued': false},
     $inc: {quantity:1}
   })
   .then(data=>{console.log("Book Updated "+JSON.stringify(data))}  )
@@ -456,24 +456,24 @@ function gettingStaff(req, res) {
     success=false;
     console.log("Book UpdateOne error "+JSON.stringify(error))
     return res.send({error});})
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
   if(success===true)
   return res.send({msg:"Success"});
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
   }
 
 
