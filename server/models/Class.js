@@ -19,6 +19,9 @@ var ClassSchema = new Schema({
     type: Array,
     required: true,
   },
+  timeTable: {
+    type: Array,
+  },
   createdAt: {
     type: Date,
     required: true,

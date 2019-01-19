@@ -298,6 +298,10 @@ handleSubjectChange = (newValue, actionMeta) => {
 
 handleSubjectCreate = (createdSubject) => {
 
+  alert("This newly created subject will not be saved in the database."
+  + "\nThis feature is for periods like Lunch, Assembly, etc."
+  + "\nTo add subject permanently, please use UpdateClass module.");
+
   var subjectsTemp = [];
 
   // We do not assume how users would like to add newly created options to the existing options list.

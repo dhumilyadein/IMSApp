@@ -159,7 +159,7 @@ class ClassDetails extends Component {
     this.setState({ studentsDataArray: studentsDataArrayTemp })
 
     console.log("sectionButtonClickHandler - Selected class - " + this.state.class +
-      " selected Section - " + section
+      " selected Section - " + this.state.section
       + " selected usernames - " + studentsDataArrayTemp);
 
     // Switching view to students view
@@ -358,7 +358,7 @@ class ClassDetails extends Component {
 
           { this.state.timeTableView && (
 
-            <Agenda subjects={this.state.subjectArray}/>
+            <Agenda subjects={this.state.subjectArray} selectedClass={this.state.class} selectedSection={this.state.section}/>
           )}
 
         </Container>

@@ -24,8 +24,8 @@ import {
 } from "reactstrap";
 import ReactAgenda from '../modal/reactAgenda.js';
 import ReactAgendaCtrl from '../modal/reactAgendaCtrl.js';
-import Modal from '../modal/Modal.js'
-
+import Modal from '../modal/Modal.js';
+import axios from "axios";
 
 var now = new Date();
 
@@ -110,7 +110,9 @@ export default class Agenda extends Component {
       numberOfDays: 6,
       // startDate: new Date()
       startDate: this.getCurrentWeek(),
-      subjectsArray: this.props.subjects
+      subjectsArray: this.props.subjects,
+      selectedClass: this.props.selectedClass,
+      selectedSection: this.props.selectedSection
     }
     this.handleRangeSelection = this.handleRangeSelection.bind(this)
     this.handleItemEdit = this.handleItemEdit.bind(this)
@@ -124,6 +126,7 @@ export default class Agenda extends Component {
     this.changeView = this.changeView.bind(this)
     this.handleCellSelection = this.handleCellSelection.bind(this)
     this.getCurrentWeek = this.getCurrentWeek.bind(this);
+    this.updateClassDetails = this.updateClassDetails.bind(this);
 
     // Get first day of the current week.
     this.getCurrentWeek();
@@ -262,6 +265,8 @@ export default class Agenda extends Component {
     
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
+
+    this.updateClassDetails();
   }
   editEvent(items, item) {
 
@@ -274,6 +279,29 @@ export default class Agenda extends Component {
     this.setState({ numberOfDays: days })
   }
 
+  async updateClassDetails() {
+
+    var updateClassDetailsRequest = {
+      "class": this.state.selectedClass,
+      "section": this.state.selectedSection,
+      "timeTable": this.state.items
+    }
+
+    console.log("Agenda - updateClassDetails - updateClassDetailsRequest - "
+      + JSON.stringify(updateClassDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          classDetailsUpdatedFlag: true
+        });
+      }
+    });
+  }
 
   render() {
 

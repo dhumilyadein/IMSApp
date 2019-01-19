@@ -235,15 +235,27 @@ module.exports = function (app) {
     var studentsDataJSON = {};
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
     if (request.subjects) objForUpdate.subjects = request.subjects;
+    if (request.timeTable) objForUpdate.timeTable = request.timeTable;
     objForUpdate.updatedAt = currentTime;
-    console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
-    await Class.findOneAndUpdate(
-      { $and: [{ "class": request.class }, { "section": request.section }] },
-      {
+    var udpateJSON = {};
+    if (Object.keys(objForUpdate).length === 0 && Object.keys(studentsDataJSON).length === 0) {
+      udpateJSON = {
         $set: objForUpdate,
         $push: studentsDataJSON
       }
+    } else if (objForUpdate) {
+      udpateJSON = {
+        $set: objForUpdate,
+      }
+    }
+
+    
+    console.log("udpateJSON - " + JSON.stringify(udpateJSON));
+
+    await Class.findOneAndUpdate(
+      { $and: [{ "class": request.class }, { "section": request.section }] },
+      udpateJSON
     ).then(function (classData) {
 
       console.log("Class details udpated successfully");
