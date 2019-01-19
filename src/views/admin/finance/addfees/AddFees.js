@@ -114,10 +114,10 @@ this.fetchClassDetails=this.fetchClassDetails.bind(this);
         class:"",
         section:"",
         classError:"",
-        
+
         studentsDataArray:[],
                     studentOpen:true,
-        
+
                     activeTab:"1",
         feeTemplates:[],
         selectedStudent:[],
@@ -158,7 +158,7 @@ this.fetchClassDetails=this.fetchClassDetails.bind(this);
         classes:[],
         sectionArray: [],
         studentsDataArray:[]
-        
+
 
                 });
 
@@ -231,81 +231,81 @@ if(submit)
     this.fetchClassDetails();
     }
 
-  
+
     fetchClassDetails() {
 
       axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
-  
+
         if (cRes.data.errors) {
-  
+
           return this.setState({ errors: cRes.data.errors });
-  
+
         } else {
-  
+
           this.setState({ classDetails: cRes.data },()=>{
 
             var classArray = [];
       this.state.classDetails.forEach(element => {
-  
+
         console.log("element.class - " + element.class);
         classArray.push(element.class);
       });
      // console.log("classArray - " + classArray);
      var uniqueItems = Array.from(new Set(classArray));
-   
+
 
 
       this.setState({ classes: uniqueItems });
           });
-  
+
           console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
-  
-        
+
+
         }
       });
     }
-  
+
     /**
      * @description - fetches unique classes from the class detail from DB
      */
-  
-  
+
+
     classChangeHandler(e) {
-  
+
       var selectedClass = e.currentTarget.value;
       console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
       this.setState({ class: selectedClass,
       section:"",selectedStudent:[],showFeeTemplate:false, selectedFeeTemplate:[] });
-  
+
       var sectionArrayTemp = [];
       this.state.classDetails.forEach(element => {
         if (element["class"] === selectedClass) {
-  
+
           sectionArrayTemp.push(element["section"]);
-  
+
         }
       });
-  
+
       // Sorting array alphabetically
       sectionArrayTemp.sort();
-  
+
       this.setState({
          sectionArray: sectionArrayTemp,
         })
-  
+
       console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
-  
+
       // Switching view to section view
-     
+
     }
-  
+
     sectionChangeHandler(e) {
-  
-     
+
+
       this.setState({ section: e.currentTarget.value },()=>{
         this.state.classDetails.forEach(element => {
-  
-         
+
+
           if (element.class === this.state.class && element.section === this.state.section) {
                 this.setState({
               studentsDataArray : element.studentsData
@@ -314,7 +314,7 @@ if(submit)
               this.state.studentsDataArray.forEach(element=>{
               temp.push({"value":element.username,
               "label":element.firstname+" "+element.lastname+"("+element.username+")"})
-              
+
               })
               this.setState({studentsDataArray:temp});
 
@@ -323,16 +323,16 @@ if(submit)
         });
 
 
-        
+
 
       });
-  
-     
-                
-  
-     
-  
-   
+
+
+
+
+
+
+
     }
 
 
@@ -457,7 +457,7 @@ if(!this.state.paidAmount)
     }
 
 
-  
+
     studentSelectedHandler(e){
 if(e)
      { console.log("In Student "+(e.value));
@@ -681,7 +681,7 @@ axios
 
                                       </Input>
                                     </InputGroup>
-                                  
+
                                   {this.state.sectionError && (
                                     <font color="red">
                                       {" "}
@@ -716,7 +716,7 @@ axios
                             <br/>
 
 
-                            
+
 <Select
                             id="feeTemplates"
                             name="feeTemplates"
@@ -1075,7 +1075,7 @@ axios
                                 name="dos"
                                 id="dos"
                                 value={this.state.dos}
-                                onChange={date=>{this.setState({dos:new Date(date)})}}
+                                onChange={date=>{this.setState({dos:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))})}}
                               />
 
 
@@ -1594,7 +1594,7 @@ axios
                               name="doj"
                               id="doj"
                               value={this.state.dos}
-                              onChange={date=>{this.setState({dos:date})}}
+                              onChange={date=>{this.setState({dos:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))})}}
                             />
 
 

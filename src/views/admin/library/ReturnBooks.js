@@ -115,7 +115,7 @@ this.fetchStaff=this.fetchStaff.bind(this);
     }
 
 
-   
+
 
 
 
@@ -135,7 +135,7 @@ this.fetchStaff=this.fetchStaff.bind(this);
       this.setState({
         modalSuccess: !this.state.modalSuccess
       });
-      this.reset();
+
     }
 
 
@@ -681,7 +681,9 @@ temp[j]["delay"]=0;
                                 name="dor"
                                 id="dor"
                                 value={this.state.dor}
-                                onChange={date=>{this.setState({dor:date},()=>{console.log("DOR: "+this.state.dor)})}}
+                                onChange={date=>{this.setState({dor:date},()=>{
+                                  console.log("DOR: "+this.state.dor);
+                                  this.studentSelectedHandler(this.state.selectedStudent)})}}
                               />
 
 
@@ -787,10 +789,10 @@ temp[j]["delay"]=0;
                                           const { name, value } = e.target;
                                           const temp = this.state.rows;
                                           temp[idx][name] = value;
-                                        
+
                                           temp[idx]["totalFine"]= value * temp[idx].delay;
-                                         
-                                                                                 
+
+
                                           this.setState(
                                             {
                                               rows: temp
@@ -845,11 +847,10 @@ if (submit === true) {
 
                           success: true,
                           modalSuccess: true,
-                          modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label
+                          modalMessage:"Book: "+ this.state.rows[idx].bookName + " Returned to Library! "
 
 
-
-                        });
+                        },()=>  this.studentSelectedHandler(this.state.selectedStudent));
 
                         else if (result.data.error) {
 
@@ -874,7 +875,7 @@ if (submit === true) {
 
 
 
-                                     
+
 
 
                                       }}
