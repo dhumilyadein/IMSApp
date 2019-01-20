@@ -238,7 +238,7 @@ class ItemHistory extends Component {
                                 name="dos"
                                 id="dos"
                                 value={this.state.dos}
-                                onChange={date=>{this.setState({dos:date},()=>{console.log("DOS: "+this.state.dos)})}}
+                                onChange={date=>{this.setState({dos:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dos)})}}
                               />
 &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
 <InputGroupAddon addonType="prepend">
@@ -253,7 +253,7 @@ class ItemHistory extends Component {
                                 name="doe"
                                 id="doe"
                                 value={this.state.doe}
-                                onChange={date=>{this.setState({doe:date},()=>{console.log("DOe: "+this.state.doe)})}}
+                                onChange={date=>{this.setState({doe:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOe: "+this.state.doe)})}}
                               />
                             </InputGroup>
 

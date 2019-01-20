@@ -343,7 +343,7 @@ var tempUnit,tempQuantity;
                                 name="dos"
                                 id="dos"
                                 value={this.state.doc}
-                                onChange={date=>{this.setState({doc:date},()=>{console.log("DOS: "+this.state.doc)})}}
+                                onChange={date=>{this.setState({doc:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.doc)})}}
                               />
 
 

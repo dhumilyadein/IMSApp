@@ -48,33 +48,35 @@ class IssueBooks extends Component {
         super(props);
         this.fetchClassDetails();
 
+
         this.state = {
-          lateFineDisabled:false,
+        
             class:"",
             section:"",
             classError:"",
 rowError:"",
-            studentsDataArray:[],
-                        studentOpen:true,
+    
+                      
 
                         activeTab:"1",
 
             selectedStudent:[],
             error:"",
-loader:false,
 
 
-            year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
+
+            
 showBooks:false,
             remarks:"",
-            dor:new Date(Date.now()),
+            dor:new Date(new Date().getTime()-(new Date().getTimezoneOffset() * 60000)),
+            
 
             dorError:"",
             sectionError:"",
             modalSuccess:false,
             success:false,
             studentName:"",
-            rollNo:"",
+           
 
 
             studentError:"",
@@ -94,16 +96,14 @@ showBooks:false,
             selectedStaff:[],
             staffError:"",
             modalMessage:"",
-            wholeClass:false,
-            hideStudents:false
+            
         };
 
 
         this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-         this.studentSubmitHandler = this.studentSubmitHandler.bind(this);
-         this.staffSubmitHandler = this.staffSubmitHandler.bind(this);
-
+        
+         this.staffSelectedHandler = this.staffSelectedHandler.bind(this);
          this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
          this.toggle = this.toggle.bind(this);
 
@@ -120,11 +120,56 @@ this.fetchStaff=this.fetchStaff.bind(this);
 
 
 
-    toggle(tab) { this.reset();
+    toggle(tab) { 
       if (this.state.activeTab !== tab) {
         this.setState({
-          activeTab: tab
-        });
+          activeTab: tab,
+          class:"",
+            section:"",
+            classError:"",
+rowError:"",
+    
+                      
+
+                        
+
+            selectedStudent:[],
+            error:"",
+
+
+
+            
+showBooks:false,
+            remarks:"",
+            dor:new Date(new Date().getTime()-(new Date().getTimezoneOffset() * 60000)),
+            
+
+            dorError:"",
+            sectionError:"",
+            modalSuccess:false,
+            success:false,
+            studentName:"",
+           
+
+
+            studentError:"",
+            classDetails:[],
+            classes:[],
+            sectionArray: [],
+            studentsDataArray:[],
+            existingBooks:[],
+            allBooksData:[],
+
+            rows: [{ bookName:"",
+            quantity:"",
+            uniqueBookId:"",
+
+            }],
+            existingStaff:[],
+            selectedStaff:[],
+            staffError:"",
+            modalMessage:"",
+        },()=>{this.fetchStaff();this.fetchClassDetails();});
       }
 
 
@@ -139,219 +184,7 @@ this.fetchStaff=this.fetchStaff.bind(this);
     }
 
 
-    studentSubmitHandler(e){
-      e.preventDefault();
-console.log("In FeeSubmit:"+ JSON.stringify(this.state));
-var submit=true;
-
-this.setState({classError:"", studentError:"", doiError:"",rowError:"" ,sectionError:"", error:"", success: false,
-modalSuccess: false,loader:true})
-
-
-
-if(!this.state.class)
-{
-  this.setState({classError:"Please Select Class", loader:false});
-  submit=false;
-
-
-  }
-
-
-
-  if(!this.state.section)
-{
-  this.setState({sectionError:"Please Select Section",loader:false});
-  submit=false;
-
-  }
-
-  if(!this.state.doi)
-{
-  this.setState({doiError:"Please Enter Date of Issue",loader:false});
-  submit=false;
-
-  }
-
-  if(!this.state.selectedStudent.value)
-  {
-    this.setState({studentError:"Please Select Student",loader:false});
-    submit=false;
-
-    }
-
-
-this.state.rows.forEach(element=>{
-if (!element.bookName){
-this.setState({rowError:"Please select the book(s) in each row",loader:false});
-submit=false;
-return;}
-
-if (!element.dor){
-  this.setState({rowError:"Please select the Return Due date in each row",loader:false});
-  submit=false;
-  return;}
-
-
-})
-
-for(var i=0;i<this.state.rows.length;i++)
-
-{for(var j=0;j<this.state.rows.length;j++)
-{
-  if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
-{
-  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!",loader:false});
-submit=false;
-break;
-}
-
-
-}
-}
-
-
-  if(submit)
-  {
-console.log("Issuing Book ");
-    axios
-    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":this.state.rows,"class":this.state.class,
-"section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStudent.label })
-    .then(result => {
-        console.log("result.data " + JSON.stringify(result.data));
-
-        if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                modalMessage:this.state.rows.length+ "books issued to Student: "+this.state.selectedStudent.label
-
-
-
-              });
-
-              else if (result.data.error) {
-
-                 this.setState({error:JSON.stringify(result.data.error)});
-            }
-
-
-    });
-
-
-
-  }
-
-
-
-
-
-
-
-
-    }
-
-    staffSubmitHandler(e){
-      e.preventDefault();
-console.log("In Staff Issue:"+ JSON.stringify(this.state));
-var submit=true;
-
-this.setState({ staffError:"", doiError:"",rowError:"" , error:"", success: false,
-modalSuccess: false});
-
-
-
-
-  if(!this.state.doi)
-{
-  this.setState({doiError:"Please Enter Date of Issue"});
-  submit=false;
-
-  }
-
-  if(!this.state.selectedStaff.value)
-  {
-    this.setState({staffError:"Please Select Staff/Employee"});
-    submit=false;
-
-    }
-
-
-for(var i =0;i<this.state.rows.length;i++){
-if (!this.state.rows[i].bookName){
-this.setState({rowError:"Please select the book(s) in each row"});
-submit=false;
-return;}
-
-if (!this.state.rows[i].dor){
-  this.setState({rowError:"Please select the Return Due date in each row"});
-  submit=false;
-  return;}
-
-
-
-
-
-
-
-}
-
-for(var i=0;i<this.state.rows.length;i++)
-
-{for(var j=0;j<this.state.rows.length;j++)
-{
-  if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
-{
-  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!"});
-submit=false;
-break;
-}
-
-
-}
-}
-
-  if(submit)
-  {
-console.log("Issuing Book  Staff");
-    axios
-    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":this.state.rows,"class":"NA",
-"section":"NA", "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStaff.label })
-    .then(result => {
-        console.log("result.data " + JSON.stringify(result.data));
-
-        if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                modalMessage:this.state.rows.length+ " books issued to: "+this.state.selectedStaff.label
-
-
-
-              });
-
-              else if (result.data.error) {
-
-                 this.setState({error:JSON.stringify(result.data.error)});
-            }
-
-
-    });
-
-
-
-  }
-
-
-
-
-
-
-
-
-    }
+   
 
     fetchStaff()
     {
@@ -484,7 +317,9 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
 if(e)
      { console.log("In Student "+JSON.stringify(e));
      this.setState({
-      selectedStudent: e
+      selectedStudent: e,
+      error:"",
+      showBooks:false
 
     });
 
@@ -492,29 +327,40 @@ if(e)
      .post("http://localhost:8001/api/gettingIssuedBooks",{"issuedTo":e.label})
      .then(result => {
        console.log("Issued book data " + JSON.stringify(result.data));
+       
        if (result.data) {
 var temp=[];
-for(var i=0;i<result.data.length;i++)
+for(var i=0;i<result.data.length;i++){
 for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
 {
-
-  temp.push({"bookName":result.data[i].issuedBookDetails[j].bookName.label,
+    if(result.data[i].issuedBookDetails[j].isReturned===false)
+ { 
+   temp.push({"bookName":result.data[i].issuedBookDetails[j].bookName.label,
 			"uniqueBookId":result.data[i].issuedBookDetails[j].uniqueBookId,
-			"doi":result.data[i].doi.substring(0,10),
-			"dor":result.data[i].issuedBookDetails[j].dor.substring(0,10),
-			"delay":Math.ceil((new Date(this.state.dor).getTime() - new Date(result.data[i].issuedBookDetails[j].dor).getTime())/ (1000 * 3600 * 24))
+			"doi":result.data[i].doi,
+			"dor":result.data[i].issuedBookDetails[j].dor,
+      "delay":parseInt((new Date(this.state.dor)
+       - new Date(result.data[i].issuedBookDetails[j].dor))
+       / (1000 * 3600 * 24))
 
- });
-
-console.log(JSON.stringify(temp[j].delay));
-if(temp[j].delay<0)
-temp[j]["delay"]=0;
+   });
 
 
+ if(temp[temp.length-1].delay<0)
+ temp[temp.length-1]["delay"]=0;
+ 
 
-}
 
+ }
 
+}}
+
+if(temp.length===0)
+this.setState({
+ error: "No Record found!"
+
+});
+else
            this.setState({
            rows: temp,
            showBooks:true
@@ -532,6 +378,74 @@ temp[j]["delay"]=0;
     }
 
     }
+
+    staffSelectedHandler(e){
+      if(e)
+           { console.log("In Student "+JSON.stringify(e));
+           this.setState({
+            selectedStaff: e,
+            error:"",
+            showBooks:false
+      
+          });
+      
+           axios
+           .post("http://localhost:8001/api/gettingIssuedBooks",{"issuedTo":e.label})
+           .then(result => {
+             console.log("Issued book data " + JSON.stringify(result.data));
+             
+              if (result.data) {
+      var temp=[];
+      for(var i=0;i<result.data.length;i++){
+      for(var j=0;j<result.data[i].issuedBookDetails.length;j++)
+      {
+          if(result.data[i].issuedBookDetails[j].isReturned===false)
+       { 
+         temp.push({"bookName":result.data[i].issuedBookDetails[j].bookName.label,
+            "uniqueBookId":result.data[i].issuedBookDetails[j].uniqueBookId,
+            "doi":result.data[i].doi,
+            "dor":result.data[i].issuedBookDetails[j].dor,
+            "delay":parseInt((new Date(this.state.dor)
+             - new Date(result.data[i].issuedBookDetails[j].dor))
+             / (1000 * 3600 * 24))
+      
+         });
+      
+      
+       if(temp[temp.length-1].delay<0)
+       temp[temp.length-1]["delay"]=0;
+       
+      
+      
+       }
+      
+      }}
+
+      if(temp.length===0)
+             this.setState({
+              error: "No Record found!"
+      
+            });
+else
+      
+      
+                 this.setState({
+                 rows: temp,
+                 showBooks:true
+      
+               });
+             }
+             else if(result.data.error)
+             this.setState({
+              error: result.data.error
+      
+            });
+           });
+      
+      
+          }
+      
+          }
 
 
     /**
@@ -654,7 +568,7 @@ temp[j]["delay"]=0;
                           closeMenuOnSelect={true}
                          value={this.state.selectedStudent}
                          isClearable={true}
-                         //menuIsOpen ={this.state.studentOpen}
+                       
                             isSearchable={true}
 
                             onChange={this.studentSelectedHandler}
@@ -681,7 +595,9 @@ temp[j]["delay"]=0;
                                 name="dor"
                                 id="dor"
                                 value={this.state.dor}
-                                onChange={date=>{this.setState({dor:date},()=>{
+                                onChange={date=>{
+                                  if(date)
+                                  this.setState({dor:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
                                   console.log("DOR: "+this.state.dor);
                                   this.studentSelectedHandler(this.state.selectedStudent)})}}
                               />
@@ -731,7 +647,7 @@ temp[j]["delay"]=0;
 
 
                                 <th className="text-center">
-                                <h5>Actions</h5>
+                                <h5>Action</h5>
 
                                 </th>
                               </tr>
@@ -756,14 +672,14 @@ temp[j]["delay"]=0;
                                   </td>
 
                                   <td align="center">
-                                  {this.state.rows[idx].doi}
+                                  {this.state.rows[idx].doi.substring(0,10)}
                                   </td>
 
 
 
                                   <td align="center">
 
-{this.state.rows[idx].dor}
+{this.state.rows[idx].dor.substring(0,10)}
                                   </td>
 
                                   <td align="center">
@@ -932,10 +848,10 @@ if (submit === true) {
                           closeMenuOnSelect={true}
                          value={this.state.selectedStaff}
                          isClearable={true}
-                         //menuIsOpen ={this.state.studentOpen}
+                         
                             isSearchable={true}
 
-                            onChange={selected=>{this.setState({selectedStaff:selected})}}
+                            onChange={e=>{this.staffSelectedHandler(e)}}
                             />
    {this.state.staffError && (
                                     <font color="red">
@@ -949,29 +865,34 @@ if (submit === true) {
 <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
-                                <b>  Date of Issue</b>
+                                <b>  Date of Return</b>
                                 </InputGroupText>
                               </InputGroupAddon>
 
                               &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
-                                name="doi"
-                                id="doi"
-                                value={this.state.doi}
-                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOS: "+this.state.doi)})}}
+                                name="dor"
+                                id="dor"
+                                value={this.state.dor}
+                                onChange={date=>{
+                                  if(date)
+                                  this.setState({dor:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
+                                  console.log("DOR: "+this.state.dor);
+                                  this.studentSelectedHandler(this.state.selectedStaff)})}}
                               />
 
 
                             </InputGroup>
-                            {this.state.doiError &&(
+                            {this.state.dorError &&(
                                 <font color="red"><h6>
                                   {" "}
-                                  <p>{this.state.doiError}</p></h6>
+                                  <p>{this.state.dorError}</p></h6>
                                 </font>
                               )}
 
 <br/>
+{this.state.showBooks && <p>
 <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "palevioletred" }}>
@@ -979,32 +900,34 @@ if (submit === true) {
                                   <h5> S.No.</h5>{" "}
                                 </th>
                                 <th className="text-center">
-                                  {" "}
+
                                   <h5>Book Name </h5>
                                 </th>
                                 <th className="text-center">
-                                  <h5>Available Quantity</h5>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <h5>Unique Book Id</h5>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <h5>Return due date</h5>{" "}
+                                  <h5>Unique Book Id</h5>
                                 </th>
 
+                                <th className="text-center">
+                                  <h5>Date of Issue</h5>
+                                </th>
+
+                                <th className="text-center">
+                                  <h5>Expected Return Date</h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Delay(in Day)</h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Late Fine/Day(Rs)</h5>
+                                </th>
+                                <th className="text-center">
+                                  <h5>Total Fine(Rs)</h5>
+                                </th>
+
 
 
                                 <th className="text-center">
-                                  <Button
-                                    onClick={this.handleAddRow}
-                                    className="btn btn-primary"
-                                    color="primary"
-
-
-                                  >
-
-                                    Add Row
-                          </Button>
+                                <h5>Action</h5>
 
                                 </th>
                               </tr>
@@ -1015,118 +938,147 @@ if (submit === true) {
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
-                                  <td   style={{width:"200px"}}>
+                                  <td   align="center">
+{this.state.rows[idx].bookName}
 
-                                   <Select                            id="bookName"
-                            name="bookName"
-
-                          placeholder="Select Book"
-                            options={this.state.existingBooks}
-                          closeMenuOnSelect={true}
-                         value={this.state.rows[idx].bookName}
-                         isClearable={true}
-                              isSearchable={true}
-
-                            onChange={selectedItem=>{
-
-
-                                const temp = this.state.rows;
-                                temp[idx]["bookName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
-                                selectedItem.value.slice(1),"value":selectedItem.value};
-
-                                for(var i=0;i<this.state.allBooksData.length;i++)
-                                {
-                                    if(this.state.allBooksData[i].bookName===selectedItem.value)
-                                    {
-                                      for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
-{
-
-  if(!this.state.allBooksData[i].uniqueBookIds[u].isIssued)
- { console.log(this.state.allBooksData[i].uniqueBookIds[u].isIssued);
-  temp[idx]["uniqueBookId"]=this.state.allBooksData[i].uniqueBookIds[u].value;
-  break;}
-}
-
-                                        temp[idx]["quantity"]=this.state.allBooksData[i].quantity;
-
-
-                                    }
-                                }
-
-
-                                this.setState(
-                                  {
-                                    rows: temp
-                                  })
-
-                            }}
-                            />
 
 
                                   </td>
 
 
 
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="quantity"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].quantity}
-
-                                        style={{textAlign:'center'}}
-                                        id="quantity"
-                                        size="lg"
-                                        disabled
-                                      />
-                                    </InputGroup>
+                                  <td align="center">
+                                  {this.state.rows[idx].uniqueBookId}
                                   </td>
 
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="uniqueBookId"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].uniqueBookId}
-                                        disabled
-                                        style={{textAlign:'center'}}
-                                        id="quantity"
-                                        size="lg"
-                                      />
-                                    </InputGroup>
+                                  <td align="center">
+                                  {this.state.rows[idx].doi.substring(0,10)}
                                   </td>
 
 
 
                                   <td align="center">
 
-                                  <DatePicker
+{this.state.rows[idx].dor.substring(0,10)}
+                                  </td>
 
-name="dor"
-id="dor"
-value={this.state.rows[idx].dor}
-onChange={date=>{ var temp=this.state.rows;
-temp[idx]["dor"]=date;
+                                  <td align="center">
 
-this.setState({rows:temp})}
+{this.state.rows[idx].delay}
+                                  </td>
 
-}
-/>
+                                  <td align="center">
+
+
+                                      <Input
+                                        name="lateFine"
+                                        type="text"
+                                        className="form-control"
+                                        value={this.state.rows[idx].lateFine}
+
+                                        style={{textAlign:'center'}}
+                                        id="lateFine"
+                                        size="sm"
+
+                                        onChange={e=>{ e.preventDefault();
+
+                                          const { name, value } = e.target;
+                                          const temp = this.state.rows;
+                                          temp[idx][name] = value;
+
+                                          temp[idx]["totalFine"]= value * temp[idx].delay;
+
+
+                                          this.setState(
+                                            {
+                                              rows: temp
+                                            }
+
+                                          );}}
+
+                                      />
+
+                                  </td>
+                                  <td align="center">
+
+{this.state.rows[idx].totalFine}
                                   </td>
 
 
-
                                   <td align="center">
-                                  { idx>0 &&
-                                    <Button
+                                                                    <Button
                                       className="btn btn-danger btn-sg"
-                                      //onClick={this.handleRemoveSpecificRow(idx)}
+                                      onClick={e=>{ var submit= true;
+                                        this.setState({rowError:""});
+                                        console.log(this.state.rows[idx].lateFine);
+if(!this.state.rows[idx].lateFine && this.state.rows[idx].delay>0)
+{
+  this.setState({rowError: "Please enter Late Fine/day for Book: "+this.state.rows[idx].bookName});
+  submit=false;
+}
+
+
+if (submit === true) {
+
+  confirmAlert({
+      title: 'Confirm to Proceed',
+      message: 'Are you sure to Return this Book?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () =>
+
+        {
+
+              console.log("Returning Book ");
+
+              axios
+              .post("http://localhost:8001/api/returnBook", {"issuedBook":this.state.rows[idx],"dor": this.state.dor,
+              "issuedTo":this.state.selectedStaff.label})
+              .then(result => {
+                  console.log("result.data " + JSON.stringify(result.data));
+
+                  if (result.data.msg === "Success")
+                        this.setState({
+
+                          success: true,
+                          modalSuccess: true,
+                          modalMessage:"Book: "+ this.state.rows[idx].bookName + " Returned to Library! "
+
+
+                        },()=>  this.studentSelectedHandler(this.state.selectedStaff));
+
+                        else if (result.data.error) {
+
+                           this.setState({error:JSON.stringify(result.data.error)});
+                      }
+
+
+              });
+
+
+                          }
+
+        },
+        {
+          label: 'No',
+
+        }
+      ]
+    })}
+
+
+
+
+
+
+
+
+                                      }}
                                       size="lg"
                                     >
-                                      Remove
-                                    </Button>}
+                                      Return
+                                    </Button>
                                   </td>
                                 </tr>
                               ))}
@@ -1140,28 +1092,9 @@ this.setState({rows:temp})}
                               </h6>{" "}
                             </font>
                           )}
+</p>}
 
 
-<br/>
-<InputGroup className="mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText >
-                                <b>Remarks</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              type="text"
-                              size="lg"
-                             name="remarks"
-                              id="remarks"
-                             value={this.state.remarks}
-                             onChange={e => {
-                                this.setState(
-                                  { remarks: e.target.value })}}
-
-
-                            />
-                          </InputGroup>
 
 {this.state.error &&
                               <font color="red">
@@ -1169,29 +1102,7 @@ this.setState({rows:temp})}
                                 <p>{JSON.stringify(this.state.error)}</p>
                               </font>
                             }
-<Row>
-                            <Col>
-                              <Button
-                                onClick={this.staffSubmitHandler}
-                                size="lg"
-                                color="success"
-                                block
-                              >
-                                Submit
-                              </Button>
-                            </Col>
 
-                            <Col>
-                              <Button
-                                onClick={this.reset}
-                                size="lg"
-                                color="secondary"
-                                block
-                              >
-                             Reset
-                              </Button>
-                            </Col>
-                          </Row>
 
 
 </CardBody></Card>

@@ -923,7 +923,7 @@ this.setState({selectedStudent:e});
                                 name="doi"
                                 id="doi"
                                 value={this.state.doi}
-                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOI: "+this.state.doi)})}}
+                                onChange={date=>{this.setState({doi:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOI: "+this.state.doi)})}}
                               />
 
 
@@ -1398,7 +1398,7 @@ name="dor"
 id="dor"
 value={this.state.rows[idx].dor}
 onChange={date=>{ console.log(" " +date);var temp=this.state.rows;
-temp[idx]["dor"]=date;
+temp[idx]["dor"]=new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
 
 this.setState({rows:temp})}
 
@@ -1547,7 +1547,7 @@ this.setState({rows:temp})}
                                 name="doi"
                                 id="doi"
                                 value={this.state.doi}
-                                onChange={date=>{this.setState({doi:date},()=>{console.log("DOS: "+this.state.doi)})}}
+                                onChange={date=>{this.setState({doi:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.doi)})}}
                               />
 
 
@@ -1696,7 +1696,7 @@ name="dor"
 id="dor"
 value={this.state.rows[idx].dor}
 onChange={date=>{ var temp=this.state.rows;
-temp[idx]["dor"]=date;
+temp[idx]["dor"]=new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
 
 this.setState({rows:temp})}
 

@@ -235,6 +235,20 @@ var addBook = new Books(result[i]);
 
     }
 
+     function gettingAllBooks(req, res) {
+    console.log("in gettingAllBooks ");
+
+    Books
+      .find()
+      .then(data => {
+          return res.send(data);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+
+    }
+
 async function getCategories(req,res)
 {console.log("In getCategories for: "+ JSON.stringify(req.body));
 
@@ -272,6 +286,23 @@ return res.send({error:err});
 
 }
 
+async function deleteBook(req,res)
+{console.log("In deleteBook for: "+ JSON.stringify(req.body));
+
+
+Books
+.deleteOne({bookName:req.body.bookName})
+.then(data => {
+  return res.send({msg:"Deleted"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+}
+
 async function addBook(req,res)
 {var add=true;
   console.log("in addBook: "+JSON.stringify(req.body));
@@ -290,7 +321,7 @@ add=false;
 }
 if(add){
 var tempBook={"bookId":req.body.bookId, "bookName":req.body.bookName, "category":req.body.category.label,"author":req.body.author,
-"publisher":req.body.publisher , "quantity":req.body.quantity, "cost":req.body.cost,   "doa":req.body.doa,
+"publisher":req.body.publisher , "quantity":req.body.quantity, "cost":req.body.cost,   "doa":req.body.doa, location:req.body.location,
  "description":req.body.description,"uniqueBookIds" : req.body.uniqueBookIds  }
 
 
@@ -318,6 +349,28 @@ function editCategory(req,res)
   BookCategories
   .updateOne({category:req.body.oldCategory},
     {$set: {category:req.body.newCategory,
+
+
+    }})
+  .then(data => {
+    //console.log("Student Result: "+JSON.stringify(data))
+      return res.send({msg:"Updated"
+    });
+  })
+  .catch(error => {console.log("Error " +error);
+    return res.send({error});
+  });
+}
+
+function updateBook(req,res)
+
+{ console.log("In editCategory: "+JSON.stringify(req.body.selectedBook.value));
+
+  Books
+  .updateOne({bookName:req.body.selectedBook.value},
+    {$set: {bookId:req.body.bookId, bookName:req.body.bookName, category:req.body.category.label,author:req.body.author,
+    publisher:req.body.publisher , quantity:req.body.quantity, cost:req.body.cost,   doa:req.body.doa, location:req.body.location,
+     description:req.body.description,uniqueBookIds : req.body.uniqueBookIds 
 
 
     }})
@@ -406,7 +459,7 @@ function gettingStaff(req, res) {
   {console.log("gettingIssuedBooks: "+JSON.stringify(req.body))
 
     IssuedBooks
-    .find({ issuedTo:req.body.issuedTo,'issuedBookDetails.isReturned':false} )
+    .find({ issuedTo:req.body.issuedTo} )
     .then(data => {
         return res.send(data);
     })
@@ -428,12 +481,13 @@ function gettingStaff(req, res) {
 
 
      await  IssuedBooks.updateOne({"issuedBookDetails.uniqueBookId": book.uniqueBookId,"issuedTo": req.body.issuedTo,
-       "issuedBookDetails.actualReturnDate":""  },
+       "issuedBookDetails.isReturned":false  },
       {'$set': {
         'issuedBookDetails.$.delayInReturn': book.delay,
         'issuedBookDetails.$.totalFine': book.totalFine,
 
-        'issuedBookDetails.$.actualReturnDate': req.body.dor,
+        'issuedBookDetails.$.isReturned': true,
+        'issuedBookDetails.$.actualReturnedDate': req.body.dor,
 
     }})
 
@@ -481,13 +535,15 @@ function gettingStaff(req, res) {
   app.post("/api/returnBook", returnBook);
   app.post("/api/issueBook", issueBook);
    app.get("/api/getCategories", getCategories);
-
+   app.post("/api/deleteBook", deleteBook);
    app.post("/api/deleteCategory", deleteCategory);
    app.post("/api/addBook", addBook);
    app.post("/api/editCategory", editCategory);
    app.get("/api/gettingBooks", gettingBooks);
+   app.get("/api/gettingAllBooks", gettingAllBooks);
    app.get("/api/gettingStaff", gettingStaff);
    app.post("/api/gettingIssuedBooks", gettingIssuedBooks);
+   app.post("/api/updateBook", updateBook);
 
 
 

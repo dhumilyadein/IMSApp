@@ -207,16 +207,17 @@ for(var i=0;i<result.data.length;i++)
                         modelMessage:this.state.newCategory+" Saved Successfully!"
 
                       } );}
+                      else if(result.data.error)
+                      if(result.data.error.code===11000)
+                      this.setState({
+
+                      categoryError:"Category already exist"
+
+                      } );
+
 
                   });
               }
-
-
-
-
-
-
-
 
   });
   }

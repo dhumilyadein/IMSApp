@@ -365,7 +365,7 @@ uniqueBookIdsError:"",
                 this.setState({category:selected});}}
 
                 autosize
-                onCreateOption={this.handleSubjectCreate}
+                //onCreateOption={this.handleSubjectCreate}
                 options={this.state.defaultcategories}
                 isSearchable={true}
                 placeholder="Select or type Category to Add"       />
@@ -479,7 +479,8 @@ if(this.state.bookId){ var temp=[];
                                     this.setState({uniqueBookIds:temp});
                                 }
 
-                                else{this.setState({bookIdError:"Please enter Book Id first",quantity:""})}
+                                else{this.setState({quantityError:"Please enter Book Id first",
+                                bookIdError:"Please enter Book Id", quantity:""})}
 
                                   }
                                 );
