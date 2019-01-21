@@ -131,15 +131,15 @@ return res.send({error:err});
 
 }
 
-async function editexam(req,res)
+async function editExam(req,res)
 {console.log("In editexam for: "+ JSON.stringify(req.body));
 
 
 
   exams
-.updateOne({examName:req.body.existingexams[req.body.examNo].examName},
-  {$set: {examName:req.body.examName,
-          unit:req.body.unit,
+.updateOne({examName:req.body.existingExams[req.body.examNo].examName},
+  {$set: {examName: req.body.examName, unit: req.body.unit, totalMarks: req.body.totalMarks,
+  passingMarks: req.body.passingMarks,description:req.body.description
            }}
   )
 .then(data => {
@@ -214,7 +214,7 @@ return res.send({error:err});
   app.post("/api/createexam", createExam);
   app.get("/api/existingExams", existingExams);
   app.post("/api/deleteexam", deleteexam);
-  app.post("/api/editexam", editexam);
+  app.post("/api/editExam", editExam);
   app.post("/api/consumeexam", consumeexam);
   app.post("/api/getAddedexams", getAddedexams);
   app.post("/api/getConsumedexams", getConsumedexams);

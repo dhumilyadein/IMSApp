@@ -34,7 +34,7 @@ this.getExistingExams();
       erorrs: null,
       success: null,
       examName: "",
-
+examNo:"",
       examNameError: "",
       success: false,
       modalSuccess: false,
@@ -72,7 +72,9 @@ this.getExistingExams();
     this.setState({
       modalSuccess: !this.state.modalSuccess,
       examName:"",
-      unit:""
+      totalMarks:"",
+      passingMarks:"",
+      description:""
     });
 
   }
@@ -146,23 +148,26 @@ this.getExistingExams();
         this.setState({ examNameError: "Please Enter Item Name" });
         submit = false;}
 
-        if (!this.state.unit) {
-            this.setState({ unitError: "Please Enter Unit" });
+        if (!this.state.totalMarks) {
+          this.setState({ unitError: "Please Enter Total Marks" });
+          submit = false;}
+
+          if (!this.state.passingMarks) {
+            this.setState({ unitError: "Please Enter Passing Marks" });
             submit = false;}
 
 
 
       if (submit === true) {
-        console.log("Updating Item: "+ JSON.stringify(this.state));
+        console.log("Updating Exam: "+ JSON.stringify(this.state));
         axios
-          .post("http://localhost:8001/api/editItem", {"examName":this.state.examName,"unit":this.state.unit,
-          "existingExams":this.state.existingExams,"itemNo":this.state.itemNo})
+          .post("http://localhost:8001/api/editExam", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
            if(result.data.error)
           {  if(result.data.error.code===11000)
             this.setState({
-              examNameError:"Item name already in use"
+              examNameError:"Exam name already in use"
             });}
            else  if (result.data.msg === "Item Updated")
               this.setState({
@@ -171,7 +176,7 @@ this.getExistingExams();
                 modalSuccess: true,
                 showEditItem:false
 
-              },()=>{this.getexistingExams()});
+              },()=>{this.getExistingExams()});
 
           });
       }
@@ -254,7 +259,7 @@ deleteSpecificItem= idx => () => {
 
 
 
-                  {!this.state.showEditItem &&  (
+                  {!this.state.showEditExam &&  (
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
@@ -443,8 +448,10 @@ deleteSpecificItem= idx => () => {
                                       color="primary"
                                         onClick={ ()=>{ this.setState({showEditExam:true,
                                        examName: this.state.existingExams[idx].examName,
-                                      unit:this.state.existingExams[idx].unit,
-                                    itemNo:idx,
+                                      totalMarks:this.state.existingExams[idx].totalMarks,
+                                      passingMarks:this.state.existingExams[idx].passingMarks,
+                                      description:this.state.existingExams[idx].description,
+                                    ExamNo:idx,
                                   examNameError:"",
                                 totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.showEditExam)});}}
 
@@ -619,7 +626,10 @@ deleteSpecificItem= idx => () => {
 
                               <Col>
                                 <Button
-                                  onClick={()=>{this.setState({showEditItem:false,examName:"",unit:""})}}
+                                  onClick={()=>{this.setState({showEditExam:false,examName:"" ,
+                                  totalMarks:"",
+                                  passingMarks:"",
+                                  description:""})}}
                                   size="lg"
                                   color="secondary"
   block
