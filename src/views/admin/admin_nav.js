@@ -221,6 +221,37 @@ export default {
             },
           ]},
 
+          {
+            name: 'Manage Exams',
+            url: '/exams',
+            icon: 'icon-basket-loaded',
+
+            children: [
+              {
+                name: 'Create Exam',
+                url: '/admin/exams/CreateExam',
+                icon: 'icon-bag',
+                variant: 'success',
+              },
+              {
+                name: 'Schedule Exam',
+                url: '/admin/exams/ScheduleExam',
+                icon: 'icon-bag',
+                variant: 'success',
+              },
+              {
+                name: 'Add Results',
+                url: '/admin/exams/AddResults',
+                icon: 'icon-basket-loaded',
+                variant: 'success',
+              },
+              {
+                name: 'View Results',
+                url: '/admin/exams/ViewResults',
+                icon: 'icon-basket-loaded',
+                variant: 'success',
+              }
+            ]},
 
 
     {

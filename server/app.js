@@ -16,7 +16,7 @@ const viewFees = require("./src/admin/viewFees");
 const inventory = require("./src/admin/inventory");
 const classDAO = require("./src/admin/classDAO");
 const library = require("./src/admin/library");
-
+const exam = require("./src/admin//exam");
 const login = require("./src/login");
 const app = express();
 
@@ -54,6 +54,7 @@ viewFees(app);
 inventory(app);
 classDAO(app);
 library(app);
+exam(app);
 
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
