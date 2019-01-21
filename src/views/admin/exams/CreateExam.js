@@ -45,6 +45,7 @@ examNo:"",
       totalMarks:"",
       passingMarks:"",
       showEditExam:false,
+      examNo:""
 
     };
 
@@ -92,7 +93,7 @@ examNo:"",
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      examNameError: "", totalMarksError: "", success: false, passingMarksError:"",
+      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
       modalSuccess: false
     }, () => {
       if (!this.state.examName) {
@@ -100,12 +101,13 @@ examNo:"",
         submit = false;}
 
         if (!this.state.totalMarks) {
-            this.setState({ unitError: "Please Enter Total Marks" });
+          this.setState({ totalMarksError: "Please Enter Total Marks" });
+          submit = false;}
+
+          if (!this.state.passingMarks) {
+            this.setState({ passingMarksError: "Please Enter Passing Marks" });
             submit = false;}
 
-            if (!this.state.passingMarks) {
-              this.setState({ unitError: "Please Enter Passing Marks" });
-              submit = false;}
 
 
 
@@ -128,6 +130,7 @@ examNo:"",
 
                 success: true,
                 modalSuccess: true,
+                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!"
 
               },()=>{this.getExistingExams()});
 
@@ -141,7 +144,7 @@ examNo:"",
     console.log("in Edit State: " + JSON.stringify(this.state));
 
     this.setState({
-      examNameError: "", unitError: "", success: false,
+      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
       modalSuccess: false
     }, () => {
       if (!this.state.examName) {
@@ -149,11 +152,11 @@ examNo:"",
         submit = false;}
 
         if (!this.state.totalMarks) {
-          this.setState({ unitError: "Please Enter Total Marks" });
+          this.setState({ totalMarksError: "Please Enter Total Marks" });
           submit = false;}
 
           if (!this.state.passingMarks) {
-            this.setState({ unitError: "Please Enter Passing Marks" });
+            this.setState({ passingMarksError: "Please Enter Passing Marks" });
             submit = false;}
 
 
@@ -169,12 +172,13 @@ examNo:"",
             this.setState({
               examNameError:"Exam name already in use"
             });}
-           else  if (result.data.msg === "Item Updated")
+           else  if (result.data.msg === "Exam Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                showEditItem:false
+                showEditItem:false,
+                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!" 
 
               },()=>{this.getExistingExams()});
 
@@ -203,18 +207,18 @@ deleteSpecificItem= idx => () => {
 
   confirmAlert({
     title: 'Confirm to Remove',
-    message: 'Are you sure to Remove this Item?',
+    message: 'Are you sure to Remove this Exam?',
     buttons: [
       {
         label: 'Yes',
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/deleteItem",{"examName":this.state.existingExams[idx].examName})
+        .post("http://localhost:8001/api/deleteExam",{"examName":this.state.existingExams[idx].examName})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Item Deleted")
-            this.getexistingExams();
+          if (result.data.msg==="Exam Deleted")
+            this.getExistingExams();
 
         })
       },
@@ -252,7 +256,7 @@ deleteSpecificItem= idx => () => {
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Exam: {this.state.examName} Saved Successfully!
+                        {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
@@ -392,7 +396,7 @@ deleteSpecificItem= idx => () => {
                           </Row>
                           <br /> <br />
 
-<h3 align="center"> Existing Items</h3>
+<h3 align="center"> Existing Exams</h3>
                           <br />
 
 
@@ -451,9 +455,9 @@ deleteSpecificItem= idx => () => {
                                       totalMarks:this.state.existingExams[idx].totalMarks,
                                       passingMarks:this.state.existingExams[idx].passingMarks,
                                       description:this.state.existingExams[idx].description,
-                                    ExamNo:idx,
+                                    examNo:idx,
                                   examNameError:"",
-                                totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.showEditExam)});}}
+                                totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.examNo)});}}
 
 
                                       size="lg"
@@ -573,7 +577,7 @@ deleteSpecificItem= idx => () => {
                                 value={this.state.passingMarks}
                                 onChange={e => {
                                   this.setState(
-                                    { totalMarks: e.target.value }
+                                    { passingMarks: e.target.value }
 
                                   );
                                 }}

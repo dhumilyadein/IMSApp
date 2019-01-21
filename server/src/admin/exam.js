@@ -116,13 +116,13 @@ function existingExams(req, res) {
 
   }
 
-  function deleteexam(req,res)
+  function deleteExam(req,res)
   {console.log("In deleteexam: "+ JSON.stringify(req.body.examName));
 
-exams
+Exams
 .deleteOne({examName:req.body.examName})
 .then(data => {
-  return res.send({msg:"exam Deleted"});
+  return res.send({msg:"Exam Deleted"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -144,7 +144,7 @@ async function editExam(req,res)
   )
 .then(data => {
 
-return res.send({msg:"exam Updated"});
+return res.send({msg:"Exam Updated"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -213,7 +213,7 @@ return res.send({error:err});
   app.post("/api/addexams", addexams);
   app.post("/api/createexam", createExam);
   app.get("/api/existingExams", existingExams);
-  app.post("/api/deleteexam", deleteexam);
+  app.post("/api/deleteExam", deleteExam);
   app.post("/api/editExam", editExam);
   app.post("/api/consumeexam", consumeexam);
   app.post("/api/getAddedexams", getAddedexams);
