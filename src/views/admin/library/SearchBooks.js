@@ -102,7 +102,7 @@ this.deleteBook=this.deleteBook.bind(this);
 
 
         selectedBook:[],
-  
+
         uniqueBookIds:[],
        bookId:"",
        bookName:"",
@@ -120,21 +120,21 @@ this.deleteBook=this.deleteBook.bind(this);
   bookNameError:"",
   uniqueBookIdsError:"",
   lastUpdated:"",
-  
-  
+
+
         defaultcategories:[],
-  
+
   bookError:"",
   showEdit:false,
   showOptions:false,
-  
+
         success: false,
         modalSuccess: false,
         visible: false,
-  
+
         defaultBooks:[],
         allBooksData:[]
-  
+
   })
   }
 
@@ -232,7 +232,7 @@ for(var i=0;i<result.data.length;i++)
       modalSuccess: !this.state.modalSuccess
     });
     this.reset();
-   
+
     this.gettingAllBooks();
   }
 
@@ -247,7 +247,7 @@ for(var i=0;i<result.data.length;i++)
   editHandler(e) {
 
     var submit = true;
-    console.log("in Submit State: " + JSON.stringify(this.state));
+    console.log("in Submit State: " + JSON.stringify(this.state.category));
 
     this.setState({
       bookNameError: "", bookIdError: "", success: false,
@@ -376,9 +376,9 @@ for(var i=0;i<result.data.length;i++)
                                                  <Row><Col>      <Select
 
                 value={this.state.selectedBook}
-                onChange={selected=>{ 
+                onChange={selected=>{
                 this.setState({selectedBook:selected,
-                
+
               showOptions:true,showEdit:false},()=>{ console.log("Book: "+JSON.stringify(selected))});}}
 
                 autosize
@@ -400,12 +400,12 @@ for(var i=0;i<result.data.length;i++)
 {
 temp=this.state.allBooksData[i];break}
                         }
-                                    
+
                                     this.setState({showEdit:true, showOptions:false,bookName: temp.bookName,
                                         bookId:temp.bookId,
                                          category:{"label":temp.category.charAt(0).toUpperCase()+temp.category.slice(1),
                                         "value":temp.category},
-                                          author:temp.author, 
+                                          author:temp.author,
                                         publisher:temp.publisher,
                                         quantity:temp.quantity, cost:temp.cost, doa:temp.doa,
                                          description:temp.description, lastUpdated:temp.updatedAt,
@@ -488,7 +488,7 @@ temp=this.state.allBooksData[i];break}
                               disabled
                             />
                           </InputGroup>
-                       
+
 
 
 
@@ -579,7 +579,7 @@ temp=this.state.allBooksData[i];break}
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
-                                <b>Quantity</b>
+                                <b>Available Quantity</b>
                               </InputGroupText>
                             </InputGroupAddon>
                             <Input
@@ -622,7 +622,7 @@ if(this.state.bookId){ var temp=[];
                               }}
                             />
                           </InputGroup>
-                     
+
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
@@ -706,18 +706,18 @@ if(this.state.bookId){ var temp=[];
                                 <b>Unique Book Ids</b>
                               </InputGroupText>
                             </InputGroupAddon>
-                            <Creatable
+                            <Select
 
                 value={this.state.uniqueBookIds}
                disabled
                 isMulti={true}
                 autosize
-               
-               
+
+
 
                     />
                           </InputGroup>
-                     
+
 
 
 <InputGroup className="mb-2">

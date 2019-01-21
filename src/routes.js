@@ -281,6 +281,11 @@ const ClassTimeTable = Loadable({
   loading: Loading
 });
 
+const Attendance = Loadable({
+  loader: () => import("./views/admin/classmanagement/Attendance"),
+  loading: Loading
+});
+
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -290,6 +295,7 @@ const routes = [
 
   { path: "/admin/library/AddBook", exact: true, name: "Add Book", component: AddBook },
   { path: "/admin/library/ImportBulkBooks", exact: true, name: "Import Bulk Books", component: ImportBulkBooks },
+
 
   { path: "/admin/library/IssueBooks", exact: true, name: "Issue Books", component: IssueBooks },
   { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
@@ -388,11 +394,16 @@ const routes = [
     component: CreateClass
   },
   {
+    path: "/admin/classmanagement/Attendance",
+    name: "Attendance",
+    component: Attendance
+  },
+  {
     path: "/admin/classmanagement/ClassTimeTable",
     name: "ClassTimeTable",
     component: ClassTimeTable
   },
-  
+
 
 
 

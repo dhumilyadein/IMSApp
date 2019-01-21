@@ -368,7 +368,7 @@ uniqueBookIdsError:"",
                 //onCreateOption={this.handleSubjectCreate}
                 options={this.state.defaultcategories}
                 isSearchable={true}
-                placeholder="Select or type Category to Add"       />
+                placeholder="Select or type to Add new Category"       />
 
 </Col></Row>
                           <br/>

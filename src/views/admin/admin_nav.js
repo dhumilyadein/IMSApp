@@ -43,7 +43,7 @@ export default {
           icon: 'icon-user-follow',
           variant: 'success',
         },
-      
+
     ]},
 
 
@@ -173,6 +173,13 @@ export default {
             {
               name: 'Class Details',
               url: '/admin/classmanagement/ClassDetails',
+              icon: 'icon-bag',
+              variant: 'success',
+            },
+
+            {
+              name: 'Attendance',
+              url: '/admin/classmanagement/Attendance',
               icon: 'icon-bag',
               variant: 'success',
             },
