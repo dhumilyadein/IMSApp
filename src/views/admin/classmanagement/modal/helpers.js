@@ -85,9 +85,6 @@ export function mapItems(itemsArray, rowsPerHour, timezone) {
       offsetMinutes = sdt.getMinutes() % interval;
       start = moment(sdt).subtract(offsetMinutes, "minutes").toDate();
 
-      console.log("Helpers.js - mapItems - \nitem.startDateTime string - " 
-      + item.startDateTime + " \nitem.startDateTime date - " + sdt
-      + "\nstart - " + start);
     }
     
     if(item.endDateTime instanceof Date) {
@@ -98,9 +95,6 @@ export function mapItems(itemsArray, rowsPerHour, timezone) {
       var edt = new Date(item.endDateTime);
       end = moment(edt);
 
-      console.log("Helpers.js - mapItems - \nitem.endDateTime string - " 
-      + item.endDateTime + " \nitem.endDateTime date - " + edt
-      + "\nstart - " + end);
     }
 
     var duration = moment.duration(end.diff(start));

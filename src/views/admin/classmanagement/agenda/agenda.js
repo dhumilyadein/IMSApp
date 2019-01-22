@@ -113,7 +113,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     if (item && openModal === true) {
 
       this.setState({ selected: [item] })
-      console.log("Agenda.js - handleItemEdit - item" + JSON.stringify([item]));
+      console.log("Agenda.js - handleItemEdit - item - " + JSON.stringify(item));
 
       return this._openModal();
     }
@@ -214,6 +214,8 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     console.log("agenda - editEvent");
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
+
+    this.updateClassDetails();
   }
 
   changeView(days, event) {
