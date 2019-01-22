@@ -286,6 +286,25 @@ const Attendance = Loadable({
   loading: Loading
 });
 
+const CreateExam = Loadable({
+  loader: () => import("./views/admin/exams/CreateExam"),
+  loading: Loading
+});
+
+const ScheduleExam = Loadable({
+  loader: () => import("./views/admin/exams/ScheduleExam"),
+  loading: Loading
+});
+
+const AddResults = Loadable({
+  loader: () => import("./views/admin/exams/AddResults"),
+  loading: Loading
+});
+
+const ViewResults = Loadable({
+  loader: () => import("./views/admin/exams/ViewResults"),
+  loading: Loading
+});
 
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
@@ -301,6 +320,29 @@ const routes = [
   { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
   { path: "/admin/library/SearchBooks", exact: true, name: "Search/Edit Books", component: SearchBooks },
   { path: "/admin/library/EditCategory", exact: true, name: "EditCategory", component: EditCategory },
+
+  {
+    path: "/admin/exams/CreateExam",
+    name: "Create Exam",
+    component: CreateExam
+  },
+  {
+    path: "/admin/exams/ScheduleExam",
+    name: "Schedule Exam",
+    component: ScheduleExam
+  },
+
+  {
+    path: "/admin/exams/AddResults",
+    name: "Add Results",
+    component: AddResults
+  },
+
+  {
+    path: "/admin/exams/ViewResults",
+    name: "View Results",
+    component: ViewResults
+  },
 
 
 
