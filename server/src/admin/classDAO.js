@@ -1,3 +1,4 @@
+var moment = require('moment');
 var util = require('util');
 
 var { check, validationResult } = require("express-validator/check");
@@ -254,6 +255,39 @@ module.exports = function (app) {
         timeTableTemp.endDateTime = new Date(element.endDateTime);
 
         timeTableArrayTemp.push(timeTableTemp);
+
+        console.log("classDAO - updateClassDetails FIRST FIRST - startDateTime - " 
+            + timeTableTemp.startDateTime 
+            + " endDateTime - " + timeTableTemp.endDateTime);
+
+        /*
+        Code to repeat schedule every week for the next 52 weeks
+        */
+        if (element.repeatScheduleEveryWeek) {
+
+          for (i = 1; i <= 52; i++) {
+
+            var timeTableTemp = {};
+
+            timeTableTemp._id = element._id;
+            timeTableTemp.name = element.name;
+            timeTableTemp.teacher = element.teacher;
+            timeTableTemp.classes = element.classes;
+
+            var dayOfWeek = moment(element.startDateTime).day();
+            timeTableTemp.startDateTime = new Date(moment(element.startDateTime).day(dayOfWeek + 7*i));
+            timeTableTemp.endDateTime = new Date(moment(element.endDateTime).day(dayOfWeek + 7*i));
+
+            console.log("classDAO - updateClassDetails - " + " dayOfWeek - " + dayOfWeek + " startDateTime - " 
+            + timeTableTemp.startDateTime 
+            + " endDateTime - " + timeTableTemp.endDateTime);
+            
+            timeTableArrayTemp.push(timeTableTemp);
+          }
+        }
+
+        console.log("classDAO - updateClassDetails - element.startDateTime - " + element.startDateTime);
+
       });
 
       objForUpdate.timeTable = timeTableArrayTemp;

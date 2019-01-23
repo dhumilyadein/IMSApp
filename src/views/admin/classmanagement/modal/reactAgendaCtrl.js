@@ -67,7 +67,7 @@ export default class ReactAgendaCtrl extends Component {
     this.handleSubjectChange = this.handleSubjectChange.bind(this);
     this.handleSubjectCreate = this.handleSubjectCreate.bind(this);
     this.setDefaultSubjects = this.setDefaultSubjects.bind(this);
-
+    this.repeatScheduleEveryWeekChange = this.repeatScheduleEveryWeekChange.bind(this);
   }
 
   setDefaultSubjects() {
@@ -236,6 +236,7 @@ addEvent(e) {
         startDateTime: new Date(this.state.startDateTime),
         endDateTime: new Date(this.state.endDateTime),
         classes: this.state.classes,
+        repeatScheduleEveryWeek: this.state.repeatScheduleEveryWeek,
         multiple: obj
       }
 
@@ -250,7 +251,9 @@ addEvent(e) {
     teacher: this.state.teacher,
     startDateTime: new Date(this.state.startDateTime),
     endDateTime: new Date(this.state.endDateTime),
-    classes: this.state.classes
+    classes: this.state.classes,
+    repeatScheduleEveryWeek: this.state.repeatScheduleEveryWeek,
+
   }
 
   this.dispatchEvent(newObj);
@@ -268,7 +271,9 @@ updateEvent(e) {
       teacher: this.state.teacher,
       startDateTime: new Date(this.state.startDateTime),
       endDateTime: new Date(this.state.endDateTime),
-      classes: this.state.classes
+      classes: this.state.classes,
+      repeatScheduleEveryWeek: this.state.repeatScheduleEveryWeek,
+
     }
     var items = this.props.items
     for (var i = 0; i < items.length; i++) {
@@ -292,6 +297,19 @@ handleSubmit(e) {
 handleEdit(e) {
   e.preventDefault();
   this.updateEvent(e);
+}
+
+repeatScheduleEveryWeekChange(e) {
+
+  if (e.target.checked === true) {
+    this.setState({
+      repeatScheduleEveryWeek: true
+    });
+  } else if (e.target.checked === false) {
+    this.setState({
+      repeatScheduleEveryWeek: false
+    });
+  }
 }
 
 handleSubjectChange = (newValue, actionMeta) => {
@@ -420,20 +438,19 @@ render() {
             <Input
                                                 className="form-check-input"
                                                 type="checkbox"
-                                                id="parentaddresscheck"
-                                                style={{ height: "35px", width: "25px" }}
-                                                name="parentaddresscheck"
-                                                checked={this.state.parentaddresscheck}
-                                                onChange={this.copyAddress}
-                                                disabled={this.state.editMode}
-                                                style={whiteTextFieldStyle}
+                                                id="repeatScheduleEveryWeek"
+                                                // style={{ height: "35px", width: "25px" }}
+                                                name="repeatScheduleEveryWeek"
+                                                checked={this.state.repeatScheduleEveryWeek}
+                                                onChange={this.repeatScheduleEveryWeekChange}
+                                                // style={whiteTextFieldStyle}
                                               />
                                               <Label
                                                 className="form-check-label"
                                                 check
                                                 htmlFor="inline-checkbox1"
                                               >
-                                                Repeat appointment every week
+                                                Repeat appointment
                                     </Label>
           
 <br /> <br />
@@ -494,20 +511,19 @@ render() {
         <Input
                                                 className="form-check-input"
                                                 type="checkbox"
-                                                id="parentaddresscheck"
-                                                style={{ height: "35px", width: "25px" }}
-                                                name="parentaddresscheck"
-                                                checked={this.state.parentaddresscheck}
-                                                onChange={this.copyAddress}
-                                                disabled={this.state.editMode}
-                                                style={whiteTextFieldStyle}
+                                                id="repeatScheduleEveryWeek"
+                                                // style={{ height: "35px", width: "25px" }}
+                                                name="repeatScheduleEveryWeek"
+                                                checked={this.state.repeatScheduleEveryWeek}
+                                                onChange={this.repeatScheduleEveryWeekChange}
+                                                // style={whiteTextFieldStyle}
                                               />
                                               <Label
                                                 className="form-check-label"
                                                 check
                                                 htmlFor="inline-checkbox1"
                                               >
-                                                Repeat appointment every week
+                                                Repeat appointment
                                     </Label>
 
                                     <br />

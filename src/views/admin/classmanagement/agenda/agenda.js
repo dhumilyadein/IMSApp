@@ -149,6 +149,9 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     console.log("Agenda.js - handleDateRangeChange startDate - " + startDate + " enddate - " + endDate
       + " this.state.startDate" + this.state.startDate);
 
+      /*
+      Changing date range to next monday by adding 5 days
+      */
     if (startDate > this.state.startDate) {
 
       this.setState({ startDate: moment(this.state.startDate).day(1 + 7) })
