@@ -52,6 +52,15 @@ var ExamsSchema = new Schema({
 
 
 },
+
+
+timeLimit:{
+  type: Number,
+  trim:true,
+  required: true,
+
+
+},
 description:{
   type: String,
   trim:true,

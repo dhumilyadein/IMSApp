@@ -54,7 +54,7 @@ async function createExam(req, res) {
 
   var template = {
     "examName": req.body.examName, "unit": req.body.unit, "totalMarks": req.body.totalMarks,
-    "passingMarks": req.body.passingMarks, "description":req.body.description
+    "passingMarks": req.body.passingMarks, "description":req.body.description, "timeLimit":req.body.timeLimit
 
   };
   var createExam = new Exams(template);
@@ -139,7 +139,7 @@ async function editExam(req,res)
   exams
 .updateOne({examName:req.body.existingExams[req.body.examNo].examName},
   {$set: {examName: req.body.examName, unit: req.body.unit, totalMarks: req.body.totalMarks,
-  passingMarks: req.body.passingMarks,description:req.body.description
+  passingMarks: req.body.passingMarks,description:req.body.description, timeLimit:req.body.timeLimit
            }}
   )
 .then(data => {

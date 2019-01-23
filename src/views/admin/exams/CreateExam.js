@@ -45,7 +45,9 @@ examNo:"",
       totalMarks:"",
       passingMarks:"",
       showEditExam:false,
-      examNo:""
+      examNo:"",
+      timeLimit:"",
+      timeLimitError:""
 
     };
 
@@ -94,7 +96,7 @@ examNo:"",
 
     this.setState({
       examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
-      modalSuccess: false
+      modalSuccess: false, timeLimitError:""
     }, () => {
       if (!this.state.examName) {
         this.setState({ examNameError: "Please Enter Item Name" });
@@ -107,6 +109,10 @@ examNo:"",
           if (!this.state.passingMarks) {
             this.setState({ passingMarksError: "Please Enter Passing Marks" });
             submit = false;}
+
+            if (!this.state.timeLimit) {
+              this.setState({ timeLimitError: "Please Enter Time Limit" });
+              submit = false;}
 
 
 
@@ -145,7 +151,7 @@ examNo:"",
 
     this.setState({
       examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
-      modalSuccess: false
+      modalSuccess: false, timeLimitError:""
     }, () => {
       if (!this.state.examName) {
         this.setState({ examNameError: "Please Enter Item Name" });
@@ -158,6 +164,11 @@ examNo:"",
           if (!this.state.passingMarks) {
             this.setState({ passingMarksError: "Please Enter Passing Marks" });
             submit = false;}
+
+            if (!this.state.timeLimit) {
+              this.setState({ timeLimitError: "Please Enter Time Limit" });
+              submit = false;}
+
 
 
 
@@ -357,6 +368,37 @@ deleteSpecificItem= idx => () => {
                                 </h6>{" "}
                               </font>
                             )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Time Limit(Hours)</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="number"
+                                size="lg"
+                                name="timeLimit"
+                                 id="timeLimit"
+                                value={this.state.timeLimit}
+                                onChange={e => {
+                                  this.setState(
+                                    { timeLimit: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.timeLimitError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.timeLimitError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
       <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -591,6 +633,38 @@ deleteSpecificItem= idx => () => {
                                 </h6>{" "}
                               </font>
                             )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Time Limit(hours)</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="number"
+                                size="lg"
+                                name="timeLimit"
+                                 id="timeLimit"
+                                value={this.state.timeLimit}
+                                onChange={e => {
+                                  this.setState(
+                                    { timeLimit: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.timeLimitError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.timeLimitError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+
       <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >

@@ -102,13 +102,13 @@ loader:false,
          this.studentSubmitHandler = this.studentSubmitHandler.bind(this);
          this.staffSubmitHandler = this.staffSubmitHandler.bind(this);
          this.classSubmitHandler = this.classSubmitHandler.bind(this);
-         this.studentSelectedHandler = this.studentSelectedHandler.bind(this);
+        
          this.toggle = this.toggle.bind(this);
 
          this.toggleSuccess = this.toggleSuccess.bind(this);
           this.getExistingBooks=this.getExistingBooks.bind(this);
 this.reset=this.reset.bind(this);
-this.fetchStaff=this.fetchStaff.bind(this);
+
 
     }
 
@@ -839,6 +839,7 @@ this.setState({selectedStudent:e});
                                         type="select"
                                         value={this.state.section}
                                         onChange={this.sectionChangeHandler}
+                                        isMulti={true}
                                       >
                                         <option value="">Select</option>
                                         {this.state.sectionArray.map(element => {
@@ -859,23 +860,23 @@ this.setState({selectedStudent:e});
 
 
                      <Select
-                            id="studentSelect"
-                            name="studentSelect"
+                            id="examSelect"
+                            name="examSelect"
 
-                          placeholder="Select Student or Type to search"
-                            options={this.state.studentsDataArray}
+                          placeholder="Select Exam or Type to search"
+                            options={this.state.examDataArray}
                           closeMenuOnSelect={true}
-                         value={this.state.selectedStudent}
+                         value={this.state.selectedExam}
                          isClearable={true}
                          //menuIsOpen ={this.state.studentOpen}
                             isSearchable={true}
 
-                            onChange={this.studentSelectedHandler}
+                            onChange={e=>{this.setState({selectedExam:e})}}
                             />
-   {this.state.studentError && (
+   {this.state.examError && (
                                     <font color="red">
                                       {" "}
-                                      <p>{this.state.studentError}</p>
+                                      <p>{this.state.examError}</p>
                                     </font>
                                   )}
 
