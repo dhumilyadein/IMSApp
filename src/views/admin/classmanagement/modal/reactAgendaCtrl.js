@@ -384,16 +384,20 @@ render() {
         <form onSubmit={this.handleEdit}>
 
         <div className="agendCtrls-label-wrapper">
+
             <div className="agendCtrls-label-inline">
-              <label>Teacher</label>
+            <InputGroupText className="font-weight-bold">
+                      Teacher
+                                </InputGroupText>
+              {/* <label>Teacher</label> */}
               <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
               value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
             </div>
-          </div>
-
-          <div className="agendCtrls-label-wrapper">
             <div className="agendCtrls-label-inline">
-              <label>Subject name edit</label>
+            <InputGroupText className="font-weight-bold">
+                      Subject
+                                </InputGroupText>
+              {/* <label>Subject name edit</label> */}
               {/* <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input" 
               value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/> */}
               
@@ -419,20 +423,39 @@ render() {
                 </font>
               )}
             </div>
+          </div>
+
+<br/>
+
+          <div className="agendCtrls-label-wrapper">
+            
             <div className="agendCtrls-label-inline ">
-              <label>Color</label>
+            <InputGroupText>
+                      Color
+                                </InputGroupText>
+              {/* <label>Color</label> */}
               <div className="agendCtrls-radio-wrapper">
                 {colors}</div>
             </div>
           </div>
           
+          <br/>
+
+<Card>
+  <CardBody>
           <div className="agendCtrls-timePicker-wrapper">
             <div className="agendCtrls-time-picker">
-              <label >Start Date</label>
+            <InputGroupText>
+                      Start Date
+                                </InputGroupText>
+              {/* <label >Start Date</label> */}
               <Rdate value={this.state.startDateTime} onChange={this.handleDateChange.bind(null, 'startDateTime')} input={false} viewMode="time" ></Rdate>
             </div>
             <div className="agendCtrls-time-picker">
-              <label >End Date</label>
+            <InputGroupText>
+                      End Date
+                                </InputGroupText>
+              {/* <label >End Date</label> */}
               <Rdate value={this.state.endDateTime} onChange={this.handleDateChange.bind(null, 'endDateTime')} input={false} viewMode="time" ></Rdate>
               </div>
               </div>
@@ -441,7 +464,7 @@ render() {
                                                 className="form-check-input"
                                                 type="checkbox"
                                                 id="repeatScheduleEveryWeek"
-                                                // style={{ height: "35px", width: "25px" }}
+                                                style={{ height: "15px", width: "15px" }}
                                                 name="repeatScheduleEveryWeek"
                                                 checked={this.state.repeatScheduleEveryWeek}
                                                 onChange={this.repeatScheduleEveryWeekChange}
@@ -452,11 +475,14 @@ render() {
                                                 check
                                                 htmlFor="inline-checkbox1"
                                               >
-                                                Repeat appointment
+                                                Repeat Schedule Every week
                                     </Label>
           
 <br /> <br />
           <input type="submit" value="Save"/>
+</CardBody>
+</Card>
+
         </form>
       </div>
     );
@@ -469,14 +495,19 @@ render() {
         
         <div className="agendCtrls-label-wrapper">
             <div className="agendCtrls-label-inline">
-              <label>Teacher</label>
+            <InputGroupText className="font-weight-bold">
+                      Teacher
+                                </InputGroupText>
+                                {/* <label>Teacher</label> */}
               <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
               value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/>
             </div>
-          </div>
-          <div className="agendCtrls-label-wrapper">
-          <div className="agendCtrls-label-inline">
-            <label>Subject name non edit</label>
+
+            <div className="agendCtrls-label-inline">
+          <InputGroupText className="font-weight-bold">
+          Subject
+                                </InputGroupText>
+            {/* <label>Subject name</label> */}
             {/* <input type="text" ref="eventName" autoFocus name="name" className="agendCtrls-event-input" 
             value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/> */}
 
@@ -493,19 +524,39 @@ render() {
                 options={this.state.defaultSubjects}
               />
           </div>
+          </div>
+
+<br/>
+
+          <div className="agendCtrls-label-wrapper">
+          
           <div className="agendCtrls-label-inline">
-            <label>Color</label>
+          <InputGroupText>
+          Color
+                                </InputGroupText>
+            {/* <label>Color</label> */}
             <div className="agendCtrls-radio-wrapper">
               {colors}</div>
           </div>
         </div>
+
+<br/>
+
+<Card>
+  <CardBody>
         <div className="agendCtrls-timePicker-wrapper">
           <div className="agendCtrls-time-picker">
-            <label >Start Date</label>
+          <InputGroupText>
+          Start Date
+                                </InputGroupText>
+            {/* <label >Start Date</label> */}
             <Rdate value={this.state.startDateTime} onChange={this.handleDateChange.bind(null, 'startDateTime')} input={false} viewMode="time" ></Rdate>
           </div>
           <div className="agendCtrls-time-picker">
-            <label >End Date</label>
+          <InputGroupText>
+          End Date
+                                </InputGroupText>
+            {/* <label >End Date</label> */}
             <Rdate value={this.state.endDateTime} onChange={this.handleDateChange.bind(null, 'endDateTime')} input={false} viewMode="time" ></Rdate>
           </div>
         </div>
@@ -514,7 +565,7 @@ render() {
                                                 className="form-check-input"
                                                 type="checkbox"
                                                 id="repeatScheduleEveryWeek"
-                                                // style={{ height: "35px", width: "25px" }}
+                                                style={{ height: "15px", width: "15px" }}
                                                 name="repeatScheduleEveryWeek"
                                                 checked={this.state.repeatScheduleEveryWeek}
                                                 onChange={this.repeatScheduleEveryWeekChange}
@@ -525,12 +576,15 @@ render() {
                                                 check
                                                 htmlFor="inline-checkbox1"
                                               >
-                                                Repeat appointment
+                                                Repeat Schedule Every week
                                     </Label>
 
                                     <br />
                                     <br />
         <input type="submit" value="Save"/>
+</CardBody>
+</Card>
+
       </form>
     </div>
   );
