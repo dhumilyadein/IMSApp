@@ -42,7 +42,7 @@ module.exports = function (app) {
      */
   function fetchAllClassDetails(req, res) {
 
-    console.log("fetchAllClassDetails ENTRY");
+    // console.log("fetchAllClassDetails ENTRY");
 
     //var searchJSON = {};
 
@@ -94,7 +94,7 @@ module.exports = function (app) {
 
       req.body.AllData.forEach(element => {
 
-        console.log("element - " + JSON.stringify(element));
+        // console.log("element - " + JSON.stringify(element));
 
         var errors = validationResult(element);
 
@@ -103,7 +103,6 @@ module.exports = function (app) {
         }
 
         var currentTime = new Date();
-        console.log("current time - " + currentTime);
 
         var classData = {
           "class": element.class,
@@ -118,7 +117,7 @@ module.exports = function (app) {
 
         var classObj = new Class(classData);
 
-        console.log("classObj - " + classObj);
+        // console.log("classObj - " + classObj);
 
         classObj
           .save()
@@ -145,7 +144,6 @@ module.exports = function (app) {
       }
 
       var currentTime = new Date();
-      console.log("current time - " + currentTime);
 
 
       var classData = {
@@ -163,9 +161,9 @@ module.exports = function (app) {
       classObj
         .save()
         .then(classObj => {
-          console.log("Data inserted successfully in class");
+          // console.log("Data inserted successfully in class");
           response = { reqbody: req.body, message: "Class details inserted successfully" };
-          console.log("server final response - " + JSON.stringify(response));
+          console.log("ClassDAO - insertClassDetails - Data inserted successfully in class. Server final response - " + JSON.stringify(response));
           return res.send(response);
         })
         .catch(err => {
@@ -184,7 +182,7 @@ module.exports = function (app) {
 
   async function updateClassDetails(req, res) {
 
-    console.log("classDAO - updateClassDetails - Enter");
+    // console.log("classDAO - updateClassDetails - Enter");
 
     //Initial validation like fields empty check
     var errors = validationResult(req);
@@ -204,6 +202,9 @@ module.exports = function (app) {
 
     console.log("ClassDAO - updateClassDetails req.body - " + JSON.stringify(req.body));
 
+    /*
+    If the class/section is updated in register user we have to remove the user from the previous code. This logic is present here.
+    */
     if(request.previousClass && request.previousSection) {
 
       var username = {};
@@ -223,7 +224,7 @@ module.exports = function (app) {
   
         console.log("Class details udpated successfully");
         response = { reqbody: req.body, message: "Class details updated successfully" };
-        console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(response));
+        console.log("ClassDAO - updateClassDetails - Class details udpated successfully - Server final response - " + JSON.stringify(response));
         return res.send(response);
       }).catch(function (err) {
         console.log("Catching server err - " + err);
@@ -256,9 +257,9 @@ module.exports = function (app) {
 
         timeTableArrayTemp.push(timeTableTemp);
 
-        console.log("classDAO - updateClassDetails FIRST FIRST - startDateTime - " 
-            + timeTableTemp.startDateTime 
-            + " endDateTime - " + timeTableTemp.endDateTime);
+        // console.log("classDAO - updateClassDetails FIRST FIRST - startDateTime - " 
+        //     + timeTableTemp.startDateTime 
+        //     + " endDateTime - " + timeTableTemp.endDateTime);
 
         /*
         Code to repeat schedule every week for the next 52 weeks
@@ -278,15 +279,15 @@ module.exports = function (app) {
             timeTableTemp.startDateTime = new Date(moment(element.startDateTime).day(dayOfWeek + 7*i));
             timeTableTemp.endDateTime = new Date(moment(element.endDateTime).day(dayOfWeek + 7*i));
 
-            console.log("classDAO - updateClassDetails - " + " dayOfWeek - " + dayOfWeek + " startDateTime - " 
-            + timeTableTemp.startDateTime 
-            + " endDateTime - " + timeTableTemp.endDateTime);
+            // console.log("classDAO - updateClassDetails - " + " dayOfWeek - " + dayOfWeek + " startDateTime - " 
+            // + timeTableTemp.startDateTime 
+            // + " endDateTime - " + timeTableTemp.endDateTime);
             
             timeTableArrayTemp.push(timeTableTemp);
           }
         }
 
-        console.log("classDAO - updateClassDetails - element.startDateTime - " + element.startDateTime);
+        // console.log("classDAO - updateClassDetails - element.startDateTime - " + element.startDateTime);
 
       });
 
@@ -315,9 +316,9 @@ module.exports = function (app) {
       udpateJSON
     ).then(function (classData) {
 
-      console.log("Class details udpated successfully");
+      // console.log("Class details udpated successfully");
       response = { reqbody: req.body, message: "Class details updated successfully" };
-      console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(response));
+      console.log("ClassDAO - updateClassDetails - Class details udpated successfully - server final response - " + JSON.stringify(response));
       return res.send(response);
     }).catch(function (err) {
       console.log("Catching server err - " + err);
@@ -325,6 +326,66 @@ module.exports = function (app) {
       console.log("ClassDAO - updateClassDetails - Errors in classDAO - server final response - " + JSON.stringify(response));
       return res.send(response);
     });
+
+  }
+
+  async function removeSchedule(req, res) {
+
+    // console.log("classDAO - updateClassDetails - Enter");
+
+    //Initial validation like fields empty check
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      console.log("ClassDAO - removeSchedule - Errors in classDAO - THROWING VALIDATOIN ERROR");
+      response = { errors: errors.mapped() };
+      console.log("server final response - " + JSON.stringify(response));
+      return res.send(response);
+    }
+
+    var currentTime = new Date();
+
+    var request = req.body;
+    var objForUpdate = {};
+
+    console.log("ClassDAO - removeSchedule req.body - " + JSON.stringify(request));
+
+      var id = {};
+      var pullTimeTableJSON = {};
+      var pullTimeTableUdpateJSON = {};
+
+      if (request.timeTable._id) id._id = request.timeTable._id;
+      if(id._id) pullTimeTableJSON.timeTable = id;
+
+      if (Object.keys(pullTimeTableJSON).length !== 0) {
+
+        pullTimeTableUdpateJSON = {
+          $pull: pullTimeTableJSON
+        }
+      
+
+      console.log("ClassDAO - removeSchedule - pullTimeTableUdpateJSON - " + JSON.stringify(pullTimeTableUdpateJSON));
+
+      await Class.findOneAndUpdate(
+        { $and: [{ "class": request.class }, { "section": request.section }] },
+        pullTimeTableUdpateJSON
+      ).then(function (classData) {
+  
+        response = { reqbody: req.body, message: "Class details updated successfully" };
+        console.log("ClassDAO - removeSchedule - Class details udpated successfully - Server final response - " + JSON.stringify(response));
+        return res.send(response);
+      }).catch(function (err) {
+        console.log("Catching server err - " + err);
+        response = { errors: err };
+        console.log("ClassDAO - removeSchedule - Errors in classDAO - server final response - " + JSON.stringify(response));
+        return res.send(response);
+      });
+
+    } else {
+
+      console.log("ClassDAO - removeSchedule - pullStudentsDataJSON empty - nothing to remove");
+    }
 
   }
 
@@ -338,6 +399,11 @@ module.exports = function (app) {
 
   app.post("/api/updateClassDetails", updateClassValidation, updateClassDetails, (req, res) => {
     console.log("ClassDAO - updateClassDetails post method call");
+
+  });
+
+  app.post("/api/removeSchedule", updateClassValidation, removeSchedule, (req, res) => {
+    console.log("ClassDAO - updateClassValidation post method call");
 
   });
 

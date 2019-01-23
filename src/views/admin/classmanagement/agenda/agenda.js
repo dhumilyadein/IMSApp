@@ -39,7 +39,7 @@ var colors = {
 }
 
 export default class Agenda extends Component {
-  
+
   constructor(props) {
 
     super(props);
@@ -59,7 +59,10 @@ export default class Agenda extends Component {
       subjectsArray: this.props.subjects,
       selectedClass: this.props.selectedClass,
       selectedSection: this.props.selectedSection,
-      timeTable: this.props.timeTable
+      timeTable: this.props.timeTable,
+
+      classDetailsUpdatedFlag: false,
+      removeScheduleFlag: false
     }
     this.handleRangeSelection = this.handleRangeSelection.bind(this)
     this.handleItemEdit = this.handleItemEdit.bind(this)
@@ -75,6 +78,7 @@ export default class Agenda extends Component {
     this.getCurrentWeek = this.getCurrentWeek.bind(this);
     this.updateClassDetails = this.updateClassDetails.bind(this);
     this.hourChangehandler = this.hourChangehandler.bind(this);
+    this.removeSchedule = this.removeSchedule.bind(this);
 
     // Get first day of the current week.
     this.getCurrentWeek();
@@ -99,7 +103,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
     // this.setState({ items: items })
     this.setState({ items: this.state.timeTable }, () => {
-      console.log("Agenda.js - timeTable - " + this.state.timeTable);
+      // console.log("Agenda.js - timeTable - " + this.state.timeTable);
     })
 
   }
@@ -116,7 +120,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     if (item && openModal === true) {
 
       this.setState({ selected: [item] })
-      console.log("Agenda.js - handleItemEdit - item - " + JSON.stringify(item));
+      // console.log("Agenda.js - handleItemEdit - item - " + JSON.stringify(item));
 
       return this._openModal();
     }
@@ -126,7 +130,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
   }
   handleCellSelection(item, openModal) {
 
-    console.log("Agenda.js - handleCellSelection");
+    // console.log("Agenda.js - handleCellSelection");
     if (this.state.selected && this.state.selected[0] === item) {
       return this._openModal();
     }
@@ -146,12 +150,12 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
   handleDateRangeChange(startDate, endDate) {
 
-    console.log("Agenda.js - handleDateRangeChange startDate - " + startDate + " enddate - " + endDate
-      + " this.state.startDate" + this.state.startDate);
+    // console.log("Agenda.js - handleDateRangeChange startDate - " + startDate + " enddate - " + endDate
+    //   + " this.state.startDate" + this.state.startDate);
 
-      /*
-      Changing date range to next monday by adding 5 days
-      */
+    /*
+    Changing date range to next monday by adding 5 days
+    */
     if (startDate > this.state.startDate) {
 
       this.setState({ startDate: moment(this.state.startDate).day(1 + 7) })
@@ -167,8 +171,9 @@ then are fetched in reactAgendaItem using {this.props.item.name}
   handleRangeSelection(selected) {
 
     // this.setState({ startDate: startDate })
+
     this.setState({ selected: selected, showCtrl: true })
-    console.log("agenda - handleRangeSelection selected - " + selected);
+    // console.log("agenda - handleRangeSelection selected - " + selected);
     this._openModal();
 
   }
@@ -187,29 +192,31 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
   handleItemChange(items, item) {
 
-    console.log("agenda - handleItemChange");
+    // console.log("agenda - handleItemChange");
     this.setState({ items: items })
   }
 
   handleItemSize(items, item) {
 
-    console.log("agenda - handleItemSize");
+    // console.log("agenda - handleItemSize");
     this.setState({ items: items })
 
   }
 
   removeEvent(items, item) {
 
-    console.log("agenda - removeEvent");
+    // console.log("agenda - removeEvent - item - " + JSON.stringify(item) + " \nitems - " + JSON.stringify(items));
     this.setState({ items: items });
+
+    this.removeSchedule(item);
   }
 
   addNewEvent(items, newItems) {
 
-    console.log("Agenda.js - addNewEvent - " + " newItems - " + JSON.stringify(newItems) + " \nitems - " + items + " \nthis.state.items - " 
-    + JSON.stringify(this.state.items) 
-    + " \nthis.state.items - " + JSON.stringify(this.state.items));
-    
+    // console.log("Agenda.js - addNewEvent - " + " newItems - " + JSON.stringify(newItems) + " \nitems - " + items + " \nthis.state.items - " 
+    // + JSON.stringify(this.state.items) 
+    // + " \nthis.state.items - " + JSON.stringify(this.state.items));
+
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
 
@@ -217,7 +224,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
   }
   editEvent(items, item) {
 
-    console.log("agenda - editEvent");
+    // console.log("agenda - editEvent");
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
 
@@ -236,8 +243,8 @@ then are fetched in reactAgendaItem using {this.props.item.name}
       "timeTable": this.state.items
     }
 
-    console.log("Agenda - updateClassDetails - updateClassDetailsRequest - "
-      + JSON.stringify(updateClassDetailsRequest));
+    // console.log("Agenda - updateClassDetails - updateClassDetailsRequest - "
+    //   + JSON.stringify(updateClassDetailsRequest));
 
     await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
 
@@ -252,16 +259,40 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     });
   }
 
+  async removeSchedule(item) {
+
+    var removeScheduleRequest = {
+      "class": this.state.selectedClass,
+      "section": this.state.selectedSection,
+      "timeTable": item
+    }
+
+    // console.log("Agenda - removeSchedule - removeScheduleRequest - "
+    //   + JSON.stringify(removeScheduleRequest));
+
+    await axios.post("http://localhost:8001/api/removeSchedule", removeScheduleRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          removeScheduleFlag: true
+        });
+      }
+    });
+  }
+
   hourChangehandler(e) {
 
-    console.log("agenda - hourChangehandler - e.target.name - " + [e.currentTarget.name] + " e.target.value - " + e.currentTarget.value);
+    // console.log("agenda - hourChangehandler - e.target.name - " + [e.currentTarget.name] + " e.target.value - " + e.currentTarget.value);
     this.setState({ [e.currentTarget.name]: e.currentTarget.value });
   }
 
   render() {
 
     var AgendaItem = function (props) {
-      console.log(' item component props', props)
+      // console.log(' item component props', props)
       return <div style={{ display: 'block', position: 'absolute', background: '#FFF' }}>{props.item.name} <button onClick={() => props.edit(props.item)}>Edit </button></div>
     }
     return (
@@ -279,9 +310,9 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
               <div >
 
-              <div className="control-buttons">
-                <InputGroupText>
-                      Start Hour
+                <div className="control-buttons">
+                  <InputGroupText>
+                    Start Hour
                                 </InputGroupText>
                   <Input
                     name="startHour"
@@ -291,7 +322,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                     onChange={this.hourChangehandler}
                   />
                   <InputGroupText>
-                      End Hour
+                    End Hour
                                 </InputGroupText>
                   <Input
                     name="endHour"
@@ -342,10 +373,10 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                 {
                   this.state.showModal ? <Modal clickOutside={this._closeModal} >
                     <div className="modal-nude ">
-                    {/* For pop up Modal */}
-                      <ReactAgendaCtrl items={this.state.items} itemColors={colors} 
-                      selectedCells={this.state.selected} Addnew={this.addNewEvent} 
-                      edit={this.editEvent} subjectsArray={this.props.subjects}/>
+                      {/* For pop up Modal */}
+                      <ReactAgendaCtrl items={this.state.items} itemColors={colors}
+                        selectedCells={this.state.selected} Addnew={this.addNewEvent}
+                        edit={this.editEvent} subjectsArray={this.props.subjects} />
 
                     </div>
                   </Modal> : ''

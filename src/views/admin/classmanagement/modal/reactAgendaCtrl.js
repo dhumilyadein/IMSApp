@@ -72,7 +72,7 @@ export default class ReactAgendaCtrl extends Component {
 
   setDefaultSubjects() {
 
-    console.log("reactAgendaCtrl - setDefaultSubjects setDefaultSubjects - " + this.props.subjectsArray);
+    // console.log("reactAgendaCtrl - setDefaultSubjects setDefaultSubjects - " + this.props.subjectsArray);
     var defaultSubjectsTemp = [];
 
     this.props.subjectsArray.forEach(function(key) {
@@ -91,18 +91,18 @@ export default class ReactAgendaCtrl extends Component {
     this.setState({
       defaultSubjects : defaultSubjectsTemp
     }, () => {
-      console.log("ReactAgendaCtrl defaultSubjects - " + JSON.stringify(defaultSubjectsTemp));
+      // console.log("ReactAgendaCtrl defaultSubjects - " + JSON.stringify(defaultSubjectsTemp));
   });
  
 }
 
   componentDidMount() {
 
-    console.log("ReactAgendaCtrl - componentDidMount - this.props.selectedCells[0].name - " + this.props.selectedCells[0].name);
+    // console.log("ReactAgendaCtrl - componentDidMount - this.props.selectedCells[0].name - " + this.props.selectedCells[0].name);
 
   if (this.props.itemColors) {
 
-    console.log("this.props this.props.itemColors - " + this.props.itemColors);
+    // console.log("this.props this.props.itemColors - " + this.props.itemColors);
     this.setState({
       classes: Object.keys(this.props.itemColors)[0]
     })
@@ -111,7 +111,7 @@ export default class ReactAgendaCtrl extends Component {
 
   if (this.props.subjectsArray && this.state.defaultSubjects === null) {
 
-    console.log("this.props.subjectsArray - " + this.props.subjectsArray);
+    // console.log("this.props.subjectsArray - " + this.props.subjectsArray);
     this.setDefaultSubjects();
   }
 
@@ -156,7 +156,7 @@ export default class ReactAgendaCtrl extends Component {
 
   handleChange(event) {
 
-    console.log("handleChange");
+    // console.log("handleChange");
     if(event.target.tagName === 'BUTTON'){
       event.preventDefault();
     }
@@ -168,7 +168,7 @@ export default class ReactAgendaCtrl extends Component {
       data[event.target.name] = event.target.value;
     }
 
-    console.log("handleChange - " + event.target.name + " " + event.target.value.value);
+    // console.log("handleChange - " + event.target.name + " " + event.target.value.value);
 
     this.setState(data);
   }
@@ -219,7 +219,7 @@ dispatchEvent(obj) {
 
 addEvent(e) {
 
-  console.log("ReactAgendaCtrl.js - addEvent");
+  // console.log("ReactAgendaCtrl.js - addEvent");
 
   if (this.state.name.length < 1 || this.state.teacher.length < 1) {
     return;
@@ -261,7 +261,7 @@ addEvent(e) {
 
 updateEvent(e) {
 
-  console.log("reactAgendaCtrl - updateEvent");
+  // console.log("reactAgendaCtrl - updateEvent");
   
   if (this.props.selectedCells[0]._id && this.props.items) {
 
@@ -313,13 +313,15 @@ repeatScheduleEveryWeekChange(e) {
 }
 
 handleSubjectChange = (newValue, actionMeta) => {
-  console.log("reactAgendaCtrl - selected value - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+  
+  // console.log("reactAgendaCtrl - selected value - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+  
   this.setState({ name: newValue.value,
     selectedSubject: newValue
    }, () => {
-    console.log(`state name : ${JSON.stringify(this.state.name)}`)
+    // console.log(`state name : ${JSON.stringify(this.state.name)}`)
   });
-  console.groupEnd();
+  // console.groupEnd();
 };
 
 handleSubjectCreate = (createdSubject) => {
@@ -335,8 +337,8 @@ handleSubjectCreate = (createdSubject) => {
   this.setState({ isLoading: true });
   this.setState({ subjects: this.state.defaultSubjects });
 
-  console.log('Wait a moment... input value -  ' + createdSubject);
-  console.log("Initial Available subjects - " + JSON.stringify(this.state.subjects));
+  // console.log('Wait a moment... input value -  ' + createdSubject);
+  // console.log("Initial Available subjects - " + JSON.stringify(this.state.subjects));
 
   var createdOption = { "label": createdSubject, "value": createdSubject };
 
@@ -345,15 +347,15 @@ handleSubjectCreate = (createdSubject) => {
   this.setState({
     subjects: subjectsTemp,
   }, () => {
-    console.log("Available subjects - " + JSON.stringify(this.state.subjects));
+    // console.log("Available subjects - " + JSON.stringify(this.state.subjects));
   });
 
-  console.log("check check name - " + JSON.stringify(this.state.name));
+  // console.log("check check name - " + JSON.stringify(this.state.name));
   this.setState({
     name: createdOption.value,
     selectedSubject: createdOption
   }, () => {
-    console.log("Selected Subject - " + JSON.stringify(this.state.name.value));
+    // console.log("Selected Subject - " + JSON.stringify(this.state.name.value));
   });
 
 };
