@@ -45,6 +45,9 @@ examNo:"",
       totalMarks:"",
       passingMarks:"",
       showEditExam:false,
+      examNo:"",
+      timeLimit:"",
+      timeLimitError:""
 
     };
 
@@ -74,7 +77,8 @@ examNo:"",
       examName:"",
       totalMarks:"",
       passingMarks:"",
-      description:""
+      description:"",
+      timeLimit:""
     });
 
   }
@@ -92,20 +96,25 @@ examNo:"",
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      examNameError: "", totalMarksError: "", success: false, passingMarksError:"",
-      modalSuccess: false
+      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
+      modalSuccess: false, timeLimitError:""
     }, () => {
       if (!this.state.examName) {
         this.setState({ examNameError: "Please Enter Item Name" });
         submit = false;}
 
         if (!this.state.totalMarks) {
-            this.setState({ unitError: "Please Enter Total Marks" });
+          this.setState({ totalMarksError: "Please Enter Total Marks" });
+          submit = false;}
+
+          if (!this.state.passingMarks) {
+            this.setState({ passingMarksError: "Please Enter Passing Marks" });
             submit = false;}
 
-            if (!this.state.passingMarks) {
-              this.setState({ unitError: "Please Enter Passing Marks" });
+            if (!this.state.timeLimit) {
+              this.setState({ timeLimitError: "Please Enter Time Limit" });
               submit = false;}
+
 
 
 
@@ -113,7 +122,7 @@ examNo:"",
         console.log("Creating Item: ");
         axios
           .post("http://localhost:8001/api/createExam", {"examName":this.state.examName,"totalMarks":this.state.totalMarks,
-          "passingMarks":this.state.passingMarks, "description":this.state.description})
+          "passingMarks":this.state.passingMarks, "description":this.state.description,"timeLimit":this.state.timeLimit})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
@@ -128,6 +137,7 @@ examNo:"",
 
                 success: true,
                 modalSuccess: true,
+                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!"
 
               },()=>{this.getExistingExams()});
 
@@ -141,20 +151,25 @@ examNo:"",
     console.log("in Edit State: " + JSON.stringify(this.state));
 
     this.setState({
-      examNameError: "", unitError: "", success: false,
-      modalSuccess: false
+      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
+      modalSuccess: false, timeLimitError:""
     }, () => {
       if (!this.state.examName) {
         this.setState({ examNameError: "Please Enter Item Name" });
         submit = false;}
 
         if (!this.state.totalMarks) {
-          this.setState({ unitError: "Please Enter Total Marks" });
+          this.setState({ totalMarksError: "Please Enter Total Marks" });
           submit = false;}
 
           if (!this.state.passingMarks) {
-            this.setState({ unitError: "Please Enter Passing Marks" });
+            this.setState({ passingMarksError: "Please Enter Passing Marks" });
             submit = false;}
+
+            if (!this.state.timeLimit) {
+              this.setState({ timeLimitError: "Please Enter Time Limit" });
+              submit = false;}
+
 
 
 
@@ -169,12 +184,13 @@ examNo:"",
             this.setState({
               examNameError:"Exam name already in use"
             });}
-           else  if (result.data.msg === "Item Updated")
+           else  if (result.data.msg === "Exam Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                showEditItem:false
+                showEditItem:false,
+                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!" 
 
               },()=>{this.getExistingExams()});
 
@@ -203,18 +219,18 @@ deleteSpecificItem= idx => () => {
 
   confirmAlert({
     title: 'Confirm to Remove',
-    message: 'Are you sure to Remove this Item?',
+    message: 'Are you sure to Remove this Exam?',
     buttons: [
       {
         label: 'Yes',
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/deleteItem",{"examName":this.state.existingExams[idx].examName})
+        .post("http://localhost:8001/api/deleteExam",{"examName":this.state.existingExams[idx].examName})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Item Deleted")
-            this.getexistingExams();
+          if (result.data.msg==="Exam Deleted")
+            this.getExistingExams();
 
         })
       },
@@ -252,7 +268,7 @@ deleteSpecificItem= idx => () => {
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Exam: {this.state.examName} Saved Successfully!
+                        {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
@@ -353,6 +369,37 @@ deleteSpecificItem= idx => () => {
                                 </h6>{" "}
                               </font>
                             )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Time Limit(Hours)</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="number"
+                                size="lg"
+                                name="timeLimit"
+                                 id="timeLimit"
+                                value={this.state.timeLimit}
+                                onChange={e => {console.log("limit "+JSON.stringify(e.target.value))
+                                  this.setState(
+                                    { timeLimit: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.timeLimitError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.timeLimitError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
       <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -392,7 +439,7 @@ deleteSpecificItem= idx => () => {
                           </Row>
                           <br /> <br />
 
-<h3 align="center"> Existing Items</h3>
+<h3 align="center"> Existing Exams</h3>
                           <br />
 
 
@@ -451,9 +498,9 @@ deleteSpecificItem= idx => () => {
                                       totalMarks:this.state.existingExams[idx].totalMarks,
                                       passingMarks:this.state.existingExams[idx].passingMarks,
                                       description:this.state.existingExams[idx].description,
-                                    ExamNo:idx,
+                                    examNo:idx,
                                   examNameError:"",
-                                totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.showEditExam)});}}
+                                totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.examNo)});}}
 
 
                                       size="lg"
@@ -573,7 +620,7 @@ deleteSpecificItem= idx => () => {
                                 value={this.state.passingMarks}
                                 onChange={e => {
                                   this.setState(
-                                    { totalMarks: e.target.value }
+                                    { passingMarks: e.target.value }
 
                                   );
                                 }}
@@ -587,6 +634,38 @@ deleteSpecificItem= idx => () => {
                                 </h6>{" "}
                               </font>
                             )}
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Time Limit(hours)</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="number"
+                                size="lg"
+                                name="timeLimit"
+                                 id="timeLimit"
+                                value={this.state.timeLimit}
+                                onChange={e => {
+                                  this.setState(
+                                    { timeLimit: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.timeLimitError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.timeLimitError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+
       <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >

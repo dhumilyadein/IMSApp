@@ -54,7 +54,7 @@ async function createExam(req, res) {
 
   var template = {
     "examName": req.body.examName, "unit": req.body.unit, "totalMarks": req.body.totalMarks,
-    "passingMarks": req.body.passingMarks, "description":req.body.description
+    "passingMarks": req.body.passingMarks, "description":req.body.description, "timeLimit":req.body.timeLimit
 
   };
   var createExam = new Exams(template);
@@ -116,13 +116,13 @@ function existingExams(req, res) {
 
   }
 
-  function deleteexam(req,res)
+  function deleteExam(req,res)
   {console.log("In deleteexam: "+ JSON.stringify(req.body.examName));
 
-exams
+Exams
 .deleteOne({examName:req.body.examName})
 .then(data => {
-  return res.send({msg:"exam Deleted"});
+  return res.send({msg:"Exam Deleted"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -139,12 +139,12 @@ async function editExam(req,res)
   exams
 .updateOne({examName:req.body.existingExams[req.body.examNo].examName},
   {$set: {examName: req.body.examName, unit: req.body.unit, totalMarks: req.body.totalMarks,
-  passingMarks: req.body.passingMarks,description:req.body.description
+  passingMarks: req.body.passingMarks,description:req.body.description, timeLimit:req.body.timeLimit
            }}
   )
 .then(data => {
 
-return res.send({msg:"exam Updated"});
+return res.send({msg:"Exam Updated"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -213,7 +213,7 @@ return res.send({error:err});
   app.post("/api/addexams", addexams);
   app.post("/api/createexam", createExam);
   app.get("/api/existingExams", existingExams);
-  app.post("/api/deleteexam", deleteexam);
+  app.post("/api/deleteExam", deleteExam);
   app.post("/api/editExam", editExam);
   app.post("/api/consumeexam", consumeexam);
   app.post("/api/getAddedexams", getAddedexams);
