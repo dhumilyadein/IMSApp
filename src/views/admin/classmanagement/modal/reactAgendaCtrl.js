@@ -98,6 +98,8 @@ export default class ReactAgendaCtrl extends Component {
 
   componentDidMount() {
 
+    console.log("ReactAgendaCtrl - componentDidMount - this.props.selectedCells[0].name - " + this.props.selectedCells[0].name);
+
   if (this.props.itemColors) {
 
     console.log("this.props this.props.itemColors - " + this.props.itemColors);
@@ -123,7 +125,7 @@ export default class ReactAgendaCtrl extends Component {
   if (!this.props.selectedCells) {
     let start = now
     let endT = moment(now).add(15, 'Minutes');
-    return this.setState({editMode: false, name: '', teacher:'', startDateTime: start, endDateTime: endT});
+    return this.setState({editMode: false, selectedSubject:'', name: '', teacher:'', startDateTime: start, endDateTime: endT});
   }
 
   if (this.props.selectedCells && this.props.selectedCells[0] && this.props.selectedCells[0]._id) {
@@ -131,20 +133,23 @@ export default class ReactAgendaCtrl extends Component {
     let start = moment(this.props.selectedCells[0].startDateTime);
     let endT = moment(this.props.selectedCells[0].endDateTime);
 
-    return this.setState({editMode: true, name: this.props.selectedCells[0].name, teacher: this.props.selectedCells[0].teacher, classes: this.props.selectedCells[0].classes, startDateTime: start, endDateTime: endT});
+    return this.setState({editMode: true, 
+      selectedSubject: {"value": this.props.selectedCells[0].name, "label": this.props.selectedCells[0].name} , 
+    name: this.props.selectedCells[0].name, teacher: this.props.selectedCells[0].teacher, 
+    classes: this.props.selectedCells[0].classes, startDateTime: start, endDateTime: endT});
 
   }
 
   if (this.props.selectedCells && this.props.selectedCells.length === 1) {
     let start = moment(getFirst(this.props.selectedCells));
     let endT = moment(getLast(this.props.selectedCells)).add(15, 'Minutes');
-    return this.setState({editMode: false, name: '', teacher:'', startDateTime: start, endDateTime: endT});
+    return this.setState({editMode: false, selectedSubject: '', name: '', teacher:'', startDateTime: start, endDateTime: endT});
   }
 
   if (this.props.selectedCells && this.props.selectedCells.length > 0) {
     let start = moment(getFirst(this.props.selectedCells));
     let endT = moment(getLast(this.props.selectedCells)) || now;
-    this.setState({editMode: false, name: '', teacher:'', startDateTime: start, endDateTime: endT});
+    this.setState({editMode: false, selectedSubject: '', name: '', teacher:'', startDateTime: start, endDateTime: endT});
   }
 
 }

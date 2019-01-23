@@ -52,6 +52,8 @@ export default class Agenda extends Component {
       locale: "en-gb",
       rowsPerHour: 4,
       numberOfDays: 6,
+      startHour: 9,
+      endHour: 15,
       // startDate: new Date()
       startDate: this.getCurrentWeek(),
       subjectsArray: this.props.subjects,
@@ -72,6 +74,7 @@ export default class Agenda extends Component {
     this.handleCellSelection = this.handleCellSelection.bind(this)
     this.getCurrentWeek = this.getCurrentWeek.bind(this);
     this.updateClassDetails = this.updateClassDetails.bind(this);
+    this.hourChangehandler = this.hourChangehandler.bind(this);
 
     // Get first day of the current week.
     this.getCurrentWeek();
@@ -113,7 +116,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     if (item && openModal === true) {
 
       this.setState({ selected: [item] })
-      console.log("Agenda.js - handleItemEdit - item" + JSON.stringify([item]));
+      console.log("Agenda.js - handleItemEdit - item - " + JSON.stringify(item));
 
       return this._openModal();
     }
@@ -214,6 +217,8 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     console.log("agenda - editEvent");
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
+
+    this.updateClassDetails();
   }
 
   changeView(days, event) {
@@ -244,6 +249,12 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     });
   }
 
+  hourChangehandler(e) {
+
+    console.log("agenda - hourChangehandler - e.target.name - " + [e.currentTarget.name] + " e.target.value - " + e.currentTarget.value);
+    this.setState({ [e.currentTarget.name]: e.currentTarget.value });
+  }
+
   render() {
 
     var AgendaItem = function (props) {
@@ -263,7 +274,30 @@ then are fetched in reactAgendaItem using {this.props.item.name}
             </CardHeader>
             <CardBody>
 
-              <div className="content-expanded ">
+              <div >
+
+              <div className="control-buttons">
+                <InputGroupText>
+                      Start Hour
+                                </InputGroupText>
+                  <Input
+                    name="startHour"
+                    id="startHour"
+                    type="text"
+                    value={this.state.startHour}
+                    onChange={this.hourChangehandler}
+                  />
+                  <InputGroupText>
+                      End Hour
+                                </InputGroupText>
+                  <Input
+                    name="endHour"
+                    id="endHour"
+                    type="text"
+                    value={this.state.endHour}
+                    onChange={this.hourChangehandler}
+                  />
+                </div>
 
                 <div className="control-buttons">
                   <button className="button-control" onClick={this.zoomIn}> <i className="zoom-plus-icon"></i> </button>
@@ -282,6 +316,8 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                   // maxDate={new Date(now.getFullYear() - 1, now.getFullYear() + 1)}
                   startDate={this.state.startDate}
                   startAtTime={0}
+                  startHour={this.state.startHour} //Time table start time
+                  endHour={this.state.endHour}     //Time table end time
                   cellHeight={this.state.cellHeight}
                   locale="en-gb"
                   items={this.state.items}

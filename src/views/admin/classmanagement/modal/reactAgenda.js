@@ -113,8 +113,8 @@ export default class ReactAgenda extends Component {
     var rows = [];
     var interval = (60 / this.props.rowsPerHour);
 
-    var startHour = 9;
-    var endHour = 15;
+    var startHour = this.props.startHour;
+    var endHour = this.props.endHour;
 
     var duration = endHour - startHour;
     
