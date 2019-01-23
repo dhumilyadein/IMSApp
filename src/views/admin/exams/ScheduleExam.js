@@ -723,26 +723,7 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
 
 
         this.setState({ section: e.currentTarget.value },()=>{
-          this.state.classDetails.forEach(element => {
-
-
-            if (element.class === this.state.class && element.section === this.state.section) {
-                  this.setState({
-                studentsDataArray : element.studentsData
-               },()=>{ console.log("studentsDataArray: "+ JSON.stringify(this.state.studentsDataArray));
-                var temp=[];
-                this.state.studentsDataArray.forEach(element=>{
-                temp.push({"value":element.username,
-                "label":element.firstname.charAt(0).toUpperCase()+element.firstname.slice(1)+" "+element.lastname.charAt(0).toUpperCase()+element.lastname.slice(1)+" ("+element.username+")"})
-
-                })
-                temp.sort();
-                this.setState({studentsDataArray:temp});
-
-               });
-            }
-          });
-
+            this.getAllExams();
 
 
 

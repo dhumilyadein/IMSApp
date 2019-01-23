@@ -77,7 +77,8 @@ examNo:"",
       examName:"",
       totalMarks:"",
       passingMarks:"",
-      description:""
+      description:"",
+      timeLimit:""
     });
 
   }
@@ -121,7 +122,7 @@ examNo:"",
         console.log("Creating Item: ");
         axios
           .post("http://localhost:8001/api/createExam", {"examName":this.state.examName,"totalMarks":this.state.totalMarks,
-          "passingMarks":this.state.passingMarks, "description":this.state.description})
+          "passingMarks":this.state.passingMarks, "description":this.state.description,"timeLimit":this.state.timeLimit})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
@@ -381,7 +382,7 @@ deleteSpecificItem= idx => () => {
                                 name="timeLimit"
                                  id="timeLimit"
                                 value={this.state.timeLimit}
-                                onChange={e => {
+                                onChange={e => {console.log("limit "+JSON.stringify(e.target.value))
                                   this.setState(
                                     { timeLimit: e.target.value }
 
