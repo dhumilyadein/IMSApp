@@ -166,7 +166,8 @@ class ClassDetails extends Component {
 
     // Switching view to students view
     this.setState({ 
-      studentsView: true 
+      studentsView: true,
+      timeTableView: false,
     });
   }
 
@@ -363,8 +364,12 @@ class ClassDetails extends Component {
 
           { this.state.timeTableView && (
 
+<div>
             <Agenda subjects={this.state.subjectArray} selectedClass={this.state.class} 
-            selectedSection={this.state.section} timeTable={this.state.timeTableArray}/>
+            selectedSection={this.state.section} timeTable={this.state.timeTableArray}
+            sectionArray={this.state.sectionArray}/>
+
+                    </div>
           )}
 
         </Container>

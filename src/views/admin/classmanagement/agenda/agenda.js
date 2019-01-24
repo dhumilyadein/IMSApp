@@ -60,6 +60,7 @@ export default class Agenda extends Component {
       selectedClass: this.props.selectedClass,
       selectedSection: this.props.selectedSection,
       timeTable: this.props.timeTable,
+      sectionArray: this.props.sectionArray,
 
       classDetailsUpdatedFlag: false,
       removeScheduleFlag: false
@@ -79,6 +80,7 @@ export default class Agenda extends Component {
     this.updateClassDetails = this.updateClassDetails.bind(this);
     this.hourChangehandler = this.hourChangehandler.bind(this);
     this.removeSchedule = this.removeSchedule.bind(this);
+    this.copyTimeTableToAllSections = this.copyTimeTableToAllSections.bind(this);
 
     // Get first day of the current week.
     this.getCurrentWeek();
@@ -220,7 +222,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
 
-    this.updateClassDetails();
+    this.updateClassDetails(this.state.selectedClass, this.state.selectedSection);
   }
   editEvent(items, item) {
 
@@ -228,23 +230,23 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
 
-    this.updateClassDetails();
+    this.updateClassDetails(this.state.selectedClass, this.state.selectedSection);
   }
 
   changeView(days, event) {
     this.setState({ numberOfDays: days })
   }
 
-  async updateClassDetails() {
+  async updateClassDetails(classStr, sectionStr) {
 
     var updateClassDetailsRequest = {
-      "class": this.state.selectedClass,
-      "section": this.state.selectedSection,
+      "class": classStr,
+      "section": sectionStr,
       "timeTable": this.state.items
     }
 
-    // console.log("Agenda - updateClassDetails - updateClassDetailsRequest - "
-    //   + JSON.stringify(updateClassDetailsRequest));
+    console.log("Agenda - updateClassDetails - updateClassDetailsRequest - "
+      + JSON.stringify(updateClassDetailsRequest));
 
     await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
 
@@ -287,6 +289,27 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
     // console.log("agenda - hourChangehandler - e.target.name - " + [e.currentTarget.name] + " e.target.value - " + e.currentTarget.value);
     this.setState({ [e.currentTarget.name]: e.currentTarget.value });
+  }
+
+  async copyTimeTableToAllSections() {
+
+    await console.log("Agenda - copyTimeTableToAllSections - this.state.sectionArray - " + this.state.sectionArray);
+
+    if(this.state.sectionArray) {
+
+      this.state.sectionArray.forEach(section => {
+
+        if (section !== this.state.selectedSection) {
+          console.log("Agenda - copyTimeTableToAllSections - section - " + section);
+
+          this.updateClassDetails(this.state.selectedClass, section);
+        }
+      });
+
+      alert("Refreshing the page to reflect the changes in UI");
+
+      window.location.reload();
+    }
   }
 
   render() {
@@ -381,6 +404,11 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                     </div>
                   </Modal> : ''
                 }
+
+<br/>
+<Button color="success" block onClick={this.copyTimeTableToAllSections}>
+                      Set same TimeTable for all sections of Class '{this.state.selectedClass}'
+                    </Button>
 
 
               </div>

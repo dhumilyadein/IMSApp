@@ -224,7 +224,7 @@ class ClassDetails extends Component {
         return this.setState({ dbErrors: res.data.errors });
       } else {
 
-        console.log('Inserting class details in the Database - ' + JSON.stringify(insertClassDetailsRequest));
+        console.log('Inserted class details in the Database - ' + JSON.stringify(insertClassDetailsRequest));
         this.setState({
           insertClassDetailsResponseMessage: res.data.message,
           classCreatedFlag: true,
@@ -293,15 +293,17 @@ class ClassDetails extends Component {
     );
   }
 
-  toggleModalSuccess() {
+  async toggleModalSuccess() {
 
-    console.log("toggleModalSuccess toggleModalSuccess");
+    await console.log("CreateClass - toggleModalSuccess this.state.showModalFlag - " + this.state.showModalFlag);
     this.setState({
       showModalFlag: !this.state.showModalFlag
     });
 
     if (this.state.classCreatedFlag) {
+      console.log("CreateClass - Calling resetCreateClassForm");
       this.resetCreateClassForm();
+      console.log("CreateClass - resetCreateClassForm call complete");
     }
   }
 
