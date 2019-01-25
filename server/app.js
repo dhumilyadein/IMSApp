@@ -20,7 +20,9 @@ const exam = require("./src/admin//exam");
 const login = require("./src/login");
 const app = express();
 
-app.use(bodyparser.json());
+app.use(bodyparser.json({limit: '10mb', extended: true}));
+app.use(bodyparser.urlencoded({limit: '10mb', extended: true}));
+
 mongoose.connect('mongodb://localhost:27017/IMS', { useNewUrlParser: true });
 app.use(
   cors({
