@@ -20,11 +20,14 @@ import {
   InputGroupAddon,
   InputGroupText,
   Row,
-  Table
+  Table,
+  Modal,
+  ModalHeader
 } from "reactstrap";
+
 import ReactAgenda from '../modal/reactAgenda.js';
 import ReactAgendaCtrl from '../modal/reactAgendaCtrl.js';
-import Modal from '../modal/Modal.js';
+import Modal1 from '../modal/Modal.js';
 import axios from "axios";
 
 var now = new Date();
@@ -38,7 +41,7 @@ var colors = {
   "color-5": "rgba(170, 59, 123, 1)"
 }
 
-export default class Agenda extends Component {
+class Agenda extends Component {
 
   constructor(props) {
 
@@ -63,7 +66,10 @@ export default class Agenda extends Component {
       sectionArray: this.props.sectionArray,
 
       classDetailsUpdatedFlag: false,
-      removeScheduleFlag: false
+      removeScheduleFlag: false,
+      showModalFlag: false,
+      modalMessage: '',
+      modalColor: ''
     }
     this.handleRangeSelection = this.handleRangeSelection.bind(this)
     this.handleItemEdit = this.handleItemEdit.bind(this)
@@ -81,6 +87,7 @@ export default class Agenda extends Component {
     this.hourChangehandler = this.hourChangehandler.bind(this);
     this.removeSchedule = this.removeSchedule.bind(this);
     this.copyTimeTableToAllSections = this.copyTimeTableToAllSections.bind(this);
+    this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
 
     // Get first day of the current week.
     this.getCurrentWeek();
@@ -95,6 +102,16 @@ export default class Agenda extends Component {
     var firstday = curr.getDate() - curr.getDay() + 1;
     var currentWeekStartDate = new Date(curr.setDate(firstday));
     return currentWeekStartDate;
+  }
+
+  toggleModalSuccess() {
+
+    console.log("agenda - toggleModalSuccess this.state.showModalFlag - " + this.state.showModalFlag);
+    // this.setState({
+    //   showModalFlag: !this.state.showModalFlag
+    // });
+    //window.location.reload();
+
   }
 
   /*
@@ -306,8 +323,14 @@ then are fetched in reactAgendaItem using {this.props.item.name}
         }
       });
 
-      alert("Refreshing the page to reflect the changes in UI");
+      alert("Refreshing the page to reflect the TimeTable changes in UI");
 
+      // var msg = "Timetable copied to all sections of Class ' " + this.state.selectedClass + " '";
+      // this.setState({
+      //   showModalFlag: true,
+      //   modalColor: "modal-success",
+      //   modalMessage: msg
+      // });
       window.location.reload();
     }
   }
@@ -321,9 +344,22 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     return (
 
       <div>
+
+      {/* {this.state.showModalFlag && (
+        <Modal
+          isOpen={this.state.showModalFlag}
+          className={this.state.modalColor}
+          toggle={this.toggleModalSuccess}
+        >
+          <ModalHeader
+            toggle={this.toggleModalSuccess}
+          >
+            {this.state.modalMessage}
+          </ModalHeader>
+        </Modal>
+      )} */}
+
         <Container >
-
-
 
           <Card>
             <CardHeader>
@@ -394,7 +430,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                   onItemRemove={this.removeEvent.bind(this)}
                   onDateRangeChange={this.handleDateRangeChange.bind(this)} />
                 {
-                  this.state.showModal ? <Modal clickOutside={this._closeModal} >
+                  this.state.showModal ? <Modal1 clickOutside={this._closeModal} >
                     <div className="modal-nude ">
                       {/* For pop up Modal */}
                       <ReactAgendaCtrl items={this.state.items} itemColors={colors}
@@ -402,7 +438,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                         edit={this.editEvent} subjectsArray={this.props.subjects} />
 
                     </div>
-                  </Modal> : ''
+                  </Modal1> : ''
                 }
 
 <br/>
@@ -420,3 +456,5 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     );
   }
 }
+
+export default Agenda;
