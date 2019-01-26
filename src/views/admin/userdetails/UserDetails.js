@@ -182,8 +182,8 @@ class UserDetails extends Component {
       .get("http://localhost:8001/api/existingTemplates")
       .then(result => {
 
-        console.log("Existing Fee Templates: " + JSON.stringify(result.data));
-        console.log("No of templates " + result.data.length);
+        // console.log("Existing Fee Templates: " + JSON.stringify(result.data));
+        // console.log("No of templates " + result.data.length);
 
         if (result.data) {
           var feeTemplatesFromDBLabelTemp = [];
@@ -194,7 +194,7 @@ class UserDetails extends Component {
               "label": result.data[i].templateName.charAt(0).toUpperCase() + result.data[i].templateName.slice(1) + " (" + (result.data[i].templateType.toLowerCase()) + ")"
             });
 
-            console.log("this.state.selectedFeeTemplate - " + this.state.selectedFeeTemplate);
+            // console.log("this.state.selectedFeeTemplate - " + this.state.selectedFeeTemplate);
             this.state.selectedFeeTemplate.forEach(function (element) {
 
               if (element === result.data[i].templateName) {
@@ -207,8 +207,8 @@ class UserDetails extends Component {
 
             });
           }
-          console.log("feeTemplatesFromDBLabelTemp - " + JSON.stringify(feeTemplatesFromDBLabelTemp)
-          + " usersFeeTemplatesLabelTemp - " + JSON.stringify(usersFeeTemplatesLabelTemp));
+          // console.log("feeTemplatesFromDBLabelTemp - " + JSON.stringify(feeTemplatesFromDBLabelTemp)
+          // + " usersFeeTemplatesLabelTemp - " + JSON.stringify(usersFeeTemplatesLabelTemp));
 
           this.setState({ feeTemplatesFromDBLabel: feeTemplatesFromDBLabelTemp });
           this.setState({ selectedFeeTemplateLabel: usersFeeTemplatesLabelTemp });
@@ -229,7 +229,7 @@ class UserDetails extends Component {
 
   async fetchUserDataOnPageLoad() {
 
-    console.log("fetchUserDataOnPageLoad ENTER: " + this.props.match.params.username);
+    // console.log("fetchUserDataOnPageLoad ENTER: " + this.props.match.params.username);
 
     var searchUserRequest = {
       "find": this.props.match.params.username,
@@ -237,7 +237,7 @@ class UserDetails extends Component {
       "role": "anyRole",
       "searchCriteria": "equalsSearchCriteria"
     }
-    console.log("Submit Request - " + JSON.stringify(searchUserRequest));
+    // console.log("Submit Request - " + JSON.stringify(searchUserRequest));
 
     await axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(res => {
 
@@ -274,7 +274,7 @@ class UserDetails extends Component {
       });
 
 
-      console.log("this.state.fetchedStudentsDetails[0].parentusername - " + this.state.fetchedStudentsDetails[0].parentusername);
+      // console.log("this.state.fetchedStudentsDetails[0].parentusername - " + this.state.fetchedStudentsDetails[0].parentusername);
       var searchParentRequest = {
         "find": this.state.parentusername,
         "using": "parentusername",
@@ -287,7 +287,7 @@ class UserDetails extends Component {
           return this.setState({ errors: pRes.data.errors });
         } else {
 
-          console.log("Parent data pRes.data - " + JSON.stringify(pRes.data));
+          // console.log("Parent data pRes.data - " + JSON.stringify(pRes.data));
           this.setState({
             fetchedParentDetail: pRes.data
           });
@@ -306,7 +306,7 @@ class UserDetails extends Component {
 
   mapStudentResponseToState() {
 
-    console.log("Mapping the students response with the state to show details on the page");
+    // console.log("Mapping the students response with the state to show details on the page");
 
     var studentData = this.state.fetchedStudentsDetails[0];
 
@@ -362,7 +362,7 @@ class UserDetails extends Component {
 
   mapParentResponseToState() {
 
-    console.log("Mapping the Parent response with the state to show details on the page");
+    // console.log("Mapping the Parent response with the state to show details on the page");
 
     var parentData = this.state.fetchedParentDetail;
 
@@ -382,7 +382,7 @@ class UserDetails extends Component {
       parentusername: parentData.parentusername
     });
 
-    console.log("Parent details - " + parentData.parentusername);
+    // console.log("Parent details - " + parentData.parentusername);
   }
 
   switchToEditMode() {
@@ -410,16 +410,17 @@ class UserDetails extends Component {
 
     var updateUserDetailsRequest = this.state;
 
-    console.log("UserDetails - updateUserDetails - updateUserDetailsRequest - "
-      + JSON.stringify(updateUserDetailsRequest));
+    // console.log("UserDetails - updateUserDetails - updateUserDetailsRequest - "
+    //   + JSON.stringify(updateUserDetailsRequest));
 
     await axios.post("http://localhost:8001/api/updateUserDetails", updateUserDetailsRequest).then(res => {
 
       if (res.data.errors) {
+        console.log("UserDetails.js updateUserDetails - Error in DB Operation")
         return this.setState({ errors: res.data.errors });
       } else {
 
-        console.log('Updating user details in the Database');
+        console.log('Updated user details in the Database');
         this.setState({
           userDetailsUpdatedFlag: true
         });
@@ -458,7 +459,7 @@ class UserDetails extends Component {
         [e.target.name]: String(e.target.value).toLowerCase()
       });
 
-    console.log('maleGender ' + this.state.maleGender + ' femaleGender ' + this.state.femaleGender + ' current value - ' + e.target.value);
+    // console.log('maleGender ' + this.state.maleGender + ' femaleGender ' + this.state.femaleGender + ' current value - ' + e.target.value);
 
     if (e.target.value === "Male" && this.state.femaleGender) {
       this.setState({ maleGender: true });
@@ -472,7 +473,7 @@ class UserDetails extends Component {
   classChangeHandler(e) {
 
     var selectedClass = e.currentTarget.value;
-    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
+    // console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
     
     var previousClass = this.state.class;
     this.setState({ previousClass: previousClass });
@@ -494,7 +495,7 @@ class UserDetails extends Component {
        sectionArray: sectionArrayTemp,
       })
 
-    console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
+    // console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
 
     // Switching view to section view
     this.setState({ sectionView: true });
@@ -526,7 +527,7 @@ class UserDetails extends Component {
        sectionArray: sectionArrayTemp,
       })
 
-    console.log("Initiallly Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
+    // console.log("Initiallly Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
   }
 
   fetchClassDetails() {
@@ -541,7 +542,7 @@ class UserDetails extends Component {
 
         this.setState({ classDetails: cRes.data });
 
-        console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
+        // console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
 
         this.fetchClasses();
       }
@@ -556,16 +557,16 @@ class UserDetails extends Component {
     var classArray = [];
     this.state.classDetails.forEach(element => {
 
-      console.log("element.class - " + element.class);
+      // console.log("element.class - " + element.class);
       classArray.push(element.class);
     });
-    console.log("classArray - " + classArray);
+    // console.log("classArray - " + classArray);
     var uniqueItems = Array.from(new Set(classArray));
 
     this.setState({ classes: uniqueItems });
 
     this.setInitialClassSections();
-    console.log("Unique classes - " + this.state.classes);
+    // console.log("Unique classes - " + this.state.classes);
   }
 
   /**
@@ -573,7 +574,7 @@ class UserDetails extends Component {
    **/
   copyAddress(e) {
     if (e.target.checked === true) {
-      console.log("address check true: " + e.target.checked);
+      // console.log("address check true: " + e.target.checked);
       this.setState({
         parentaddress: this.state.address,
         parentcity: this.state.city,
@@ -582,7 +583,7 @@ class UserDetails extends Component {
         parentaddresscheck: true
       });
     } else if (e.target.checked === false) {
-      console.log("address check false: " + e.target.checked);
+      // console.log("address check false: " + e.target.checked);
       this.setState({
         parentaddress: this.state.parentaddress,
         parentcity: this.state.parentcity,
@@ -608,8 +609,8 @@ class UserDetails extends Component {
       "previousSection" : this.state.previousSection
     }
 
-    console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
-      + JSON.stringify(updateClassDetailsRequest));
+    // console.log("UserDetails - updateClassDetails - updateClassDetailsRequest - "
+    //   + JSON.stringify(updateClassDetailsRequest));
 
     await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
 
@@ -1192,7 +1193,7 @@ class UserDetails extends Component {
                                           value={this.state.phone}
                                           name="phone"
                                           onChange={phone => {
-                                            console.log("phone value: " + phone);
+                                            // console.log("phone value: " + phone);
                                             this.setState({ phone });
                                           }}
                                           disabled={this.state.editMode}
@@ -1361,7 +1362,7 @@ class UserDetails extends Component {
                                                 isSearchable={true}
                                                 isDisabled={this.state.editMode}
                                               onChange={selected => {
-                                                console.log("Selected Selected Selected Selected Selected - " + JSON.stringify(selected));
+                                                
                                                 var temp = [];
 
                                                 for (var i = 0; i < selected.length; i++) { temp.push(selected[i].value) }
@@ -1369,8 +1370,8 @@ class UserDetails extends Component {
                                                   selectedFeeTemplate: temp,
                                                   selectedFeeTemplateLabel: selected
                                                 }, () => {
-                                                  console.log("selectedFeeTemplate - " + JSON.stringify(this.state.selectedFeeTemplate) 
-                                                  + "selectedFeeTemplateLabel - " + JSON.stringify(this.state.selectedFeeTemplateLabel));
+                                                  // console.log("selectedFeeTemplate - " + JSON.stringify(this.state.selectedFeeTemplate) 
+                                                  // + "selectedFeeTemplateLabel - " + JSON.stringify(this.state.selectedFeeTemplateLabel));
                                                 })
                                               }
                                               } 
@@ -1888,9 +1889,9 @@ class UserDetails extends Component {
                                               value={this.state.parentphone1}
                                               name="parentphone1"
                                               onChange={parentphone1 => {
-                                                console.log(
-                                                  "parentphone1 value: " + parentphone1
-                                                );
+                                                // console.log(
+                                                //   "parentphone1 value: " + parentphone1
+                                                // );
                                                 this.setState({ parentphone1 });
                                               }}
                                               disabled={this.state.editMode}
@@ -1919,9 +1920,9 @@ class UserDetails extends Component {
                                               value={this.state.parentphone2}
                                               name="parentphone2"
                                               onChange={parentphone2 => {
-                                                console.log(
-                                                  "parentphone2 value: " + parentphone2
-                                                );
+                                                // console.log(
+                                                //   "parentphone2 value: " + parentphone2
+                                                // );
                                                 this.setState({ parentphone2 });
                                               }}
                                               disabled={this.state.editMode}

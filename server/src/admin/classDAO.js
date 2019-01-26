@@ -296,13 +296,16 @@ module.exports = function (app) {
 
     objForUpdate.updatedAt = currentTime;
 
+    console.log("objForUpdate - " + JSON.stringify(objForUpdate) 
+    + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
+
     var udpateJSON = {};
-    if (Object.keys(objForUpdate).length === 0 && Object.keys(studentsDataJSON).length === 0) {
+    if (Object.keys(objForUpdate).length !== 0 && Object.keys(studentsDataJSON).length !== 0) {
       udpateJSON = {
         $set: objForUpdate,
         $push: studentsDataJSON
       }
-    } else if (objForUpdate) {
+    } else if (Object.keys(objForUpdate).length !== 0) {
       udpateJSON = {
         $set: objForUpdate,
       }

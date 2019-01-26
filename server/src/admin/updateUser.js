@@ -35,7 +35,7 @@ module.exports = function (app) {
         }
 
         var currentTime = new Date();
-        console.log("current time - " + currentTime);
+        // console.log("current time - " + currentTime);
         console.log("updateUser - updateUserDetails - selectedFeeTemplate - " + req.selectedFeeTemplate);
         
 
