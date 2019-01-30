@@ -61,6 +61,38 @@ var ClassSchema = new Schema({
     required: true,
     default: Date.now
   },
+
+  attendance: {
+    type: Array,
+
+    date: {
+      type: Date,
+      required: true
+    },
+    studentsInfo: {
+      type: Array,
+      required: true,
+
+      username: {
+        type: String,
+        required: true
+      },
+      firstname: {
+        type: String,
+        required: true
+      },
+      lastname: {
+        type: String,
+        required: true
+      },
+      rollno: {
+        type: String,
+        required: true,
+        trim: true
+      },
+    }
+    
+  }
 },  { collection: 'Class' });
 
 // Composite primary key (class + section)

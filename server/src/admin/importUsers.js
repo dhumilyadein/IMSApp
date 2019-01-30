@@ -112,7 +112,9 @@ console.log( "Update Class: "+JSON.stringify(request));
 
     if(request.subjects) objForUpdate.subjects = request.subjects;
     objForUpdate.updatedAt = currentTime;
-    console.log("objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
+
+    console.log("ImportUsers - UpdateClassDetails - request.class - " + request.class + " request.section - " + request.section 
+    + " objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
 
     await Class.findOneAndUpdate(

@@ -236,6 +236,10 @@ module.exports = function (app) {
 
     var studentsDataJSON = {};
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
+
+    var attendanceJSON = {};
+    if (request.attendance) attendanceJSON.attendance = request.attendance;
+
     if (request.subjects) objForUpdate.subjects = request.subjects;
     // if (request.timeTable) objForUpdate.timeTable = request.timeTable;
     
@@ -294,16 +298,24 @@ module.exports = function (app) {
       objForUpdate.timeTable = timeTableArrayTemp;
     }
 
+    // if (request.attendance) objForUpdate.attendance = request.attendance;
+
     objForUpdate.updatedAt = currentTime;
 
     console.log("objForUpdate - " + JSON.stringify(objForUpdate) 
-    + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
+    + " studentsDataJSON - " + JSON.stringify(studentsDataJSON)
+    + " attendanceJSON - " + JSON.stringify(attendanceJSON));
 
     var udpateJSON = {};
     if (Object.keys(objForUpdate).length !== 0 && Object.keys(studentsDataJSON).length !== 0) {
       udpateJSON = {
         $set: objForUpdate,
         $push: studentsDataJSON
+      }
+    } else if (Object.keys(objForUpdate).length !== 0 && Object.keys(attendanceJSON).length !== 0) {
+      udpateJSON = {
+        $set: objForUpdate,
+        $push: attendanceJSON
       }
     } else if (Object.keys(objForUpdate).length !== 0) {
       udpateJSON = {

@@ -58,7 +58,13 @@ class Attendance extends Component {
 
       timeTableView: false,
       subjectArray: [],
-      timeTableArray: []
+      timeTableArray: [],
+      nameBtnColorFlag: false, // false means grey color, change color to green when button is clicked (true - green)
+      nameBtnColor: 'grey',
+
+      attendance: []
+
+
 
     };
 
@@ -67,9 +73,144 @@ class Attendance extends Component {
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
     this.showTimeTable = this.showTimeTable.bind(this);
+    this.nameBtnClicked = this.nameBtnClicked.bind(this);
+    this.rollnoBtnClicked = this.rollnoBtnClicked.bind(this);
+    this.updateClassDetails = this.updateClassDetails.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
+
+  }
+
+  nameBtnClicked(rollno, username, firstname, lastname) {
+
+    var nameBtn = document.getElementById(username);
+    var rollnoBtn = document.getElementById(rollno);
+
+    var studentsInfoArray = [];
+
+    if(this.state.attendance && this.state.attendance.studentsInfo) {
+      studentsInfoArray = this.state.attendance.studentsInfo;
+    }
+
+    var attendance = {};
+    attendance.date = new Date();
+
+    nameBtn.blur();
+
+    if(nameBtn.style.backgroundColor === 'grey' && rollnoBtn.style.backgroundColor === 'grey') {
+      nameBtn.style.backgroundColor='green';
+      rollnoBtn.style.backgroundColor='green';
+
+      var studentsInfo = {};
+      studentsInfo.username = username;
+      studentsInfo.rollno = rollno;
+      studentsInfo.firstname = firstname;
+      studentsInfo.lastname = lastname;
+
+      studentsInfoArray.push(studentsInfo);
+
+      console.log("Attendance - present marked for username - " + username);
+
+    } else {
+      nameBtn.style.backgroundColor='grey';
+      rollnoBtn.style.backgroundColor='grey';
+
+      // console.log("Attendance - username - " + username + " studentsInfoArray 1 - " + JSON.stringify(studentsInfoArray));
+      if(studentsInfoArray.length > 0) {
+      for(var i=0; i<studentsInfoArray.length; i++) {
+        if(studentsInfoArray[i].username === username) {
+          var deletedItem = studentsInfoArray.splice(i, 1); 
+          console.log("Deleted " + deletedItem);
+          // delete studentsInfoArray[i];
+        }
+      }
+      // console.log("Attendance - After REMOVING username - " + username + " studentsInfoArray 2 - " + JSON.stringify(studentsInfoArray));
+    }
+
+    console.log("Attendance - absent marked for username - " + username);
+    }
+
+    attendance.studentsInfo = studentsInfoArray;
+
+    this.setState({
+      attendance : attendance
+    }, () => {
+      console.log("attendance - attendance array - " + JSON.stringify(this.state.attendance));
+    });
+
+  }
+
+  rollnoBtnClicked(e) {
+
+    var rollnoBtn = document.getElementById(e.currentTarget.id);
+    rollnoBtn.blur();
+  }
+
+  async updateClassDetails(classStr, sectionStr) {
+
+    var updateClassDetailsRequest = {
+      "class": classStr,
+      "section": sectionStr,
+      "attendance": this.state.attendance
+    }
+
+    console.log("Attendance - updateClassDetails - updateClassDetailsRequest - "
+      + JSON.stringify(updateClassDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          classDetailsUpdatedFlag: true
+        });
+      }
+    });
+  }
+
+  nameBtnClicked1(e) {
+
+    console.log("Button clicked for username - " + e.currentTarget.id);
+
+    // For hiding blue highlight border on click
+    e.currentTarget.blur();
+
+    // var btn = document.getElementById(e.currentTarget.id);
+    var btn = document.getElementById('muksha');
+    if(btn.style.backgroundColor === 'grey') {
+      btn.style.backgroundColor='green';
+    } else {
+      btn.style.backgroundColor='grey';
+    }
+
+    var btn1 = document.getElementById('87878');
+    if(btn1.style.backgroundColor === 'grey') {
+      btn1.style.backgroundColor='green';
+    } else {
+      btn1.style.backgroundColor='grey';
+    }
+    
+
+    // this.setState({
+    //   nameBtnColorFlag: !this.state.nameBtnColorFlag
+    // }, () => {
+
+    //   if (this.state.nameBtnColorFlag) {
+    //     this.setState({
+    //       nameBtnColor: 'green'
+    //     });
+    //   }
+    //   else {
+    //     this.setState({
+    //       nameBtnColor: 'grey'
+    //     });
+    //   }
+    // });
+    
+    
 
   }
 
@@ -310,48 +451,131 @@ class Attendance extends Component {
                     </CardHeader>
                     <CardBody>
 
-                      <Table responsive hover>
-                        <thead>
-                          <tr>
-                            <th scope="col" >Roll Number</th>
-                            <th scope="col">Full name</th>
-                            <th scope="col" >Present</th>
-                          </tr>
-                        </thead>
+                      <Row>
+                        <Col className="col-md-2">
+                        <Button block
+                                     color="warning"
+                                      // onClick={}
+                                      size="lg"
+                                    >
+                                      Roll No.
+                                    </Button>
+                        </Col>
+
+                        <Col className="col-md-10">
+                        <Button block
+                                     color="warning"
+                                      // onClick={}
+                                      size="lg"
+                                    >
+                                      Name
+                                    </Button>
+                        </Col>
+                      </Row>
+
+                      {this.state.studentsDataArray.map((studentsData) => (
+
+<Row key={studentsData.username}>
+<Col className="col-md-2">
+                        {/* <Button block
+                                     id={studentsData.rollno}
+                                     key={studentsData.rollno}
+                                     color="secondary"
+                                      // onClick={}
+                                      size="lg"
+                                    >
+                                      {studentsData.rollno}
+                                    </Button> */}
+                                    <Input
+                                    type="button"
+                                    id={studentsData.rollno}
+                                    value={studentsData.rollno}
+                                    style={{ backgroundColor: this.state.nameBtnColor, 
+                                      // borderColor: 'black', 
+                                      color: 'white' }}
+                                      // onClick={this.rollnoBtnClicked}
+                                      disabled="disabled"
+                                      size="lg"></Input>
+                        </Col>
+
+                        <Col className="col-md-10">
+                        {/* <Button block
+                                     id={studentsData.username}
+                                     key={studentsData.username}
+                                     color="secondary"
+                                      onClick={this.nameBtnClicked(studentsData.rollno, studentsData.username)}
+                                      size="lg"
+                                    >
+                                      {studentsData.firstname.toUpperCase()} {studentsData.lastname.toUpperCase()} ({studentsData.username})
+                                    </Button> */}
+                                    <Input
+                                    type="button"
+                                    id={studentsData.username}
+                                      // onClick={this.nameBtnClicked}
+                                      onClick={ () => this.nameBtnClicked(studentsData.rollno, studentsData.username, studentsData.firstname, studentsData.lastname) }
+                                      size="lg"
+                                      style={{ backgroundColor: this.state.nameBtnColor, 
+                                      // borderColor: 'black', 
+                                      color: 'white',
+                                      outline:0 }}
+                                      value={studentsData.firstname.toUpperCase() + " " + studentsData.lastname.toUpperCase() + " ( " + studentsData.username + " )"} >
+                                      </Input>
+                        </Col>
+  </Row>
+))}
+
+<br/><br/>
+                                        <Card>
+                                          <CardBody>
+
+<Input
+                                    type="button"
+                                    id="submitAttendanceBtn"
+                                      // onClick={ }
+                                      size="lg"
+                                      style={{ backgroundColor: "blue", 
+                                      // borderColor: 'black', 
+                                      color: 'white',
+                                      outline:0 }}
+                                      value="SUBMIT ATTENDANCE" >
+                                      </Input>
+
+                                          </CardBody>
+                                        </Card>
+
+                      {/* <Table responsive hover >
+                        
                         <tbody>
-                          {/* {userList.map((user, index) =>
-                      <UserRow key={index} user={user}/>
-                    )} */}
 
-                          {/* {students} */}
+                          <tr>
+                          
+                          <td >
+                          <div className="col-md-2">
+                                    <Button block
+                                     color="primary"
+                                      // onClick={}
+                                      size="lg"
+                                    >
+                                      Edit
+                                    </Button>
+                                    </div>
 
-                          {
-                            this.state.studentsDataArray.map(studentData =>
-                              //this.state.tempArray.map(item =>
-                              <tr key={studentData.username}>
+<div className="col-md-8">
+                                    <Button block
+                                      color="warning"
+                                      // onClick={}
+                                      size="lg"
+                                    >
+                                      Copy
+                                    </Button>
+                                    </div>
+                                    </td>
 
-                                <td>{studentData.rollno}</td>
-                                <td>{studentData.firstname.charAt(0).toUpperCase() + " " + studentData.lastname}</td>
-                                <th scope="row" align="center" >
-
-                                   <Input
-                                      className="form-check-input"
-                                      type="checkbox"
-                                      id="present"
-                                      style={{ height: "10%", width: "5%" }}
-                                      name="parentaddresscheck"
-                                      //checked={this.state.parentaddresscheck}
-                                     // onChange={this.copyAddress}
-                                    />
-
-                                </th>
-                                {/* <td>{user.role}</td> */}
-                              </tr>
-                            )
-                          }
+                                   
+                                </tr>
 
                         </tbody>
-                      </Table>
+                      </Table> */}
 
                     </CardBody>
                   </Card>
