@@ -4,6 +4,7 @@ import ReactPhoneInput from "react-phone-input-2";
 import DatePicker from 'react-date-picker';
 import classnames from 'classnames';
 import Select from 'react-select';
+import moment from 'moment';
 
 import {
   Button,
@@ -75,7 +76,7 @@ class Attendance extends Component {
     this.showTimeTable = this.showTimeTable.bind(this);
     this.nameBtnClicked = this.nameBtnClicked.bind(this);
     this.rollnoBtnClicked = this.rollnoBtnClicked.bind(this);
-    this.updateClassDetails = this.updateClassDetails.bind(this);
+    this.updateStudentsAttendance = this.updateStudentsAttendance.bind(this);
     this.submitAttendance = this.submitAttendance.bind(this);
 
     // Fetching class details on page load
@@ -85,8 +86,13 @@ class Attendance extends Component {
 
   submitAttendance() {
 
-    console.log("Attendance - submitAttendance - updateClassDetails called");
-    this.updateClassDetails(this.state.class, this.state.section);
+    var submitBtn = document.getElementById("submitAttendanceBtn");
+    submitBtn.blur();
+
+    console.log("Attendance - submitAttendance - updateStudentsAttendance called");
+
+    // console.log(new Date() + "\n" + new Date(moment().startOf('day')));
+    this.updateStudentsAttendance(this.state.class, this.state.section);
   }
 
   nameBtnClicked(rollno, username, firstname, lastname) {
@@ -101,7 +107,8 @@ class Attendance extends Component {
     }
 
     var attendance = {};
-    attendance.date = new Date();
+    // attendance.date = new Date();
+    attendance.date = new Date(moment().startOf('day'));
 
     nameBtn.blur();
 
@@ -157,18 +164,18 @@ class Attendance extends Component {
     rollnoBtn.blur();
   }
 
-  async updateClassDetails(classStr, sectionStr) {
+  async updateStudentsAttendance(classStr, sectionStr) {
 
-    var updateClassDetailsRequest = {
+    var updateStudentsAttendanceRequest = {
       "class": classStr,
       "section": sectionStr,
       "attendance": this.state.attendance
     }
 
-    console.log("Attendance - updateClassDetails - updateClassDetailsRequest - "
-      + JSON.stringify(updateClassDetailsRequest));
+    console.log("Attendance - updateStudentsAttendance - updateStudentsAttendanceRequest - "
+      + JSON.stringify(updateStudentsAttendanceRequest));
 
-    await axios.post("http://localhost:8001/api/updateClassDetails", updateClassDetailsRequest).then(res => {
+    await axios.post("http://localhost:8001/api/updateStudentsAttendance", updateStudentsAttendanceRequest).then(res => {
 
       if (res.data.errors) {
         return this.setState({ errors: res.data.errors });
@@ -467,6 +474,7 @@ class Attendance extends Component {
                                      color="warning"
                                       // onClick={}
                                       size="lg"
+                                      disabled="disabled"
                                     >
                                       Roll No.
                                     </Button>
@@ -477,6 +485,7 @@ class Attendance extends Component {
                                      color="warning"
                                       // onClick={}
                                       size="lg"
+                                      disabled="disabled"
                                     >
                                       Name
                                     </Button>
@@ -502,7 +511,9 @@ class Attendance extends Component {
                                     value={studentsData.rollno}
                                     style={{ backgroundColor: this.state.nameBtnColor, 
                                       // borderColor: 'black', 
-                                      color: 'white' }}
+                                      color: 'white',
+                                      cursor: 'pointer'
+                                    }}
                                       // onClick={this.rollnoBtnClicked}
                                       disabled="disabled"
                                       size="lg"></Input>
@@ -527,7 +538,9 @@ class Attendance extends Component {
                                       style={{ backgroundColor: this.state.nameBtnColor, 
                                       // borderColor: 'black', 
                                       color: 'white',
-                                      outline:0 }}
+                                      outline:0,
+                                      cursor: 'pointer'
+                                    }}
                                       value={studentsData.firstname.toUpperCase() + " " + studentsData.lastname.toUpperCase() + " ( " + studentsData.username + " )"} >
                                       </Input>
                         </Col>
@@ -546,7 +559,9 @@ class Attendance extends Component {
                                       style={{ backgroundColor: "blue", 
                                       // borderColor: 'black', 
                                       color: 'white',
-                                      outline:0 }}
+                                      outline:0,
+                                      cursor: 'pointer'
+                                     }}
                                       value="SUBMIT ATTENDANCE" >
                                       </Input>
 

@@ -237,13 +237,6 @@ module.exports = function (app) {
     var studentsDataJSON = {};
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
 
-    if (request.attendance) {
-
-      updateStudentsAttendance(request.class, request.section, request.attendance);
-
-    }
-    
-
     if (request.subjects) objForUpdate.subjects = request.subjects;
     // if (request.timeTable) objForUpdate.timeTable = request.timeTable;
     
@@ -357,10 +350,6 @@ module.exports = function (app) {
 
     var request = req.body;
 
-    var attendance = {};
-    if (request.attendance.date) attendance.date = new Date(moment(request.attendance.date).startOf('day'));
-    if (request.attendance.studentsInfo) attendance.studentsInfo = request.attendance.studentsInfo;
-
 console.log("\n\nclass - " + request.class + " section - " + request.section + " attendance.date - " + request.attendance.date);
 
      Class.findOneAndUpdate(
@@ -386,6 +375,8 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
       if(null === classData) {
         
+        console.log("No record for attendance found so ADDING the record");
+
         Class.findOneAndUpdate(
           {"class": request.class, 
           "section": request.section 
@@ -395,15 +386,18 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
           },
         ).then(function (classData) {
     
+          response = { response: classData, message: "Class details updated successfully - ATTENDANCE ADDED" };
           console.log("ClassDAO - server response while set attendance - " + JSON.stringify(classData));
         }).catch(function (err) {
-          console.log("Catching server err while set attendance - " + err);
+          console.log("Catching server ERROR while set attendance - " + err);
           response = { errors: err };
-          console.log("ClassDAO - updateStudentsAttendance - Errors in classDAO - err while set attendance - " + JSON.stringify(err));
+          console.log("ClassDAO - updateStudentsAttendance - ERRORS in classDAO - ERR while set attendance - " + JSON.stringify(err));
           return res.send(response);
         });
 
       } else {
+
+        console.log("ClassDAO - updateStudentsAttendance - attendance record found - so MODIFYING data");
 
         Class.findOneAndUpdate(
           {"class": request.class, 
@@ -415,11 +409,12 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
           },
         ).then(function (classData) {
     
+          response = { response: classData, message: "Class details updated successfully - ATTENDANCE MODIFIED" };
           console.log("ClassDAO - server response while set attendance studentInfo - " + JSON.stringify(classData));
         }).catch(function (err) {
-          console.log("Catching server err while set attendance studentInfo - " + err);
+          console.log("Catching server ERROR while set attendance studentInfo - " + err);
           response = { errors: err };
-          console.log("ClassDAO - updateStudentsAttendance - Errors in classDAO - err while set attendance studentInfo - " + JSON.stringify(err));
+          console.log("ClassDAO - updateStudentsAttendance - ERRORS in classDAO - ERR while set attendance studentInfo - " + JSON.stringify(err));
           return res.send(response);
         });
       }
@@ -430,7 +425,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
     }).catch(function (err) {
       console.log("Catching server err while unset - " + err);
       response = { errors: err };
-      console.log("ClassDAO - updateStudentsAttendance - Errors in classDAO - server final response for unset - " + JSON.stringify(err));
+      console.log("ClassDAO - updateStudentsAttendance - ERRORS in classDAO - server final ERR for unset - " + JSON.stringify(err));
       return res.send(response);
     });
   }
