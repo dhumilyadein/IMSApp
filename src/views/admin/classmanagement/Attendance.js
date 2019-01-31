@@ -76,10 +76,17 @@ class Attendance extends Component {
     this.nameBtnClicked = this.nameBtnClicked.bind(this);
     this.rollnoBtnClicked = this.rollnoBtnClicked.bind(this);
     this.updateClassDetails = this.updateClassDetails.bind(this);
+    this.submitAttendance = this.submitAttendance.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
 
+  }
+
+  submitAttendance() {
+
+    console.log("Attendance - submitAttendance - updateClassDetails called");
+    this.updateClassDetails(this.state.class, this.state.section);
   }
 
   nameBtnClicked(rollno, username, firstname, lastname) {
@@ -136,7 +143,10 @@ class Attendance extends Component {
     this.setState({
       attendance : attendance
     }, () => {
-      console.log("attendance - attendance array - " + JSON.stringify(this.state.attendance));
+      console.log("attendance - Selected class - " + this.state.class 
+      + " selected Section - " + this.state.section 
+      + " attendance array - " + JSON.stringify(this.state.attendance));
+    
     });
 
   }
@@ -299,7 +309,7 @@ class Attendance extends Component {
 
     this.setState({ studentsDataArray: studentsDataArrayTemp })
 
-    console.log("sectionButtonClickHandler - Selected class - " + this.state.class +
+    console.log("Attendance - sectionChangeHandler - Selected class - " + this.state.class +
       " selected Section - " + this.state.section
       + " selected usernames - " + studentsDataArrayTemp);
 
@@ -531,7 +541,7 @@ class Attendance extends Component {
 <Input
                                     type="button"
                                     id="submitAttendanceBtn"
-                                      // onClick={ }
+                                      onClick={this.submitAttendance}
                                       size="lg"
                                       style={{ backgroundColor: "blue", 
                                       // borderColor: 'black', 

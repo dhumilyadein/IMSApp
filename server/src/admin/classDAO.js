@@ -237,8 +237,17 @@ module.exports = function (app) {
     var studentsDataJSON = {};
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
 
+    // var attendanceJSON = {};
+    // if (request.attendance) attendanceJSON.attendance = request.attendance;
+
+    var attendance = {};
     var attendanceJSON = {};
-    if (request.attendance) attendanceJSON.attendance = request.attendance;
+    if (request.attendance) {
+      if (request.attendance.date) attendance.date = moment(request.attendance.date).startOf('day').toDate();
+      if (request.attendance.studentsInfo) attendance.studentsInfo = request.attendance.studentsInfo;
+      attendanceJSON.attendance = attendance;
+    }
+    
 
     if (request.subjects) objForUpdate.subjects = request.subjects;
     // if (request.timeTable) objForUpdate.timeTable = request.timeTable;
@@ -313,9 +322,21 @@ module.exports = function (app) {
         $push: studentsDataJSON
       }
     } else if (Object.keys(objForUpdate).length !== 0 && Object.keys(attendanceJSON).length !== 0) {
+
+      console.log("\nnew Date(moment(request.attendance.date).startOf('day')" + new Date(moment(request.attendance.date).startOf('day')));
       udpateJSON = {
         $set: objForUpdate,
-        $push: attendanceJSON
+        // $push: attendanceJSON
+        // $addToSet: attendanceJSON,
+
+        $addToSet: {
+          "attendance": {
+            "date" : new Date(moment(request.attendance.date).startOf('day').day(2)),
+            // "studentsInfo" : request.attendance.studentsInfo
+          }
+        },
+
+        upsert: true
       }
     } else if (Object.keys(objForUpdate).length !== 0) {
       udpateJSON = {
@@ -331,9 +352,14 @@ module.exports = function (app) {
       udpateJSON
     ).then(function (classData) {
 
+      if (request.attendance) {
+        updateStudentsInfoInClassAttendance(request.class, request.section, new Date(moment(request.attendance.date).startOf('day').day(2)), request.attendance.studentsInfo);
+      }
+
       // console.log("Class details udpated successfully");
       response = { reqbody: req.body, message: "Class details updated successfully" };
       console.log("ClassDAO - updateClassDetails - Class details udpated successfully - server final response - " + JSON.stringify(response));
+
       return res.send(response);
     }).catch(function (err) {
       console.log("Catching server err - " + err);
@@ -342,6 +368,31 @@ module.exports = function (app) {
       return res.send(response);
     });
 
+  }
+
+  async function updateStudentsInfoInClassAttendance(classValue, section, date, studentsInfo) {
+
+    await Class.findOneAndUpdate(
+      { $and: [{ "class": classValue }, { "section": section }, {"attendance.date": date}] },
+      {
+        // $set: {
+        // "attendance.studentsInfo" : studentsInfo
+        // },
+        $set: {'attendance.$.studentsInfo': studentsInfo}
+      },
+      {upsert: true}
+    ).then(function (classData) {
+
+      // console.log("Class details udpated successfully");
+      // response = { reqbody: req.body, message: "Class details updated successfully" };
+      console.log("ClassDAO - updateStudentsInfoInClassAttendance - Class details udpated successfully - server final response - " + JSON.stringify(classData));
+      // return res.send(response);
+    }).catch(function (err) {
+      console.log("Catching server err - " + err);
+      // response = { errors: err };
+      console.log("ClassDAO - updateStudentsInfoInClassAttendance - Errors in classDAO - server final response - " + JSON.stringify(err));
+      // return res.send(response);
+    });
   }
 
   async function removeSchedule(req, res) {

@@ -67,7 +67,9 @@ var ClassSchema = new Schema({
 
     date: {
       type: Date,
-      required: true
+      required: true,
+      unique: true,
+      index: true
     },
     studentsInfo: {
       type: Array,
@@ -97,5 +99,7 @@ var ClassSchema = new Schema({
 
 // Composite primary key (class + section)
 ClassSchema.index({class: 1, section: 1}, {unique: true});
+ClassSchema.index({"attendance.date": 1}, {unique: true});
+// ClassSchema.ensureIndex({"attendance.date": 1}, {unique: true});
 
 module.exports = Class = mongoose.model("Class", ClassSchema);
