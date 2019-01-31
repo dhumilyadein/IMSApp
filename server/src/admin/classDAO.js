@@ -323,7 +323,8 @@ module.exports = function (app) {
       }
     } else if (Object.keys(objForUpdate).length !== 0 && Object.keys(attendanceJSON).length !== 0) {
 
-      console.log("\nnew Date(moment(request.attendance.date).startOf('day')" + new Date(moment(request.attendance.date).startOf('day')));
+      console.log("\nupdateClassDetails new Date(moment(request.attendance.date).startOf('day')" 
+      + new Date(moment(request.attendance.date).startOf('day')));
       udpateJSON = {
         $set: objForUpdate,
         // $push: attendanceJSON
@@ -331,7 +332,7 @@ module.exports = function (app) {
 
         $addToSet: {
           "attendance": {
-            "date" : new Date(moment(request.attendance.date).startOf('day').day(2)),
+            "date" : new Date(moment(request.attendance.date).startOf('day')),
             // "studentsInfo" : request.attendance.studentsInfo
           }
         },
@@ -353,7 +354,8 @@ module.exports = function (app) {
     ).then(function (classData) {
 
       if (request.attendance) {
-        updateStudentsInfoInClassAttendance(request.class, request.section, new Date(moment(request.attendance.date).startOf('day').day(2)), request.attendance.studentsInfo);
+        updateStudentsInfoInClassAttendance(request.class, request.section, 
+          new Date(moment(request.attendance.date).startOf('day')), request.attendance.studentsInfo);
       }
 
       // console.log("Class details udpated successfully");
@@ -373,6 +375,7 @@ module.exports = function (app) {
   async function updateStudentsInfoInClassAttendance(classValue, section, date, studentsInfo) {
 
     await Class.findOneAndUpdate(
+      // { $and: [{ "class": classValue }, { "section": section }, {"attendance.date": date}] },
       { $and: [{ "class": classValue }, { "section": section }, {"attendance.date": date}] },
       {
         // $set: {
