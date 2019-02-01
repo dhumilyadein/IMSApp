@@ -430,6 +430,53 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
     });
   }
 
+  async function fetchAttendanceOnDate(req, res) {
+
+    await console.log("fetchAttendanceOnDate");
+
+    console.log("ClassDAO - fetchAttendanceOnDate - Errors in classDAO - THROWING VALIDATOIN ERROR");
+
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      console.log("ClassDAO - fetchAttendanceOnDate - Errors in classDAO - THROWING VALIDATOIN ERROR");
+      response = { errors: errors.mapped() };
+      console.log("ClassDAO - fetchAttendanceOnDate - server final response - " + JSON.stringify(response));
+      return res.send(response);
+    }
+
+    var request = req.body;
+
+    console.log("\n\nfetchAttendanceOnDate - class - " + request.class
+    + " section - " + request.section
+    + " \nattendance date - " + request.date);
+
+    Class.findOne(
+      {"class": request.class, 
+      "section": request.section
+      // ,"attendance.date": request.date
+      ,"attendance" : { $elemMatch : { date : request.date } },
+    },
+    {
+      "class":1, 
+      "section":1,
+      "attendance.date":1,
+      "attendance.$.studentsInfo":1
+    }
+    ).then(function (classData) {
+
+      response = { response: classData, message: "Attendance details fetched successfully" };
+      console.log("ClassDAO - fetchAttendanceOnDate - Attendance details fetched successfull - " + JSON.stringify(classData));
+      return res.send(response);
+    }).catch(function (err) {
+      console.log("Catching server ERROR while set attendance studentInfo - " + err);
+      response = { errors: err };
+      console.log("ClassDAO - fetchAttendanceOnDate - ERRORS in classDAO - ERR while fetching attendance - " + JSON.stringify(err));
+      return res.send(response);
+    });
+  }
+
   async function removeSchedule(req, res) {
 
     // console.log("classDAO - updateClassDetails - Enter");
@@ -510,6 +557,11 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
   app.post("/api/updateStudentsAttendance", updateClassValidation, updateStudentsAttendance, (req, res) => {
     console.log("ClassDAO - updateStudentsAttendance post method call");
+
+  });
+
+  app.post("/api/fetchAttendanceOnDate", updateClassValidation, fetchAttendanceOnDate, (req, res) => {
+    console.log("ClassDAO - fetchAttendanceOnDate post method call");
 
   });
 

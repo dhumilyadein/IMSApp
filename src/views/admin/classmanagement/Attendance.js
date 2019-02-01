@@ -65,6 +65,7 @@ class Attendance extends Component {
       section: "",
       sectionArray: [],
       studentsDataArray: [],
+      studentsDataArrayPageLoad: [],
 
       tempArray: ["kapil", "mayank"],
 
@@ -104,6 +105,7 @@ class Attendance extends Component {
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
     this.viewAttendanceHandler = this.viewAttendanceHandler.bind(this);
     this.markAttendanceHandler = this.markAttendanceHandler.bind(this);
+    this.fetchAttendanceOnDate = this.fetchAttendanceOnDate.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
@@ -133,6 +135,9 @@ class Attendance extends Component {
       
       this.setState({ attendanceDate: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }, () => {
         this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
+
+        this.fetchAttendanceOnDate();
+        
       });
 
       // this.setState({ attendanceDate: new Date(moment(date.getTime()).startOf('day')) }, () => {
@@ -143,19 +148,26 @@ class Attendance extends Component {
     this.toggleCalendar();
   }
 
+
   viewAttendanceHandler() {
 
     console.log("viewAttendanceHandler");
+
+    this.fetchAttendanceOnDate();
 
     this.setState({
       viewAttendanceView: true,
       markAttendanceView: false
     });
+
+
   }
 
   markAttendanceHandler() {
 
     console.log("markAttendanceHandler");
+
+    this.fetchAttendanceOnDate();
 
     this.setState({
       markAttendanceView: true,
@@ -189,8 +201,11 @@ class Attendance extends Component {
 
         if(btnColor === 'grey') {
           studentsInfo.attendanceStatus = "absent";
+          studentsInfo.attendanceColor = "grey";
+
         } else if(btnColor === 'green') {
           studentsInfo.attendanceStatus = "present";
+          studentsInfo.attendanceColor = "green";
         }
   
         studentsInfoArray.push(studentsInfo);
@@ -239,6 +254,53 @@ class Attendance extends Component {
 
     var rollnoBtn = document.getElementById(e.currentTarget.id);
     rollnoBtn.blur();
+  }
+
+  /*
+   * Setting studentsDataArray from Class.attendance.studentsInfo which was earlier set from Class.studentsData table
+   */
+  async fetchAttendanceOnDate() {
+
+    // Resetting studentsDataArray to clear the previous date so that only the selected records are present on the page
+    this.setState({
+      studentsDataArray: []
+    });
+
+    var fetchAttendanceOnDateRequest = {
+      "class": this.state.class,
+      "section": this.state.section,
+      "date": this.state.attendanceDate
+    }
+
+    console.log("Attendance - fetchAttendanceOnDate - fetchAttendanceOnDateRequest - "
+      + JSON.stringify(fetchAttendanceOnDateRequest));
+
+    await axios.post("http://localhost:8001/api/fetchAttendanceOnDate", fetchAttendanceOnDateRequest).then(attendanceRes => {
+
+      if (attendanceRes.data.errors) {
+        return this.setState({ errors: attendanceRes.data.errors });
+      } else {
+
+        // Setting studentsDataArray from Class.attendance.studentsInfo which was earlier set from Class.studentsData table
+        if(attendanceRes.data.response && attendanceRes.data.response.attendance 
+          && attendanceRes.data.response.attendance[0] && attendanceRes.data.response.attendance[0].studentsInfo) {
+
+            // Setting students data for the selected date
+          this.setState({
+            studentsDataArray: attendanceRes.data.response.attendance[0].studentsInfo
+          });
+        } else {
+
+          // If there is no data for the selected date and view is markAttendance - show all the students of the class from studentsDataArrayPageLoad
+          if(this.state.markAttendanceView) {
+            this.setState({
+              studentsDataArray: this.state.studentsDataArrayPageLoad
+            });
+          }
+        }
+        
+      }
+    });
   }
 
   async updateStudentsAttendance(classStr, sectionStr) {
@@ -393,6 +455,7 @@ class Attendance extends Component {
     // Sorting array alphabetically
     //studentsDataArrayTemp.sort();
 
+    this.setState({ studentsDataArrayPageLoad: studentsDataArrayTemp } );
     this.setState({ studentsDataArray: studentsDataArrayTemp } );
 
     console.log("Attendance - sectionChangeHandler - Selected class - " + this.state.class +
@@ -537,10 +600,10 @@ class Attendance extends Component {
 <Row>
 <Col className="col-md-4"/>
 { this.state.markAttendanceView && (
-<Col className="col-md-4 " align="center"><h3><b>Mark Attendance for</b></h3></Col>
+<Col className="col-md-4 " align="center"><h3><b>MARK Attendance for</b></h3></Col>
 )}
 { this.state.viewAttendanceView && (
-  <Col className="col-md-4 " align="center"><h3><b>View Attendance for</b></h3></Col>
+  <Col className="col-md-4 " align="center"><h3><b>VIEW Attendance for</b></h3></Col>
   )}
 </Row>
 <Row>
@@ -561,10 +624,11 @@ class Attendance extends Component {
 <Col className="col-md-4">
 { this.state.markAttendanceView && (
   <NavLink href="#"
-onClick={this.viewAttendanceHandler} ><h3><b><u>View Attendance</u></b></h3></NavLink> )}
+  style={{ color: 'red'}}
+onClick={this.viewAttendanceHandler} ><h3><b><u>Go to View Attendance</u></b></h3></NavLink> )}
 { this.state.viewAttendanceView && (
   <NavLink href="#"
-onClick={this.markAttendanceHandler} ><h3><b><u>Mark Attendance</u></b></h3></NavLink> )}
+onClick={this.markAttendanceHandler} ><h3><b><u>Go to Mark Attendance</u></b></h3></NavLink> )}
 </Col>
 </Row>
 </div>
@@ -644,8 +708,8 @@ onClick={this.markAttendanceHandler} ><h3><b><u>Mark Attendance</u></b></h3></Na
                                     type="button"
                                     id={studentsData.rollno}
                                     value={studentsData.rollno}
-                                    style={{ backgroundColor: this.state.nameBtnColor, 
-                                      // borderColor: 'black', 
+                                    // style={{ backgroundColor: this.state.nameBtnColor, 
+                                    style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'grey'), 
                                       color: 'white',
                                       cursor: 'pointer'
                                     }}
@@ -671,7 +735,8 @@ onClick={this.markAttendanceHandler} ><h3><b><u>Mark Attendance</u></b></h3></Na
                                       onClick={ () => this.nameBtnClicked(studentsData.rollno, studentsData.username, studentsData.firstname, studentsData.lastname) }
                                       size="lg"
                                       disabled={this.state.viewAttendanceView}
-                                      style={{ backgroundColor: this.state.nameBtnColor, 
+                                      // style={{ backgroundColor: this.state.nameBtnColor, 
+                                      style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'grey'), 
                                       // borderColor: 'black', 
                                       color: 'white',
                                       outline:0,

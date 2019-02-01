@@ -94,6 +94,10 @@ var ClassSchema = new Schema({
       attendanceStatus: {
         type: String,
         required: true
+      },
+      attendanceColor: {
+        type: String,
+        required: true
       }
     }
     
