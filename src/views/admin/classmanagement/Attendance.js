@@ -74,7 +74,10 @@ class Attendance extends Component {
       attendance: [],
 
       isOpen: false,
-      attendanceDate: new Date(moment().startOf('day')),
+      
+      attendanceDate: new Date(new Date(moment().startOf('day')).getTime()-(new Date(moment().startOf('day')).getTimezoneOffset() * 60000)),
+      // attendanceDate: new Date(moment().startOf('day')),
+
       displayDate: moment().format('LL'),
 
       modalSuccess: false
