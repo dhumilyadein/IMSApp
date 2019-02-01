@@ -32,7 +32,8 @@ import {
   Row,
   Table,
   Modal,
-  ModalHeader
+  ModalHeader,
+  NavLink
 } from "reactstrap";
 import axios from "axios";
 
@@ -55,6 +56,8 @@ class Attendance extends Component {
       classesView: true,
       sectionView: false,
       studentsView: false,
+      markAttendanceView: false,
+      viewAttendanceView: false,
 
       classDetails: {},
       classes: [],
@@ -92,7 +95,6 @@ class Attendance extends Component {
     this.fetchClasses = this.fetchClasses.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-    this.showTimeTable = this.showTimeTable.bind(this);
     this.nameBtnClicked = this.nameBtnClicked.bind(this);
     this.rollnoBtnClicked = this.rollnoBtnClicked.bind(this);
     this.updateStudentsAttendance = this.updateStudentsAttendance.bind(this);
@@ -100,6 +102,8 @@ class Attendance extends Component {
     this.dayChangeHandler = this.dayChangeHandler.bind(this);
     this.toggleCalendar = this.toggleCalendar.bind(this);
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
+    this.viewAttendanceHandler = this.viewAttendanceHandler.bind(this);
+    this.markAttendanceHandler = this.markAttendanceHandler.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
@@ -137,6 +141,26 @@ class Attendance extends Component {
     }
     
     this.toggleCalendar();
+  }
+
+  viewAttendanceHandler() {
+
+    console.log("viewAttendanceHandler");
+
+    this.setState({
+      viewAttendanceView: true,
+      markAttendanceView: false
+    });
+  }
+
+  markAttendanceHandler() {
+
+    console.log("markAttendanceHandler");
+
+    this.setState({
+      markAttendanceView: true,
+      viewAttendanceView: false
+    });
   }
 
   submitAttendance() {
@@ -347,6 +371,8 @@ class Attendance extends Component {
       sectionView: true,
       studentsView: false,
       timeTableView: false,
+      markAttendanceView: false,
+      viewAttendanceView: false,
       section: ""
      });
   }
@@ -375,31 +401,10 @@ class Attendance extends Component {
 
     // Switching view to students view
     this.setState({
-      studentsView: true
+      studentsView: true,
+      markAttendanceView: true
     });
   }
-
-  showTimeTable() {
-
-    var subjectArray = null;
-    var timeTableArrayTemp = null;
-    this.state.classDetails.forEach(element => {
-      if (element["class"] === this.state.class && element["section"] === this.state.section) {
-        subjectArray = element["subjects"];
-        timeTableArrayTemp = element["timeTable"];
-      }
-    });
-
-    this.setState({
-      studentsView: false,
-      timeTableView: true,
-      subjectArray: subjectArray,
-      timeTableArray: timeTableArrayTemp
-    });
-
-    console.log("ClassDetails - subjectArray - " + subjectArray + " timeTableArray - " + JSON.stringify(timeTableArrayTemp));
-  }
-
 
   render() {
 
@@ -531,7 +536,12 @@ class Attendance extends Component {
 <div align="center">
 <Row>
 <Col className="col-md-4"/>
+{ this.state.markAttendanceView && (
 <Col className="col-md-4 " align="center"><h3><b>Mark Attendance for</b></h3></Col>
+)}
+{ this.state.viewAttendanceView && (
+  <Col className="col-md-4 " align="center"><h3><b>View Attendance for</b></h3></Col>
+  )}
 </Row>
 <Row>
 <Col className="col-md-4"/>
@@ -548,7 +558,14 @@ class Attendance extends Component {
                                     onClick={this.toggleCalendar}
                                       size="lg"></Input>
 </Col>
-{/* <Col className="col-md-4"/> */}
+<Col className="col-md-4">
+{ this.state.markAttendanceView && (
+  <NavLink href="#"
+onClick={this.viewAttendanceHandler} ><h3><b><u>View Attendance</u></b></h3></NavLink> )}
+{ this.state.viewAttendanceView && (
+  <NavLink href="#"
+onClick={this.markAttendanceHandler} ><h3><b><u>Mark Attendance</u></b></h3></NavLink> )}
+</Col>
 </Row>
 </div>
             )}
@@ -633,7 +650,7 @@ class Attendance extends Component {
                                       cursor: 'pointer'
                                     }}
                                       // onClick={this.rollnoBtnClicked}
-                                      disabled="disabled"
+                                      disabled={true}
                                       size="lg"></Input>
                         </Col>
 
@@ -653,6 +670,7 @@ class Attendance extends Component {
                                       // onClick={this.nameBtnClicked}
                                       onClick={ () => this.nameBtnClicked(studentsData.rollno, studentsData.username, studentsData.firstname, studentsData.lastname) }
                                       size="lg"
+                                      disabled={this.state.viewAttendanceView}
                                       style={{ backgroundColor: this.state.nameBtnColor, 
                                       // borderColor: 'black', 
                                       color: 'white',
@@ -664,27 +682,6 @@ class Attendance extends Component {
                         </Col>
   </Row>
 ))}
-
-<br/><br/>
-                                        <Card>
-                                          <CardBody>
-
-<Input
-                                    type="button"
-                                    id="submitAttendanceBtn"
-                                      onClick={this.submitAttendance}
-                                      size="lg"
-                                      style={{ backgroundColor: "blue", 
-                                      // borderColor: 'black', 
-                                      color: 'white',
-                                      outline:0,
-                                      cursor: 'pointer'
-                                     }}
-                                      value="SUBMIT ATTENDANCE" >
-                                      </Input>
-
-                                          </CardBody>
-                                        </Card>
 
                       {/* <Table responsive hover >
                         
@@ -722,11 +719,34 @@ class Attendance extends Component {
 
                     </CardBody>
                   </Card>
+
                 </Col>
               </Row>
             </div>
+          
           )}
 
+          { this.state.markAttendanceView && (
+                  <Card>
+                                          <CardBody>
+
+<Input
+                                    type="button"
+                                    id="submitAttendanceBtn"
+                                      onClick={this.submitAttendance}
+                                      size="lg"
+                                      style={{ backgroundColor: "blue", 
+                                      // borderColor: 'black', 
+                                      color: 'white',
+                                      outline:0,
+                                      cursor: 'pointer'
+                                     }}
+                                      value="SUBMIT ATTENDANCE" >
+                                      </Input>
+
+                                          </CardBody>
+                                        </Card>
+                  )}
 
 
         </Container>
