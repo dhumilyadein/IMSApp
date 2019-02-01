@@ -141,10 +141,47 @@ class Attendance extends Component {
     var submitBtn = document.getElementById("submitAttendanceBtn");
     submitBtn.blur();
 
-    console.log("Attendance - submitAttendance - updateStudentsAttendance called");
+    console.log("this.state.studentsDataArray - " + JSON.stringify(this.state.studentsDataArray));
+  
+      var attendance = {};
+      var studentsInfoArray = [];
+  
+      attendance.date = this.state.attendanceDate;
+  
+      this.state.studentsDataArray.forEach(student => {
+  
+        var studentsInfo = {};
+  
+        studentsInfo.username = student.username;
+        studentsInfo.rollno = student.rollno;
+        studentsInfo.firstname = student.firstname;
+        studentsInfo.lastname = student.lastname;
 
-    // console.log(new Date() + "\n" + new Date(moment().startOf('day')));
-    this.updateStudentsAttendance(this.state.class, this.state.section);
+        var nameBtn = document.getElementById(student.username);
+        var btnColor = nameBtn.style.backgroundColor;
+
+        if(btnColor === 'grey') {
+          studentsInfo.attendanceStatus = "absent";
+        } else if(btnColor === 'green') {
+          studentsInfo.attendanceStatus = "present";
+        }
+  
+        studentsInfoArray.push(studentsInfo);
+      })
+  
+      attendance.studentsInfo = studentsInfoArray;
+  
+      this.setState({
+        attendance: attendance
+      }, () => {
+        console.log("attendance - Selected class - " + this.state.class
+          + " selected Section - " + this.state.section
+          + " attendance array - " + JSON.stringify(this.state.attendance));
+  
+          this.updateStudentsAttendance(this.state.class, this.state.section);
+      });
+
+    console.log("Attendance - submitAttendance - updateStudentsAttendance called");
   }
 
   nameBtnClicked(rollno, username, firstname, lastname) {
@@ -152,61 +189,22 @@ class Attendance extends Component {
     var nameBtn = document.getElementById(username);
     var rollnoBtn = document.getElementById(rollno);
 
-    var studentsInfoArray = [];
-
-    if(this.state.attendance && this.state.attendance.studentsInfo) {
-      studentsInfoArray = this.state.attendance.studentsInfo;
-    }
-
-    var attendance = {};
-    // attendance.date = new Date();
-    attendance.date = this.state.attendanceDate;
-
     nameBtn.blur();
 
     if(nameBtn.style.backgroundColor === 'grey' && rollnoBtn.style.backgroundColor === 'grey') {
+
       nameBtn.style.backgroundColor='green';
       rollnoBtn.style.backgroundColor='green';
-
-      var studentsInfo = {};
-      studentsInfo.username = username;
-      studentsInfo.rollno = rollno;
-      studentsInfo.firstname = firstname;
-      studentsInfo.lastname = lastname;
-
-      studentsInfoArray.push(studentsInfo);
 
       console.log("Attendance - present marked for username - " + username);
 
     } else {
+
       nameBtn.style.backgroundColor='grey';
       rollnoBtn.style.backgroundColor='grey';
 
-      // console.log("Attendance - username - " + username + " studentsInfoArray 1 - " + JSON.stringify(studentsInfoArray));
-      if(studentsInfoArray.length > 0) {
-      for(var i=0; i<studentsInfoArray.length; i++) {
-        if(studentsInfoArray[i].username === username) {
-          var deletedItem = studentsInfoArray.splice(i, 1); 
-          console.log("Deleted " + deletedItem);
-          // delete studentsInfoArray[i];
-        }
-      }
-      // console.log("Attendance - After REMOVING username - " + username + " studentsInfoArray 2 - " + JSON.stringify(studentsInfoArray));
+      console.log("Attendance - absent marked for username - " + username);
     }
-
-    console.log("Attendance - absent marked for username - " + username);
-    }
-
-    attendance.studentsInfo = studentsInfoArray;
-
-    this.setState({
-      attendance : attendance
-    }, () => {
-      console.log("attendance - Selected class - " + this.state.class 
-      + " selected Section - " + this.state.section 
-      + " attendance array - " + JSON.stringify(this.state.attendance));
-    
-    });
 
   }
 
@@ -366,7 +364,7 @@ class Attendance extends Component {
     // Sorting array alphabetically
     //studentsDataArrayTemp.sort();
 
-    this.setState({ studentsDataArray: studentsDataArrayTemp })
+    this.setState({ studentsDataArray: studentsDataArrayTemp } );
 
     console.log("Attendance - sectionChangeHandler - Selected class - " + this.state.class +
       " selected Section - " + this.state.section
