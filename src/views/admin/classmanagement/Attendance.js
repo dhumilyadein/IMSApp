@@ -5,6 +5,12 @@ import DatePicker from 'react-date-picker';
 import classnames from 'classnames';
 import Select from 'react-select';
 import moment from 'moment';
+import DayPickerInput from 'react-day-picker/DayPickerInput';
+// import 'react-day-picker/lib/style.css';
+// import MomentLocaleUtils, {
+//   formatDate,
+//   parseDate,
+// } from 'react-day-picker/moment';
 
 import {
   Button,
@@ -24,7 +30,9 @@ import {
   InputGroupAddon,
   InputGroupText,
   Row,
-  Table
+  Table,
+  Modal,
+  ModalHeader
 } from "reactstrap";
 import axios from "axios";
 
@@ -63,7 +71,15 @@ class Attendance extends Component {
       nameBtnColorFlag: false, // false means grey color, change color to green when button is clicked (true - green)
       nameBtnColor: 'grey',
 
-      attendance: []
+      attendance: [],
+
+      isOpen: false,
+      attendanceDate: new Date(moment().startOf('day')),
+      displayDate: moment().format('LL'),
+
+      modalSuccess: false
+
+      // new Date().getDate() + '-' + (new Date().getMonth()+1) + '-' + new Date().getFullYear()
 
 
 
@@ -78,10 +94,46 @@ class Attendance extends Component {
     this.rollnoBtnClicked = this.rollnoBtnClicked.bind(this);
     this.updateStudentsAttendance = this.updateStudentsAttendance.bind(this);
     this.submitAttendance = this.submitAttendance.bind(this);
+    this.dayChangeHandler = this.dayChangeHandler.bind(this);
+    this.toggleCalendar = this.toggleCalendar.bind(this);
+    this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
 
+  }
+
+  toggleCalendar (e) {
+
+    e && e.preventDefault()
+    this.setState({isOpen: !this.state.isOpen})
+
+  }
+
+  toggleModalSuccess() {
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
+    });
+  }
+
+  dayChangeHandler(date) {
+
+    if(date) {
+
+      console.log("GMT - " + new Date()
+      + "\nnew Date(date.getTime()-(date.getTimezoneOffset() * 60000)) - " + new Date(date.getTime()-(date.getTimezoneOffset() * 60000))
+      );
+      
+      this.setState({ attendanceDate: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }, () => {
+        this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
+      });
+
+      // this.setState({ attendanceDate: new Date(moment(date.getTime()).startOf('day')) }, () => {
+      //   this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
+      // });
+    }
+    
+    this.toggleCalendar();
   }
 
   submitAttendance() {
@@ -108,7 +160,7 @@ class Attendance extends Component {
 
     var attendance = {};
     // attendance.date = new Date();
-    attendance.date = new Date(moment().startOf('day'));
+    attendance.date = this.state.attendanceDate;
 
     nameBtn.blur();
 
@@ -182,7 +234,7 @@ class Attendance extends Component {
       } else {
 
         this.setState({
-          classDetailsUpdatedFlag: true
+          modalSuccess: true
         });
       }
     });
@@ -378,7 +430,17 @@ class Attendance extends Component {
       <div>
         <Container >
 
-
+          {this.state.modalSuccess && (
+            <Modal
+              isOpen={this.state.modalSuccess}
+              className={"modal-success"}
+              toggle={this.toggleModalSuccess}
+            >
+              <ModalHeader toggle={this.toggleModalSuccess}>
+                Attendance Submitted Successfully!
+              </ModalHeader>
+            </Modal>
+          )}
 
           <Card>
             <CardHeader>
@@ -452,7 +514,62 @@ class Attendance extends Component {
 
           {this.state.studentsView && this.state.class && this.state.sectionArray && this.state.studentsDataArray && (
 
-            <div className="animated fadeIn">
+            <div>
+
+            <div align="center">
+            
+            { !this.state.isOpen && (
+            // <button
+            //   className="example-custom-input"
+            //   onClick={this.toggleCalendar}
+            //   value="kapil"
+            //   >
+              
+            //   {/* TODAY */}
+            // </button>
+<div align="center">
+<Row>
+<Col className="col-md-4"/>
+<Col className="col-md-4 " align="center"><h3><b>Mark Attendance for</b></h3></Col>
+</Row>
+<Row>
+<Col className="col-md-4"/>
+<Col className="col-md-4" align="center">
+<Input
+                                    type="button"
+                                    id="attendanceDate"
+                                    value={this.state.displayDate}
+                                    style={{ backgroundColor: this.state.nameBtnColor, 
+                                      // borderColor: 'black', 
+                                      color: 'white',
+                                      cursor: 'pointer'
+                                    }}
+                                    onClick={this.toggleCalendar}
+                                      size="lg"></Input>
+</Col>
+{/* <Col className="col-md-4"/> */}
+</Row>
+</div>
+            )}
+{ this.state.isOpen && (
+            <DatePicker
+
+                                name="attendanceDate"
+                                id="attendanceDate"
+                                value={this.state.attendanceDate}
+                                onChange={this.dayChangeHandler}
+                                isOpen={this.state.isOpen}
+                              />
+)}
+              {/* <DayPickerInput 
+              value="TODAY"
+              formatDate={formatDate}
+        parseDate={parseDate}
+              format="DD-MM-YYYY"
+              placeholder="TODAY"
+              onDayChange={this.dayChangeHandler}
+              selectedDay={this.state.selectedDay} /> */}
+            </div>
 
 <Row>
   <Col>
