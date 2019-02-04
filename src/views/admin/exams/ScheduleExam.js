@@ -47,10 +47,11 @@ class ScheduleExam extends Component {
         this.fetchClassDetails();
         this.getExistingBooks();
         this.state = {
-
+            showSections:true,
             class:"",
             section:"",
             classError:"",
+            allSectionCheck:false,
 rowError:"",
             studentsDataArray:[],
                         studentOpen:true,
@@ -808,85 +809,71 @@ this.setState({selectedStudent:e});
                                     </font>
                                   )}
 
-                                    <InputGroup className="mb-4">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "120px" }}>
-                                          Section
-                                </InputGroupText>
-                                      </InputGroupAddon>
-                                      <Input
-                                        name="section"
+                          {  this.state.showSections&& <p>        
+                        
+                                    <Select
                                         id="section"
-                                        type="select"
-                                        value={this.state.section}
-                                        onChange={this.sectionChangeHandler}
+                                        name="section"
                                         isMulti={true}
-                                      >
-                                        <option value="">Select</option>
-                                        {this.state.sectionArray.map(element => {
-                                          return (<option key={element} value={element}>{element}</option>);
+                                        placeholder="Select Single or Multiple Section(s)"
+                                        options={this.state.sectionArray}
+                                        closeMenuOnSelect={false}
+                                        value={this.state.section}
+
+                                        isSearchable={true}
+                                        onChange={selected => {
+                                          console.log("Selected: " + JSON.stringify(selected));
+                                          var temp = [];
+
+                                          for (var i = 0; i < selected.length; i++) { temp.push(selected[i].value) }
+                                          this.setState({
+                                            selectedFeeTemplate: temp,
+                                            selectedFeeTemplateValue: selected
+                                          }, () => {
+                                            console.log("Selected Fee Templ: " + JSON.stringify(this.state.selectedFeeTemplate));
+                                          })
+
+
+
+
+
+
+
                                         }
-                                        )}
 
-                                      </Input>
-                                    </InputGroup>
 
+
+                                        } />
+                                 
                                   {this.state.sectionError && (
                                     <font color="red">
                                       {" "}
                                       <p>{this.state.sectionError}</p>
                                     </font>
-                                  )}
+                                  )} </p>}
 
+<FormGroup check inline>
+                                    <Input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      id="allSectionCheck"
+                                      style={{ height: "35px", width: "25px" }}
+                                      name="allSectionCheck"
+                                      checked={this.state.allSectionCheck}
+                                      onChange={e=>{ if(e.target.checked)
+                                        this.setState({allSectionCheck:true,showSections:false});
+                                        else                                      
+                                        this.setState({allSectionCheck:false,showSections:true})}}
+                                    />
+                                    <Label
+                                      className="form-check-label"
+                                      check
+                                      htmlFor="inline-checkbox1"
+                                    >
+                                     For All Sections
+                                    </Label>
+                                  </FormGroup>
 
-
-                     <Select
-                            id="examSelect"
-                            name="examSelect"
-
-                          placeholder="Select Exam or Type to search"
-                            options={this.state.examDataArray}
-                          closeMenuOnSelect={true}
-                         value={this.state.selectedExam}
-                         isClearable={true}
-                         //menuIsOpen ={this.state.studentOpen}
-                            isSearchable={true}
-
-                            onChange={e=>{this.setState({selectedExam:e})}}
-                            />
-   {this.state.examError && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.examError}</p>
-                                    </font>
-                                  )}
-
-
-<br/>
-<InputGroup className="mb-2">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                <b>  Date of Issue</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-
-                              &nbsp; &nbsp; &nbsp;
-                              <DatePicker
-
-                                name="doi"
-                                id="doi"
-                                value={this.state.doi}
-                                onChange={date=>{this.setState({doi:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOI: "+this.state.doi)})}}
-                              />
-
-
-                            </InputGroup>
-                            {this.state.doiError &&(
-                                <font color="red"><h6>
-                                  {" "}
-                                  <p>{this.state.doiError}</p></h6>
-                                </font>
-                              )}
 
 <br/>
 <Table bordered hover>
