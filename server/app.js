@@ -18,6 +18,8 @@ const classDAO = require("./src/admin/classDAO");
 const library = require("./src/admin/library");
 const exam = require("./src/admin//exam");
 const login = require("./src/login");
+const SendEmail = require("./src/admin/sendemail/SendEmail");
+
 const app = express();
 
 app.use(bodyparser.json({limit: '10mb', extended: true}));
@@ -57,6 +59,7 @@ inventory(app);
 classDAO(app);
 library(app);
 exam(app);
+SendEmail(app);
 
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
