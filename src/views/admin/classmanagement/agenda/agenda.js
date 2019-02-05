@@ -443,7 +443,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
 <br/>
 <Button color="success" block onClick={this.copyTimeTableToAllSections}>
-                      Set same TimeTable for all sections of Class '{this.state.selectedClass}'
+                      Set same TimeTable for all sections of Class ' {this.state.selectedClass} '
                     </Button>
 
 
