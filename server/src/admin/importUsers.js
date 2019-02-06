@@ -99,6 +99,7 @@ console.log( "Update Class: "+JSON.stringify(request));
         "username": request.username,
         "firstname": request.firstname,
         "lastname": request.lastname,
+        "email": request.email
       }
     }
 

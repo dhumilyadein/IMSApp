@@ -8,10 +8,21 @@ module.exports = function (app) {
        */
     function sendEmail(req, res) { 
 
-        var to = "dhumilyadein@gmail.com";
-        var subject = "Jai Ho";
-        var text = 'Jai Ho';
-        var html = '<h1>Welcome</h1><p>That was easy!</p>';
+        var request = req.body;
+
+console.log("\n\nSendEmail - to - " + request.to + " subject - " + request.subject + " text - " + request.text + " html - " + request.html);
+
+
+        // var to = "dhumilyadein@gmail.com";
+        // var to = ['kapil_141290@yahoo.co.in', 'dhumilyadein@gmail.com'];
+        // var subject = "Hello dude";
+        // var text = 'Whats up';
+        // var html = '<h1>Welcome</h1><p>That was easy!</p>';
+
+        var to = request.to;
+        var subject = request.subject;
+        var text = request.text;
+        var html = request.html;
 
         nodemailer.createTestAccount((err, account) => { 
             
@@ -53,14 +64,19 @@ module.exports = function (app) {
             transporter.sendMail(mailOptions, (error, info) => { 
                 if (error) { 
                     console.log('Error', error); 
+                    return res.send({ errors: error });
+
                 } else { 
                     console.log('Success', info); 
+                    console.log('\nSendEmail - Mail response - ' + info.response, info); 
+                    response = { response: info, message: "SendEmail - Email Sent to " + info.accepted};
+                    return res.send(response);
                 } 
             }); 
         }); 
     }
 
-    app.get("/api/SendEmail", sendEmail, (req, res) => {
+    app.post("/api/SendEmail", sendEmail, (req, res) => {
         console.log("SendEmail get service running");
     });
 

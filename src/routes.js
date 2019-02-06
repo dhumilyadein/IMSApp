@@ -286,6 +286,11 @@ const Attendance = Loadable({
   loading: Loading
 });
 
+const SendMail = Loadable({
+  loader: () => import("./views/admin/classmanagement/SendMail"),
+  loading: Loading
+});
+
 const CreateExam = Loadable({
   loader: () => import("./views/admin/exams/CreateExam"),
   loading: Loading
@@ -439,6 +444,11 @@ const routes = [
     path: "/admin/classmanagement/Attendance",
     name: "Attendance",
     component: Attendance
+  },
+  {
+    path: "/admin/classmanagement/SendMail",
+    name: "SendMail",
+    component: SendMail
   },
   {
     path: "/admin/classmanagement/ClassTimeTable",
