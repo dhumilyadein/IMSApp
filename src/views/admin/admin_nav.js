@@ -86,7 +86,7 @@ export default {
     {
       name: 'Manage Library',
       url: '/library',
-      icon: 'icon-basket-loaded',
+      icon: 'fa fa-book',
 
       children: [
         {
@@ -220,6 +220,9 @@ export default {
               variant: 'success',
             },
           ]},
+          {
+            divider: true,
+          },
 
           {
             name: 'Manage Exams',
@@ -252,7 +255,37 @@ export default {
                 variant: 'success',
               }
             ]},
-
+            {
+              name: 'Manage Transport',
+              url: '/exams',
+              icon: 'fa fa-bus',
+  
+              children: [
+                {
+                  name: 'Manage Vehicles',
+                  url: '/admin/transport/ManageVehicles',
+                  icon: 'fa fa-bus',
+                  variant: 'success',
+                },
+                {
+                  name: 'Manage Stops',
+                  url: '/admin/transport/ManageStops',
+                  icon: 'fa fa-bus',
+                  variant: 'success',
+                },
+                {
+                  name: 'Manage Routes',
+                  url: '/admin/transport/ManageRoutes',
+                  icon: 'fa fa-bus',
+                  variant: 'success',
+                },
+                {
+                  name: 'Assign Students',
+                  url: '/admin/transport/AssignStudents',
+                  icon: 'fa fa-bus',
+                  variant: 'success',
+                },
+              ]},
 
     {
       divider: true,
