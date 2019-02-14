@@ -75,7 +75,7 @@ module.exports = function (app) {
     Class.find()
       .then(function (classDetails) {
 
-        console.log("classDAO - fetchAllClassDetails - All Class details -  " + classDetails);
+        // console.log("classDAO - fetchAllClassDetails - All Class details -  " + classDetails);
 
         res.send(classDetails);
       })
@@ -84,6 +84,52 @@ module.exports = function (app) {
       });
 
   }
+
+  /**
+     * @description Post method for fetchSelectedClassStudentsData service
+     */
+    async function fetchSelectedClassStudentsData(req, res) {
+
+      // console.log("fetchSelectedClassStudentsData ENTRY");
+  
+      //var searchJSON = {};
+  
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      var request = req.body;
+      var className = request.class;
+      var section = request.section;
+
+      console.log("classDAO - class - " + className + " section - " + section);
+
+      await Class.findOne(
+        { "class": className , "section": section },
+        {
+          "class":1, 
+          "section":1,
+          "studentsData":1
+        }
+      ).then(function (classData) {
+  
+        response = { response: classData, message: "Class details fetched successfully" };
+        console.log("ClassDAO - fetchSelectedClassStudentsData - Class details fetched successfully.\nServer final response - " + JSON.stringify(response));
+        return res.send(response);
+
+      }).catch(function (err) {
+
+        console.log("ClassDAO - fetchSelectedClassStudentsData- Catching server err - " + err);
+        response = { errors: err };
+        console.log("ClassDAO - fetchSelectedClassStudentsData - Errors in classDAO.\nServer final response - " + JSON.stringify(response));
+        return res.send(response);
+      });
+  
+    }
 
   async function insertClassDetails(req, res) {
 
@@ -539,6 +585,10 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
   app.get("/api/fetchAllClassDetails", fetchAllClassDetails, (req, res) => {
     console.log("fetchAllClassDetails get service running");
+  });
+
+  app.post("/api/fetchSelectedClassStudentsData", fetchSelectedClassStudentsData, (req, res) => {
+    console.log("fetchSelectedClassStudentsData post service running");
   });
 
   app.post("/api/insertClassDetails", insertClassDetailsValidation, insertClassDetails, (req, res) => {
