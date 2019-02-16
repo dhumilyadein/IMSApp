@@ -13,7 +13,7 @@ var VehiclesSchema = new Schema({
       isAsync: true,
       validator: function(value, isValid) {
           const self = this;
-          return self.constructor.findOne({ VehicleNo: value })
+          return self.constructor.findOne({ vehicleNo: value })
           .exec(function(err, user){
               if(err){
                   throw err;
@@ -45,7 +45,7 @@ var VehiclesSchema = new Schema({
       isAsync: true,
       validator: function(value, isValid) {
           const self = this;
-          return self.constructor.findOne({ VehicleRegNo: value })
+          return self.constructor.findOne({ vehicleRegNo: value })
           .exec(function(err, user){
               if(err){
                   throw err;
@@ -91,7 +91,7 @@ var VehiclesSchema = new Schema({
 },
 
   driverPhone:{
-    type: Number,
+    type: String,
     trim:true,
     required: true,
   },
@@ -104,7 +104,7 @@ var VehiclesSchema = new Schema({
   },
   
     conductorPhone:{
-      type: Number,
+      type: String,
       trim:true,
      
     },
@@ -118,7 +118,7 @@ var VehiclesSchema = new Schema({
   },
   
     vendorPhone:{
-      type: Number,
+      type: String,
       trim:true,
       required: true,
     },

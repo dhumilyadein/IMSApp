@@ -1,4 +1,4 @@
-const PurchaseItems = require("../../models/PurchaseItems");
+const Stops = require("../../models/Stops");
 const ConsumedItems = require("../../models/ConsumedItems");
 const Vehicles = require("../../models/Vehicles");
 
@@ -50,20 +50,17 @@ addItem
 
 }
 
-async function createItem(req, res) {
-  console.log("in createItem Req.body: "+JSON.stringify(req.body))
+async function addVehicle(req, res) {
+  console.log("in addVehicle Req.body: "+JSON.stringify(req.body))
 
-  var template = {
-    "itemName": req.body.itemName, "unit": req.body.unit, "quantity": 0,
-
-  };
-  var createItem = new Items(template);
+  
+  var addVehicle = new Vehicles(req.body);
 
 
 
 
 
-  await createItem
+  await addVehicle
     .save()
     .then(user => {
         return res.send({msg:"Success"});
@@ -73,6 +70,27 @@ async function createItem(req, res) {
     });
 
   }
+
+  async function addStop(req, res) {
+    console.log("in addStop Req.body: "+JSON.stringify(req.body))
+  
+    
+    var addStop = new Stops(req.body);
+  
+  
+  
+  
+  
+    await addStop
+      .save()
+      .then(user => {
+          return res.send({msg:"Success"});
+      })
+      .catch(err => {
+        return res.send(err);
+      });
+  
+    }
 
   async function consumeItem(req, res) {
     console.log("in consumeItem Req.body: "+JSON.stringify(req.body))
@@ -116,13 +134,41 @@ function existingVehicles(req, res) {
 
   }
 
-  function deleteItem(req,res)
-  {console.log("In deleteItem: "+ JSON.stringify(req.body.itemName));
+  function existingStops(req, res) {
+    console.log("in existingVehicles ");
+  
+    Stops
+      .find()
+      .then(data => {
+          return res.send(data);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+  
+    }
 
-Items
-.deleteOne({itemName:req.body.itemName})
+  function deleteVehicle(req,res)
+  {console.log("In deleteVehicle: "+ JSON.stringify(req.body.VehicleNo));
+
+Vehicles
+.deleteOne({VehicleNo:req.body.VehicleNo})
 .then(data => {
-  return res.send({msg:"Item Deleted"});
+  return res.send({msg:"Vehicle Deleted"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+}
+function deleteStop(req,res)
+{console.log("In deleteVehicle: "+ JSON.stringify(req.body.VehicleNo));
+
+Stops
+.deleteOne({stopName:req.body.stopName})
+.then(data => {
+return res.send({msg:"Stop Deleted"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -131,20 +177,18 @@ return res.send({error:err});
 
 }
 
-async function editItem(req,res)
-{console.log("In editItem for: "+ JSON.stringify(req.body));
+async function editVehicle(req,res)
+{console.log("In editVehicle for: "+ JSON.stringify(req.body));
 
 
 
-  Items
-.updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
-  {$set: {itemName:req.body.itemName,
-          unit:req.body.unit,
-           }}
+  Vehicles
+.updateOne({VehicleNo:req.body.existingVehicles[req.body.vNo].VehicleNo},
+  {$set: req.body}
   )
 .then(data => {
 
-return res.send({msg:"Item Updated"});
+return res.send({msg:"Vehicle Updated"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -157,6 +201,31 @@ return res.send({error:err});
 
 
 }
+async function editStop(req,res)
+{console.log("In editVehicle for: "+ JSON.stringify(req.body));
+
+
+
+  Stops
+.updateOne({stopName:req.body.existingStops[req.body.stopNo].stopName},
+  {$set: req.body}
+  )
+.then(data => {
+
+return res.send({msg:"Stop Updated"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+}
+
 async function getAddedItems(req,res)
 {console.log("In getAddedItems for: "+ JSON.stringify(req.body));
 
@@ -211,13 +280,17 @@ return res.send({error:err});
 
 
   app.post("/api/addItems", addItems);
-  app.post("/api/createItem", createItem);
+  app.post("/api/addVehicle", addVehicle);
   app.get("/api/existingVehicles", existingVehicles);
-  app.post("/api/deleteItem", deleteItem);
-  app.post("/api/editItem", editItem);
+  app.get("/api/existingStops", existingStops);
+  app.post("/api/deleteVehicle", deleteVehicle);
+  app.post("/api/deleteStop", deleteStop);
+  app.post("/api/editVehicle", editVehicle);
+  app.post("/api/editStop", editStop);
   app.post("/api/consumeItem", consumeItem);
   app.post("/api/getAddedItems", getAddedItems);
   app.post("/api/getConsumedItems", getConsumedItems);
+  app.post("/api/addStop", addStop);
 
 
 

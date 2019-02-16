@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css'
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import ReactPhoneInput from "react-phone-input-2";
 import {
   Button,
   Card,
@@ -54,10 +55,12 @@ this.getExistingVehicles();
       vendorNameError:"",
       vendorPhone:"",
       vendorPhoneError:"",
-      vendorAddress:""
-
+      vendorAddress:"",
+vNo:""
 
     };
+
+    
 
 
 
@@ -66,8 +69,7 @@ this.getExistingVehicles();
     this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
-
-
+    this.reset = this.reset.bind(this);
     this.getExistingVehicles = this.getExistingVehicles.bind(this);
     this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
     this.editHandler = this.editHandler.bind(this);
@@ -82,13 +84,43 @@ this.getExistingVehicles();
   toggleSuccess() {
     this.setState({
       modalSuccess: !this.state.modalSuccess,
-      examName:"",
-      totalMarks:"",
-      passingMarks:"",
-      description:"",
-      timeLimit:""
+     
     });
+    this.reset();
+    
 
+  }
+
+  reset(){
+
+    this.setState({
+      erorrs: null,
+      success: null,
+      vNo:"",
+      vehicleNo: "",
+      vehicleNoError: "",
+      vehicleRegNo:"",
+      vehicleRegNoError:"",
+  vehicleMake: "",
+      success: false,
+      modalSuccess: false,
+      visible: false,
+      capacity:"",
+      driverName:"",
+      driverNameError:"",
+      
+      driverPhone:"",
+      driverPhoneError:"",
+      conductorName:"",
+      showEditVehicle:false,
+      conductorPhone:"",
+      vendorName:"",
+      vendorNameError:"",
+      vendorPhone:"",
+      vendorPhoneError:"",
+      vendorAddress:""
+
+    });
   }
 
   /**
@@ -104,50 +136,64 @@ this.getExistingVehicles();
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
-      modalSuccess: false, timeLimitError:""
+      driverNameError: "", driverPhoneError: "", vehicleNoError:"", vehicleRegNoError: false,
+      modalSuccess: false, vendorNameError:"", vendorPhoneError:""
     }, () => {
-      if (!this.state.examName) {
-        this.setState({ examNameError: "Please Enter Item Name" });
+      if (!this.state.vehicleNo) {
+        this.setState({ vehicleNoError: "Please Enter Vehicle No" });
         submit = false;}
 
-        if (!this.state.totalMarks) {
-          this.setState({ totalMarksError: "Please Enter Total Marks" });
+        if (!this.state.vehicleRegNo) {
+          this.setState({ vehicleRegNoError: "Please Enter Registration No" });
           submit = false;}
 
-          if (!this.state.passingMarks) {
-            this.setState({ passingMarksError: "Please Enter Passing Marks" });
+          if (!this.state.driverName) {
+            this.setState({ driverNameError: "Please Enter Driver Name" });
             submit = false;}
 
-            if (!this.state.timeLimit) {
-              this.setState({ timeLimitError: "Please Enter Time Limit" });
+            if (!this.state.driverPhone) {
+              this.setState({ driverPhoneError: "Please Enter Driver Phone No" });
               submit = false;}
+
+              if (!this.state.vendorName) {
+                this.setState({ vendorNameError: "Please Enter Vendor Name" });
+                submit = false;}
+
+                if (!this.state.vendorPhone) {
+                  this.setState({ vendorPhoneError: "Please Enter Vendor Phone No" });
+                  submit = false;}
 
 
 
 
       if (submit === true) {
-        console.log("Creating Item: ");
+        console.log("Adding Bus : ");
         axios
-          .post("http://localhost:8001/api/createExam", {"examName":this.state.examName,"totalMarks":this.state.totalMarks,
-          "passingMarks":this.state.passingMarks, "description":this.state.description,"timeLimit":this.state.timeLimit})
+          .post("http://localhost:8001/api/addVehicle", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
             if(result.data.errors)
             {
-            if(result.data.errors.examName)
+            if(result.data.errors.vehicleNo)
               this.setState({
-                examNameError:result.data.errors.examName.message
-              });}
+                vehicleNoError:result.data.errors.vehicleNo.message
+              });
+            
+            else  if(result.data.errors.vehicleRegNo)
+              this.setState({
+                vehicleRegNoError:result.data.errors.vehicleRegNo.message
+              });
+
+            }
              else if (result.data.msg === "Success")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!"
+                modalMessage:"Vehicle: "+ this.state.vehicleNo+" Saved Successfully!"
 
-              },()=>{this.getExistingExams()});
+              },()=>{this.getExistingVehicles()});
 
           });
       }
@@ -159,48 +205,64 @@ this.getExistingVehicles();
     console.log("in Edit State: " + JSON.stringify(this.state));
 
     this.setState({
-      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
-      modalSuccess: false, timeLimitError:""
+      driverNameError: "", driverPhoneError: "", vehicleNoError:"", vehicleRegNoError: false,
+      modalSuccess: false, vendorNameError:"", vendorPhoneError:""
     }, () => {
-      if (!this.state.examName) {
-        this.setState({ examNameError: "Please Enter Item Name" });
+      if (!this.state.vehicleNo) {
+        this.setState({ vehicleNoError: "Please Enter Vehicle No" });
         submit = false;}
 
-        if (!this.state.totalMarks) {
-          this.setState({ totalMarksError: "Please Enter Total Marks" });
+        if (!this.state.vehicleRegNo) {
+          this.setState({ vehicleRegNoError: "Please Enter Registration No" });
           submit = false;}
 
-          if (!this.state.passingMarks) {
-            this.setState({ passingMarksError: "Please Enter Passing Marks" });
+          if (!this.state.driverName) {
+            this.setState({ driverNameError: "Please Enter Driver Name" });
             submit = false;}
 
-            if (!this.state.timeLimit) {
-              this.setState({ timeLimitError: "Please Enter Time Limit" });
+            if (!this.state.driverPhone) {
+              this.setState({ driverPhoneError: "Please Enter Driver Phone No" });
               submit = false;}
+
+              if (!this.state.vendorName) {
+                this.setState({ vendorNameError: "Please Enter Vendor Name" });
+                submit = false;}
+
+                if (!this.state.vendorPhone) {
+                  this.setState({ vendorPhoneError: "Please Enter Vendor Phone No" });
+                  submit = false;}
 
 
 
 
       if (submit === true) {
-        console.log("Updating Exam: "+ JSON.stringify(this.state));
+        console.log("Updating Vehicle: "+ JSON.stringify(this.state));
         axios
-          .post("http://localhost:8001/api/editExam", this.state)
+          .post("http://localhost:8001/api/editVehicle", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
            if(result.data.error)
-          {  if(result.data.error.code===11000)
+          {  if(result.data.error.errmsg.indexOf("vehicleNo")!==-1)
             this.setState({
-              examNameError:"Exam name already in use"
-            });}
-           else  if (result.data.msg === "Exam Updated")
+              vehicleNoError:"Vehicle No already in use"
+            });
+
+            else if(result.data.error.errmsg.indexOf("vehicleRegNo")!==-1)
+            this.setState({
+              vehicleRegNoError:"Vehicle Reg No already in use"
+            });
+          
+          
+          }
+           else  if (result.data.msg === "Vehicle Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                showEditItem:false,
-                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!" 
+                showEditVehicle:false,
+                modalMessage:"Vehicle: "+ this.state.vehicleNo+" Updated Successfully!" 
 
-              },()=>{this.getExistingExams()});
+              },()=>{this.getExistingVehicles()});
 
           });
       }
@@ -234,17 +296,17 @@ deleteSpecificItem= idx => () => {
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/deleteExam",{"examName":this.state.existingExams[idx].examName})
+        .post("http://localhost:8001/api/deleteVehicle",{"examName":this.state.existingVehicles[idx].vehicleNo})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Exam Deleted")
-            this.getExistingExams();
+          if (result.data.msg==="Vehicle Deleted")
+            this.getExistingVehicles();
 
         })
       },
       {
         label: 'No',
-        onClick: () =>  {this.getexistingExams();}
+        onClick: () =>  {this.getExistingVehicles();}
       }
     ]
   })
@@ -283,9 +345,11 @@ deleteSpecificItem= idx => () => {
 
 
 
-                  {!this.state.showEditVehicle &&  (
+                  {!this.state.showEditVehicle &&  <p>
+                    <Card>
+                    <h3 align="center"> Add Vehicle Details</h3>
                      <Row lg="2">
-                      <h3 align="center"> Add Vehicle Details</h3>
+                     
                      <Col>
 
                       <Card className="mx-1">
@@ -400,7 +464,7 @@ deleteSpecificItem= idx => () => {
       <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
-                                  <b>Driver's Name</b>
+                                  <b>Driver Name</b>
                                 </InputGroupText>
                               </InputGroupAddon>
                               <Input
@@ -418,26 +482,227 @@ deleteSpecificItem= idx => () => {
                                 }}
                               />
                             </InputGroup>
+                            {this.state.driverNameError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.driverNameError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText  >
+                                  <b>Driver Phone</b>
+                                </InputGroupText>
+                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                             
+                              <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.driverPhone}
+                                  name="driverPhone"
+                                  size="lg"
+                                  onChange={driverPhone => {
+                                    console.log("phone value: " + driverPhone);
+                                    this.setState({ driverPhone });
+                                  }}
+                                /> </InputGroupAddon>
+                            </InputGroup>
+                            {this.state.driverPhoneError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.driverPhoneError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+                           
+
 
 <br/>
-<Row >
+
+                        </CardBody>
+
+                      </Card>
+                      </Col>
+                      
+                      <Col>
+
+<Card className="mx-1">
+  <CardBody className="p-2">
+   
+    <br />
+    <InputGroup className="mb-3">
+        <InputGroupAddon addonType="prepend">
+          <InputGroupText >
+            <b>Conductor Name</b>
+          </InputGroupText>
+        </InputGroupAddon>
+        <Input
+          type="text"
+          size="lg"
+
+          name= "conductorName"
+
+          id="conductorName"
+          value={this.state.conductorName}
+          onChange={e => {
+            this.setState(
+              { conductorName: e.target.value }
+            );
+          }}
+        />
+      </InputGroup>
+    
+
+      <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <b>Conductor Phone</b>
+                                </InputGroupText>
+                            
+                             
+                              <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.conductorPhone}
+                                  name="conductorPhone"
+                                  size="lg"
+                                  onChange={conductorPhone => {
+                                    console.log("phone value: " + conductorPhone);
+                                    this.setState({ conductorPhone });
+                                  }}
+                                /> </InputGroupAddon>
+                            </InputGroup>
+    
+
+
+<InputGroup className="mb-3">
+        <InputGroupAddon addonType="prepend">
+          <InputGroupText >
+            <b>Vendor Name</b>
+          </InputGroupText>
+        </InputGroupAddon>
+        <Input
+          type="text"
+          size="lg"
+          name="vendorName"
+           id="vendorName"
+          value={this.state.vendorName}
+          onChange={e => {
+            this.setState(
+              { vendorName: e.target.value }
+
+            );
+          }}
+        />
+      </InputGroup>
+      {this.state.vendorNameError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.vendorNameError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+     
+
+     <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <b>Vendor Phone</b>
+                                </InputGroupText>
+                            
+                             
+                              <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.vendorPhone}
+                                  name="vendorPhone"
+                                  size="lg"
+                                  onChange={vendorPhone => {
+                                    console.log("phone value: " + vendorPhone);
+                                    this.setState({ vendorPhone });
+                                  }}
+                                /> </InputGroupAddon>
+                            </InputGroup>
+      {this.state.vendorPhoneError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.vendorPhoneError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+    
+
+
+<InputGroup className="mb-3">
+        <InputGroupAddon addonType="prepend">
+          <InputGroupText >
+            <b>Vendor Address</b>
+          </InputGroupText>
+        </InputGroupAddon>
+        <Input
+          type="textarea"
+          size="lg"
+
+          name="vendorAddress"
+
+          id="vendorAddress"
+          value={this.state.vendorAddress}
+          onChange={e => {
+            this.setState(
+              { vendorAddress: e.target.value }
+            );
+          }}
+        />
+      </InputGroup>
+
+<br/>
+
+
+  </CardBody>
+
+</Card>
+</Col> 
+
+                       </Row>
+                       
+                       
+<Row align="center" >
                             <Col>
                               <Button
                                 onClick={this.submitHandler}
                                 size="lg"
                                 color="success"
+block
+                              >
+                                Add Details
+                              </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={this.reset}
+                                size="lg"
+                                color="secondary"
+                                block
 
                               >
-                                Create
+                                Reset
                               </Button>
                             </Col>
 
 
-                          </Row>
-                          <br /> <br />
+                          </Row><br />  </Card>
+                          
 
-<h3 align="center"> Existing Exams</h3>
-                          <br />
+<h3 align="center"> Existing Vehicles</h3>
+                     
 
 
                           <Table bordered hover>
@@ -448,16 +713,16 @@ deleteSpecificItem= idx => () => {
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Exam Name </h4>
+                                  <h4>Vehicle No</h4>
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Total Marks</h4>
+                                  <h4>Reg. No</h4>
                                 </th>
 
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Passing Marks</h4>
+                                  <h4>Driver Name</h4>
                                 </th>
 
                                 <th className="text-center">
@@ -469,35 +734,42 @@ deleteSpecificItem= idx => () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.existingExams.map((item, idx) => (
+                              {this.state.existingVehicles.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingExams[idx].examName.charAt(0).toUpperCase() +
-                                      this.state.existingExams[idx].examName.slice(1)}</h5>
+                                    <h5> {this.state.existingVehicles[idx].vehicleNo.toUpperCase()}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingExams[idx].totalMarks}</h5>
+                                    <h5> {this.state.existingVehicles[idx].vehicleRegNo.toUpperCase()}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingExams[idx].passingMarks}</h5>
+                                    <h5> {this.state.existingVehicles[idx].driverName.toUpperCase()}</h5>
                                   </td>
 
                                   <td align="center">
                                   <Button
                                       color="primary"
-                                        onClick={ ()=>{ this.setState({showEditExam:true,
-                                       examName: this.state.existingExams[idx].examName,
-                                      totalMarks:this.state.existingExams[idx].totalMarks,
-                                      passingMarks:this.state.existingExams[idx].passingMarks,
-                                      description:this.state.existingExams[idx].description,
-                                    examNo:idx,
-                                  examNameError:"",
-                                totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.examNo)});}}
+                                        onClick={ ()=>{ this.setState({showEditVehicle:true,
+                                       vehicleNo: this.state.existingVehicles[idx].vehicleNo,
+                                      vehicleRegNo:this.state.existingVehicles[idx].vehicleRegNo,
+                                      vehicleMake:this.state.existingVehicles[idx].vehicleMake,
+                                      capacity:this.state.existingVehicles[idx].capacity,
+                                    vNo:idx,
+                                    driverName:this.state.existingVehicles[idx].driverName,
+                                    driverPhone:this.state.existingVehicles[idx].driverPhone,
+                                    conductorName:this.state.existingVehicles[idx].conductorName,
+                                    conductorPhone:this.state.existingVehicles[idx].conductorPhone,
+                                    vendorName:this.state.existingVehicles[idx].vendorName,
+                                    vendorPhone:this.state.existingVehicles[idx].vendorPhone,
+                                    vendorAddress:this.state.existingVehicles[idx].vendorAddress,
+                                  driverNameError:"",
+                                driverPhoneError:"",vehicleNoError:"", vehicleRegNoError:"",vendorNameError:"", vendorPhoneError:""
+                            },()=>{console.log("showEditVehi"+this.state.vNo)});}}
 
 
                                       size="lg"
@@ -530,6 +802,198 @@ deleteSpecificItem= idx => () => {
 
 
                           <br /> <br />
+                       </p>
+
+                       
+                    }
+
+
+
+
+
+{this.state.showEditVehicle && (
+  <Card className="mx-1">
+  <CardBody className="p-2">
+
+    <h3 align="center"> Edit Vehicle Details</h3>
+                            <br />
+                            <Row lg="2">
+                     
+                     <Col>
+
+                      <Card className="mx-1">
+                        <CardBody className="p-2">
+                         
+                          <br />
+                          <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Vehicle Number</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                size="lg"
+
+                                name="vehicleNo"
+
+                                id="vehicleNo"
+                                value={this.state.vehicleNo}
+                                onChange={e => {
+                                  this.setState(
+                                    { vehicleNo: e.target.value }
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.vehicleNoError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.vehicleNoError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+  <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Vehicle Reg. No</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                size="lg"
+                                name="vehicleRegNo"
+                                 id="vehicleRegNo"
+                                value={this.state.vehicleRegNo}
+                                onChange={e => {
+                                  this.setState(
+                                    { vehicleRegNo: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.vehicleRegNoError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.vehicleRegNoError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+  <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Vehicle Make</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                size="lg"
+                                name="vehicleMake"
+                                 id="vehicleMake"
+                                value={this.state.vehicleMake}
+                                onChange={e => {
+                                  this.setState(
+                                    { vehicleMake: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                           
+
+<InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Capacity</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="number"
+                                size="lg"
+                                name="capacity"
+                                 id="capacity"
+                                value={this.state.capacity}
+                                onChange={e => {console.log("limit "+JSON.stringify(e.target.value))
+                                  this.setState(
+                                    { capacity: e.target.value }
+
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                          
+
+
+      <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Driver Name</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="text"
+                                size="lg"
+
+                                name="driverName"
+
+                                id="driverName"
+                                value={this.state.driverName}
+                                onChange={e => {
+                                  this.setState(
+                                    { driverName: e.target.value }
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.driverNameError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.driverNameError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText  >
+                                  <b>Driver Phone</b>
+                                </InputGroupText>
+                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                             
+                              <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.driverPhone}
+                                  name="driverPhone"
+                                  size="lg"
+                                  onChange={driverPhone => {
+                                    console.log("phone value: " + driverPhone);
+                                    this.setState({ driverPhone });
+                                  }}
+                                /> </InputGroupAddon>
+                            </InputGroup>
+                            {this.state.driverPhoneError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.driverPhoneError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+                           
+
+
+<br/>
 
                         </CardBody>
 
@@ -545,241 +1009,130 @@ deleteSpecificItem= idx => () => {
     <InputGroup className="mb-3">
         <InputGroupAddon addonType="prepend">
           <InputGroupText >
-            <b>Vehicle Number</b>
+            <b>Conductor Name</b>
           </InputGroupText>
         </InputGroupAddon>
         <Input
           type="text"
           size="lg"
 
-          name="vehicleNo"
+          name= "conductorName"
 
-          id="vehicleNo"
-          value={this.state.vehicleNo}
+          id="conductorName"
+          value={this.state.conductorName}
           onChange={e => {
             this.setState(
-              { vehicleNo: e.target.value }
-            );
-          }}
-        />
-      </InputGroup>
-      {this.state.vehicleNoError && (
-        <font color="red">
-          <h6>
-            {" "}
-            <p>{this.state.vehicleNoError} </p>
-          </h6>{" "}
-        </font>
-      )}
-
-<InputGroup className="mb-3">
-        <InputGroupAddon addonType="prepend">
-          <InputGroupText >
-            <b>Vehicle Reg. No</b>
-          </InputGroupText>
-        </InputGroupAddon>
-        <Input
-          type="text"
-          size="lg"
-          name="vehicleRegNo"
-           id="vehicleRegNo"
-          value={this.state.vehicleRegNo}
-          onChange={e => {
-            this.setState(
-              { vehicleRegNo: e.target.value }
-
-            );
-          }}
-        />
-      </InputGroup>
-      {this.state.vehicleRegNoError && (
-        <font color="red">
-          <h6>
-            {" "}
-            <p>{this.state.vehicleRegNoError} </p>
-          </h6>{" "}
-        </font>
-      )}
-
-
-<InputGroup className="mb-3">
-        <InputGroupAddon addonType="prepend">
-          <InputGroupText >
-            <b>Vehicle Make</b>
-          </InputGroupText>
-        </InputGroupAddon>
-        <Input
-          type="text"
-          size="lg"
-          name="vehicleMake"
-           id="vehicleMake"
-          value={this.state.vehicleMake}
-          onChange={e => {
-            this.setState(
-              { vehicleMake: e.target.value }
-
-            );
-          }}
-        />
-      </InputGroup>
-     
-
-<InputGroup className="mb-3">
-        <InputGroupAddon addonType="prepend">
-          <InputGroupText >
-            <b>Capacity</b>
-          </InputGroupText>
-        </InputGroupAddon>
-        <Input
-          type="number"
-          size="lg"
-          name="capacity"
-           id="capacity"
-          value={this.state.capacity}
-          onChange={e => {console.log("limit "+JSON.stringify(e.target.value))
-            this.setState(
-              { capacity: e.target.value }
-
+              { conductorName: e.target.value }
             );
           }}
         />
       </InputGroup>
     
 
+      <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <b>Conductor Phone</b>
+                                </InputGroupText>
+                            
+                             
+                              <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.conductorPhone}
+                                  name="conductorPhone"
+                                  size="lg"
+                                  onChange={conductorPhone => {
+                                    console.log("phone value: " + conductorPhone);
+                                    this.setState({ conductorPhone });
+                                  }}
+                                /> </InputGroupAddon>
+                            </InputGroup>
+    
+
 
 <InputGroup className="mb-3">
         <InputGroupAddon addonType="prepend">
           <InputGroupText >
-            <b>Driver's Name</b>
+            <b>Vendor Name</b>
           </InputGroupText>
         </InputGroupAddon>
         <Input
           type="text"
           size="lg"
-
-          name="driverName"
-
-          id="driverName"
-          value={this.state.driverName}
+          name="vendorName"
+           id="vendorName"
+          value={this.state.vendorName}
           onChange={e => {
             this.setState(
-              { driverName: e.target.value }
+              { vendorName: e.target.value }
+
+            );
+          }}
+        />
+      </InputGroup>
+      {this.state.vendorNameError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.vendorNameError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+     
+
+     <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                  <b>Vendor Phone</b>
+                                </InputGroupText>
+                            
+                             
+                              <ReactPhoneInput
+                                  defaultCountry="in"
+                                  value={this.state.vendorPhone}
+                                  name="vendorPhone"
+                                  size="lg"
+                                  onChange={vendorPhone => {
+                                    console.log("phone value: " + vendorPhone);
+                                    this.setState({ vendorPhone });
+                                  }}
+                                /> </InputGroupAddon>
+                            </InputGroup>
+      {this.state.vendorPhoneError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.vendorPhoneError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+    
+
+
+<InputGroup className="mb-3">
+        <InputGroupAddon addonType="prepend">
+          <InputGroupText >
+            <b>Vendor Address</b>
+          </InputGroupText>
+        </InputGroupAddon>
+        <Input
+          type="textarea"
+          size="lg"
+
+          name="vendorAddress"
+
+          id="vendorAddress"
+          value={this.state.vendorAddress}
+          onChange={e => {
+            this.setState(
+              { vendorAddress: e.target.value }
             );
           }}
         />
       </InputGroup>
 
 <br/>
-<Row >
-      <Col>
-        <Button
-          onClick={this.submitHandler}
-          size="lg"
-          color="success"
 
-        >
-          Create
-        </Button>
-      </Col>
-
-
-    </Row>
-    <br /> <br />
-
-<h3 align="center"> Existing Exams</h3>
-    <br />
-
-
-    <Table bordered hover>
-      <thead>
-        <tr style={{ 'backgroundColor': "lightgreen" }}>
-          <th className="text-center">
-            <h4> S.No.</h4>{" "}
-          </th>
-          <th className="text-center">
-            {" "}
-            <h4>Exam Name </h4>
-          </th>
-          <th className="text-center">
-            {" "}
-            <h4>Total Marks</h4>
-          </th>
-
-          <th className="text-center">
-            {" "}
-            <h4>Passing Marks</h4>
-          </th>
-
-          <th className="text-center">
-           <h4> Actions</h4>
-
-
-          </th>
-
-        </tr>
-      </thead>
-      <tbody>
-        {this.state.existingExams.map((item, idx) => (
-          <tr id="addr0" key={idx}>
-            <td align="center">
-              <h5>{idx + 1}</h5>
-            </td>
-            <td align="center">
-              <h5> {this.state.existingExams[idx].examName.charAt(0).toUpperCase() +
-                this.state.existingExams[idx].examName.slice(1)}</h5>
-            </td>
-
-            <td align="center">
-              <h5> {this.state.existingExams[idx].totalMarks}</h5>
-            </td>
-
-            <td align="center">
-              <h5> {this.state.existingExams[idx].passingMarks}</h5>
-            </td>
-
-            <td align="center">
-            <Button
-                color="primary"
-                  onClick={ ()=>{ this.setState({showEditExam:true,
-                 examName: this.state.existingExams[idx].examName,
-                totalMarks:this.state.existingExams[idx].totalMarks,
-                passingMarks:this.state.existingExams[idx].passingMarks,
-                description:this.state.existingExams[idx].description,
-              examNo:idx,
-            examNameError:"",
-          totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.examNo)});}}
-
-
-                size="lg"
-              >
-                Edit/View
-              </Button>
-              &nbsp; &nbsp;
-
-              <Button
-                color="danger"
-                  onClick={ this.deleteSpecificItem(idx)}
-
-
-                size="lg"
-              >
-                Remove
-              </Button>
-
-
-
-
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-
-
-
-
-
-    <br /> <br />
 
   </CardBody>
 
@@ -787,160 +1140,10 @@ deleteSpecificItem= idx => () => {
 </Col> 
 
                        </Row>
-                   ) }
+                       
+                       
 
-{this.state.showEditExam && (
-  <Card className="mx-1">
-  <CardBody className="p-2">
-
-    <h3 align="center"> Edit Item</h3>
-                            <br />
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Item Name</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-
-                                name="examName"
-
-                                id="examName"
-                                value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { examName: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.examNameError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.examNameError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Total Marks</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="totalMarks"
-                                 id="totalMarks"
-                                value={this.state.totalMarks}
-                                onChange={e => {
-                                  this.setState(
-                                    { totalMarks: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.totalMarksError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.totalMarksError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Passing Marks</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="passingMarks"
-                                 id="passingMarks"
-                                value={this.state.passingMarks}
-                                onChange={e => {
-                                  this.setState(
-                                    { passingMarks: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.passingMarksError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.passingMarksError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Time Limit(hours)</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="timeLimit"
-                                 id="timeLimit"
-                                value={this.state.timeLimit}
-                                onChange={e => {
-                                  this.setState(
-                                    { timeLimit: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.timeLimitError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.timeLimitError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-
-
-      <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Description</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-
-                                name="description"
-
-                                id="description"
-                                value={this.state.description}
-                                onChange={e => {
-                                  this.setState(
-                                    { description: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-
-
-
-  <br/>
-  <Row >
+                             <Row >
                               <Col>
                                 <Button
                                   onClick={this.editHandler}
@@ -954,10 +1157,7 @@ deleteSpecificItem= idx => () => {
 
                               <Col>
                                 <Button
-                                  onClick={()=>{this.setState({showEditExam:false,examName:"" ,
-                                  totalMarks:"",
-                                  passingMarks:"",
-                                  description:""})}}
+                                  onClick={()=>{this.setState({showEditVehicle:false}); this.reset();}}
                                   size="lg"
                                   color="secondary"
   block
