@@ -76,8 +76,10 @@ var VehiclesSchema = new Schema({
   
   },
 
-  route:{
-    type: Array,
+  routeDetails:{
+    type: [
+      Object
+    ],
     trim:true,
   },
 

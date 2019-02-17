@@ -187,6 +187,7 @@ class RegisterUser extends Component {
     this.setState({
       modalSuccess: !this.state.modalSuccess
     });
+    this.resetForm();
   }
 
   /**
@@ -301,7 +302,7 @@ class RegisterUser extends Component {
    * @description Handles the form submit request
    * @param {*} e
    */
-  photoUpload() {
+   photoUpload() {
     console.log("in PhotoUpload for file - " + this.state.photoname)
 
     const data = new FormData();  //photo upload
@@ -343,7 +344,7 @@ class RegisterUser extends Component {
                       return this.setState(result.data);
                     }
 
-                    this.resetForm();
+                   
 
                     return this.setState({
                       userdata: result.data.data,
@@ -353,10 +354,10 @@ class RegisterUser extends Component {
                       loader: false
 
 
-                    });
+                    },()=>{ this.updateClassDetails();});
                   });
 
-                this.updateClassDetails();
+             
 
               } else if (this.state.role.indexOf("admin") !== -1 || this.state.role.indexOf("teacher") !== -1) {
                 this.setState({ roleerror: false, errors: null });

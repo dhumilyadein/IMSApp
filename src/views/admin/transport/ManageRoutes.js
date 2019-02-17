@@ -109,13 +109,15 @@ this.getExistingVehicles();
             this.setState({ stopError: "Please Select Stops" });
             submit = false;}
         
+           
 
 
 
       if (submit === true) {
         console.log("Creating Route: ");
         axios
-          .post("http://localhost:8001/api/addRoute", {"vehicleNo":this.state.vehicleNo,"route":this.state.stopArray})
+          .post("http://localhost:8001/api/addRoute", {"vehicleNo":this.state.vehicleNo,"route":this.state.stopArray,
+          "description":this.state.description})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
@@ -142,39 +144,46 @@ this.getExistingVehicles();
 
   editHandler(e) {
     var submit = true;
-    console.log("in Edit State: " + JSON.stringify(this.state));
+    console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      stopNameError: "", descriptionError: "", success: false,
+      vehicleNoError: "", stopError:"",  success: false,
       modalSuccess: false
     }, () => {
-      if (!this.state.stopName) {
-        this.setState({ stopNameError: "Please Enter Stop Name" });
-        submit = false;}
+     
 
+        if (this.state.stopArray.length===0) {
+            this.setState({ stopError: "Please Select Stops" });
+            submit = false;}
+        
         
 
 
       if (submit === true) {
-        console.log("Updating Stop: "+ JSON.stringify(this.state));
+        console.log("Updating Route: "+ JSON.stringify(this.state));
         axios
-          .post("http://localhost:8001/api/editStop", {"stopName":this.state.stopName,"description":this.state.description,
-          "existingStops":this.state.existingStops,"stopNo":this.state.stopNo})
+          .post("http://localhost:8001/api/editRoute", {"vehicleNo":this.state.vehicleNo,"route":this.state.stopArray,
+          "description":this.state.description})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
            if(result.data.error)
-          {  if(result.data.error.code===11000)
+       
             this.setState({
-              stopNameError:"Stop name already in use"
-            });}
-           else  if (result.data.msg === "Stop Updated")
+              vehicleNoError:result.data.error
+            });
+           else  if (result.data.msg === "Route Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                showEditStop:false
+                showEditRoute:false,
+                vehicleNo:"",
+                selectedStops:[],
+                description:""
+              
 
-              },()=>{this.getExistingStops()});
+
+              },()=>{this.getExistingVehicles()});
 
           });
       }
@@ -204,13 +213,17 @@ this.getExistingVehicles();
       .get("http://localhost:8001/api/existingVehicles")
       .then(result => {
         console.log("Existing RESULT.data " + JSON.stringify(result.data));
-        if (result.data) { var temp=[];
+        if (result.data) { var temp1=[];var temp2=[];
             for(var i=0;i<result.data.length;i++)
-            temp.push(result.data[i].vehicleNo)
+           { temp1.push(result.data[i].vehicleNo)
+            for(var j=0;j<result.data[i].routeDetails.length;j++)
+            temp2.push({"vehicleNo":result.data[i].vehicleNo, "route":result.data[i].routeDetails[j].route,
+            "description":result.data[i].routeDetails[j].description})}
 
           this.setState({
-            existingVehicles: temp
-          });
+            existingVehicles: temp1,
+            existingRoutes:temp2
+          },()=>{console.log("Routes Details: "+ JSON.stringify(this.state.existingRoutes))});
         }
       });
   }
@@ -227,11 +240,12 @@ deleteSpecificItem= idx => () => {
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/deleteStop",{"stopName":this.state.existingStops[idx].stopName})
+        .post("http://localhost:8001/api/deleteRoute",{"vehicleNo":this.state.existingRoutes[idx].vehicleNo,
+        "route":this.state.existingRoutes[idx].route})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Stop Deleted")
-            this.getExistingStops();
+          if (result.data.msg==="Route Deleted")
+            this.getExistingVehicles();
 
         })
       },
@@ -316,7 +330,7 @@ deleteSpecificItem= idx => () => {
                                         id="stop"
                                         name="stop"
                                         isMulti={true}
-                                        placeholder="Select Multiple Stops"
+                                        placeholder="Select or type to Search Multiple Stops"
                                         options={this.state.existingStops}
                                         closeMenuOnSelect={false}
                                         value={this.state.selectedStops}
@@ -369,19 +383,16 @@ deleteSpecificItem= idx => () => {
                               size="lg"
                               name="description"
                                id="description"
-                              value={this.state.stopArray.description}
-                              onChange={e => { var temp=this.state.stopArray;
-                                temp.push({"description":e.target.value})
+                              value={this.state.description}
+                              onChange={e => { 
                                 this.setState(
-                                  { stopArray: temp },
-                                  () => {
-                                    console.log(
-                                      "Stop Array: " +
-                                     JSON.stringify( this.state.stopArray)
+                                  { description: e.target.value }
+                            
+                                   
                                     );
                                   }
-                                );
-                              }}
+                                
+                              }
                             />
                           </InputGroup>
                         
@@ -414,11 +425,11 @@ deleteSpecificItem= idx => () => {
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Vehicle Number </h4>
+                                  <h4>Vehicle No</h4>
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Route</h4>
+                                  <h4>Route Details</h4>
                                 </th>
                                
                                 <th className="text-center">
@@ -440,7 +451,7 @@ deleteSpecificItem= idx => () => {
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingRoutes[idx].routes}</h5>
+                                    <h5> {this.state.existingRoutes[idx].route.join(" -> ")}</h5>
                                   </td>
 
                                
@@ -448,11 +459,18 @@ deleteSpecificItem= idx => () => {
                                   <td align="center">
                                   <Button
                                       color="primary"
-                                        onClick={ ()=>{ this.setState({showEditRoute:true,
+                                        onClick={ ()=>{this.getExistingStops(); var temp=[];
+                                            for(var i=0;i<this.state.existingRoutes[idx].route.length;i++)
+                                            temp.push({"label":this.state.existingRoutes[idx].route[i],
+                                            "value":this.state.existingRoutes[idx].route[i]})
+                                            
+                                            this.setState({showEditRoute:true,
                                        vehicleNo: this.state.existingRoutes[idx].vehicleNo,
-                                      selectedStops:this.state.existingRoutes[idx].route,
-                                    routeNo:idx,
+                                      selectedStops:temp,
+                                    routeNo:idx, 
                                   vehicleNoError:"",
+                                  description:this.state.existingRoutes[idx].description,
+                                  stopError:""
                                },()=>{console.log("showEditStop "+this.state.showEditRoute)});}}
 
 
@@ -493,63 +511,106 @@ deleteSpecificItem= idx => () => {
 
                    ) }
 
-{this.state.showEditStop && (
+{this.state.showEditRoute && (
   <Card className="mx-1">
   <CardBody className="p-2">
 
-    <h3 align="center"> Edit Stop</h3>
+    <h3 align="center"> Edit Route</h3>
                             <br />
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Stop Name</b>
+                                
+                          <InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                      <b>  Vehicle No</b>
                                 </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="vehicleNo"
+                                      id="vehicleNo"
+                                      type="text"
+                                      value={this.state.vehicleNo}
+                                     disabled="true"
+                                    >
+                                    
+                                    </Input>
+                                  </InputGroup>
+                                  { this.state.vehicleNoError && (
+                                    <font color="red">
+                                      {" "}
+                                     <b> <p>{this.state.vehicleNoError}</p></b>
+                                    </font>
+                                  )}
 
-                                name="stopName"
 
-                                id="stopName"
-                                value={this.state.stopName.charAt(0).toUpperCase() + this.state.stopName.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { stopName: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.stopNameError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.stopNameError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
+<Select
+                                        id="stop"
+                                        name="stop"
+                                        isMulti={true}
+                                        placeholder="Select or type to Search Multiple Stops"
+                                        options={this.state.existingStops}
+                                        closeMenuOnSelect={false}
+                                        value={this.state.selectedStops}
 
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Stop description</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-                                name="description"
-                                 id="description"
-                                value={this.state.description.charAt(0).toUpperCase() + this.state.description.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { description: e.target.value }
+                                        isSearchable={true}
+                                        onChange={selected => {
+                                          console.log("Selected: " + JSON.stringify(selected));
+                                          var temp1=[];var temp2 = [];
 
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                         
+                                          for (var i = 0; i < selected.length; i++) {
+                                           temp1.push(selected[i]) ;
+                                            temp2.push(selected[i].value)
+                                          }
+                                          this.setState({
+                                            selectedStops: temp1,
+                                            stopArray:temp2
+                                            
+                                          }, () => {
+                                            console.log("Selected Stops: " + JSON.stringify(this.state.selectedStops));
+                                          })
+
+
+
+
+
+
+
+                                        }
+
+
+
+                                        } />
+                                 
+                                  {this.state.stopError && (
+                                    <font color="red">
+                                      {" "}
+                                     <b> <p>{this.state.stopError}</p></b>
+                                    </font>
+                                  )}
+<br/>
+
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b> description</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                              name="description"
+                               id="description"
+                              value={this.state.description}
+                              onChange={e => { 
+                                this.setState(
+                                  { description: e.target.value }
+                            
+                                   
+                                    );
+                                  }
+                                
+                              }
+                            />
+                          </InputGroup>
   <br/>
   <Row >
                               <Col>
@@ -565,7 +626,7 @@ deleteSpecificItem= idx => () => {
 
                               <Col>
                                 <Button
-                                  onClick={()=>{this.setState({showEditStop:false,stopName:"",description:""})}}
+                                  onClick={()=>{this.setState({showEditRoute:false,vehicleNo:"",selectedStops:[], description:""})}}
                                   size="lg"
                                   color="secondary"
   block

@@ -9,14 +9,13 @@ async function addRoute(req, res) {
 console.log("in addRoute Req.body: "+JSON.stringify(req.body))
 
 var template = {
-  "listName": req.body.listName, "dos": req.body.dos, "itemRows": req.body.rows,
-  "grandTotal":req.body.grandTotal, "remarks":req.body.remarks
+  "route": req.body.route, "description":req.body.description
 
 };
 
 Vehicles
 .updateOne({VehicleNo:req.body.VehicleNo},
-  {$set: {route:req.body.route}}
+  {$push: {routeDetails:template}}
   )
 .then(data => {
 
@@ -132,6 +131,25 @@ return res.send({error:err});
 
 }
 
+function deleteRoute(req,res)
+{console.log("In deleteRoute: "+ JSON.stringify(req.body));
+
+Vehicles
+.update(
+  {'vehicleNo': req.body.vehicleNo},
+  { $pull: { "routeDetails" : { route: req.body.route } } },
+
+)
+.then(data => {
+return res.send({msg:"Route Deleted"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+}
+
 async function editVehicle(req,res)
 {console.log("In editVehicle for: "+ JSON.stringify(req.body));
 
@@ -181,6 +199,33 @@ return res.send({error:err});
 
 }
 
+async function editRoute(req,res)
+{console.log("In editRoute for: "+ JSON.stringify(req.body));
+
+
+Vehicles
+.update(
+  {'vehicleNo': req.body.vehicleNo},
+  { $set: { "routeDetails" : { route: req.body.route , description:req.body.description} } },
+
+)
+.then(data => {
+return res.send({msg:"Route Updated"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+
+}
+
+
 
 
 
@@ -191,8 +236,10 @@ return res.send({error:err});
   app.get("/api/existingStops", existingStops);
   app.post("/api/deleteVehicle", deleteVehicle);
   app.post("/api/deleteStop", deleteStop);
+  app.post("/api/deleteRoute", deleteRoute);
   app.post("/api/editVehicle", editVehicle);
   app.post("/api/editStop", editStop);
+  app.post("/api/editRoute", editRoute);
  
   
  
