@@ -14,7 +14,7 @@ var template = {
 };
 
 Vehicles
-.updateOne({VehicleNo:req.body.VehicleNo},
+.updateOne({vehicleNo:req.body.vehicleNo},
   {$push: {routeDetails:template}}
   )
 .then(data => {

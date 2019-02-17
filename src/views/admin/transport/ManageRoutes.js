@@ -132,6 +132,9 @@ this.getExistingVehicles();
 
                 success: true,
                 modalSuccess: true,
+                vehicleNo:"",
+                selectedStops:[],
+                description:""
 
               },()=>{this.getExistingVehicles()});
 
