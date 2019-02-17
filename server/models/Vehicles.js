@@ -76,6 +76,16 @@ var VehiclesSchema = new Schema({
   
   },
 
+  route:{
+    type: Array,
+    trim:true,
+  },
+
+  students:{
+    type: Array,
+    trim:true,
+  },
+
 
   capacity:{
     type: Number,

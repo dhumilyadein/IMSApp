@@ -91,7 +91,7 @@ this.getExistingStops();
       modalSuccess: false
     }, () => {
       if (!this.state.stopName) {
-        this.setState({ stopNameError: "Please Enter Item Name" });
+        this.setState({ stopNameError: "Please Enter Stop Name" });
         submit = false;}
 
         
@@ -133,7 +133,7 @@ this.getExistingStops();
       modalSuccess: false
     }, () => {
       if (!this.state.stopName) {
-        this.setState({ stopNameError: "Please Enter Item Name" });
+        this.setState({ stopNameError: "Please Enter Stop Name" });
         submit = false;}
 
         
@@ -185,7 +185,7 @@ deleteSpecificItem= idx => () => {
 
   confirmAlert({
     title: 'Confirm to Remove',
-    message: 'Are you sure to Remove this Item?',
+    message: 'Are you sure to Remove this Stop?',
     buttons: [
       {
         label: 'Yes',
@@ -202,7 +202,7 @@ deleteSpecificItem= idx => () => {
       },
       {
         label: 'No',
-        onClick: () =>  {this.getexistingStops();}
+        onClick: () =>  {this.getExistingStops();}
       }
     ]
   })
@@ -328,7 +328,7 @@ deleteSpecificItem= idx => () => {
                           </Row> <br />
                        </Card>    <br /><br />
 
-<h3 align="center"> Existing Items</h3>
+<h3 align="center"> Existing Stops</h3>
                           <br />
 
 

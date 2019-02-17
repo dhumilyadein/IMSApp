@@ -289,7 +289,7 @@ deleteSpecificItem= idx => () => {
 
   confirmAlert({
     title: 'Confirm to Remove',
-    message: 'Are you sure to Remove this Exam?',
+    message: 'Are you sure to Remove this Vehicle?',
     buttons: [
       {
         label: 'Yes',

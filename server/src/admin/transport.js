@@ -5,48 +5,26 @@ const Vehicles = require("../../models/Vehicles");
 module.exports = function (app) {
 
 
-async function addItems(req, res) {
-console.log("in addItems Req.body: "+JSON.stringify(req.body))
+async function addRoute(req, res) {
+console.log("in addRoute Req.body: "+JSON.stringify(req.body))
 
 var template = {
   "listName": req.body.listName, "dos": req.body.dos, "itemRows": req.body.rows,
   "grandTotal":req.body.grandTotal, "remarks":req.body.remarks
 
 };
-var addItem = new PurchaseItems(template);
 
+Vehicles
+.updateOne({VehicleNo:req.body.VehicleNo},
+  {$set: {route:req.body.route}}
+  )
+.then(data => {
 
-for(var i=0;i<req.body.rows.length;i++)
-{
-
-  await Items
-  .updateOne({itemName:req.body.rows[i].itemName.value},
-    {$inc: {quantity:req.body.rows[i].quantity
-
-             }}
-    )
-  .then(data => {
-
-
-
-  })
-  .catch(err => {
-  return res.send({error:err});
-  });
-
-
-
-}
-
-addItem
-.save()
-.then(user => {
-    return res.send({msg:"Success"});
+return res.send({msg:"Success"});
 })
 .catch(err => {
-  return res.send(err);
+return res.send({error:err});
 });
-
 
 }
 
@@ -92,33 +70,7 @@ async function addVehicle(req, res) {
   
     }
 
-  async function consumeItem(req, res) {
-    console.log("in consumeItem Req.body: "+JSON.stringify(req.body))
-
-    Items
-    .updateOne({itemName:req.body.itemName},
-      {$inc: {quantity:-1*parseInt(req.body.consumedQuantity)
-
-               }}
-      )
-    .then(data => {
-     var consumeItems = new ConsumedItems(req.body);
-     consumeItems.save()
-     .then(user => {
-         return res.send({msg:"Success"});
-     })
-     .catch(err => {
-       return res.send(err);
-     });
-
-
-    })
-    .catch(err => {
-    return res.send({error:err});
-    });
-
-    }
-
+ 
 
 function existingVehicles(req, res) {
   console.log("in existingVehicles ");
@@ -147,6 +99,9 @@ function existingVehicles(req, res) {
       });
   
     }
+
+ 
+  
 
   function deleteVehicle(req,res)
   {console.log("In deleteVehicle: "+ JSON.stringify(req.body.VehicleNo));
@@ -226,60 +181,11 @@ return res.send({error:err});
 
 }
 
-async function getAddedItems(req,res)
-{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
-
-
-
-  PurchaseItems
-.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } }] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
 
 
 
 
-
-
-
-}
-
-
-async function getConsumedItems(req,res)
-{console.log("In getConsumedItems for: "+ JSON.stringify(req.body));
-
-
-
-
-ConsumedItems
-.find({ $and: [ { doc: { $gte : new Date(req.body.dos) } }, { doc: { $lte : new Date(req.body.doe) } }] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
-
-
-
-
-
-
-
-
-}
-
-
-
-  app.post("/api/addItems", addItems);
+  app.post("/api/addRoute", addRoute);
   app.post("/api/addVehicle", addVehicle);
   app.get("/api/existingVehicles", existingVehicles);
   app.get("/api/existingStops", existingStops);
@@ -287,9 +193,9 @@ return res.send({error:err});
   app.post("/api/deleteStop", deleteStop);
   app.post("/api/editVehicle", editVehicle);
   app.post("/api/editStop", editStop);
-  app.post("/api/consumeItem", consumeItem);
-  app.post("/api/getAddedItems", getAddedItems);
-  app.post("/api/getConsumedItems", getConsumedItems);
+ 
+  
+ 
   app.post("/api/addStop", addStop);
 
 
