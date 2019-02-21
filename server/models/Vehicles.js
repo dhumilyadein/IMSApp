@@ -83,7 +83,7 @@ var VehiclesSchema = new Schema({
     trim:true,
   },
 
-  students:{
+  studentDetails:{
     type: Array,
     trim:true,
   },

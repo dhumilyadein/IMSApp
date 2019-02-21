@@ -27,6 +27,85 @@ return res.send({error:err});
 
 }
 
+async function addStudent(req, res) {
+  console.log("in addStudent Req.body: "+JSON.stringify(req.body));
+  var tempStudent=[];
+  for(var i=0;i<req.body.students.length;i++)
+  tempStudent.push(req.body.students[i].label);
+  var template = {
+    "stopName": req.body.stopName, "students":tempStudent
+  
+  };
+ 
+ await Vehicles
+  .findOne({vehicleNo:req.body.vehicleNo, "studentDetails.stopName":req.body.stopName})
+  .then(data => {
+  if(data)
+  {
+   console.log("Stopname: "+JSON.stringify(data));
+  /*  var temp;
+for(var i=0;i<data.studentDetails.length;i++)
+{if(data.studentDetails[i].stopName===req.body.stopName)
+temp=data.studentDetails[i].students;
+break;}
+console.log("Students: "+JSON.stringify(temp));
+for(var i=0;i<tempStudent.length;i++)
+temp.push(tempStudent[i]);
+temp=Array.from(new Set(temp));
+
+console.log("Students Updated: "+JSON.stringify(temp)); */
+
+
+
+ Vehicles.updateOne({vehicleNo:req.body.vehicleNo,"studentDetails.stopName":req.body.stopName},
+  {"$set": {"studentDetails.$.students":template.students}}
+  )
+.then(data => {
+
+return res.send({msg:"Success"});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+  }
+  else{
+
+    Vehicles.updateOne({vehicleNo:req.body.vehicleNo},
+      {$push: {studentDetails:template}}
+      )
+    .then(data => {
+    
+    return res.send({msg:"Success"});
+    })
+    .catch(err => {
+    return res.send({error:err});
+    });
+  }
+    
+    })
+    .catch(err => {
+    return res.send({error:err});
+    });
+
+
+
+
+ /*  .updateOne({vehicleNo:req.body.vehicleNo},
+    {$push: {students:template}}
+    )
+  .then(data => {
+  
+  return res.send({msg:"Success"});
+  })
+  .catch(err => {
+  return res.send({error:err});
+  }); */
+  
+  }
+  
+
 async function addVehicle(req, res) {
   console.log("in addVehicle Req.body: "+JSON.stringify(req.body))
 
@@ -232,6 +311,7 @@ return res.send({error:err});
 
   app.post("/api/addRoute", addRoute);
   app.post("/api/addVehicle", addVehicle);
+  app.post("/api/addStudent", addStudent);
   app.get("/api/existingVehicles", existingVehicles);
   app.get("/api/existingStops", existingStops);
   app.post("/api/deleteVehicle", deleteVehicle);

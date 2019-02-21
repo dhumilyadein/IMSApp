@@ -52,7 +52,7 @@ class IssueBooks extends Component {
             section:"",
             classError:"",
 rowError:"",
-            studentsDataArray:[],
+           
                         studentOpen:true,
 
                         activeTab:"1",
@@ -109,6 +109,7 @@ loader:false,
           this.getExistingBooks=this.getExistingBooks.bind(this);
 this.reset=this.reset.bind(this);
 this.fetchStaff=this.fetchStaff.bind(this);
+this.fetchClassDetails=this.fetchClassDetails.bind(this);
 
     }
 

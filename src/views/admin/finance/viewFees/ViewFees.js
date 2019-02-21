@@ -83,6 +83,7 @@ halfYearError:"",
 monthError:"",
 paidAmountError:"",
 dosError:"",
+dateError:"",
 sectionError:"",
 modalSuccess:false,
 success:false,
@@ -96,6 +97,8 @@ classDetails:[],
 classes:[],
 sectionArray: [],
 studentsDataArray:[],
+startDate:"",
+endDate:new Date(Date.now()),
         };
 
        
@@ -110,6 +113,7 @@ studentsDataArray:[],
          this.printPDF = this.printPDF.bind(this);
          this.getStudentByRollNo = this.getStudentByRollNo.bind(this);
 this.reset=this.reset.bind(this);
+this.feeCollection=this.feeCollection.bind(this);
  this.getFeeDefaulters=this.getFeeDefaulters.bind(this);
 
  
@@ -174,6 +178,72 @@ this.reset=this.reset.bind(this);
                 });
 
 
+    }
+
+    feeCollection(){
+      var submit = true;
+      console.log("in Fee Collection State: " + JSON.stringify(this.state));
+  
+      this.setState({
+        dateError: "",
+      }, () => {
+        if (!this.state.startDate) {
+          this.setState({ dateError: "Please select Start Date" });
+          submit = false;}
+  
+          if (!this.state.endDate) {
+              this.setState({  dateError: "Please select End Date"});
+              submit = false;}
+  
+              if(new Date(this.state.startDate).getTime()>new Date(this.state.endDate).getTime())
+              {
+                  this.setState({  dateError: "Start Date can't be Greater than End Date!"});
+                  submit = false;}
+  
+  
+  
+  
+        if (submit === true) {
+  
+        
+              console.log("Getting Fee Collection ");
+              axios
+                .post("http://localhost:8001/api/feeCollection", {"doe":this.state.endDate,"dos":this.state.startDate,
+                "class":this.state.class,"section":this.state.section})
+                .then(result => {
+                  console.log("RESULT.data " + JSON.stringify(result.data));
+  
+                  if(result.data.error)
+                  this.setState({
+                      dateError:result.data.error
+                    });
+  
+                  if(result.data.data.length===0)
+                  {
+  
+                    this.setState({
+                      dateError:"No Records Found!"
+                    });}
+                  else if(result.data.data.length>0)
+                  {
+                      this.setState({
+                          showSearchResults:true,
+                          existingAddedItems:result.data.data
+                        });
+  
+                  }
+  
+  
+  
+                });
+  
+          
+  
+        
+  
+  
+        }
+      });
     }
 
     getStudentByRollNo()
@@ -462,6 +532,16 @@ if(result.data.length===0)
 
             >
             <h5>  Fee Dafaulters</h5>
+            </NavLink>
+          </NavItem>
+
+          <NavItem>
+            <NavLink
+              className={classnames({ active: this.state.activeTab === '4' })}
+              onClick={() => { this.toggle('4'); }}
+
+            >
+            <h5> Fee Collection</h5>
             </NavLink>
           </NavItem>
           
@@ -1547,7 +1627,393 @@ if(result.data.length===0)
   </CardBody></Card>
       
       </TabPane>
-      
+      <TabPane tabId="4">
+            <Row>
+
+              <Col sm="12">
+
+
+
+
+
+
+
+                          <h5> Choose Date Period</h5>
+                          <br/>
+                          <Row>
+                          <InputGroup className="mb-2">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b> Start Date</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="startDate"
+                                id="startDate"
+                                value={this.state.startDate}
+                                onChange={date=>{this.setState({startDate:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dos)})}}
+                              />
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b> End Date</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="endDate"
+                                id="endDate"
+                                value={this.state.endDate}
+                                onChange={date=>{this.setState({endDate:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOe: "+this.state.doe)})}}
+                              />
+                            </InputGroup>
+
+
+
+ </Row>
+ {this.state.dateError &&(
+                                <font color="red"><h6>
+                                  {" "}
+                                  <p>{this.state.dateError}</p></h6>
+                                </font>
+                              )}
+<br/>
+<InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                        Class
+                                </InputGroupText>
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="class"
+                                      id="class"
+                                      type="select"
+                                      value={this.state.class}
+                                      onChange={e=>{this.setState({class:e.target.value})}}
+                                    >
+                                      <option value="">All Classes</option>
+                                      {this.state.classes.map(element => {
+                                        return (<option key={element} value={element}>{element}</option>);
+                                      }
+                                      )}
+                                    </Input>
+                                  </InputGroup>
+                                  { this.state.classError && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.classError}</p>
+                                    </font>
+                                  )}
+
+                                    <InputGroup className="mb-4">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Section
+                                </InputGroupText>
+                                      </InputGroupAddon>
+                                      <Input
+                                        name="section"
+                                        id="section"
+                                        type="select"
+                                        value={this.state.section}
+                                        onChange={e=>{this.setState({section:e.target.value})}}
+                                      >
+                                        <option value="">All Sections</option>
+                                        {this.state.sectionArray.map(element => {
+                                          return (<option key={element} value={element}>{element}</option>);
+                                        }
+                                        )}
+
+                                      </Input>
+                                    </InputGroup>
+                                 
+
+
+<Row >
+                            <Col>
+                              <Button
+                                onClick={this.feeCollection}
+                                size="lg"
+                                color="success"
+
+                              >
+                                Search
+                              </Button>
+                            </Col>
+
+
+                          </Row>
+                          <br /> <br />
+
+{(this.state.showSearchResults && this.state.existingAddedItems.length>0) &&<p>
+
+<h3 align="center"> Search Results</h3>
+                          <br />
+
+
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
+                                <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>List Name </h4>
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Date</h4>
+                                </th>
+
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Paid Amount(Rs)</h4>
+                                </th>
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Remarks</h4>
+                                </th>
+
+                                <th className="text-center">
+                                 <h4> Actions</h4>
+
+
+                                </th>
+
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.existingAddedItems.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h5>{idx + 1}</h5>
+                                  </td>
+                                  <td align="center">
+                                    <h5> {this.state.existingAddedItems[idx].listName.charAt(0).toUpperCase() +
+                                      this.state.existingAddedItems[idx].listName.slice(1)}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingAddedItems[idx].dos.substring(0,10)}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingAddedItems[idx].grandTotal}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingAddedItems[idx].remarks}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                  <Button
+                                      color="primary"
+                                      onClick={e=>{
+                                        this.setState({
+                                            showSearchResults:false,
+                                            showAddedItem:true,
+                                            viewItem:this.state.existingAddedItems[idx]
+                                        })}
+                                    }
+
+
+                                      size="lg"
+                                    >
+                                      View Details
+                                    </Button>
+                                    &nbsp; &nbsp;
+
+
+
+
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+
+
+                          </p>     }
+
+
+
+{this.state.showAddedItem && <p>
+
+<Card className="mx-1">
+<CardBody className="p-2">
+  <h3 align="center"> Added Item Details</h3>
+  <br />
+  <InputGroup className="mb-3">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText >
+        <b>List Name</b>
+      </InputGroupText>
+    </InputGroupAddon>
+    <Input
+
+
+      value={this.state.viewItem.listName.charAt(0).toUpperCase() + this.state.viewItem.listName.slice(1)}
+     disabled
+    />
+  </InputGroup>
+
+
+<InputGroup className="mb-2">
+      <InputGroupAddon addonType="prepend">
+        <InputGroupText >
+        <b>  Date of Submission</b>
+        </InputGroupText>
+      </InputGroupAddon>
+
+      &nbsp; &nbsp; &nbsp;
+      <Input
+
+        value={this.state.viewItem.dos.substring(0,10)}
+       disabled
+      />
+
+
+    </InputGroup>
+
+  <Table bordered hover>
+    <thead>
+      <tr style={{ 'backgroundColor': "palevioletred" }}>
+        <th className="text-center">
+          <h5> S.No.</h5>{" "}
+        </th>
+        <th className="text-center">
+          {" "}
+          <h5>Item Name </h5>
+        </th>
+        <th className="text-center">
+          <h5>Unit</h5>{" "}
+        </th>
+        <th className="text-center">
+          <h5>Quantity</h5>{" "}
+        </th>
+
+        <th className="text-center">
+          <h5>Cost/Unit(Rs)</h5>{" "}
+        </th>
+        <th className="text-center">
+          <h5>Total(Rs)</h5>{" "}
+        </th>
+
+
+
+      </tr>
+    </thead>
+    <tbody>
+      {this.state.viewItem.itemRows.map((item, idx) => (
+        <tr id="addr0" key={idx}>
+          <td align="center">
+            <h4>{idx + 1}</h4>
+          </td>
+          <td   >
+
+          {this.state.viewItem.itemRows[idx].itemName.label}
+
+
+          </td>
+
+
+
+          <td>
+           {this.state.viewItem.itemRows[idx].unit}
+
+
+          </td>
+
+          <td>
+          {this.state.viewItem.itemRows[idx].quantity}
+          </td>
+
+          <td>
+          {this.state.viewItem.itemRows[idx].costPerItem}
+          </td>
+
+          <td>
+          {this.state.viewItem.itemRows[idx].totalAmount}
+          </td>
+
+
+        </tr>
+      ))}
+    </tbody>
+  </Table>
+
+
+<InputGroup className="mb-3">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText >
+        <b>Grand Total Amount(Rs)</b>
+      </InputGroupText>
+    </InputGroupAddon>
+    <Input
+      type="text"
+      size="lg"
+     name="grandTotal"
+      id="grandTotal"
+     value={this.state.viewItem.grandTotal}
+      disabled
+
+
+    />
+  </InputGroup>
+
+  <InputGroup className="mb-3">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText >
+        <b>Remarks</b>
+      </InputGroupText>
+    </InputGroupAddon>
+    <Input
+      type="text"
+      size="lg"
+     name="remarks"
+      id="remarks"
+     value={this.state.viewItem.remarks}
+    disabled
+
+    />
+  </InputGroup>
+
+  <br /> <br />
+  <Row>
+    <Col>
+      <Button
+        onClick={e=>{this.setState({showSearchResults:true,
+        showAddedItem:false})}}
+        size="lg"
+        color="secondary"
+        block
+      >
+        Go back
+      </Button>
+    </Col>
+
+
+  </Row>
+</CardBody>
+
+</Card>
+</p>}
+
+
+
+
+
+
+              </Col>
+            </Row>
+          </TabPane>
+         
         </TabContent>
 
 
