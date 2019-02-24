@@ -4,6 +4,10 @@ import ReactPhoneInput from "react-phone-input-2";
 import DatePicker from 'react-date-picker';
 import classnames from 'classnames';
 import Select from 'react-select';
+import ReactLoading from 'react-loading';
+
+import { css } from '@emotion/core';
+import { ClipLoader } from 'react-spinners';
 
 import {
   Button,
@@ -24,7 +28,9 @@ import {
   InputGroupText,
   Row,
   Table,
-  NavLink
+  NavLink,
+  Modal,
+  ModalHeader
 } from "reactstrap";
 import axios from "axios";
 import MapsTransferWithinAStation from "material-ui/SvgIcon";
@@ -37,6 +43,28 @@ var imageContext = require.context('../../../photoTemp', true);
 const whiteTextFieldStyle = {
   background: "white"
 }
+
+const override = css`
+    display: block;
+    margin: 0 auto;
+    border-color: red;
+`;
+
+const popupStyle = css`
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    padding-top: 100px;
+    background-color: black;
+    background-color: rgba(0, 0, 0, 0.4);
+    -webkit-transition: 0.5s;
+    overflow: auto;
+    transition: all 0.3s linear;
+`;
 
 class ClassDetails extends Component {
 
@@ -58,6 +86,7 @@ class ClassDetails extends Component {
       sectionArray: [],
       studentsDataArray: [],
       selectClassStudentsData: [],
+      studentsCollectionData: [],
       selectedClassStudentsEmailArray : [],
 
       tempArray: ["kapil", "mayank"],
@@ -67,7 +96,9 @@ class ClassDetails extends Component {
       timeTableArray: [],
 
       mailSubject: '',
-      mailBody: ''
+      mailBody: '',
+      loader: false,
+      modalSuccess: false
 
     };
 
@@ -81,10 +112,17 @@ class ClassDetails extends Component {
     this.fetchSelectedClassStudentsData = this.fetchSelectedClassStudentsData.bind(this);
     this.sendMailToClass = this.sendMailToClass.bind(this);
     this.changeHandler = this.changeHandler.bind(this);
+    this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
 
     // Fetching class details on page load
     this.fetchClassDetails();
 
+  }
+
+  toggleModalSuccess() {
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
+    });
   }
 
   /**
@@ -104,6 +142,14 @@ class ClassDetails extends Component {
   sendMailBtnHandler() {
 
     console.log("SendMail - sendMailBtnHandler");
+
+    document.getElementById('sendMailRoot').style.filter = 'blur(5px)';
+    // document.getElementById('sendMailRoot').style.display = 'none';
+
+    this.setState({
+      modalSuccess: true,
+      loader: true
+    });
     
     this.sendMailToClass();
   }
@@ -134,15 +180,26 @@ class ClassDetails extends Component {
     console.log("SendMail - sendMailToClass - sendMailRequest " 
     + JSON.stringify(sendMailRequest));
     
-    axios.post("http://127.0.0.1:8001/api/SendEmail", sendMailRequest).then(seRes => {
+    axios.post("http://localhost:8001/api/sendmail", sendMailRequest).then(seRes => {
 
       if (seRes.data.errors) {
+
+        this.setState({
+          loader: false,
+          modalSuccess: false
+        });
 
         console.log("SendMail - sendMailToClass - ERROR in send mail - " + seRes.data.Errors);
         return this.setState({ errors: seRes.data.Errors });
 
       } else {
 
+        this.setState({
+          loader: false,
+          modalSuccess: false
+        });
+        document.getElementById('sendMailRoot').style.filter = 'blur(0px)';
+        // document.getElementById('sendMailRoot').style.display = 'block';
         console.log("SendMail - sendMailToClass - send email response - " + seRes.data.response.response);
       }
     });
@@ -166,18 +223,69 @@ class ClassDetails extends Component {
 
       } else {
 
-        this.setState({ selectClassStudentsData: sdRes.data.response.studentsData }, () => {
+        var studentsData = sdRes.data.response.studentsData;
+        
+        console.log("studentsData - " + studentsData);
+
+        this.setState({ selectClassStudentsData: studentsData }, () => {
 
           var studentsEmailArray = [];
+          var studentsUsername = [];
           this.state.selectClassStudentsData.forEach(element => {
 
             studentsEmailArray.push(element.email);
+
+            // storing student's username for fetching parents email address
+            studentsUsername.push(element.username);
           });
 
           this.setState({
             selectedClassStudentsEmailArray : studentsEmailArray
+          
           }, () => {
             console.log("SendMail - selectedClassStudentsEmailArray - " + this.state.selectedClassStudentsEmailArray);
+
+            /*
+            Now we have student's email addresses, we have to their parents email address as well for sending email to everyone.
+            Fetching parents email address from students collection
+            */
+
+            var searchStudentsByUsernameRequest = {
+              "username" : studentsUsername
+            }
+           axios.post("http://localhost:8001/api/searchStudentsByUsername", searchStudentsByUsernameRequest).then(sRes => {
+
+            if (sRes.data.errors) {
+      
+              return this.setState({ errors: sRes.data.errors });
+      
+            } else {
+
+              console.log("SendMail - studentsCollectionData - sRes.data - " + JSON.stringify(sRes.data));
+
+              var studentsCollectionData = sRes.data.response;
+      
+              this.setState({ studentsCollectionData: studentsCollectionData }, () => {
+      
+                var parentsEmailArray = [];
+                this.state.studentsCollectionData.forEach(element => {
+      
+                  parentsEmailArray.push(element.parentemail);
+                });
+
+                console.log('\nstudentsEmailArray - ' + studentsEmailArray + ' \nparentsEmailArray - ' + parentsEmailArray)
+                
+                this.setState({
+                  selectedClassStudentsEmailArray : studentsEmailArray.concat(parentsEmailArray)
+                }, () => {
+                  console.log("SendMail - selectedClassStudentsEmailArray - " + this.state.selectedClassStudentsEmailArray);
+                });
+              });
+      
+              console.log('SendMail - fetchClassDetails - selectedClassStudentsEmailArray - ' + JSON.stringify(this.state.selectedClassStudentsEmailArray));
+            }
+          });
+
           });
         });
 
@@ -343,6 +451,7 @@ class ClassDetails extends Component {
       <div>
         <Container >
 
+<div id="sendMailRoot">
 { this.state.emailLinkView && ( 
 
   
@@ -504,6 +613,31 @@ onClick={this.emailLinkHandler} ><h3><b><u>Send Email to Email Groups</u></b></h
 <Row>
 <Col className="col-md-4"></Col>
 <Col className="col-md-4"> 
+
+{this.state.loader && (
+  // <ReactLoading type="bars"
+  //   color="	#006400"
+  //   height='2%' width='20%'
+  //   style = {{
+  //     position: 'relative',
+  //     margin: '0',
+  //     top: '25%'
+  //   }} />
+
+  <div style = {popupStyle} >
+
+    <ClipLoader
+// css={override}
+sizeUnit={"px"}
+size={150}
+color={'#123abc'}
+loading={this.state.loader}
+/>
+
+</div> 
+)}
+
+{ !this.state.loader && (
 <Input
                                     type="button"
                                     id="sendMailBtn"
@@ -517,6 +651,7 @@ onClick={this.emailLinkHandler} ><h3><b><u>Send Email to Email Groups</u></b></h
                                      }}
                                       value="SEND EMAIL" >
                                       </Input>
+                                      )}
                                       </Col>
                                       </Row>
 {/* // { this.state.studentsDataArray.map(studentData =>)} */}
@@ -526,6 +661,8 @@ onClick={this.emailLinkHandler} ><h3><b><u>Send Email to Email Groups</u></b></h
 
             
           )}
+
+</div>
 
         </Container>
       </div>

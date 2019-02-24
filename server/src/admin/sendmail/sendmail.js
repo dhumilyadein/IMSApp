@@ -4,13 +4,13 @@ const smtpTransport = require('nodemailer-smtp-transport');
 module.exports = function (app) {
 
     /**
-       * @description Post method for SendEmail service
+       * @description Post method for sendmail service
        */
-    function sendEmail(req, res) { 
+    function sendmail(req, res) { 
 
         var request = req.body;
 
-console.log("\n\nSendEmail - to - " + request.to + " subject - " + request.subject + " text - " + request.text + " html - " + request.html);
+console.log("\n\nsendmail - to - " + request.to + " subject - " + request.subject + " text - " + request.text + " html - " + request.html);
 
 
         // var to = "dhumilyadein@gmail.com";
@@ -63,22 +63,22 @@ console.log("\n\nSendEmail - to - " + request.to + " subject - " + request.subje
                 
             transporter.sendMail(mailOptions, (error, info) => { 
                 if (error) { 
-                    console.log('Error', error); 
+                    console.log('Errors', error); 
                     return res.send({ errors: error });
 
                 } else { 
                     console.log('Success', info); 
-                    console.log('\nSendEmail - Mail response - ' + info.response, info); 
-                    response = { response: info, message: "SendEmail - Email Sent to " + info.accepted};
+                    console.log('\nsendmail - Mail response - ' + info.response, info); 
+                    response = { response: info, message: "sendmail - Email Sent to " + info.accepted};
                     return res.send(response);
                 } 
             }); 
         }); 
     }
 
-    app.post("/api/SendEmail", sendEmail, (req, res) => {
-        console.log("SendEmail get service running");
+    app.post("/api/sendmail", sendmail, (req, res) => {
+        console.log("sendmail get service running");
     });
 
-    app.get("/", (req, res) => res.json("SendEmail.js"));
+    app.get("/", (req, res) => res.json("sendmail.js"));
 };

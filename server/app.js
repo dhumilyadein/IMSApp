@@ -15,10 +15,11 @@ const addFees = require("./src/admin/addFees");
 const viewFees = require("./src/admin/viewFees");
 const inventory = require("./src/admin/inventory");
 const classDAO = require("./src/admin/classDAO");
+const studentsDAO = require("./src/admin/studentsDAO");
 const library = require("./src/admin/library");
 const exam = require("./src/admin//exam");
 const login = require("./src/login");
-const SendEmail = require("./src/admin/sendemail/SendEmail");
+const sendmail = require("./src/admin/sendmail/sendmail");
 
 const app = express();
 
@@ -57,9 +58,10 @@ addFees(app);
 viewFees(app);
 inventory(app);
 classDAO(app);
+studentsDAO(app);
 library(app);
 exam(app);
-SendEmail(app);
+sendmail(app);
 
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
