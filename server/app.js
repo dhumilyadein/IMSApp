@@ -14,6 +14,7 @@ const updateUser = require("./src/admin/updateUser");
 const addFees = require("./src/admin/addFees");
 const viewFees = require("./src/admin/viewFees");
 const inventory = require("./src/admin/inventory");
+const transport = require("./src/admin/transport");
 const classDAO = require("./src/admin/classDAO");
 const studentsDAO = require("./src/admin/studentsDAO");
 const library = require("./src/admin/library");
@@ -62,6 +63,7 @@ studentsDAO(app);
 library(app);
 exam(app);
 sendmail(app);
+transport(app);
 
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));

@@ -271,6 +271,14 @@ valError["ClassError"] =
 
 
       if (!request.rollno) valError["RollNo"] = "Roll No can't be empty";
+      else {
+        const rollCheck = await Student.findOne({ rollno: request.rollno });
+
+        if (rollCheck)
+          valError["RollNoExists"] =
+            "RollNo: " + request.rollno + " is already in use";
+        //console.log("emailexists: " + valError['EmailExists']);
+      }
 
       if (!request.parentfirstname)
         valError["ParentfirstName"] = "Parent's FirstName can't be empty";

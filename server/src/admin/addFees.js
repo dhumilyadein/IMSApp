@@ -199,6 +199,31 @@ function getStudentByRollNo(req,res)
   });
 }
 
+function feeCollection(req,res)
+{console.log("In feeCollction for: "+ JSON.stringify(req.body));
+
+
+
+  FeeRecord
+.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{section:req.body.section}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+}
+
   app.post("/api/selectStudentByClass", selectStudentByClass);
   app.post("/api/selectStudentBySection", selectStudentBySection);
 
@@ -208,6 +233,7 @@ function getStudentByRollNo(req,res)
    app.post("/api/getpendingFeeAmount", getpendingFeeAmount);
    app.post("/api/feeSubmit", feeSubmit);
    app.post("/api/getStudentByRollNo", getStudentByRollNo);
+   app.post("/api/feeCollection", feeCollection);
 
 
 

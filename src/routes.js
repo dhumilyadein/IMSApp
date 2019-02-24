@@ -188,6 +188,26 @@ const FeeTemplates = Loadable({
   loading: Loading
 });
 
+const ManageVehicles = Loadable({
+  loader: () => import("./views/admin/transport/ManageVehicles"),
+  loading: Loading
+});
+
+const ManageStops = Loadable({
+  loader: () => import("./views/admin/transport/ManageStops"),
+  loading: Loading
+});
+
+const ManageRoutes = Loadable({
+  loader: () => import("./views/admin/transport/ManageRoutes"),
+  loading: Loading
+});
+
+const AssignStudents = Loadable({
+  loader: () => import("./views/admin/transport/AssignStudents"),
+  loading: Loading
+});
+
 
 const RegisterUser = Loadable({
   loader: () => import("./views/admin/registeruser/RegisterUser"),
@@ -325,6 +345,32 @@ const routes = [
   { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
   { path: "/admin/library/SearchBooks", exact: true, name: "Search/Edit Books", component: SearchBooks },
   { path: "/admin/library/EditCategory", exact: true, name: "EditCategory", component: EditCategory },
+
+
+  {
+    path: "/admin/transport/ManageVehicles",
+    name: "Manage Vehicles",
+    component: ManageVehicles
+  },
+
+  {
+    path: "/admin/transport/ManageStops",
+    name: "Manage Stops",
+    component: ManageStops
+  },
+
+  {
+    path: "/admin/transport/ManageRoutes",
+    name: "Manage Routes",
+    component: ManageRoutes
+  },
+
+  {
+    path: "/admin/transport/AssignStudents",
+    name: "Assign Students",
+    component: AssignStudents
+  },
+
 
   {
     path: "/admin/exams/CreateExam",
