@@ -202,8 +202,8 @@ export default {
               variant: 'success',
             },
             {
-              name: 'Add Fee template',
-              url: '/admin/classmanagement/AddFeeTemplate',
+              name: 'Class Fee template',
+              url: '/admin/classmanagement/ClassFeeTemplate',
               icon: 'icon-bag',
               variant: 'success',
             },

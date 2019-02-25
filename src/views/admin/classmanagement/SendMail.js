@@ -482,6 +482,9 @@ onClick={this.emailLinkHandler} ><h3><b><u>Send Email to Email Groups</u></b></h
 
               {this.state.classesView && (
 
+
+<div>
+<h1 style={{color:"red"}}>Send Email to Entire Class</h1>
 <Card>
             <CardHeader>
               <i className="fa fa-align-justify"></i> Classes <small className="text-muted">Select a Class</small>
@@ -550,6 +553,7 @@ onClick={this.emailLinkHandler} ><h3><b><u>Send Email to Email Groups</u></b></h
 
             </CardBody>
           </Card>
+          </div>
 )}
 
 
