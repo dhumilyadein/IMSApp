@@ -203,8 +203,8 @@ function feeCollection(req,res)
 {console.log("In feeCollction for: "+ JSON.stringify(req.body));
 
 
-
-  FeeRecord
+if(req.body.class&&req.body.section)
+ { FeeRecord
 .find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } },
   {class:req.body.class},{section:req.body.section}] })
 
@@ -215,8 +215,36 @@ return res.send({data});
 .catch(err => {
 return res.send({error:err});
 });
+ }
+
+ else if(req.body.class&&!req.body.section)
+ { FeeRecord
+.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } },
+  {class:req.body.class}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
 
 
+ else if(!req.body.class&&!req.body.section)
+ { FeeRecord
+.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } },
+    ] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
 
 
 

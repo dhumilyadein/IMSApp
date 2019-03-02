@@ -285,6 +285,12 @@ export default {
                   icon: 'fa fa-bus',
                   variant: 'success',
                 },
+                {
+                  name: 'View/Edit Students',
+                  url: '/admin/transport/DeleteStudents',
+                  icon: 'fa fa-bus',
+                  variant: 'success',
+                },
               ]},
 
     {

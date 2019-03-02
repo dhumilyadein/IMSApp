@@ -207,7 +207,10 @@ const AssignStudents = Loadable({
   loader: () => import("./views/admin/transport/AssignStudents"),
   loading: Loading
 });
-
+const DeleteStudents = Loadable({
+  loader: () => import("./views/admin/transport/DeleteStudents"),
+  loading: Loading
+});
 
 const RegisterUser = Loadable({
   loader: () => import("./views/admin/registeruser/RegisterUser"),
@@ -370,6 +373,13 @@ const routes = [
     name: "Assign Students",
     component: AssignStudents
   },
+
+  {
+    path: "/admin/transport/DeleteStudents",
+    name: "Remove Students",
+    component: DeleteStudents
+  },
+  
 
 
   {

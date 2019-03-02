@@ -49,7 +49,7 @@ class:"",
 section:"",
 classError:"",
 divToPrint:"",
-
+totalCollection:"",
 
             studentResults: [],
             studentOpen:true,
@@ -99,6 +99,7 @@ sectionArray: [],
 studentsDataArray:[],
 startDate:"",
 endDate:new Date(Date.now()),
+searchResults:[]
         };
 
        
@@ -182,10 +183,11 @@ this.feeCollection=this.feeCollection.bind(this);
 
     feeCollection(){
       var submit = true;
-      console.log("in Fee Collection State: " + JSON.stringify(this.state));
+      console.log("in Fee Collection State: " + JSON.stringify({"doe":this.state.endDate,"dos":this.state.startDate,
+      "class":this.state.class,"section":this.state.section}));
   
       this.setState({
-        dateError: "",
+        dateError: "",searchResults:[]
       }, () => {
         if (!this.state.startDate) {
           this.setState({ dateError: "Please select Start Date" });
@@ -226,9 +228,13 @@ this.feeCollection=this.feeCollection.bind(this);
                     });}
                   else if(result.data.data.length>0)
                   {
+                    var total=0;
+                    for(var i=0;i<result.data.data.length;i++)
+                    total=total+parseInt( result.data.data[i].paidAmount);
                       this.setState({
                           showSearchResults:true,
-                          existingAddedItems:result.data.data
+                          searchResults:result.data.data,
+                          totalCollection:total
                         });
   
                   }
@@ -396,7 +402,7 @@ var height = pdf.internal.pageSize.getHeight();
       sectionArrayTemp.sort();
   
       this.setState({
-         sectionArray: sectionArrayTemp,
+         sectionArray: sectionArrayTemp, class:e.target.value
         })
   
       console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
@@ -1694,7 +1700,7 @@ if(result.data.length===0)
                                       id="class"
                                       type="select"
                                       value={this.state.class}
-                                      onChange={e=>{this.setState({class:e.target.value})}}
+                                      onChange={this.classChangeHandler}
                                     >
                                       <option value="">All Classes</option>
                                       {this.state.classes.map(element => {
@@ -1703,12 +1709,7 @@ if(result.data.length===0)
                                       )}
                                     </Input>
                                   </InputGroup>
-                                  { this.state.classError && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.classError}</p>
-                                    </font>
-                                  )}
+                                
 
                                     <InputGroup className="mb-4">
                                       <InputGroupAddon addonType="prepend">
@@ -1750,7 +1751,7 @@ if(result.data.length===0)
                           </Row>
                           <br /> <br />
 
-{(this.state.showSearchResults && this.state.existingAddedItems.length>0) &&<p>
+{(this.state.showSearchResults && this.state.searchResults.length>0) &&<p>
 
 <h3 align="center"> Search Results</h3>
                           <br />
@@ -1764,246 +1765,74 @@ if(result.data.length===0)
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>List Name </h4>
+                                  <h4>Student Name </h4>
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Date</h4>
+                                  <h4>Class</h4>
                                 </th>
 
                                 <th className="text-center">
                                   {" "}
                                   <h4>Paid Amount(Rs)</h4>
                                 </th>
+
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Remarks</h4>
+                                  <h4>Date</h4>
                                 </th>
-
-                                <th className="text-center">
-                                 <h4> Actions</h4>
-
-
-                                </th>
+                              
 
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.existingAddedItems.map((item, idx) => (
+                              {this.state.searchResults.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingAddedItems[idx].listName.charAt(0).toUpperCase() +
-                                      this.state.existingAddedItems[idx].listName.slice(1)}</h5>
+                                    <h5> {this.state.searchResults[idx].studentDetails[0].name +"("+
+                                       this.state.searchResults[idx].studentDetails[0].username+")"}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingAddedItems[idx].dos.substring(0,10)}</h5>
+                                    <h5> {this.state.searchResults[idx].class+" "+this.state.searchResults[idx].section}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingAddedItems[idx].grandTotal}</h5>
+                                    <h5> {this.state.searchResults[idx].paidAmount}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingAddedItems[idx].remarks}</h5>
+                                    <h5> {this.state.searchResults[idx].dos.substring(0,10)}</h5>
                                   </td>
 
-                                  <td align="center">
-                                  <Button
-                                      color="primary"
-                                      onClick={e=>{
-                                        this.setState({
-                                            showSearchResults:false,
-                                            showAddedItem:true,
-                                            viewItem:this.state.existingAddedItems[idx]
-                                        })}
-                                    }
-
-
-                                      size="lg"
-                                    >
-                                      View Details
-                                    </Button>
-                                    &nbsp; &nbsp;
-
-
-
-
-                                  </td>
+                                
                                 </tr>
                               ))}
                             </tbody>
                           </Table>
 
+                         < InputGroup className="mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                       <b> Total Collection</b>
+                                </InputGroupText>
+                                    </InputGroupAddon>
+                                    <Input
+                                      name="totalCollection"
+                                      id="totalCollection"
+                                      type="text"
+                                      value={this.state.totalCollection}
+disabled                                    >
+                                    
+                                    </Input>
+                                  </InputGroup>
 
                           </p>     }
 
 
-
-{this.state.showAddedItem && <p>
-
-<Card className="mx-1">
-<CardBody className="p-2">
-  <h3 align="center"> Added Item Details</h3>
-  <br />
-  <InputGroup className="mb-3">
-    <InputGroupAddon addonType="prepend">
-      <InputGroupText >
-        <b>List Name</b>
-      </InputGroupText>
-    </InputGroupAddon>
-    <Input
-
-
-      value={this.state.viewItem.listName.charAt(0).toUpperCase() + this.state.viewItem.listName.slice(1)}
-     disabled
-    />
-  </InputGroup>
-
-
-<InputGroup className="mb-2">
-      <InputGroupAddon addonType="prepend">
-        <InputGroupText >
-        <b>  Date of Submission</b>
-        </InputGroupText>
-      </InputGroupAddon>
-
-      &nbsp; &nbsp; &nbsp;
-      <Input
-
-        value={this.state.viewItem.dos.substring(0,10)}
-       disabled
-      />
-
-
-    </InputGroup>
-
-  <Table bordered hover>
-    <thead>
-      <tr style={{ 'backgroundColor': "palevioletred" }}>
-        <th className="text-center">
-          <h5> S.No.</h5>{" "}
-        </th>
-        <th className="text-center">
-          {" "}
-          <h5>Item Name </h5>
-        </th>
-        <th className="text-center">
-          <h5>Unit</h5>{" "}
-        </th>
-        <th className="text-center">
-          <h5>Quantity</h5>{" "}
-        </th>
-
-        <th className="text-center">
-          <h5>Cost/Unit(Rs)</h5>{" "}
-        </th>
-        <th className="text-center">
-          <h5>Total(Rs)</h5>{" "}
-        </th>
-
-
-
-      </tr>
-    </thead>
-    <tbody>
-      {this.state.viewItem.itemRows.map((item, idx) => (
-        <tr id="addr0" key={idx}>
-          <td align="center">
-            <h4>{idx + 1}</h4>
-          </td>
-          <td   >
-
-          {this.state.viewItem.itemRows[idx].itemName.label}
-
-
-          </td>
-
-
-
-          <td>
-           {this.state.viewItem.itemRows[idx].unit}
-
-
-          </td>
-
-          <td>
-          {this.state.viewItem.itemRows[idx].quantity}
-          </td>
-
-          <td>
-          {this.state.viewItem.itemRows[idx].costPerItem}
-          </td>
-
-          <td>
-          {this.state.viewItem.itemRows[idx].totalAmount}
-          </td>
-
-
-        </tr>
-      ))}
-    </tbody>
-  </Table>
-
-
-<InputGroup className="mb-3">
-    <InputGroupAddon addonType="prepend">
-      <InputGroupText >
-        <b>Grand Total Amount(Rs)</b>
-      </InputGroupText>
-    </InputGroupAddon>
-    <Input
-      type="text"
-      size="lg"
-     name="grandTotal"
-      id="grandTotal"
-     value={this.state.viewItem.grandTotal}
-      disabled
-
-
-    />
-  </InputGroup>
-
-  <InputGroup className="mb-3">
-    <InputGroupAddon addonType="prepend">
-      <InputGroupText >
-        <b>Remarks</b>
-      </InputGroupText>
-    </InputGroupAddon>
-    <Input
-      type="text"
-      size="lg"
-     name="remarks"
-      id="remarks"
-     value={this.state.viewItem.remarks}
-    disabled
-
-    />
-  </InputGroup>
-
-  <br /> <br />
-  <Row>
-    <Col>
-      <Button
-        onClick={e=>{this.setState({showSearchResults:true,
-        showAddedItem:false})}}
-        size="lg"
-        color="secondary"
-        block
-      >
-        Go back
-      </Button>
-    </Col>
-
-
-  </Row>
-</CardBody>
-
-</Card>
-</p>}
 
 
 
