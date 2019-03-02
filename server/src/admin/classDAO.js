@@ -86,6 +86,38 @@ module.exports = function (app) {
   }
 
   /**
+     * @description Post method for fetchAllClassDetails service
+     */
+    function fetchAllClassesAndSections(req, res) {
+
+      console.log("ClassDAO - fetchAllClassesAndSections - ENTRY");
+  
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      Class.find({},
+        {
+        "class":1, 
+        "section":1,
+      })
+        .then(function (classDetails) {
+  
+          console.log("classDAO - fetchAllClassesAndSections - All Classes and Sections -  " + classDetails);
+  
+          res.send(classDetails);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+  
+    }
+
+  /**
      * @description Post method for fetchSelectedClassStudentsData service
      */
     async function fetchSelectedClassStudentsData(req, res) {
@@ -585,6 +617,10 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
   app.get("/api/fetchAllClassDetails", fetchAllClassDetails, (req, res) => {
     console.log("fetchAllClassDetails get service running");
+  });
+
+  app.get("/api/fetchAllClassesAndSections", fetchAllClassesAndSections, (req, res) => {
+    console.log("fetchAllClassesAndSections get service running");
   });
 
   app.post("/api/fetchSelectedClassStudentsData", fetchSelectedClassStudentsData, (req, res) => {

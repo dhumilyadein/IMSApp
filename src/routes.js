@@ -314,6 +314,11 @@ const SendMail = Loadable({
   loading: Loading
 });
 
+const ClassFeeTemplate = Loadable({
+  loader: () => import("./views/admin/classmanagement/ClassFeeTemplate"),
+  loading: Loading
+});
+
 const CreateExam = Loadable({
   loader: () => import("./views/admin/exams/CreateExam"),
   loading: Loading
@@ -510,6 +515,11 @@ const routes = [
     path: "/admin/classmanagement/ClassTimeTable",
     name: "ClassTimeTable",
     component: ClassTimeTable
+  },
+  {
+    path: "/admin/classmanagement/ClassFeeTemplate",
+    name: "ClassFeeTemplate",
+    component: ClassFeeTemplate
   },
 
 

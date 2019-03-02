@@ -69,6 +69,7 @@
     "react-script": "^2.0.5",
     "react-select": "^2.1.2",
     "react-selectize": "^3.0.1",
+    "react-spinners": "^0.5.1",
     "react-test-renderer": "^16.5.2",
     "react-transition-group": "^2.5.1",
     "reactstrap": "^7.1.0",

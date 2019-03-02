@@ -128,7 +128,7 @@ console.log( "Update Class: "+JSON.stringify(request));
 
       console.log("Class details udpated successfully");
 
-      console.log("ClassDAO - updateClassDetails - server final response - " + JSON.stringify(classData));
+      console.log("importUsers - updateClassDetails - server final response - " + JSON.stringify(classData));
 
     }).catch(function (err) {
       console.log("Catching Class Update server err - " + err);
