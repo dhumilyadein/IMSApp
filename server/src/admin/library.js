@@ -469,6 +469,174 @@ function gettingStaff(req, res) {
 
   }
 
+  function getIssuedBooks(req,res)
+{console.log("In issuedBookDetails for: "+ JSON.stringify(req.body));
+
+
+if(req.body.class&&req.body.section)
+ { IssuedBooks
+.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{section:req.body.section},{ "issuedBookDetails.isReturned":false}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+ else if(req.body.class&&!req.body.section)
+ { IssuedBooks
+.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{ "issuedBookDetails.isReturned":false}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+
+ else if(!req.body.class&&!req.body.section)
+ { IssuedBooks
+.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } }, { "issuedBookDetails.isReturned":false}
+    ] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+
+
+
+
+}
+
+function getReturnedBooks(req,res)
+{console.log("In getReturnedBooks for: "+ JSON.stringify(req.body));
+
+
+if(req.body.class&&req.body.section)
+ { IssuedBooks
+.find({ $and: [ { "issuedBookDetails.actualReturnedDate": { $gte : new Date(req.body.dos) } }, 
+{ "issuedBookDetails.actualReturnedDate": { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{section:req.body.section},{ "issuedBookDetails.isReturned":true}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+ else if(req.body.class&&!req.body.section)
+ { IssuedBooks
+.find({ $and: [ { "issuedBookDetails.actualReturnedDate": { $gte : new Date(req.body.dos) } },
+ { "issuedBookDetails.actualReturnedDate": { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{ "issuedBookDetails.isReturned":true}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+
+ else if(!req.body.class&&!req.body.section)
+ { console.log("in else");
+  IssuedBooks
+  .find({ "issuedBookDetails":{"actualReturnedDate": { $gte : new Date(req.body.dos) } }})
+
+
+
+/* .find({ $and: [ { "issuedBookDetails":{"actualReturnedDate": { $gte : new Date(req.body.dos) } }}, 
+{ "issuedBookDetails":{"actualReturnedDate": { $lte : new Date(req.body.doe) } }}, 
+   { "issuedBookDetails.isReturned":true}
+    ] }) */
+
+.then(data => { 
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+
+
+
+
+}
+
+function getBookDefaulters(req,res)
+{console.log("In getReturnedBooks for: "+ JSON.stringify(req.body));
+
+
+if(req.body.class&&req.body.section)
+ { IssuedBooks
+.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{section:req.body.section},{ "issuedBookDetails.isReturned":true}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+ else if(req.body.class&&!req.body.section)
+ { IssuedBooks
+.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
+  {class:req.body.class},{ "issuedBookDetails.isReturned":true}] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+
+ else if(!req.body.class&&!req.body.section)
+ { IssuedBooks
+.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
+   { "issuedBookDetails.isReturned":true}
+    ] })
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+ }
+
+
+
+
+
+}
 
   async function returnBook(req,res)
   {var temp=[]; var success=true;
@@ -530,6 +698,8 @@ function gettingStaff(req, res) {
 
   }
 
+  
+  app.post("/api/getBookDefaulters", getBookDefaulters);
 
   app.post("/api/importBooks", importBooks);
   app.post("/api/returnBook", returnBook);
@@ -544,8 +714,9 @@ function gettingStaff(req, res) {
    app.get("/api/gettingStaff", gettingStaff);
    app.post("/api/gettingIssuedBooks", gettingIssuedBooks);
    app.post("/api/updateBook", updateBook);
-
-
+   app.post("/api/getIssuedBooks", getIssuedBooks);
+   app.post("/api/getReturnedBooks", getReturnedBooks);
+   
 
 
 

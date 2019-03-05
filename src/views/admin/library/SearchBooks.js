@@ -399,7 +399,10 @@ for(var i=0;i<result.data.length;i++)
                         { if(this.state.allBooksData[i].bookName===this.state.selectedBook.value)
 {
 temp=this.state.allBooksData[i];break}
-                        }
+                        }var tempIds=[];
+for(var j=0;j<temp.uniqueBookIds.length;j++)
+tempIds.push({"value":temp.uniqueBookIds[j].value,"label":(temp.uniqueBookIds[j].value+" Issued: "+temp.uniqueBookIds[j].isIssued)})
+                        
 
                                     this.setState({showEdit:true, showOptions:false,bookName: temp.bookName,
                                         bookId:temp.bookId,
@@ -409,7 +412,7 @@ temp=this.state.allBooksData[i];break}
                                         publisher:temp.publisher,
                                         quantity:temp.quantity, cost:temp.cost, doa:temp.doa,
                                          description:temp.description, lastUpdated:temp.updatedAt,
-                                         location:temp.location, uniqueBookIds:temp.uniqueBookIds
+                                         location:temp.location, uniqueBookIds:tempIds
 
                                 })}}
                                 size="lg"

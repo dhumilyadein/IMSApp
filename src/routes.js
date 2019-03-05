@@ -207,7 +207,10 @@ const AssignStudents = Loadable({
   loader: () => import("./views/admin/transport/AssignStudents"),
   loading: Loading
 });
-
+const DeleteStudents = Loadable({
+  loader: () => import("./views/admin/transport/DeleteStudents"),
+  loading: Loading
+});
 
 const RegisterUser = Loadable({
   loader: () => import("./views/admin/registeruser/RegisterUser"),
@@ -238,6 +241,10 @@ const ImportBulkBooks = Loadable({
   loading: Loading
 });
 
+const IssueReturnDetails = Loadable({
+  loader: () => import("./views/admin/library/IssueReturnDetails"),
+  loading: Loading
+});
 const IssueBooks = Loadable({
   loader: () => import("./views/admin/library/IssueBooks"),
   loading: Loading
@@ -343,6 +350,26 @@ const ViewResults = Loadable({
   loading: Loading
 });
 
+const ViewPayslip = Loadable({
+  loader: () => import("./views/admin/payroll/ViewPayslip"),
+  loading: Loading
+});
+
+const DeductionTemplates = Loadable({
+  loader: () => import("./views/admin/payroll/DeductionTemplates"),
+  loading: Loading
+});
+
+const SalaryTemplates = Loadable({
+  loader: () => import("./views/admin/payroll/SalaryTemplates"),
+  loading: Loading
+});
+
+const PaySalary = Loadable({
+  loader: () => import("./views/admin/payroll/PaySalary"),
+  loading: Loading
+});
+
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -366,6 +393,36 @@ const routes = [
   },
 
   {
+    path: "/admin/payroll/ViewPayslip",
+    name: "View Payslip",
+    component: ViewPayslip
+  },
+
+  {
+    path: "/admin/library/IssueReturnDetails",
+    name: "Issue/Return Details",
+    component: IssueReturnDetails
+  },
+
+  {
+    path: "/admin/payroll/DeductionTemplates",
+    name: "Deduction Tempates",
+    component: DeductionTemplates
+  },
+
+  {
+    path: "/admin/payroll/SalaryTemplates",
+    name: "Salary Tempates",
+    component: SalaryTemplates
+  },
+
+  {
+    path: "/admin/payroll/PaySalary",
+    name: "Pay Salary",
+    component: PaySalary
+  },
+
+  {
     path: "/admin/transport/ManageStops",
     name: "Manage Stops",
     component: ManageStops
@@ -382,6 +439,13 @@ const routes = [
     name: "Assign Students",
     component: AssignStudents
   },
+
+  {
+    path: "/admin/transport/DeleteStudents",
+    name: "Remove Students",
+    component: DeleteStudents
+  },
+  
 
 
   {
