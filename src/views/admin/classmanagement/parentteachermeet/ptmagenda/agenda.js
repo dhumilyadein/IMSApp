@@ -25,9 +25,9 @@ import {
   ModalHeader
 } from "reactstrap";
 
-import ReactAgenda from '../modal/reactAgenda.js';
-import ReactAgendaCtrl from '../modal/reactAgendaCtrl.js';
-import Modal1 from '../modal/Modal.js';
+import ReactAgenda from '../ptmmodal/reactAgenda.js';
+import ReactAgendaCtrl from '../ptmmodal/reactAgendaCtrl.js';
+import Modal1 from '../ptmmodal/Modal.js';
 import axios from "axios";
 
 var now = new Date();
@@ -62,7 +62,10 @@ class Agenda extends Component {
       subjectsArray: this.props.subjects,
       selectedClass: this.props.selectedClass,
       selectedSection: this.props.selectedSection,
-      timeTable: this.props.timeTable,
+      // timeTable: this.props.timeTable,
+      pTMeetSchedule: this.props.pTMeetSchedule,
+      emailArray: this.props.emailArray,
+      teachersDetailsArray: this.props.teachersDetailsArray,
       sectionArray: this.props.sectionArray,
 
       classDetailsUpdatedFlag: false,
@@ -86,8 +89,9 @@ class Agenda extends Component {
     this.updateClassDetails = this.updateClassDetails.bind(this);
     this.hourChangehandler = this.hourChangehandler.bind(this);
     this.removeSchedule = this.removeSchedule.bind(this);
-    this.copyTimeTableToAllSections = this.copyTimeTableToAllSections.bind(this);
+    // this.copypTMeetScheduleToAllSections = this.copypTMeetScheduleToAllSections.bind(this);
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
+    this.sendMailToClass = this.sendMailToClass.bind(this);
 
     // Get first day of the current week.
     this.getCurrentWeek();
@@ -98,7 +102,6 @@ class Agenda extends Component {
 
   getCurrentWeek() {
 
-    console.log("getCurrentWeek getCurrentWeek getCurrentWeek");
     var curr = new Date;
     var firstday = curr.getDate() - curr.getDay() + 1;
     var currentWeekStartDate = new Date(curr.setDate(firstday));
@@ -122,8 +125,11 @@ then are fetched in reactAgendaItem using {this.props.item.name}
   componentDidMount() {
 
     // this.setState({ items: items })
-    this.setState({ items: this.state.timeTable }, () => {
-      // console.log("Agenda.js - timeTable - " + this.state.timeTable);
+    this.setState({ items: this.state.pTMeetSchedule }, () => {
+    
+      console.log("Agenda.js - teachersDetailsArray - " + JSON.stringify(this.state.teachersDetailsArray)
+      + "\npTMeetSchedule - " + JSON.stringify(this.state.pTMeetSchedule)
+      + "\nthis.props.pTMeetSchedule - " + JSON.stringify(this.props.pTMeetSchedule));
     })
 
   }
@@ -233,34 +239,34 @@ then are fetched in reactAgendaItem using {this.props.item.name}
 
   addNewEvent(items, newItems) {
 
-    // console.log("Agenda.js - addNewEvent - " + " newItems - " + JSON.stringify(newItems) + " \nitems - " + items + " \nthis.state.items - " 
-    // + JSON.stringify(this.state.items) 
-    // + " \nthis.state.items - " + JSON.stringify(this.state.items));
+    console.log("Agenda.js - addNewEvent - " + " newItems - " + JSON.stringify(newItems) + " \nitems - " + items + " \nthis.state.items - " 
+    + JSON.stringify(this.state.items) 
+    + " \nthis.state.items - " + JSON.stringify(this.state.items));
 
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
 
-    this.updateClassDetails(this.state.selectedClass, this.state.selectedSection);
+    this.updateClassDetails(this.state.selectedClass, this.state.selectedSection, newItems);
   }
   editEvent(items, item) {
 
-    // console.log("agenda - editEvent");
+    // console.log("agenda - editEvent - " + JSON.stringify(item));
     this.setState({ showModal: false, selected: [], items: items });
     this._closeModal();
 
-    this.updateClassDetails(this.state.selectedClass, this.state.selectedSection);
+    this.updateClassDetails(this.state.selectedClass, this.state.selectedSection, item);
   }
 
   changeView(days, event) {
     this.setState({ numberOfDays: days })
   }
 
-  async updateClassDetails(classStr, sectionStr) {
+  async updateClassDetails(classStr, sectionStr, item) {
 
     var updateClassDetailsRequest = {
       "class": classStr,
       "section": sectionStr,
-      "timeTable": this.state.items
+      "pTMeetSchedule": this.state.items
     }
 
     console.log("Agenda - updateClassDetails - updateClassDetailsRequest - "
@@ -271,6 +277,8 @@ then are fetched in reactAgendaItem using {this.props.item.name}
       if (res.data.errors) {
         return this.setState({ errors: res.data.errors });
       } else {
+
+        this.sendMailToClass(item);
 
         this.setState({
           classDetailsUpdatedFlag: true
@@ -284,7 +292,7 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     var removeScheduleRequest = {
       "class": this.state.selectedClass,
       "section": this.state.selectedSection,
-      "timeTable": item
+      "pTMeetSchedule": item
     }
 
     // console.log("Agenda - removeSchedule - removeScheduleRequest - "
@@ -309,32 +317,84 @@ then are fetched in reactAgendaItem using {this.props.item.name}
     this.setState({ [e.currentTarget.name]: e.currentTarget.value });
   }
 
-  async copyTimeTableToAllSections() {
+  sendMailToClass(item) {
 
-    await console.log("Agenda - copyTimeTableToAllSections - this.state.sectionArray - " + this.state.sectionArray);
+    var startDateMoment = moment(new Date(item.startDateTime));
+    var endDateMoment = moment(new Date(item.endDateTime));
 
-    if(this.state.sectionArray) {
+    var subject = "Parent Teacher Meet on " + startDateMoment.date() + "-" + startDateMoment.month() + 1
+    + "-" + startDateMoment.year() + " (" + startDateMoment.format("hh:mm a") + " - " + endDateMoment.format("hh:mm a") + ")";
 
-      this.state.sectionArray.forEach(section => {
+    var mailBody = "Hi Sir/Madam, \nGreetings!\nThis mail is to inform you that Parent Tearcher Meet is scheduled for "
+    + startDateMoment.date() + "-" + startDateMoment.month() + 1 + "-" + startDateMoment.year() + " between " 
+    + startDateMoment.format("hh:mm a") + " and " + endDateMoment.format("hh:mm a") 
+    + ".\n\nAgenda - " + item.name 
+    + "\nTeacher - " + item.teacher
+    + "\n\nRegards,\nSchool Staff";
 
-        if (section !== this.state.selectedSection) {
-          console.log("Agenda - copyTimeTableToAllSections - section - " + section);
+    console.log("PTM Agenda - sendMailToClass - to - " + this.state.emailArray 
+    + " \nsubject - " + subject + " \nmailBody - " + mailBody);
 
-          this.updateClassDetails(this.state.selectedClass, section);
-        }
-      });
-
-      alert("Refreshing the page to reflect the TimeTable changes in UI");
-
-      // var msg = "Timetable copied to all sections of Class ' " + this.state.selectedClass + " '";
-      // this.setState({
-      //   showModalFlag: true,
-      //   modalColor: "modal-success",
-      //   modalMessage: msg
-      // });
-      window.location.reload();
+    var sendMailRequest = {
+      "to": this.state.emailArray,
+      "subject": subject,
+      "text": mailBody
+      // ,"html": this.state.mailHtml
     }
+
+    console.log("SendMail - sendMailToClass - sendMailRequest " 
+    + JSON.stringify(sendMailRequest));
+    
+    axios.post("http://localhost:8001/api/sendmail", sendMailRequest).then(seRes => {
+
+      if (seRes.data.errors) {
+
+        this.setState({
+          loader: false,
+          modalSuccess: false
+        });
+
+        console.log("SendMail - sendMailToClass - ERROR in send mail - " + seRes.data.Errors);
+        return this.setState({ errors: seRes.data.Errors });
+
+      } else {
+
+        this.setState({
+          loader: false,
+          modalSuccess: false
+        });
+        // document.getElementById('sendMailRoot').style.display = 'block';
+        console.log("SendMail - sendMailToClass - send email response - " + seRes.data.response.response);
+      }
+    });
   }
+
+  // async copypTMeetScheduleToAllSections() {
+
+  //   await console.log("Agenda - copypTMeetScheduleToAllSections - this.state.sectionArray - " + this.state.sectionArray);
+
+  //   if(this.state.sectionArray) {
+
+  //     this.state.sectionArray.forEach(section => {
+
+  //       if (section !== this.state.selectedSection) {
+  //         console.log("Agenda - copypTMeetScheduleToAllSections - section - " + section);
+
+  //         this.updateClassDetails(this.state.selectedClass, section);
+  //       }
+  //     });
+
+  //     alert("Refreshing the page to reflect the pTMeetSchedule changes in UI");
+
+  //     // var msg = "pTMeetSchedule copied to all sections of Class ' " + this.state.selectedClass + " '";
+  //     // this.setState({
+  //     //   showModalFlag: true,
+  //     //   modalColor: "modal-success",
+  //     //   modalMessage: msg
+  //     // });
+  //     window.location.reload();
+  //   }
+  // }
 
   render() {
 
@@ -436,23 +496,23 @@ then are fetched in reactAgendaItem using {this.props.item.name}
                       {/* For pop up Modal */}
                       <ReactAgendaCtrl items={this.state.items} itemColors={colors}
                         selectedCells={this.state.selected} Addnew={this.addNewEvent}
-                        edit={this.editEvent} subjectsArray={this.props.subjects} />
+                        edit={this.editEvent} subjectsArray={this.props.subjects}
+                        teachersDetailsArray= {this.state.teachersDetailsArray} />
 
                     </div>
                   </Modal1> : ''
                 }
 
 <br/>
-<Row>
+{/* <Row>
 <Col className="col-md-3"></Col>
   <Col className="col-md-6">
-<Button color="success" block onClick={this.copyTimeTableToAllSections}>
-                      Set same TimeTable for all sections of Class ' {this.state.selectedClass} '
+<Button color="success" block onClick={this.copypTMeetScheduleToAllSections}>
+                      Set same Parent Teacher Meet for all sections of Class ' {this.state.selectedClass} '
                     </Button>
                     </Col>
         <Col className="col-md-3"></Col>
-        </Row>
-
+        </Row> */}
 
               </div>
             </CardBody>

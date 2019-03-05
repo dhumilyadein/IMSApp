@@ -627,7 +627,8 @@ class RegisterUser extends Component {
         "username": this.state.username,
         "firstname": this.state.firstname,
         "lastname": this.state.lastname,
-        "email": this.state.email
+        "email": this.state.email,
+        "parentemail": this.state.parentemail
       }
     }
 

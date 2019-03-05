@@ -117,6 +117,74 @@ module.exports = function (app) {
   
     }
 
+    /**
+     * @description Post method for fetchClassSpecificDetails service
+     */
+    function fetchClassSpecificDetails(req, res) {
+
+      console.log("ClassDAO - fetchClassSpecificDetails - ENTRY");
+  
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+
+        console.log("ClassDAO - fetchClassSpecificDetails - errors - " + JSON.stringify(errors.mapped));
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      var request = req.body;
+
+      var fetchClassSpecificDetailsJSON = {};
+
+      if(request.class) {
+        fetchClassSpecificDetailsJSON.class = request.class;
+      }
+      if(request.section) {
+        fetchClassSpecificDetailsJSON.section = request.section;
+      }
+
+      var fetchClassSpecificDetailsResponseJSON = {};
+
+      if(request.class) {
+        fetchClassSpecificDetailsResponseJSON.class = 1
+      }
+      if(request.section) {
+        fetchClassSpecificDetailsResponseJSON.section = 1
+      }
+      if(request.timeTable) {
+        fetchClassSpecificDetailsResponseJSON.timeTable = 1
+      }
+      if(request.pTMeetSchedule) {
+        fetchClassSpecificDetailsResponseJSON.pTMeetSchedule = 1
+      }
+      if(request.subjects) {
+        fetchClassSpecificDetailsResponseJSON.subjects = 1
+      }
+      if(request.studentsData) {
+        fetchClassSpecificDetailsResponseJSON.studentsData = 1
+      }
+
+      console.log("classDAO - fetchClassSpecificDetails - fetchClassSpecificDetailsResponseJSON - " 
+      + JSON.stringify(fetchClassSpecificDetailsResponseJSON));
+
+      Class.findOne(
+        fetchClassSpecificDetailsJSON,
+        fetchClassSpecificDetailsResponseJSON
+        )
+        .then(function (classDetails) {
+  
+          console.log("classDAO - fetchClassSpecificDetails - All Classes and Sections -  " + classDetails);
+  
+          res.send(classDetails);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+  
+    }
+
   /**
      * @description Post method for fetchSelectedClassStudentsData service
      */
@@ -336,10 +404,6 @@ module.exports = function (app) {
 
         timeTableArrayTemp.push(timeTableTemp);
 
-        // console.log("classDAO - updateClassDetails FIRST FIRST - startDateTime - " 
-        //     + timeTableTemp.startDateTime 
-        //     + " endDateTime - " + timeTableTemp.endDateTime);
-
         /*
         Code to repeat schedule every week for the next 52 weeks
         */
@@ -358,19 +422,57 @@ module.exports = function (app) {
             timeTableTemp.startDateTime = new Date(moment(element.startDateTime).day(dayOfWeek + 7*i));
             timeTableTemp.endDateTime = new Date(moment(element.endDateTime).day(dayOfWeek + 7*i));
 
-            // console.log("classDAO - updateClassDetails - " + " dayOfWeek - " + dayOfWeek + " startDateTime - " 
-            // + timeTableTemp.startDateTime 
-            // + " endDateTime - " + timeTableTemp.endDateTime);
-            
             timeTableArrayTemp.push(timeTableTemp);
           }
         }
 
-        // console.log("classDAO - updateClassDetails - element.startDateTime - " + element.startDateTime);
-
       });
 
       objForUpdate.timeTable = timeTableArrayTemp;
+    }
+
+    if (request.pTMeetSchedule) {
+
+      var pTMeetScheduleArrayTemp = [];
+
+      request.pTMeetSchedule.forEach(element => {
+
+        var pTMeetScheduleTemp = {};
+        
+        pTMeetScheduleTemp._id = element._id;
+        pTMeetScheduleTemp.name = element.name;
+        pTMeetScheduleTemp.teacher = element.teacher;
+        pTMeetScheduleTemp.classes = element.classes;
+        pTMeetScheduleTemp.startDateTime = new Date(element.startDateTime);
+        pTMeetScheduleTemp.endDateTime = new Date(element.endDateTime);
+
+        pTMeetScheduleArrayTemp.push(pTMeetScheduleTemp);
+
+        /*
+        Code to repeat schedule every week for the next 52 weeks
+        */
+        if (element.repeatScheduleEveryWeek) {
+
+          for (i = 1; i <= 52; i++) {
+
+            var pTMeetScheduleTemp = {};
+
+            pTMeetScheduleTemp._id = element._id;
+            pTMeetScheduleTemp.name = element.name;
+            pTMeetScheduleTemp.teacher = element.teacher;
+            pTMeetScheduleTemp.classes = element.classes;
+
+            var dayOfWeek = moment(element.startDateTime).day();
+            pTMeetScheduleTemp.startDateTime = new Date(moment(element.startDateTime).day(dayOfWeek + 7*i));
+            pTMeetScheduleTemp.endDateTime = new Date(moment(element.endDateTime).day(dayOfWeek + 7*i));
+
+            pTMeetScheduleArrayTemp.push(pTMeetScheduleTemp);
+          }
+        }
+
+      });
+
+      objForUpdate.pTMeetSchedule = pTMeetScheduleArrayTemp;
     }
 
     objForUpdate.updatedAt = currentTime;
@@ -577,25 +679,45 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
     console.log("ClassDAO - removeSchedule req.body - " + JSON.stringify(request));
 
-      var id = {};
-      var pullTimeTableJSON = {};
-      var pullTimeTableUdpateJSON = {};
+      var pullArrayUdpateClassJSON = {};
 
-      if (request.timeTable._id) id._id = request.timeTable._id;
-      if(id._id) pullTimeTableJSON.timeTable = id;
+      var id = {};
+
+      console.log("\nClassDAO - removeSchedule - id BEFORE - " + Object.keys(id).length);
+
+      var pullTimeTableJSON = {};
+      if (request.timeTable && request.timeTable._id) { 
+        id._id = request.timeTable._id;
+        if(id._id) pullTimeTableJSON.timeTable = id;
+      }
+
+      var pullPTMeetScheduleJSON = {};
+      if (request.pTMeetSchedule && request.pTMeetSchedule._id) {
+        id._id = request.pTMeetSchedule._id;
+        if(id._id) pullPTMeetScheduleJSON.pTMeetSchedule = id;
+      }
+
+      console.log("\nClassDAO - removeSchedule - id AFTER - " + Object.keys(id).length);
 
       if (Object.keys(pullTimeTableJSON).length !== 0) {
 
-        pullTimeTableUdpateJSON = {
+        pullArrayUdpateClassJSON = {
           $pull: pullTimeTableJSON
         }
-      
+      } else if (Object.keys(pullPTMeetScheduleJSON).length !== 0) {
 
-      console.log("ClassDAO - removeSchedule - pullTimeTableUdpateJSON - " + JSON.stringify(pullTimeTableUdpateJSON));
+        pullArrayUdpateClassJSON = {
+          $pull: pullPTMeetScheduleJSON
+        }
+      }
+      
+      if(Object.keys(pullArrayUdpateClassJSON).length !== 0) {
+
+      console.log("ClassDAO - removeSchedule - pullArrayUdpateClassJSON - " + JSON.stringify(pullArrayUdpateClassJSON));
 
       await Class.findOneAndUpdate(
         { $and: [{ "class": request.class }, { "section": request.section }] },
-        pullTimeTableUdpateJSON
+        pullArrayUdpateClassJSON
       ).then(function (classData) {
   
         response = { reqbody: req.body, message: "Class details updated successfully" };
@@ -610,7 +732,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
     } else {
 
-      console.log("ClassDAO - removeSchedule - pullStudentsDataJSON empty - nothing to remove");
+      console.log("ClassDAO - removeSchedule - pullArrayUdpateClassJSON empty - nothing to remove");
     }
 
   }
@@ -621,6 +743,11 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
   app.get("/api/fetchAllClassesAndSections", fetchAllClassesAndSections, (req, res) => {
     console.log("fetchAllClassesAndSections get service running");
+  });
+
+  
+  app.post("/api/fetchClassSpecificDetails", updateClassValidation, fetchClassSpecificDetails, (req, res) => {
+    console.log("fetchClassSpecificDetails post service running");
   });
 
   app.post("/api/fetchSelectedClassStudentsData", fetchSelectedClassStudentsData, (req, res) => {
