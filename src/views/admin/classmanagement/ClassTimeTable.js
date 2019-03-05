@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import './classmanagementcss/index.css';
 import Agenda from './agenda/agenda.js'
 

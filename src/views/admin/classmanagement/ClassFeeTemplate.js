@@ -1,21 +1,17 @@
 import React, { Component } from "react";
-import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Col,
   Container,
   Form,
-  FormGroup,
   Input,
   InputGroup,
   InputGroupAddon,
   InputGroupText,
   CardHeader,
-  Label,
   Row,
   Table,
   Modal,

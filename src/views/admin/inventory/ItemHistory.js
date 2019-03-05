@@ -7,21 +7,14 @@ import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Col,
-  Container,
-  Form,
-  FormGroup,
   Input,
   InputGroup,
   InputGroupAddon,
   InputGroupText,
-  CardHeader,
-  Label,
   Row,
   Table,
-  Modal,
-  ModalHeader, TabContent, TabPane, Nav, NavItem, NavLink,   CardTitle, CardText,
+  TabContent, TabPane, Nav, NavItem, NavLink,
 } from "reactstrap";
 
 import axios from "axios";
