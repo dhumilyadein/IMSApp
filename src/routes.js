@@ -323,6 +323,13 @@ const ClassFeeTemplate = Loadable({
   loading: Loading
 });
 
+const ParentTeacherMeet = Loadable({
+  loader: () => import("./views/admin/classmanagement/parentteachermeet/ParentTeacherMeet"),
+  loading: Loading
+});
+
+
+
 const CreateExam = Loadable({
   loader: () => import("./views/admin/exams/CreateExam"),
   loading: Loading
@@ -574,6 +581,11 @@ const routes = [
     path: "/admin/classmanagement/ClassFeeTemplate",
     name: "ClassFeeTemplate",
     component: ClassFeeTemplate
+  },
+  {
+    path: "/admin/classmanagement/parentteachermeet/ParentTeacherMeet",
+    name: "ParentTeacherMeet",
+    component: ParentTeacherMeet
   },
 
 

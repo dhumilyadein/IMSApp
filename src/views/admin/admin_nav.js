@@ -218,7 +218,7 @@ export default {
             },
             {
               name: 'Schedule PT Meet',
-              url: '/admin/classmanagement/SchedulePTMeet',
+              url: '/admin/classmanagement/parentteachermeet/ParentTeacherMeet',
               icon: 'icon-calendar',
               variant: 'success',
             },

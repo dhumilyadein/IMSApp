@@ -1,23 +1,13 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
-import ReactPhoneInput from "react-phone-input-2";
-import DatePicker from 'react-date-picker';
-import classnames from 'classnames';
-import Select from 'react-select';
 
 import {
   Button,
-  ButtonDropdown,
-  ButtonGroup,
-  ButtonToolbar,
   Card,
   CardBody,
   CardHeader,
   Col,
   Container,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
   Input,
   InputGroup,
   InputGroupAddon,
@@ -26,18 +16,12 @@ import {
   Table
 } from "reactstrap";
 import axios from "axios";
-import MapsTransferWithinAStation from "material-ui/SvgIcon";
 
-import './classmanagementcss/index.css';
-import Agenda from './agenda/agenda.js'
+import './ptmclassmanagementcss/index.css';
+import Agenda from './ptmagenda/agenda.js'
 
-var imageContext = require.context('../../../photoTemp', true);
 
-const whiteTextFieldStyle = {
-  background: "white"
-}
-
-class ClassDetails extends Component {
+class ParentTeacherMeet extends Component {
 
   constructor(props) {
 
@@ -47,8 +31,8 @@ class ClassDetails extends Component {
 
       classesView: true,
       sectionView: false,
-      studentsView: false,
 
+      classesAndSections: [],
       classDetails: {},
       classes: [],
       class: "",
@@ -58,26 +42,31 @@ class ClassDetails extends Component {
 
       tempArray: ["kapil", "mayank"],
 
-      timeTableView: false,
+      pTMeetScheduleView: false,
       subjectArray: [],
-      timeTableArray: []
+      pTMeetScheduleArray: [],
+      emailArray: [],
+      teachersDetailsArray: []
 
     };
 
-    this.fetchClassDetails = this.fetchClassDetails.bind(this);
+    this.fetchAllClassesAndSections = this.fetchAllClassesAndSections.bind(this);
     this.fetchClasses = this.fetchClasses.bind(this);
+    this.fetchClassSpecificDetails = this.fetchClassSpecificDetails.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-    this.showTimeTable = this.showTimeTable.bind(this);
+    this.fetchAllTeachersSpecificDetails = this.fetchAllTeachersSpecificDetails.bind(this);
 
     // Fetching class details on page load
-    this.fetchClassDetails();
+    this.fetchAllClassesAndSections();
 
   }
 
-  fetchClassDetails() {
+  fetchAllClassesAndSections() {
 
-    axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
+    axios.get("http://localhost:8001/api/fetchAllClassesAndSections").then(cRes => {
+
+      console.log("ClassFeeTemplate - fetchAllClassesAndSections - cRes.data - " + JSON.stringify(cRes.data));
 
       if (cRes.data.errors) {
 
@@ -85,11 +74,122 @@ class ClassDetails extends Component {
 
       } else {
 
-        this.setState({ classDetails: cRes.data });
+        this.setState({ classesAndSections: cRes.data }, () => {
 
-        console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
+          console.log('ParentTeacherMeet - fetchAllClassesAndSections - All class details - ' + JSON.stringify(this.state.classesAndSections));
 
-        this.fetchClasses();
+          // Fetching unique classes from the classesAndSections 
+          this.fetchClasses();
+        });
+
+      }
+    });
+  }
+
+  async fetchClassSpecificDetails(classStr, sectionStr) {
+
+    this.setState({
+      subjectArray: [],
+      pTMeetScheduleArray: [],
+      pTMeetScheduleView: false,
+      emailArray: []
+    });
+
+    var fetchClassSpecificDetailsRequest = {
+      "class": this.state.class,
+      "section": this.state.section,
+      "subjects": 1,
+      "pTMeetSchedule": 1,
+      "studentsData": 1
+    }
+
+    console.log("ParentTeacherMeet - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
+      + JSON.stringify(fetchClassSpecificDetailsRequest));
+
+    await axios.post("http://localhost:8001/api/fetchClassSpecificDetails", fetchClassSpecificDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+
+        console.log('ParentTeacherMeet - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({ classDetails: res.data }, () => {
+
+          console.log('ParentTeacherMeet - fetchClassSpecificDetails - All class details classDetails - ' + JSON.stringify(this.state.classDetails));
+
+          var studentsemailArray = [];
+          var parentsemailArray = [];
+          this.state.classDetails.studentsData.forEach(element => {
+            studentsemailArray.push(element["email"]);
+            parentsemailArray.push(element["parentemail"]);
+          });
+
+          console.log();
+
+          var emailArray = studentsemailArray.concat(parentsemailArray);
+
+          // Fetching Teachers details
+          var fetchAllTeachersSpecificDetailsRequest = {
+            "username":"1",
+            "firstname":"1",
+            "lastname":"1",
+            "email":"1",
+            "userid":"1"
+          }
+      
+          axios.post("http://localhost:8001/api/fetchAllTeachersSpecificDetails", fetchAllTeachersSpecificDetailsRequest).then(res => {
+      
+            if (res.data.errors) {
+      
+              console.log('ParentTeacherMeet - fetchAllTeachersSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
+              return this.setState({ errors: res.data.errors });
+            } else {
+      
+              this.setState({ 
+                teachersDetailsArray: res.data,
+                pTMeetScheduleView: true,
+                subjectArray: this.state.classDetails.subjects,
+                pTMeetScheduleArray: this.state.classDetails.pTMeetSchedule,
+                emailArray: emailArray 
+              }, () => {
+
+                console.log("ParentTeacherMeet - fetchClassSpecificDetails - subjectArray - " + this.state.subjectArray
+                + " pTMeetScheduleArray - " + JSON.stringify(this.state.pTMeetScheduleArray)
+                + " teachersDetailsArray - " + JSON.stringify(this.state.teachersDetailsArray));
+              });
+            }
+          });
+
+        });
+      }
+    });
+  }
+
+  /**
+   * Fetch all teachers details
+   */
+  fetchAllTeachersSpecificDetails() {
+
+    var fetchAllTeachersSpecificDetailsRequest = {
+      "username":"1",
+      "firstname":"1",
+      "lastname":"1",
+      "email":"1",
+      "userid":"1"
+    }
+
+    axios.post("http://localhost:8001/api/fetchAllTeachersSpecificDetails", fetchAllTeachersSpecificDetailsRequest).then(res => {
+
+      if (res.data.errors) {
+
+        console.log('ParentTeacherMeet - fetchAllTeachersSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({ teachersDetailsArray: res.data }, () => {
+          console.log('ParentTeacherMeet - fetchAllTeachersSpecificDetails - All Teachers details teachersDetailsArray - ' + JSON.stringify(this.state.teachersDetailsArray));
+        });
       }
     });
   }
@@ -100,7 +200,7 @@ class ClassDetails extends Component {
   fetchClasses() {
 
     var classArray = [];
-    this.state.classDetails.forEach(element => {
+    this.state.classesAndSections.forEach(element => {
 
       console.log("element.class - " + element.class);
       classArray.push(element.class);
@@ -116,11 +216,11 @@ class ClassDetails extends Component {
   classChangeHandler(e) {
 
     var selectedClass = e.currentTarget.value;
-    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
+
     this.setState({ class: selectedClass });
 
     var sectionArrayTemp = [];
-    this.state.classDetails.forEach(element => {
+    this.state.classesAndSections.forEach(element => {
       if (element["class"] === selectedClass) {
         sectionArrayTemp.push(element["section"]);
       }
@@ -134,92 +234,44 @@ class ClassDetails extends Component {
     console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp);
 
     // Switching view to section view
-    this.setState({ 
+    this.setState({
       sectionView: true,
-      studentsView: false,
-      timeTableView: false,
+      pTMeetScheduleView: false,
       section: ""
-     });
+    });
   }
 
-  sectionChangeHandler(e) {
+  async sectionChangeHandler(e) {
 
     var section = e.currentTarget.value;
-    console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + section);
-    this.setState({ section: section });
 
-    var studentsDataArrayTemp = null;
-    this.state.classDetails.forEach(element => {
-      if (element["class"] === this.state.class && element["section"] === section) {
-        studentsDataArrayTemp = element["studentsData"];
-      }
+    await console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + section);
+
+    this.setState({ section: section }, () => {
+
+      this.fetchClassSpecificDetails();
+
     });
 
-    // Sorting array alphabetically
-    //studentsDataArrayTemp.sort();
+    // var studentsDataArrayTemp = null;
+    // this.state.classDetails.forEach(element => {
+    //   if (element["class"] === this.state.class && element["section"] === section) {
+    //     studentsDataArrayTemp = element["studentsData"];
+    //   }
+    // });
 
-    this.setState({ studentsDataArray: studentsDataArrayTemp })
+    // studentsDataArrayTemp.sort();
 
-    console.log("sectionButtonClickHandler - Selected class - " + this.state.class +
-      " selected Section - " + this.state.section
-      + " selected usernames - " + studentsDataArrayTemp);
+    // this.setState({ studentsDataArray: studentsDataArrayTemp })
 
-    // Switching view to students view
-    this.setState({ 
-      studentsView: true,
-      timeTableView: false,
-    });
+    // console.log("sectionButtonClickHandler - Selected class - " + this.state.class +
+    //   " selected Section - " + this.state.section
+    //   + " selected usernames - " + studentsDataArrayTemp);
+
+    // Switching view to pTMeetScheduleView Parent Teacher Meet View
   }
-
-  showTimeTable() {
-
-    console.log("showTimeTable showTimeTable showTimeTable");
-
-    var subjectArray = null;
-    var timeTableArrayTemp = null;
-    this.state.classDetails.forEach(element => {
-      if (element["class"] === this.state.class && element["section"] === this.state.section) {
-        subjectArray = element["subjects"];
-        timeTableArrayTemp = element["timeTable"];
-      }
-    });
-
-    this.setState({ 
-      studentsView: false,
-      timeTableView: true,
-      subjectArray: subjectArray,
-      timeTableArray: timeTableArrayTemp
-    });
-
-    console.log("ClassDetails - subjectArray - " + subjectArray + " timeTableArray - " + JSON.stringify(timeTableArrayTemp));
-  }
-
 
   render() {
-
-    // const students = this.state.studentsDataArray.map(student => {
-
-    //   console.log("this.state.studentsDataArray - " + this.state.studentsDataArray 
-    //   + "tempArray - " + this.state.tempArray
-    //   + " student - " + student);
-    //   return (
-
-    //       <tr key={student}>
-
-    //         <td>{student.rollno}</td>
-    //         <td>{student.firstname = student.lastname}</td>
-    //         <th scope="row">
-
-    //             <a href="#">{student}</a>
-
-    //         </th>
-    //         {/* <td>{user.role}</td> */}
-    //         <td>
-    //           Active
-    //         </td>
-    //       </tr>
-    //   )
-    // })
 
     return (
       <div>
@@ -301,19 +353,6 @@ class ClassDetails extends Component {
 
             <div className="animated fadeIn">
 
-<Row>
-  <Col>
-  <Button
-                    onClick={this.showTimeTable}
-                    size="lg"
-                    color="success"
-                    block
-                  >
-                    Time Table
-                              </Button>
-        </Col>
-        </Row>
-<br/>
               <Row>
                 <Col>
                   <Card>
@@ -364,14 +403,15 @@ class ClassDetails extends Component {
             </div>
           )}
 
-          { this.state.timeTableView && (
+          {this.state.pTMeetScheduleView && (
 
-<div>
-            <Agenda subjects={this.state.subjectArray} selectedClass={this.state.class} 
-            selectedSection={this.state.section} timeTable={this.state.timeTableArray}
-            sectionArray={this.state.sectionArray}/>
+            <div>
+              <Agenda subjects={this.state.subjectArray} selectedClass={this.state.class}
+                selectedSection={this.state.section} pTMeetSchedule={this.state.pTMeetScheduleArray}
+                sectionArray={this.state.sectionArray} emailArray={this.state.emailArray}
+                teachersDetailsArray={this.state.teachersDetailsArray} />
 
-                    </div>
+            </div>
           )}
 
         </Container>
@@ -380,4 +420,4 @@ class ClassDetails extends Component {
   }
 }
 
-export default ClassDetails;
+export default ParentTeacherMeet;
