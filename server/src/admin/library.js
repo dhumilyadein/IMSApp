@@ -560,7 +560,9 @@ return res.send({error:err});
  else if(!req.body.class&&!req.body.section)
  { console.log("in else");
   IssuedBooks
-  .find({ "issuedBookDetails":{"actualReturnedDate": { $gte : new Date(req.body.dos) } }})
+  .find({  "issuedBookDetails.actualReturnedDate": { $gte: new Date(req.body.dos), $lte:  new Date(req.body.doe) },
+   "issuedBookDetails.isReturned":true
+    })
 
 
 
@@ -570,7 +572,7 @@ return res.send({error:err});
     ] }) */
 
 .then(data => { 
-
+console.log("Data"+ JSON.stringify(data))
 return res.send({data});
 })
 .catch(err => {
@@ -655,7 +657,8 @@ return res.send({error:err});
         'issuedBookDetails.$.totalFine': book.totalFine,
 
         'issuedBookDetails.$.isReturned': true,
-        'issuedBookDetails.$.actualReturnedDate': req.body.dor,
+        'issuedBookDetails.$.actualReturnedDate': new Date(req.body.dor),
+      
 
     }})
 
