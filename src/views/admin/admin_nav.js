@@ -54,10 +54,18 @@ export default {
 
 
     {
+      
       name: 'Manage Fees',
       url: '/finance',
       icon: 'fa fa-money',
       children: [
+
+        {
+          name: 'Fee Templates ',
+          url: '/admin/finance/FeeTemplates',
+          icon: 'fa fa-money',
+          variant: 'success',
+        },
 
         {
           name: 'Add Fees',
@@ -71,12 +79,7 @@ export default {
           icon: 'fa fa-money',
           variant: 'success',
         },
-        {
-          name: 'Fee Templates ',
-          url: '/admin/finance/FeeTemplates',
-          icon: 'fa fa-money',
-          variant: 'success',
-        },
+       
     ]},
 
 
@@ -110,6 +113,12 @@ export default {
         {
           name: 'Return Books',
           url: '/admin/library/ReturnBooks',
+          icon: 'icon-book-open',
+          variant: 'success',
+        },
+        {
+          name: 'Issue/Return Details',
+          url: '/admin/library/IssueReturnDetails',
           icon: 'icon-book-open',
           variant: 'success',
         },
@@ -292,6 +301,41 @@ export default {
                   variant: 'success',
                 },
               ]},
+
+              {
+                name: 'Manage Payroll',
+                url: '/finance',
+                icon: 'fa fa-money',
+                children: [
+                  {
+                    name: 'Salary Templates ',
+                    url: '/admin/payroll/SalaryTemplates',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+
+                  {
+                    name: 'Deduction Templates',
+                    url: '/admin/payroll/DeductionTemplates',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+          
+                  {
+                    name: 'Pay Salary',
+                    url: '/admin/payroll/PaySalary',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+                  {
+                    name: 'View Payslip',
+                    url: '/admin/payroll/ViewPayslip',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+                 
+              ]},
+
 
     {
       divider: true,

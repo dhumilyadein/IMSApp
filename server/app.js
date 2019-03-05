@@ -21,6 +21,8 @@ const library = require("./src/admin/library");
 const exam = require("./src/admin//exam");
 const login = require("./src/login");
 const sendmail = require("./src/admin/sendmail/sendmail");
+const payroll = require("./src/admin/payroll");
+
 
 const app = express();
 
@@ -64,6 +66,7 @@ library(app);
 exam(app);
 sendmail(app);
 transport(app);
+payroll(app);
 
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));

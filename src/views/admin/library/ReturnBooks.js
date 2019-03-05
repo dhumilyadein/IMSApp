@@ -695,7 +695,7 @@ else
                                         type="text"
                                         className="form-control"
                                         value={this.state.rows[idx].lateFine}
-
+defaultValue="0"
                                         style={{textAlign:'center'}}
                                         id="lateFine"
                                         size="sm"
@@ -975,7 +975,7 @@ if (submit === true) {
                                         type="text"
                                         className="form-control"
                                         value={this.state.rows[idx].lateFine}
-
+defaultValue="0"
                                         style={{textAlign:'center'}}
                                         id="lateFine"
                                         size="sm"
