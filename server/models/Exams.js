@@ -9,64 +9,72 @@ var ExamsSchema = new Schema({
     type: String,
     required: true,
     unique:true,
-    validate: {
-      isAsync: true,
-      validator: function(value, isValid) {
-          const self = this;
-          return self.constructor.findOne({ examName: value })
-          .exec(function(err, user){
-              if(err){
-                  throw err;
-              }
-              else if(user) {
-                  if(self.id === user.id) {
-                      return isValid(true);
-                  }
-                  return isValid(false);
-              }
-              else{
-                  return isValid(true);
-              }
-
-          })
-      },
-      message:  'The exam Name is already in use'
-  },
-
     trim:true,
-   lowercase:true
+    lowercase:true
+
+  //   validate: {
+  //     isAsync: true,
+  //     validator: function(value, isValid) {
+  //         const self = this;
+  //         return self.constructor.findOne({ examName: value })
+  //         .exec(function(err, user){
+  //             if(err){
+  //                 throw err;
+  //             }
+  //             else if(user) {
+  //                 if(self.id === user.id) {
+  //                     return isValid(true);
+  //                 }
+  //                 return isValid(false);
+  //             }
+  //             else{
+  //                 return isValid(true);
+  //             }
+
+  //         })
+  //     },
+  //     message:  'The exam Name is already in use'
+  // },
+
+},
+
+//   totalMarks:{
+//     type: Number,
+//     trim:true,
+//     required: true,
+//   },
+
+
+//   passingMarks:{
+//     type: Number,
+//     trim:true,
+//     required: true,
+// },
+
+
+// timeLimit:{
+//   type: Number,
+//   trim:true,
+//   required: true,
+// },
+
+  examDescription:{
+    type: String,
+    trim:true,
   },
 
-  totalMarks:{
+  applicableForClasses: {
+    type: Array,
+    required: true
+  },
+
+  percentageShareInFinalResult: {
     type: Number,
-    trim:true,
-    required: true,
-
   },
 
-
-  passingMarks:{
-    type: Number,
-    trim:true,
-    required: true,
-
-
-},
-
-
-timeLimit:{
-  type: Number,
-  trim:true,
-  required: true,
-
-
-},
-description:{
-  type: String,
-  trim:true,
-
-
-},
+  isMandatryToAttendForFinalResult: {
+    type: Boolean,
+  },
 
   createdAt: {
     type: Date,

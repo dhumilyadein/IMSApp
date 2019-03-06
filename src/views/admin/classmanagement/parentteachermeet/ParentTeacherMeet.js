@@ -62,6 +62,9 @@ class ParentTeacherMeet extends Component {
 
   }
 
+  /**
+   * Fetches all the classes and section details and nothing else
+   */
   fetchAllClassesAndSections() {
 
     axios.get("http://localhost:8001/api/fetchAllClassesAndSections").then(cRes => {
