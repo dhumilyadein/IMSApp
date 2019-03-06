@@ -78,57 +78,33 @@ this.getIssuedBooks=this.getIssuedBooks.bind(this);
     reset()
     {
       this.setState( {
-        class:"",
-        section:"",
-        classError:"",
-        divToPrint:"",
-        
-        
-                    studentResults: [],
-                    studentOpen:true,
+  
+                
         
                     activeTab:"1",
-        feeTemplates:[],
+        
         selectedStudent:[],
         error:"",
-        showFeeTemplate:false,
-        templateRows: [{ feeType: "", amount: "" }],
-        templateType:"",
-        totalAmount:"",
-        year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
-        showMonth:false,
-        showQuarter: false,
-        showHalfYearly:false,
-        showViewCard:false,
-        month:"",
-        quarter:"",
-        halfYear:"",
-        totalDueAmount:"",
-        lateFeeFine:"0",
-        paidAmount:"",
-        pastPendingDue:"0",
-        paidAmount:"",
+        
+        
         remarks:"",
         dos:Date(Date.now()).toString(),
-        yearError:"",
-        quarterError:"",
-        halfYearError:"",
-        monthError:"",
-        paidAmountError:"",
+        
         dosError:"",
-        sectionError:"",
+        dateError:"",
         modalSuccess:false,
         success:false,
         studentName:"",
-        rollNo:"",
-        showRollFeeTemplate:false,
-        showFeeRecords:false,
-        feeRecords:[],
+        
+        
         defaulters:[],
         classDetails:[],
         classes:[],
         sectionArray: [],
         studentsDataArray:[],
+        startDate:"",
+        endDate:new Date(Date.now()),
+        searchResults:[]
                 
         
                 });
@@ -270,8 +246,8 @@ this.getIssuedBooks=this.getIssuedBooks.bind(this);
                       
                       "issuedTo":result.data.data[i].issuedTo,
                       "class":result.data.data[i].class+" "+result.data.data[i].section,
-                      "doi":result.data.data[i].doi.substring(0,10),
-                      "dor":result.data.data[i].issuedBookDetails[j].actualReturnedDate.substring(0,10),
+                      "doi":result.data.data[i].doi,
+                      "dor":result.data.data[i].issuedBookDetails[j].actualReturnedDate,
                       "delayFine":result.data.data[i].issuedBookDetails[j].delayInReturn+
                       "/"+result.data.data[i].issuedBookDetails[j].totalFine
                   })
@@ -541,7 +517,7 @@ if(result.data.length===0)
 
 
 
-                          <h5> Choose Date Period</h5>
+                          <h5> Choose Issued Date Period</h5>
                           <br/>
                           <Row>
                           <InputGroup className="mb-2">
@@ -744,7 +720,7 @@ if(result.data.length===0)
 
 
 
-                          <h5> Choose Date Period</h5>
+                          <h5> Choose Return Date Period</h5>
                           <br/>
                           <Row>
                           <InputGroup className="mb-2">
