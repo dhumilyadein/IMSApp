@@ -26,29 +26,27 @@ import axios from "axios";
 class CreateExam extends Component {
   constructor(props) {
     super(props);
-    this.getExistingTemplates();
+
     this.state = {
-      showCreateTemplate: false,
+      showCreateExam: false,
       status: "Active",
       erorrs: null,
       success: null,
       userdata: null,
       
-      rows: [{ feeType: "", amount: "" }],
-      editRows: [{ feeType: "", amount: "" }],
-      existingRows: [{ templateName: "" }],
+      // existingRows: [{ examName: "" }],
+      existingRows: [],
+      
       showCreateButton: true,
       rowError: false,
-      templateNameError: "",
+      examNameError: "",
       success: false,
       modalSuccess: false,
       visible: false,
-      showEditTemplate: false,
-      templateNo: "",
-      showExistingTemplate:true,
-      showCopyTemplate:false,
-      templateTypeError:"",
-      templateType:"",
+      showEditExam: false,
+      examNo: "",
+      examDescriptionError:"",
+      examDescription:"",
 
       examName: "",
       examNameError: "",
@@ -58,7 +56,7 @@ class CreateExam extends Component {
       percentageShareInFinalResult:null,
       percentageShareInFinalResultError:"",
       shareInFinalResult: null,
-      isMandatoryToAttendChecked: false,
+      isMandatryToAttendForFinalResult: false,
       classesAndSections: [],
       classes: [],
 
@@ -66,29 +64,20 @@ class CreateExam extends Component {
       selectClasses: [],
 
       // Contains only the class value (eg - [I, II, III] etc)
-      selectClassesArray: [],
+      applicableForClasses: [],
 
       insertExamErrorMessage: "",
 
-      createExamModal: false
+      modalSuccess: false,
+      showExistingExams:true,
 
     };
 
-
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleAddRow = this.handleAddRow.bind(this);
-    this.handleRemoveSpecificRow = this.handleRemoveSpecificRow.bind(this);
-    this.handleEditChange = this.handleEditChange.bind(this);
-    this.handleEditAddRow = this.handleEditAddRow.bind(this);
-    this.handleEditRemoveSpecificRow = this.handleEditRemoveSpecificRow.bind(this);
-    this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
-    this.getExistingTemplates = this.getExistingTemplates.bind(this);
+    this.fetchExamDetails = this.fetchExamDetails.bind(this);
 
     this.updateHandler = this.updateHandler.bind(this);
-    this.copyHandler = this.copyHandler.bind(this);
     this.handleRemoveExistingSpecificRow = this.handleRemoveExistingSpecificRow.bind(this);
 
     this.changeHandler = this.changeHandler.bind(this);
@@ -97,10 +86,25 @@ class CreateExam extends Component {
     this.handleClassChange = this.handleClassChange.bind(this);
     this.createExamBtnHandler = this.createExamBtnHandler.bind(this);
     this.insertExam = this.insertExam.bind(this);
+    this.isMandatryToAttendForFinalResultChangeHandler = this.isMandatryToAttendForFinalResultChangeHandler.bind(this);
 
     // Fetching all classes to display in the classes dropdown on page load
     this.fetchAllClassesAndSections();
 
+    // Fetching exam details on page load
+    this.fetchExamDetails();
+
+  }
+
+/**
+   * @description Called when the change event is triggered for isMandatryToAttendForFinalResultChangeHandler appswith.
+   * @param {*} e
+   */
+  isMandatryToAttendForFinalResultChangeHandler(e) {
+    // console.log("Name: "+e.target.name +" Value: "+ e.target.checked);
+    this.setState({
+      [e.target.name]: e.target.checked
+    });
   }
 
   /**
@@ -108,7 +112,7 @@ class CreateExam extends Component {
    * @param {*} e
    */
   changeHandler(e) {
-    // console.log("Name: "+e.target.name +" Value: "+e.target.value);
+    // console.log("Name: "+e.target.name +" Value: "+ e.target.value);
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -121,7 +125,7 @@ class CreateExam extends Component {
 
     axios.get("http://localhost:8001/api/fetchAllClassesAndSections").then(cRes => {
 
-      console.log("CreateExam - fetchAllClassesAndSections - cRes.data - " + JSON.stringify(cRes.data));
+      // console.log("CreateExam - fetchAllClassesAndSections - cRes.data - " + JSON.stringify(cRes.data));
 
       if (cRes.data.errors) {
 
@@ -202,10 +206,10 @@ class CreateExam extends Component {
     });
     this.setState({
       selectedClasses: newValue,
-      selectClassesArray: classesArrayTemp,
+      applicableForClasses: classesArrayTemp,
     }, () => {
       console.log("CreateExam - handleClassChange - selectedClasses - " + JSON.stringify(this.state.selectedClasses) 
-      + " selectClassesArray - " + JSON.stringify(this.state.selectClassesArray));
+      + " applicableForClasses - " + JSON.stringify(this.state.applicableForClasses));
     });
 
   };
@@ -220,9 +224,9 @@ class CreateExam extends Component {
     var insertExamRequest = {};
     insertExamRequest.examName = this.state.examName;
     insertExamRequest.examDescription = this.state.examDescription;
-    insertExamRequest.applicableForClasses = this.state.selectClassesArray;
+    insertExamRequest.applicableForClasses = this.state.applicableForClasses;
     insertExamRequest.percentageShareInFinalResult = this.state.percentageShareInFinalResult;
-    insertExamRequest.isMandatoryToAttendChecked = this.state.isMandatoryToAttendChecked;
+    insertExamRequest.isMandatryToAttendForFinalResult = this.state.isMandatryToAttendForFinalResult;
 
     console.log("CreateExam - insertExam start - insertExamRequest- " + JSON.stringify(insertExamRequest));
 
@@ -239,24 +243,36 @@ class CreateExam extends Component {
 
         this.setState(
           {
-            createExamModal: true
+            modalSuccess: true,
+            modalColor: "modal-success",
+            modalMessage: "Exam created successfully!"
+          }, () => {
+
+            // Fetching the exam details so that add the recently added exam to the existing exams table
+            this.fetchExamDetails();
           }
         );
+        console.log("CreateExam - insertExam - msg - " + eRes.data.msg);
       }
     });
   }
 
-  getExistingTemplates() {
+  fetchExamDetails() {
 
     axios
-      .get("http://localhost:8001/api/existingTemplates")
+      .get("http://localhost:8001/api/fetchExamDetails")
       .then(result => {
-        console.log("Existing RESULT.data " + JSON.stringify(result.data));
-        if (result.data) {
-          this.setState({
-            existingRows: result.data
-          });
+        
+        // console.log("CreateExam - fetchExamDetails - exam details - " + JSON.stringify(result.data));
+        
+        if (result.errors) {
+          return this.setState({ errors: result.errors });
+        } else {
+  
+          this.setState({ existingRows: result.data });
+          // console.log('ClassDetails - fetchExamDetails - All exam details - ' + JSON.stringify(this.state.existingRows));
         }
+        
       });
   }
   /**
@@ -283,269 +299,59 @@ class CreateExam extends Component {
     this.setState({ visible: !this.state.visible });
   }
 
-  submitHandler(e) {
-    var submit = true;
-    console.log("in Submit State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.rows.length);
-    this.setState({
-      rowError: "", templateNameError: "", success: false, templateTypeError:"",
-      modalSuccess: false
-    }, () => {
-      if (!this.state.templateName) {
-        this.setState({ templateNameError: "Please Enter Template Name" });
-        submit = false;}
-
-        if (!this.state.templateType) {
-          this.setState({ templateTypeError: "Please Select Template Type" });
-          submit = false;
-
-      }  if (this.state.rows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Fee Category" });
-        submit = false;
-      } else
-        for (var i = 0; i < this.state.rows.length; i++) {
-          if (
-            this.state.rows[i].feeType === "" ||
-            this.state.rows[i].amount === ""
-          ) {
-            this.setState({
-              rowError: "Please fill all the table fields first"
-            });
-            submit = false;
-
-            break;
-          }
-        }
-
-      if (submit === true) {
-        console.log("Submitting Template: ");
-        axios
-          .post("http://localhost:8001/api/feeTemplate", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-            if(result.data.errors)
-            {if (result.data.errors.templateName)
-              this.setState({
-                templateNameError: "Template Name already exists! Use another Template Name"
-              });}
-             else if (result.data.msg === "Success")
-              this.setState({
-                templateName: "",
-                rows: [{ feeType: "", amount: "" }],
-                success: true,
-                modalSuccess: true,
-                templateNameError:"",
-                templateTypeError:"",
-                rowError:"",
-templateType:""
-              });
-            this.getExistingTemplates();
-          });
-      }
-    });
-  }
-
   updateHandler(e) {
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.editRows.length);
     this.setState({
-      rowError: "", templateNameError: "", success: false,
+      rowError: "", examNameError: "", success: false,
       modalSuccess: false
     }, () => {
-      if (!this.state.templateName) {
-        this.setState({ templateNameError: "Please Enter Template Name" });
+      if (!this.state.examName) {
+        this.setState({ examNameError: "Please Enter Exam Name" });
         submit = false;
-
       }
-      if (!this.state.templateType) {
-        this.setState({ templateTypeError: "Please Select Template Type" });
-        submit = false;
-
-    }
-
-      if (this.state.editRows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Fee Category" });
-        submit = false;
-      } else
-        for (var i = 0; i < this.state.editRows.length; i++) {
-          if (
-            this.state.editRows[i].feeType === "" ||
-            this.state.editRows[i].amount === ""
-          ) {
-            this.setState({
-              rowError: "Please fill all the table fields first"
-            });
-            submit = false;
-
-            break;
-          }
-        }
 
       if (submit === true) {
 
+        var udpateExamRequest = {
+          "examName": this.state.examName.toLowerCase(),
+          "examDescription":this.state.examDescription,
+      "applicableForClasses": this.state.applicableForClasses,
+      "percentageShareInFinalResult": this.state.percentageShareInFinalResult,
+      "isMandatryToAttendForFinalResult": this.state.isMandatryToAttendForFinalResult,
+        }
         this.setState()
-        console.log("Updating Template for: ");
+        console.log("Updating Exam - udpateExamRequest - " + udpateExamRequest);
         axios
-          .post("http://localhost:8001/api/updateFeeTemplate", this.state)
+          .post("http://localhost:8001/api/updateExam", udpateExamRequest)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
-            if (result.data.msg === "Template Updated")
+
+            if (result.data.message === "Exam details updated successfully")
               this.setState({
                 success: true,
                 modalSuccess: true,
-                templateNameError:"",
-                templateTypeError:"",
+                modalMessage: "Exam details updated successfully.",
+                modalColor: "modal-success",
+                examNameError:"",
+                examDescriptionError:"",
                 rowError:""
 
               });
 
-            this.getExistingTemplates();
+            this.fetchExamDetails();
           });
       }
     });
   }
-
-
-  copyHandler(e) {
-    var submit = true;
-    console.log("in Copy State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.editRows.length);
-    this.setState({
-      rowError: "", templateNameError: "", success: false,
-      modalSuccess: false
-    }, () => {
-      if (!this.state.templateName) {
-        this.setState({ templateNameError: "Please Enter Template Name" });
-        submit = false;
-      }
-
-      if (!this.state.templateType) {
-        this.setState({ templateTypeError: "Please Select Template Type" });
-        submit = false;
-
-    }
-
-    if (this.state.editRows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Fee Category" });
-        submit = false;
-      } else
-        for (var i = 0; i < this.state.editRows.length; i++) {
-          if (
-            this.state.editRows[i].feeType === "" ||
-            this.state.editRows[i].amount === ""
-          ) {
-            this.setState({
-              rowError: "Please fill all the table fields first"
-            });
-            submit = false;
-
-            break;
-          }
-        }
-
-      if (submit === true) {
-
-        this.setState()
-        console.log("Copying Template for: ");
-        axios
-          .post("http://localhost:8001/api/copyFeeTemplate", this.state)
-          .then(result => {
-            console.log("COPY RESULT.data " + JSON.stringify(result.data));
-                if (result.data.msg === "already exist")
-
-            this.setState({
-              templateNameError: "Template Name already exists! Use another Template Name"
-            });
-
-           else if (result.data.msg === "Template Copied")
-              this.setState({
-                success: true,
-                modalSuccess: true,
-                templateNameError:"",
-                templateTypeError:"",
-                rowError:""
-
-              });
-            this.getExistingTemplates();
-          });
-      }
-    });
-  }
-
-  handleChange = idx => e => {
-    e.preventDefault();
-    const { name, value } = e.target;
-    const temp = this.state.rows;
-    temp[idx][name] = value;
-
-    this.setState(
-      {
-        rows: temp
-      },
-      () => {
-        console.log("Change State: " + JSON.stringify(this.state));
-      }
-    );
-  };
-  handleAddRow = e => {
-    e.preventDefault();
-    this.setState({ rowError: "" });
-    const item = {
-      feeType: "",
-      amount: ""
-    };
-    this.setState({
-      rows: [...this.state.rows, item]
-    });
-  };
-
-  handleRemoveSpecificRow = idx => () => {
-    const temp = [...this.state.rows];
-    temp.splice(idx, 1);
-    this.setState({ rows: temp });
-  };
-
-
-  handleEditChange = idx => e => {
-    e.preventDefault();
-    const { name, value } = e.target;
-    const temp = this.state.editRows;
-    temp[idx][name] = value;
-
-    this.setState(
-      {
-        editRows: temp
-      },
-      () => {
-        console.log("Change State: " + JSON.stringify(this.state));
-      }
-    );
-  };
-  handleEditAddRow = e => {
-    e.preventDefault();
-    this.setState({ rowError: "" });
-    const item = {
-      feeType: "",
-      amount: ""
-    };
-    this.setState({
-      editRows: [...this.state.editRows, item]
-    });
-  };
-
-  handleEditRemoveSpecificRow = idx => () => {
-    const temp = [...this.state.editRows];
-    temp.splice(idx, 1);
-    this.setState({ editRows: temp });
-  };
-
 
   handleRemoveExistingSpecificRow= idx => () => {
 
+    console.log("CreateExam - handleRemoveExistingSpecificRow - examName - " + this.state.examName);
+
     confirmAlert({
       title: 'Confirm to Remove',
-      message: 'Are you sure to Remove this Template?',
+      message: 'Are you sure to Remove this Exam?',
       buttons: [
         {
           label: 'Yes',
@@ -553,16 +359,17 @@ templateType:""
             const temp = [...this.state.existingRows];
             temp.splice(idx, 1);
             this.setState({ existingRows: temp,
-            templateName: this.state.existingRows[idx].templateName},()=>{
-        
+            examName: this.state.existingRows[idx].examName},()=>{
         
               axios
-              .post("http://localhost:8001/api/deleteTemplate", this.state)
+              .post("http://localhost:8001/api/removeExam", this.state)
               .then(result => {
-                console.log("RESULT.data " + JSON.stringify(result.data));
-                if (result.data.error)
-                 console.log(result.data.error);
-                this.getExistingTemplates();
+                
+                if (result.data.errors) {
+                  console.log("CreateExam - handleRemoveExistingSpecificRow - ERROR in removing exm - " + result.data.errors);
+                } else {
+                 this.fetchExamDetails();
+                }
               });
         
             });
@@ -573,27 +380,36 @@ templateType:""
         },
         {
           label: 'No',
-          onClick: () =>  {  this.getExistingTemplates();}
+          onClick: () =>  {  this.fetchExamDetails();}
         }
       ]
     })
   };
 
+  async toggleModalSuccess() {
+
+    await console.log("CreateExam - toggleModalSuccess this.state.showModalFlag - " + this.state.showModalFlag);
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
+    });
+  }
+
   render() {
     return (
       <div>
         <Container>
+
               <Card className="mx-1">
                 <CardBody className="p-2">
                   <h1>Manage Exams</h1>
-                  {this.state.success && (
+                  {this.state.modalSuccess && (
                     <Modal
                       isOpen={this.state.modalSuccess}
-                      className={"modal-success " + this.props.className}
+                      className={this.state.modalColor}
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Template saved Successfully!
+                      {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
@@ -606,15 +422,14 @@ templateType:""
                           size="lg"
                           onClick={() => {
                             this.setState({
-                              showCreateTemplate: true,
+                              showCreateExam: true,
                               showCreateButton: false,
-                              showExistingTemplate:false,
-                              templateName:"",
-                              templateType:"",
-                              templateNameError:"",
-                              templateTypeError:"",
+                              showExistingExams:false,
+                              examName:"",
+                              examDescription:"",
+                              examNameError:"",
+                              examDescriptionError:"",
                               rowError:"",
-                              rows: [{ feeType: "", amount: "" }],
 
                             });
                           }}
@@ -624,7 +439,7 @@ templateType:""
                       </div>
                     )}
 
-                    {this.state.showCreateTemplate && (
+                    {this.state.showCreateExam && (
                       <Card className="mx-1">
                         <CardBody className="p-2">
                           <h2 align="center"> Create Exam</h2>
@@ -765,16 +580,16 @@ templateType:""
 
                               &nbsp; &nbsp;
                               <AppSwitch
-                                      name="isMandatoryToAttendChecked"
-                                      id="isMandatoryToAttendChecked"
+                                      name="isMandatryToAttendForFinalResult"
+                                      id="isMandatryToAttendForFinalResult"
                               size="lg"
                                       className={"mx-1"}
                                       variant={"3d"}
                                       color={"primary"}
                                       size={"sm"}
-                                      onChange={this.changeHandler}
+                                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
                                       disabled={this.state.disabled}
-                                      checked={this.state.isMandatoryToAttendChecked}
+                                      checked={this.state.isMandatryToAttendForFinalResult}
                                     /> 
                             </InputGroup> 
 
@@ -796,20 +611,14 @@ templateType:""
                                       variant={"3d"}
                                       color={"primary"}
                                       size={"sm"}
-                                      onChange={this.roleHandler}
+                                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
                                       disabled={this.state.disabled}
-                                      checked={this.state.isMandatoryToAttendChecked}
+                                      checked={this.state.isMandatryToAttendForFinalResult}
                                     />
                                   </td>
                                 </tr>
                                 </tbody>
                                 </Table> */}
-                            {this.state.templateTypeError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.templateTypeError}</p>
-                              </font>
-                            )}                            
 
                           <br />
                           <Row>
@@ -836,10 +645,9 @@ templateType:""
                               <Button
                                 onClick={() => {
                                   this.setState({
-                                    showCreateTemplate: false,
+                                    showCreateExam: false,
                                     showCreateButton: true,
-                                    showExistingTemplate:true,
-                                    rows: [{}]
+                                    showExistingExams:true,
                                   });
                                 }}
                                 size="lg"
@@ -859,179 +667,150 @@ templateType:""
 
 
 
-                    {this.state.showEditTemplate &&
+                    {this.state.showEditExam &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Edit Template:  <font color="blue">
-                           {this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}</font> </h3>
+                          <h2 align="center"> Edit Exam :  <font color="blue">
+                           {this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}</font> </h2>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText style={{ width: "120px" }}>
-                                <b>Template Name</b>
+                                <b>Exam Name</b>
                               </InputGroupText>
                             </InputGroupAddon>
                             <Input
                               type="text"
-                              label="Template Name"
+                              label="Exam Name"
                               size="lg"
-                              name="templateName"
-                              id="templateName"
-                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
+                              name="examName"
+                              disabled={true}
+                              id="examName"
+                              value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
                               onChange={e => {
                                 this.setState(
-                                  { templateName: e.target.value },
+                                  { examName: e.target.value },
                                   () => {
                                     console.log(
-                                      "Template name: " +
-                                      this.state.templateName
+                                      "Exam name: " +
+                                      this.state.examName
                                     );
                                   }
                                 );
                               }}
                             />
                           </InputGroup>
-                          {this.state.templateNameError && (
+                          {this.state.examNameError && (
                             <font color="red">
                               <h6>
                                 {" "}
-                                <p>{this.state.templateNameError} </p>
+                                <p>{this.state.examNameError} </p>
                               </h6>{" "}
                             </font>
                           )}
 
 <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                <b>Template Type</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="templateType"
-                                id="templateType"
-                                size="lg"
-                                type="select"
-                                onChange={e => {
-                                  this.setState(
-                                    { templateType: e.target.value },
-                                    () => {
-                                      console.log(
-                                        "Template Type: " +
-                                        this.state.templateType
-                                      );
-                                    }
-                                  );
-                                }}
-                                value={this.state.templateType}
-                              >
-
-                               <option value="">Select</option>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Quarterly">Quarterly</option>
-                                <option value="Half Yearly">Half Yearly</option>
-                                <option value="Yearly">Yearly</option>
-
-                              </Input>
-                            </InputGroup>
-                            {this.state.templateTypeError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.templateTypeError}</p>
-                              </font>
-                            )}
-
-
-
-
-
-
-                          <Table bordered hover>
-                            <thead>
-                              <tr style={{ 'backgroundColor': "palevioletred" }}>
-                                <th className="text-center">
-                                  <h4> S.No.</h4>{" "}
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Fee Category </h4>
-                                </th>
-                                <th className="text-center">
-                                  <h4> Amount(Rs)</h4>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <Button
-                                    onClick={this.handleEditAddRow}
-                                    className="btn btn-primary"
-                                    color="primary"
-                                    size="lg"
-                                  >
-                                    {" "}
-                                    Add Row
-                      </Button>
-
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.editRows.map((item, idx) => (
-                                <tr id="addr0" key={idx}>
-                                  <td align="center">
-                                    <h4>{idx + 1}</h4>
-                                  </td>
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        type="text"
-                                        name="feeType"
-                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
-                                           + this.state.editRows[idx].feeType.slice(1)}
-                                        onChange={this.handleEditChange(idx)}
-                                        style={{textAlign:'center'}}
-                                        className="form-control"
-                                        size="lg"
-                                        id="feeType"
-                                      />
-                                    </InputGroup>
-                                  </td>
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="amount"
-                                        type="number"
-                                        className="form-control"
-                                        value={this.state.editRows[idx].amount}
-                                        onChange={this.handleEditChange(idx)}
-                                        style={{textAlign:'center'}}
-                                        id="amount"
-                                        size="lg"
-                                      />
-                                    </InputGroup>
-                                  </td>
-                                  <td align="center">
-                                    <Button
-                                      className="btn btn-danger btn-sg"
-                                      onClick={this.handleEditRemoveSpecificRow(
-                                        idx
-                                      )}
-                                      size="lg"
-                                    >
-                                      Remove
-                                </Button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                          {this.state.rowError && (
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Exam Description</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                              label="Exam Description"
+                              name="examDescription"
+                              id="examDescription"
+                              value={this.state.examDescription.charAt(0).toUpperCase() + this.state.examDescription.slice(1)}
+                              onChange={e => {
+                                this.setState(
+                                  { examDescription: e.target.value }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.examDescriptionError && (
                             <font color="red">
                               <h6>
                                 {" "}
-                                <p>{this.state.rowError} </p>
+                                <p>{this.state.examDescriptionError} </p>
                               </h6>{" "}
                             </font>
                           )}
 
+                           <InputGroupAddon addonType="prepend">
+                <InputGroupText >
+                  <b>Applicable for Classes</b>
+                </InputGroupText>
+              </InputGroupAddon>
+              
+              <Select
+              placeholder="Select applicable for classes"
+              isMulti={true}
+              closeMenuOnSelect={false}
+              value={this.state.selectedClasses}
+              onChange={this.handleClassChange}
+              options={this.state.classes}
+              isClearable={true}
+              isSearchable={true}
+              openMenuOnFocus={true}
+              />
 
-                          <br /> <br />
+              {this.state.dbErrors && this.state.dbErrors.classes && (
+                <font color="red">
+                  <h6>
+                    {" "}
+                    <p>{this.state.dbErrors.classes.msg} </p>
+                  </h6>{" "}
+                </font>
+              )}
+
+<br />
+
+<InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Percentage Share in Final result</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                      type="number"
+                              size="lg"
+                                      name="percentageShareInFinalResult"
+                                      id="percentageShareInFinalResult"
+                                      autoComplete="shareInFinalResult"
+                                      onChange={this.changeHandler}
+                                      value={this.state.percentageShareInFinalResult}
+                                    />
+                            </InputGroup>
+                            {this.state.percentageShareInFinalResultError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.percentageShareInFinalResultError}</p>
+                              </font>
+                            )}
+
+ <InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Mandatory to Attend for Final results</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp;
+                              <AppSwitch
+                                      name="isMandatryToAttendForFinalResult"
+                                      id="isMandatryToAttendForFinalResult"
+                              size="lg"
+                                      className={"mx-1"}
+                                      variant={"3d"}
+                                      color={"primary"}
+                                      size={"sm"}
+                                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
+                                      disabled={this.state.disabled}
+                                      checked={this.state.isMandatryToAttendForFinalResult}
+                                    /> 
+                            </InputGroup> 
+                            <br />  
                           <Row>
                             <Col>
                               <Button
@@ -1048,11 +827,10 @@ templateType:""
                               <Button
                                 onClick={() => {
                                   this.setState({
-                                    showEditTemplate: false,
-                                    showCreateTemplate: false,
+                                    showEditExam: false,
+                                    showCreateExam: false,
                                     showCreateButton: true,
-                                    showExistingTemplate:true,
-                                    rows: [{}]
+                                    showExistingExams:true,
                                   });
                                 }}
                                 size="lg"
@@ -1066,239 +844,17 @@ templateType:""
                         </CardBody>
                       </Card>
                     }
-
-{this.state.showCopyTemplate &&
-                      <Card className="mx-1">
-                        <CardBody className="p-2">
-                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName.charAt(0).toUpperCase()
-                             + this.state.templateName.slice(1)}</font> </h3>
-                          <InputGroup className="mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText >
-                                <b>Template Name</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              type="text"
-                              label="Template Name"
-                              size="lg"
-                              name="templateName"
-                              id="templateName"
-                              value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
-                              onChange={e => {
-                                this.setState(
-                                  { templateName: e.target.value },
-                                  () => {
-                                    console.log(
-                                      "Template name: " +
-                                      this.state.templateName
-                                    );
-                                  }
-                                );
-                              }}
-                            />
-                          </InputGroup>
-                          {this.state.templateNameError && (
-                            <font color="red">
-                              <h6>
-                                {" "}
-                                <p>{this.state.templateNameError} </p>
-                              </h6>{" "}
-                            </font>
-                          )}
-
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                <b>Template Type</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="templateType"
-                                id="templateType"
-                                size="lg"
-                                type="select"
-                                onChange={e => {
-                                  this.setState(
-                                    { templateType: e.target.value },
-                                    () => {
-                                      console.log(
-                                        "Template Type: " +
-                                        this.state.templateType
-                                      );
-                                    }
-                                  );
-                                }}
-                                value={this.state.templateType}
-                              >
-
-                               <option value="">Select</option>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Quarterly">Quarterly</option>
-                                <option value="Half Yearly">Half Yearly</option>
-                                <option value="Yearly">Yearly</option>
-
-                              </Input>
-                            </InputGroup>
-                            {this.state.templateTypeError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.templateTypeError}</p>
-                              </font>
-                            )}
-
-
-
-
-
-                          <Table bordered hover>
-                            <thead>
-                              <tr style={{ 'backgroundColor': "palevioletred" }}>
-                                <th className="text-center">
-                                  <h4> S.No.</h4>{" "}
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Fee Category </h4>
-                                </th>
-                                <th className="text-center">
-                                  <h4> Amount(Rs)</h4>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <Button
-                                    onClick={this.handleEditAddRow}
-                                    className="btn btn-primary"
-                                    color="primary"
-                                    size="lg"
-                                  >
-                                    {" "}
-                                    Add Row
-                      </Button>
-
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.editRows.map((item, idx) => (
-                                <tr id="addr0" key={idx}>
-                                  <td align="center">
-                                    <h4>{idx + 1}</h4>
-                                  </td>
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        type="text"
-                                        name="feeType"
-                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase() +
-                                          this.state.editRows[idx].feeType.slice(1)}
-                                        onChange={this.handleEditChange(idx)}
-                                        className="form-control"
-                                        size="lg"
-                                        id="feeType"
-                                        style={{textAlign:'center'}}
-                                      />
-                                    </InputGroup>
-                                  </td>
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="amount"
-                                        type="number"
-                                        className="form-control"
-                                        value={this.state.editRows[idx].amount}
-                                        onChange={this.handleEditChange(idx)}
-                                        id="amount"
-                                        size="lg"
-                                        style={{textAlign:'center'}}
-                                      />
-                                    </InputGroup>
-                                  </td>
-                                  <td align="center">
-                                    <Button
-                                      className="btn btn-danger btn-sg"
-                                      onClick={this.handleEditRemoveSpecificRow(
-                                        idx
-                                      )}
-                                      size="lg"
-                                    >
-                                      Remove
-                                </Button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                          {this.state.rowError && (
-                            <font color="red">
-                              <h6>
-                                {" "}
-                                <p>{this.state.rowError} </p>
-                              </h6>{" "}
-                            </font>
-                          )}
-
-
-                          <br /> <br />
-                          <Row>
-                            <Col>
-                              <Button
-                                onClick={this.copyHandler}
-                                size="lg"
-                                color="success"
-                                block
-                              >
-                               Create Copy
-                          </Button>
-                            </Col>
-
-                            <Col>
-                              <Button
-                                onClick={() => {
-                                  this.setState({
-                                    showEditTemplate: false,
-                                    showCreateTemplate: false,
-                                    showCreateButton: true,
-                                    showExistingTemplate:true,
-                                    showCopyTemplate:false,
-                                    rows: [{}]
-                                  });
-                                }}
-                                size="lg"
-                                color="secondary"
-                                block
-                              >
-                                Cancel
-                          </Button>
-                            </Col>
-                          </Row>
-                        </CardBody>
-                      </Card>
-                    }
-
-
-
                 </CardBody>
               </Card>
 
-
-
-
-
-              {this.state.showExistingTemplate && this.state.existingRows.length>0 &&
+              {this.state.showExistingExams && this.state.existingRows.length>0 &&
                 <Card className="mx-1">
                   <CardBody className="p-2">
 
                         <CardHeader style={{backgroundColor: 'Aqua', borderColor: 'black',  display: 'flex',
   alignItems: 'center'}}>
                           <h2> Existing Exams</h2>
-                           &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
-                           <Button
-                                      color="primary"
-                                        onClick={this.getExistingTemplates}
-                                      size="lg"
-                                    >
-                                      Refresh
-                                    </Button> </CardHeader>
+                           </CardHeader>
 
 
 
@@ -1311,11 +867,16 @@ templateType:""
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Template Name </h4>
+                                  <h4>Exam Name </h4>
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Template Type </h4>
+                                  <h4>Exam Description </h4>
+                                </th>
+
+                                 <th className="text-center">
+                                  {" "}
+                                  <h4>Applicable For Classes</h4>
                                 </th>
 
                                 <th className="text-center">
@@ -1333,63 +894,56 @@ templateType:""
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].templateName.charAt(0).toUpperCase() +
-                                      this.state.existingRows[idx].templateName.slice(1)}</h5>
+                                    <h5> {this.state.existingRows[idx].examName.charAt(0).toUpperCase() +
+                                      this.state.existingRows[idx].examName.slice(1)}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].templateType}</h5>
+                                    <h5> {this.state.existingRows[idx].examDescription}</h5>
+                                  </td>
+
+                                  <td align="center">
+                                    <h5> {this.state.existingRows[idx].applicableForClasses.toString()}</h5>
                                   </td>
 
                                   <td align="center">
                                     <Button
                                      color="primary"
-                                      onClick={()=>{this.setState({
-                                        editRows:this.state.existingRows[idx].templateRows,
-                                        showEditTemplate: true,
-                                        templateNo: idx,
-                                        templateName: this.state.existingRows[idx].templateName,
-                                        templateType: this.state.existingRows[idx].templateType,
-                                        showCreateTemplate:false,
+                                      onClick={()=>{
+                                        
+                                        var selectedClassesArray = [];
+                                        this.state.existingRows[idx].applicableForClasses.forEach(element => {
+
+                                          var selectedClass = {};
+                                          selectedClass.value = element;
+                                          selectedClass.label = element;
+
+                                          selectedClassesArray.push(selectedClass);
+                                        })
+
+                                        
+                                        this.setState({
+                                        showEditExam: true,
+                                        examNo: idx,
+                                        examName: this.state.existingRows[idx].examName,
+                                        examDescription: this.state.existingRows[idx].examDescription,
+                                        selectedClasses: selectedClassesArray,
+                                        percentageShareInFinalResult: this.state.existingRows[idx].percentageShareInFinalResult,
+                                        isMandatryToAttendForFinalResult: this.state.existingRows[idx].isMandatryToAttendForFinalResult,
+                                        showCreateExam:false,
                                         showCreateButton:false,
-                                        showExistingTemplate:false,
-                                        templateNameError:"",
-                                        templateTypeError:"",
+                                        showExistingExams:false,
+                                        examNameError:"",
+                                        examDescriptionError:"",
                                         rowError:""
-
-
-                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+                                      },()=>{console.log("isMandatryToAttendForFinalResult - " + JSON.stringify(this.state.existingRows[idx])
+                                      + " Updated State: "+JSON.stringify(this.state));})
                                       }}
 
 
                                       size="lg"
                                     >
                                       Edit
-                                    </Button>
-                                    &nbsp;&nbsp;
-                                    <Button
-                                      color="warning"
-                                      onClick={()=>{this.setState({
-                                        editRows:this.state.existingRows[idx].templateRows,
-                                        showEditTemplate: false,
-                                        showCopyTemplate: true,
-                                        templateNo: idx,
-                                        templateName: this.state.existingRows[idx].templateName,
-                                        templateType: this.state.existingRows[idx].templateType,
-                                        showCreateTemplate:false,
-                                        showCreateButton:false,
-                                        showExistingTemplate:false,
-                                        templateNameError:"",
-                                        templateTypeError:"",
-                                        rowError:""
-
-
-                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
-                                      }}
-
-                                      size="lg"
-                                    >
-                                      Copy
                                     </Button>
                                     &nbsp;&nbsp;
                                     <Button

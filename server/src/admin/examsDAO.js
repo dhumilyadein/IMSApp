@@ -13,7 +13,13 @@ module.exports = function (app) {
       .not()
       .isEmpty()
       .withMessage("Please Enter Applicable for Classes"),
+  ];
 
+  const ExamNameValidation = [
+    check("examName")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter exam name")
   ];
 
   async function addexams(req, res) {
@@ -87,6 +93,89 @@ module.exports = function (app) {
 
   }
 
+  async function updateExam(req, res) {
+
+    var request = req.body;
+    console.log("examsDAO - in updateExam -  request - " + JSON.stringify(request))
+
+    var date = new Date();
+    
+    var objForUpdate = {};
+    if(request.examDescription) objForUpdate.examDescription = request.examDescription;
+    if(request.applicableForClasses) objForUpdate.applicableForClasses = request.applicableForClasses;
+    if(request.percentageShareInFinalResult) objForUpdate.percentageShareInFinalResult = request.percentageShareInFinalResult;
+    if(request.examDescription) objForUpdate.isMandatryToAttendForFinalResult = request.isMandatryToAttendForFinalResult;
+
+    objForUpdate.updatedAt = new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
+
+    console.log("\nexamName - " + request.examName + "\nobjForUpdate objForUpdate - " + JSON.stringify(objForUpdate));
+
+    // var udpateJSON = {};
+    // if (Object.keys(objForUpdate).length !== 0 && Object.keys(studentsDataJSON).length !== 0) {
+    //   udpateJSON = {
+    //     $set: objForUpdate,
+    //   }
+    // } else if (Object.keys(objForUpdate).length !== 0) {
+    //   udpateJSON = {
+    //     $set: objForUpdate,
+    //   }
+    // }
+
+    await exams.findOneAndUpdate(
+      { "examName": request.examName },
+      objForUpdate
+    ).then(function (examData) {
+
+      response = { reqbody: req.body, message: "Exam details updated successfully" };
+      console.log("examsDAO - updateExam - Exam details udpated successfully - server final response - " + JSON.stringify(response));
+
+      return res.send(response);
+    }).catch(function (err) {
+      console.log("Catching server err - " + err);
+      response = { errors: err };
+      console.log("examsDAO - updateExam - Errors in examsDAO - server final response - " + JSON.stringify(response));
+      return res.send(response);
+    });
+
+
+  }
+
+  /**
+     * @description get method for fetchExamDetails service
+     */
+    function fetchExamDetails(req, res) {
+
+      console.log("examsDAO - fetchExamDetails - ENTRY");
+  
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      exams.find({},
+        {
+        "examName":1, 
+        "examDescription":1,
+        "percentageShareInFinalResult": 1,
+        "applicableForClasses": 1,
+        "isMandatryToAttendForFinalResult": 1
+      })
+        .then(function (examDetails) {
+  
+          console.log("examsDAO - fetchExamDetails - Exam details -  " + examDetails);
+  
+          res.send(examDetails);
+        })
+        .catch(function (err) {
+          console.log("examsDAO - fetchExamDetails - ERROR - " + err);
+          return res.send({ "errors" : err});
+        });
+  
+    }
+
   async function consumeexam(req, res) {
     console.log("in consumeexam Req.body: " + JSON.stringify(req.body))
 
@@ -108,8 +197,6 @@ module.exports = function (app) {
           .catch(err => {
             return res.send(err);
           });
-
-
       })
       .catch(err => {
         return res.send({ error: err });
@@ -150,8 +237,6 @@ module.exports = function (app) {
   async function editExam(req, res) {
     console.log("In editexam for: " + JSON.stringify(req.body));
 
-
-
     exams
       .updateOne({ examName: req.body.existingExams[req.body.examNo].examName },
         {
@@ -168,12 +253,6 @@ module.exports = function (app) {
       .catch(err => {
         return res.send({ error: err });
       });
-
-
-
-
-
-
 
   }
   async function getAddedexams(req, res) {
@@ -192,20 +271,11 @@ module.exports = function (app) {
         return res.send({ error: err });
       });
 
-
-
-
-
-
-
   }
 
 
   async function getConsumedexams(req, res) {
     console.log("In getConsumedexams for: " + JSON.stringify(req.body));
-
-
-
 
     Consumedexams
       .find({ $and: [{ doc: { $gte: new Date(req.body.dos) } }, { doc: { $lte: new Date(req.body.doe) } }] })
@@ -217,23 +287,39 @@ module.exports = function (app) {
       .catch(err => {
         return res.send({ error: err });
       });
-
-
-
-
-
-
-
-
   }
 
+  function removeExam(req, res) {
 
+    var request = req.body;
+    console.log("examsDAO - RemoveExam - request " + JSON.stringify(request.examName) + " req.body - " + JSON.stringify(req.body));
+
+    exams
+      .deleteOne({ examName: request.examName })
+      .then(data => {
+        return res.send({ msg: "Exam Deleted - " + request.examName });
+      })
+      .catch(err => {
+        return res.send({ errors: err });
+      });
+  }
 
   app.post("/api/addexams", addexams);
 
-  app.post("/api/insertExam", insertExam);
+  app.get("/api/fetchExamDetails", fetchExamDetails, (req, res) => {
+    console.log("examsDAO - fetchExamDetails get method call");
+  });
+
   app.post("/api/insertExam", insertExamValidation, insertExam, (req, res) => {
     console.log("examsDAO - insertExam post method call");
+  });
+
+  app.post("/api/updateExam", ExamNameValidation, updateExam, (req, res) => {
+    console.log("examsDAO - updateExam post method call");
+  });
+
+  app.post("/api/removeExam", ExamNameValidation, removeExam, (req, res) => {
+    console.log("examsDAO - remove post method call");
   });
 
   app.get("/api/existingExams", existingExams);
