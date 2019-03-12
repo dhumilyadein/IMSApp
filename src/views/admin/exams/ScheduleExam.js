@@ -5,34 +5,35 @@ import DatePicker from 'react-date-picker';
 import ReactLoading from 'react-loading';
 import moment from 'moment';
 import {
-    Badge,
-    Button,
-    ButtonDropdown,
-    Card,
-    CardBody,
-    CardFooter,
-    CardHeader,
-    Col,
-    Collapse,
-    DropdownItem,
-    DropdownMenu,
-    DropdownToggle,
-    Fade,
-    Form,
-    FormGroup,
-    FormText,
-    FormFeedback,
-    Input,
-    InputGroup,
-    InputGroupAddon,
-    InputGroupText,
-    Label,
-    Row,
-    Modal,
-    ModalHeader,
+  Badge,
+  Button,
+  ButtonDropdown,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Col,
+  Collapse,
+  Container,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Fade,
+  Form,
+  FormGroup,
+  FormText,
+  FormFeedback,
+  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  Label,
+  Row,
+  Modal,
+  ModalHeader,
 
-    Table,
-    TabContent, TabPane, Nav, NavItem, NavLink,   CardTitle, CardText
+  Table,
+  TabContent, TabPane, Nav, NavItem, NavLink, CardTitle, CardText
 } from 'reactstrap';
 
 import axios, { post } from "axios";
@@ -42,1086 +43,502 @@ import { stat } from 'fs';
 
 class ScheduleExam extends Component {
 
-    constructor(props) {
-        super(props);
-        this.fetchClassDetails();
-        this.getExistingBooks();
-        this.state = {
-            showSections:true,
-            class:"",
-            section:"",
-            classError:"",
-            allSectionCheck:false,
-rowError:"",
-            studentsDataArray:[],
-                        studentOpen:true,
+  constructor(props) {
 
-                        activeTab:"1",
+    super(props);
 
-            selectedStudent:[],
-            error:"",
-loader:false,
+    this.state = {
 
+      classesView: true,
+      sectionView: false,
 
+      classesAndSections: [],
+      classDetails: {},
+      classes: [],
+      class: "",
 
+      sectionArray: [],
+      sectionLabelValueArray: [],
+      selectedSectionsArray: [],
+      selectedSectionsLabelValueArray: [],
+      disableSectionsFlag: false,
+      allSectionCheck: false
+    };
 
-            remarks:"",
-            doi:new Date(Date.now()),
+    this.fetchAllClassesAndSections = this.fetchAllClassesAndSections.bind(this);
+    this.fetchClasses = this.fetchClasses.bind(this);
+    this.fetchClassSpecificDetails = this.fetchClassSpecificDetails.bind(this);
+    this.classChangeHandler = this.classChangeHandler.bind(this);
+    this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
+    this.allSectionCheckHandler = this.allSectionCheckHandler.bind(this);
 
-            doiError:"",
-            sectionError:"",
-            modalSuccess:false,
-            success:false,
-            studentName:"",
+    this.fetchAllClassesAndSections();
+  }
 
+  /**
+ * Fetches all the classes and section details and nothing else
+ */
+  fetchAllClassesAndSections() {
 
+    axios.get("http://localhost:8001/api/fetchAllClassesAndSections").then(cRes => {
 
-            studentError:"",
-            classDetails:[],
-            classes:[],
-            sectionArray: [],
-            studentsDataArray:[],
-            existingBooks:[],
-            allBooksData:[],
+      console.log("ClassFeeTemplate - fetchAllClassesAndSections - cRes.data - " + JSON.stringify(cRes.data));
 
-            rows: [{ bookName:"",
-            quantity:"",
-            uniqueBookId:"", dor:""
+      if (cRes.data.errors) {
 
-            }],
-            existingStaff:[],
-            selectedStaff:[],
-            staffError:"",
-            modalMessage:"",
-            wholeClass:false,
-            hideStudents:false
-        };
+        return this.setState({ errors: cRes.data.errors });
 
+      } else {
 
-        this.classChangeHandler = this.classChangeHandler.bind(this);
-         this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-         this.studentSubmitHandler = this.studentSubmitHandler.bind(this);
-         this.staffSubmitHandler = this.staffSubmitHandler.bind(this);
-         this.classSubmitHandler = this.classSubmitHandler.bind(this);
-        
-         this.toggle = this.toggle.bind(this);
+        this.setState({ classesAndSections: cRes.data }, () => {
 
-         this.toggleSuccess = this.toggleSuccess.bind(this);
-          this.getExistingBooks=this.getExistingBooks.bind(this);
-this.reset=this.reset.bind(this);
+          console.log('ScheduleExam - fetchAllClassesAndSections - All class details - ' + JSON.stringify(this.state.classesAndSections));
 
-
-    }
-
-   async getExistingBooks() {
-
-      await axios
-        .get("http://localhost:8001/api/gettingBooks")
-        .then(result => {
-          console.log("Existing Book.data " + JSON.stringify(result.data));
-          if (result.data) {
-   var temp=[];
-    for(var i=0;i<result.data.length;i++)
-     temp.push({"label":result.data[i].bookName.charAt(0).toUpperCase()+result.data[i].bookName.slice(1),
-    "value": result.data[i].bookName})
-
-              this.setState({
-              existingBooks: temp,
-              allBooksData:result.data
-            });
-          }
+          // Fetching unique classes from the classesAndSections 
+          this.fetchClasses();
         });
+
+      }
+    });
+  }
+
+  async fetchClassSpecificDetails(classStr, sectionStr) {
+
+    this.setState({
+      subjectArray: [],
+      pTMeetScheduleArray: [],
+      pTMeetScheduleView: false,
+      emailArray: []
+    });
+
+    var fetchClassSpecificDetailsRequest = {
+      "class": this.state.class,
+      "section": this.state.section,
+      "subjects": 1,
     }
 
-    reset()
-    {
-      this.fetchClassDetails();
-      this.getExistingBooks();
-      this.fetchStaff();
-      this.setState( {
+    console.log("ScheduleExam - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
+      + JSON.stringify(fetchClassSpecificDetailsRequest));
 
-       section:"",
-        classError:"",
-rowError:"",
-        studentsDataArray:[],
-                    studentOpen:true,
+    await axios.post("http://localhost:8001/api/fetchClassSpecificDetails", fetchClassSpecificDetailsRequest).then(res => {
 
+      if (res.data.errors) {
 
-                    loader:false,
+        console.log('ScheduleExam - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
+        return this.setState({ errors: res.data.errors });
+      } else {
 
-        selectedStudent:[],
-        error:"",
-
-
-
-        year:new Date().getFullYear()+"-"+(new Date().getFullYear()+1),
-
-        remarks:"",
-        doi:new Date(Date.now()),
-
-        doiError:"",
-        sectionError:"",
-        modalSuccess:false,
-        success:false,
-        studentName:"",
-        rollNo:"",
-
-
-        studentError:"",
-        classDetails:[],
-        classes:[],
-
-        studentsDataArray:[],
-        existingBooks:[],
-        allBooksData:[],
-
-        rows: [{ bookName:"",
-        quantity:"",
-        uniqueBookId:"",
-
-        }],
-        existingStaff:[],
-        selectedStaff:[],
-        staffError:"",
-        modalMessage:""
-                });
-
-
-    }
-
-    handleChange = idx => e => {
-      e.preventDefault();
-
-      const { name, value } = e.target;
-      const temp = this.state.rows;
-      temp[idx][name] = value;
-
-      this.setState(
-        {
-          rows: temp
-        },
-        () => {
-          console.log("Change State: " + JSON.stringify(this.state));
-
-
-        }
-      );
-
-
-    };
-    handleAddRow = e => {
-      e.preventDefault();
-      this.setState({ rowError: "" });
-      const item = { bookName:"",
-      quantity:"",
-      uniqueBookId:"",
-
-
-      };
-      this.setState({
-        rows: [...this.state.rows, item]
-      });
-    };
-
-    handleRemoveSpecificRow = idx => () => {
-
-    const temp = [...this.state.rows];
-          temp.splice(idx, 1);
-          this.setState({ rows: temp,
-          });
-
-    };
-
-
-    toggle(tab) { this.reset();
-      if (this.state.activeTab !== tab) {
         this.setState({
-          activeTab: tab
+          classDetails: res.data,
+          subjectArray: res.data.subjects,
+        }, () => {
+
+          console.log('ScheduleExam - fetchClassSpecificDetails - All class details classDetails - ' + JSON.stringify(this.state.classDetails));
         });
       }
-if(tab==="2")
-this.fetchStaff();
-
-    }
-
-    toggleSuccess() {
-
-      this.setState({
-        modalSuccess: !this.state.modalSuccess
-      });
-      this.reset();
-    }
-
-
-    studentSubmitHandler(e){
-      e.preventDefault();
-console.log("In FeeSubmit:"+ JSON.stringify(this.state));
-var submit=true;
-
-this.setState({classError:"", studentError:"", doiError:"",rowError:"" ,sectionError:"", error:"", success: false,
-modalSuccess: false,loader:true})
-
-
-
-if(!this.state.class)
-{
-  this.setState({classError:"Please Select Class", loader:false});
-  submit=false;
-
-
+    });
   }
 
+  /**
+   * @description - fetches unique classes from the class detail from DB
+   */
+  fetchClasses() {
 
+    var classArray = [];
+    this.state.classesAndSections.forEach(element => {
 
-  if(!this.state.section)
-{
-  this.setState({sectionError:"Please Select Section",loader:false});
-  submit=false;
+      classArray.push(element.class);
+    });
+    console.log("classArray - " + classArray);
+    var uniqueItems = Array.from(new Set(classArray));
 
+    this.setState({ classes: uniqueItems });
+
+    console.log("Unique classes - " + this.state.classes);
   }
 
-  if(!this.state.doi)
-{
-  this.setState({doiError:"Please Enter Date of Issue",loader:false});
-  submit=false;
+  classChangeHandler(e) {
 
-  }
+    var selectedClass = e.currentTarget.value;
 
-  if(!this.state.selectedStudent.value)
-  {
-    this.setState({studentError:"Please Select Student",loader:false});
-    submit=false;
+    this.setState({ class: selectedClass });
 
-    }
+    var sectionArrayTemp = [];
+    var sectionLabelValueArray = [];
+    this.state.classesAndSections.forEach(element => {
+      if (element["class"] === selectedClass) {
 
+        var sectionLabelValue = {};
 
-this.state.rows.forEach(element=>{
-if (!element.bookName){
-this.setState({rowError:"Please select the book(s) in each row",loader:false});
-submit=false;
-return;}
+        var section = element["section"];
+        sectionArrayTemp.push(section);
 
-if (!element.dor){
-  this.setState({rowError:"Please select the Return Due date in each row",loader:false});
-  submit=false;
-  return;}
+        sectionLabelValue.value = section;
+        sectionLabelValue.label = section;
 
+        sectionLabelValueArray.push(sectionLabelValue);
 
-})
-
-for(var i=0;i<this.state.rows.length;i++)
-
-{for(var j=0;j<this.state.rows.length;j++)
-{
-  if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
-{
-  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!",loader:false});
-submit=false;
-break;
-}
-
-
-}
-}
-
-
-  if(submit)
-  {
-console.log("Issuing Book ");
-    axios
-    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":this.state.rows,"class":this.state.class,
-"section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStudent.label })
-    .then(result => {
-        console.log("result.data " + JSON.stringify(result.data));
-
-        if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                modalMessage:this.state.rows.length+ " books issued to Student: "+this.state.selectedStudent.label,
-                loader:false
-
-
-
-              });
-
-              else if (result.data.error) {
-
-                 this.setState({error:JSON.stringify(result.data.error)});
-            }
-
-
+      }
     });
 
+    // Sorting array alphabetically
+    sectionArrayTemp.sort();
 
+    this.setState({ 
+      sectionArray: sectionArrayTemp,
+      sectionLabelValueArray: sectionLabelValueArray,
+      sectionView: true,
+      selectedSectionsArray: [],
+      selectedSectionsLabelValueArray: [],
+      disableSectionsFlag: false,
+      allSectionCheck: false
+    }, () => {
 
+      console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp 
+      + " \nsectionLabelValueArray - " + JSON.stringify(this.state.sectionLabelValueArray));
+    })
   }
 
+  sectionChangeHandler = (newValue, actionMeta) => {
 
+    console.log("ScheduleExam - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
 
-
-
-
-
-
-    }
-
-    staffSubmitHandler(e){
-      e.preventDefault();
-console.log("In Staff Issue:"+ JSON.stringify(this.state));
-var submit=true;
-
-this.setState({ staffError:"", doiError:"",rowError:"" , error:"", success: false,
-modalSuccess: false});
-
-
-
-
-  if(!this.state.doi)
-{
-  this.setState({doiError:"Please Enter Date of Issue"});
-  submit=false;
-
-  }
-
-  if(!this.state.selectedStaff.value)
-  {
-    this.setState({staffError:"Please Select Staff/Employee"});
-    submit=false;
-
-    }
-
-
-for(var i =0;i<this.state.rows.length;i++){
-if (!this.state.rows[i].bookName){
-this.setState({rowError:"Please select the book(s) in each row"});
-submit=false;
-return;}
-
-if (!this.state.rows[i].dor){
-  this.setState({rowError:"Please select the Return Due date in each row"});
-  submit=false;
-  return;}
-
-
-
-
-
-
-
-}
-
-for(var i=0;i<this.state.rows.length;i++)
-
-{for(var j=0;j<this.state.rows.length;j++)
-{
-  if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
-{
-  this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!"});
-submit=false;
-break;
-}
-
-
-}
-}
-
-  if(submit)
-  {
-console.log("Issuing Book  Staff");
-    axios
-    .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":this.state.rows,"class":"NA",
-"section":"NA", "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.selectedStaff.label })
-    .then(result => {
-        console.log("result.data " + JSON.stringify(result.data));
-
-        if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                modalMessage:this.state.rows.length+ " books issued to: "+this.state.selectedStaff.label
-
-
-
-              });
-
-              else if (result.data.error) {
-
-                 this.setState({error:JSON.stringify(result.data.error)});
-            }
-
-
+    var sectionArrayTemp = [];
+    newValue.forEach(element => {
+      sectionArrayTemp.push(element.value);
+    });
+    this.setState({
+      selectedSectionsArray: sectionArrayTemp.sort(),
+      selectedSectionsLabelValueArray: newValue
+    }, () => {
+      console.log("ScheduleExam - sectionChangeHandler - selectedSectionsLabelValueArray - " + JSON.stringify(this.state.selectedSectionsLabelValueArray));
+      console.log("\nScheduleExam - sectionChangeHandler - selected class - " + JSON.stringify(this.state.class) 
+      + " selected sections - " + this.state.selectedSectionsArray);
     });
 
+  };
 
+  allSectionCheckHandler(e) {
 
-  }
-
-
-
-
-
-
-
-
-    }
-
-    async classSubmitHandler(e)
-    {
-      e.preventDefault();
-      console.log("In FeeSubmit:"+ JSON.stringify(this.state));
-      var submit=true;
-
-      this.setState({classError:"", studentError:"", doiError:"",rowError:"" ,sectionError:"", error:"", success: false,
-      modalSuccess: false,loader:true})
-
-
-
-      if(!this.state.class)
-      {
-        this.setState({classError:"Please Select Class", loader:false});
-        submit=false;
-
-
-        }
-
-
-
-        if(!this.state.section)
-      {
-        this.setState({sectionError:"Please Select Section",loader:false});
-        submit=false;
-
-        }
-
-        if(!this.state.doi)
-      {
-        this.setState({doiError:"Please Enter Date of Issue",loader:false});
-        submit=false;
-
-        }
-
-
-
-      this.state.rows.forEach(element=>{
-      if (!element.bookName){
-      this.setState({rowError:"Please select the book(s) in each row",loader:false});
-      submit=false;
-      return;}
-
-      if (!element.dor){
-        this.setState({rowError:"Please select the Return Due date in each row",loader:false});
-        submit=false;
-        return;}
-
-        if (element.quantity<this.state.studentsDataArray.length){
-          this.setState({rowError: element.bookName+"'s quantity is less that class strength, Please add more books!",loader:false});
-          submit=false;
-          return;}
-
-
+    if (e.target.checked) {
+      this.setState({ 
+        allSectionCheck: true, 
+      selectedSectionsArray: this.state.sectionArray,
+      selectedSectionsLabelValueArray: this.state.sectionLabelValueArray,
+      disableSectionsFlag: true
+       }, () => {
+        console.log("\nScheduleExam - sectionChangeHandler - selected class - " + JSON.stringify(this.state.class) 
+        + " selected sections - " + this.state.selectedSectionsArray);
+       });
+    } else {
+      this.setState({ 
+        allSectionCheck: false,
+        disableSectionsFlag: false
+      }, () => {
+        console.log("\nScheduleExam - sectionChangeHandler - selected class - " + JSON.stringify(this.state.class) 
+      + " selected sections - " + this.state.selectedSectionsArray);
       })
-
-      for(var i=0;i<this.state.rows.length;i++)
-
-      {for(var j=0;j<this.state.rows.length;j++)
-      {
-        if(this.state.rows[i].bookName.label===this.state.rows[j].bookName.label&&(i!=j))
-      {
-        this.setState({rowError:"Duplicate Books found in Rows: "+(j+1)+" and  "+(i+1)+". Duplcate books Not allowed!",loader:false});
-      submit=false;
-      break;
-      }
-
-
-      }
-      }
-
-
-        if(submit)
-        {
-      console.log("Issuing Book to Class ");
- var count=0;
-      for(var s=0;s<this.state.studentsDataArray.length;s++)
-        { var temp=[];
-
-          console.log("Student "+JSON.stringify(this.state.studentsDataArray[s]));
-
-
-          for(var r=0;r<this.state.rows.length;r++)
-          { console.log("Book row "+JSON.stringify(this.state.rows[r]));
-var unique;
-
-            for(var i=0;i<this.state.allBooksData.length;i++)
-            {
-                if(this.state.allBooksData[i].bookName===this.state.rows[r].bookName.value)
-                { console.log("book Name "+JSON.stringify(this.state.allBooksData[i].bookName));
-
-
-                  for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
-{
-
-if(!this.state.allBooksData[i].uniqueBookIds[u].isIssued)
-{  console.log("unique id "+JSON.stringify(this.state.allBooksData[i].uniqueBookIds[u]));
-
-temp.push({"uniqueBookId":this.state.allBooksData[i].uniqueBookIds[u].value,
-"quantity":this.state.rows[r].quantity, "bookName":this.state.rows[r].bookName,"dor":this.state.rows[r].dor
-});
-break;
-}
-
-
-}
-}
-
-
-
-
-                }
-            }
-
-
-
-console.log("temp "+JSON.stringify(temp));
-
-
-if(temp.length===this.state.rows.length)
-{ await axios
-          .post("http://localhost:8001/api/issueBook", {"issuedBookDetails":temp,"class":this.state.class,
-      "section":this.state.section, "doi":this.state.doi,"remarks":this.state.remarks, "issuedTo":this.state.studentsDataArray[s].label })
-          .then(result => {
-              console.log("result.data " + JSON.stringify(result.data));
-
-              if (result.data.msg === "Success")
-                   {
-                     count++;
-
-                   }
-
-                    else if (result.data.error) {
-
-                       this.setState({error:JSON.stringify(result.data.error)});
-                       return;
-                  }
-
-
-          });}
-          await this.getExistingBooks();
-        }
-        console.log("count " + count);
-if(count===this.state.studentsDataArray.length)
-this.setState({
-
-  success: true,
-  modalSuccess: true,
-  modalMessage:this.state.rows.length+ " books issued to Class: "+this.state.class+" "+this.state.section,
-  loader:false
-
-});
-
-
-
-        }
-
-
-
-
-
     }
+  }
 
-    fetchStaff()
-    {
-      axios
-      .get("http://localhost:8001/api/gettingStaff")
-      .then(result => {
-        console.log("Existing Staff data " + JSON.stringify(result.data));
-        if (result.data) {
- var temp=[];
-  for(var i=0;i<result.data.length;i++)
-   temp.push({"label":result.data[i].firstname.charAt(0).toUpperCase()+result.data[i].firstname.slice(1)+
-   " "+result.data[i].lastname.charAt(0).toUpperCase()+result.data[i].lastname.slice(1)+" ("+result.data[i].username+")",
-  "value": result.data[i].username})
+  render() {
 
-            this.setState({
-            existingStaff: temp,
-
-          });
-        }
-      });
-
-    }
-
-    fetchClassDetails() {
-
-        axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
-console.log("Class Details: "+JSON.stringify(cRes.data))
-          if (cRes.data.errors) {
-
-            return this.setState({ errors: cRes.data.errors });
-
-          } else {
-
-            this.setState({ classDetails: cRes.data },()=>{
-
-              var classArray = [];
-        this.state.classDetails.forEach(element => {
-
-          console.log("element.class - " + element.class);
-          classArray.push(element.class);
-        });
-       // console.log("classArray - " + classArray);
-       var uniqueItems = Array.from(new Set(classArray));
+    return (
+      <div>
+        <Container >
 
 
+          {this.state.success && (
+            <Modal
+              isOpen={this.state.modalSuccess}
+              className={"modal-success " + this.props.className}
+              toggle={this.toggleSuccess}
+            >
+              <ModalHeader toggle={this.toggleSuccess}>
+                {this.state.modalMessage}
+              </ModalHeader>
+            </Modal>
+          )}
+          <Card className="mx-5">
+            <CardBody className="p-1">
 
-        this.setState({ classes: uniqueItems });
-            });
-
-            console.log('ClassDetails - fetchClassDetails - All class details - ' + JSON.stringify(this.state.classDetails));
-
-
-          }
-        });
-      }
-
-      /**
-       * @description - fetches unique classes from the class detail from DB
-       */
-
-
-      classChangeHandler(e) {
-
-        var selectedClass = e.currentTarget.value;
-        console.log("e.target.name - " + [e.currentTarget.name] + " e.target.value - " + selectedClass);
-        this.setState({ class: selectedClass,
-        section:"",selectedStudent:[] });
-
-        var sectionArrayTemp = [];
-        this.state.classDetails.forEach(element => {
-          if (element["class"] === selectedClass) {
-
-            sectionArrayTemp.push(element["section"]);
-
-          }
-        });
-
-        // Sorting array alphabetically
-        sectionArrayTemp.sort();
-
-        this.setState({
-           sectionArray: sectionArrayTemp,
-          })
-
-        console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp );
-
-        // Switching view to section view
-
-      }
-
-      sectionChangeHandler(e) {
-
-
-        this.setState({ section: e.currentTarget.value },()=>{
-            this.getAllExams();
-
-
-
-        });
-
-
-
-
-
-
-
-      }
-
-    studentSelectedHandler(e){
-if(e)
-     { console.log("In Student "+(e.value));
-
-this.setState({selectedStudent:e});
-
-
-    }
-
-    }
-
-
-    /**
-     * @description Called when the role(s) are selected. To update role Array
-     * @param {*} e
-     */
-
-
-    render() {
-
-          return (
-            <div>
-
-
-
-
-              
-        
-            <Row>
-{this.state.success && (
-  <Modal
-    isOpen={this.state.modalSuccess}
-    className={"modal-success " + this.props.className}
-    toggle={this.toggleSuccess}
-  >
-    <ModalHeader toggle={this.toggleSuccess}>
-     {this.state.modalMessage}
-    </ModalHeader>
-  </Modal>
-)}
-              <Col sm="12">
-              <Card className="mx-5">
-                          <CardBody className="p-1">
-
-                          <InputGroup className="mb-4">
-                                    <InputGroupAddon addonType="prepend">
-                                      <InputGroupText style={{ width: "120px" }}>
-                                        Class
+              <InputGroup className="mb-4">
+                <InputGroupAddon addonType="prepend">
+                  <InputGroupText style={{ width: "120px" }}>
+                    Class
                                 </InputGroupText>
-                                    </InputGroupAddon>
-                                    <Input
-                                      name="class"
-                                      id="class"
-                                      type="select"
-                                      value={this.state.class}
-                                      onChange={this.classChangeHandler}
-                                    >
-                                      <option value="">Select</option>
-                                      {this.state.classes.map(element => {
-                                        return (<option key={element} value={element}>{element}</option>);
-                                      }
-                                      )}
-                                    </Input>
-                                  </InputGroup>
-                                  { this.state.classError && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.classError}</p>
-                                    </font>
-                                  )}
+                </InputGroupAddon>
+                <Input
+                  name="class"
+                  id="class"
+                  type="select"
+                  value={this.state.class}
+                  onChange={this.classChangeHandler}
+                >
+                  <option value="">Select</option>
+                  {this.state.classes.map(element => {
+                    return (<option key={element} value={element}>{element}</option>);
+                  }
+                  )}
+                </Input>
+              </InputGroup>
+              {this.state.classError && (
+                <font color="red">
+                  {" "}
+                  <p>{this.state.classError}</p>
+                </font>
+              )}
 
-                          {  this.state.showSections&& <p>        
-                        
-                                    <Select
-                                        id="section"
-                                        name="section"
-                                        isMulti={true}
-                                        placeholder="Select Single or Multiple Section(s)"
-                                        options={this.state.sectionArray}
-                                        closeMenuOnSelect={false}
-                                        value={this.state.section}
+              {this.state.sectionView && 
+<div>
 
-                                        isSearchable={true}
-                                        onChange={selected => {
-                                          console.log("Selected: " + JSON.stringify(selected));
-                                          var temp = [];
+                <Select
+                  id="section"
+                  name="section"
+                  isMulti={true}
+                  placeholder="Select Single or Multiple Section(s)"
+                  options={this.state.sectionLabelValueArray}
+                  closeMenuOnSelect={false}
+                  value={this.state.selectedSectionsLabelValueArray}
+                  isDisabled={this.state.disableSectionsFlag}
+                  isSearchable={true}
+                  onChange={this.sectionChangeHandler} />
 
-                                          for (var i = 0; i < selected.length; i++) { temp.push(selected[i].value) }
-                                          this.setState({
-                                            selectedFeeTemplate: temp,
-                                            selectedFeeTemplateValue: selected
-                                          }, () => {
-                                            console.log("Selected Fee Templ: " + JSON.stringify(this.state.selectedFeeTemplate));
-                                          })
+                {this.state.sectionError && (
+                  <font color="red">
+                    {" "}
+                    <p>{this.state.sectionError}</p>
+                  </font>
+                )} 
 
-
-
-
-
-
-
-                                        }
-
-
-
-                                        } />
-                                 
-                                  {this.state.sectionError && (
-                                    <font color="red">
-                                      {" "}
-                                      <p>{this.state.sectionError}</p>
-                                    </font>
-                                  )} </p>}
-
-<FormGroup check inline>
-                                    <Input
-                                      className="form-check-input"
-                                      type="checkbox"
-                                      id="allSectionCheck"
-                                      style={{ height: "35px", width: "25px" }}
-                                      name="allSectionCheck"
-                                      checked={this.state.allSectionCheck}
-                                      onChange={e=>{ if(e.target.checked)
-                                        this.setState({allSectionCheck:true,showSections:false});
-                                        else                                      
-                                        this.setState({allSectionCheck:false,showSections:true})}}
-                                    />
-                                    <Label
-                                      className="form-check-label"
-                                      check
-                                      htmlFor="inline-checkbox1"
-                                    >
-                                     For All Sections
+              <FormGroup check inline>
+                <Input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="allSectionCheck"
+                  style={{ height: "35px", width: "25px" }}
+                  name="allSectionCheck"
+                  checked={this.state.allSectionCheck}
+                  onChange={this.allSectionCheckHandler}
+                />
+                <Label
+                  className="form-check-label"
+                  check
+                  htmlFor="inline-checkbox1"
+                >
+                  For All Sections
                                     </Label>
-                                  </FormGroup>
+              </FormGroup>
+</div>
+}
 
-
-<br/>
-<Table bordered hover>
-                            <thead>
-                              <tr style={{ 'backgroundColor': "palevioletred" }}>
-                                <th className="text-center">
-                                  <h5> S.No.</h5>{" "}
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h5>Book Name </h5>
-                                </th>
-                                <th className="text-center">
-                                  <h5>Available Quantity</h5>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <h5>Unique Book Id</h5>{" "}
-                                </th>
-                                <th className="text-center">
-                                  <h5>Return due date</h5>{" "}
-                                </th>
-
-
-
-                                <th className="text-center">
-                                  <Button
-                                    onClick={this.handleAddRow}
-                                    className="btn btn-primary"
-                                    color="primary"
-
-
-                                  >
-
-                                    Add Row
+              <br />
+              {/* <Table bordered hover>
+                <thead>
+                  <tr style={{ 'backgroundColor': "palevioletred" }}>
+                    <th className="text-center">
+                      <h5> S.No.</h5>{" "}
+                    </th>
+                    <th className="text-center">
+                      {" "}
+                      <h5>Book Name </h5>
+                    </th>
+                    <th className="text-center">
+                      <h5>Available Quantity</h5>{" "}
+                    </th>
+                    <th className="text-center">
+                      <h5>Unique Book Id</h5>{" "}
+                    </th>
+                    <th className="text-center">
+                      <h5>Return due date</h5>{" "}
+                    </th>
+                    <th className="text-center">
+                      <Button
+                        onClick={this.handleAddRow}
+                        className="btn btn-primary"
+                        color="primary"
+                      >
+                        Add Row
                           </Button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.rows.map((item, idx) => (
+                    <tr id="addr0" key={idx}>
+                      <td align="center">
+                        <h4>{idx + 1}</h4>
+                      </td>
+                      <td style={{ width: "200px" }}>
 
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.rows.map((item, idx) => (
-                                <tr id="addr0" key={idx}>
-                                  <td align="center">
-                                    <h4>{idx + 1}</h4>
-                                  </td>
-                                  <td   style={{width:"200px"}}>
-
-                                   <Select                            id="bookName"
-                            name="bookName"
+                        <Select id="bookName"
+                          name="bookName"
 
                           placeholder="Select Book"
-                            options={this.state.existingBooks}
+                          options={this.state.existingBooks}
                           closeMenuOnSelect={true}
-                         value={this.state.rows[idx].bookName}
-                         isClearable={true}
-                              isSearchable={true}
+                          value={this.state.rows[idx].bookName}
+                          isClearable={true}
+                          isSearchable={true}
 
-                            onChange={selectedItem=>{
-
-
-                                const temp = this.state.rows;
-                                temp[idx]["bookName"] = {"label":selectedItem.value.charAt(0).toUpperCase()+
-                                selectedItem.value.slice(1),"value":selectedItem.value};
-
-                                for(var i=0;i<this.state.allBooksData.length;i++)
-                                {
-                                    if(this.state.allBooksData[i].bookName===selectedItem.value)
-                                    {
-                                      for(var u=0;u<this.state.allBooksData[i].uniqueBookIds.length;u++)
-{
-
-  if(!this.state.allBooksData[i].uniqueBookIds[u].isIssued)
- { console.log(this.state.allBooksData[i].uniqueBookIds[u].isIssued);
-  temp[idx]["uniqueBookId"]=this.state.allBooksData[i].uniqueBookIds[u].value;
-  break;}
-}
-
-                                        temp[idx]["quantity"]=this.state.allBooksData[i].quantity;
+                          onChange={selectedItem => {
 
 
-                                    }
+                            const temp = this.state.rows;
+                            temp[idx]["bookName"] = {
+                              "label": selectedItem.value.charAt(0).toUpperCase() +
+                                selectedItem.value.slice(1), "value": selectedItem.value
+                            };
+
+                            for (var i = 0; i < this.state.allBooksData.length; i++) {
+                              if (this.state.allBooksData[i].bookName === selectedItem.value) {
+                                for (var u = 0; u < this.state.allBooksData[i].uniqueBookIds.length; u++) {
+
+                                  if (!this.state.allBooksData[i].uniqueBookIds[u].isIssued) {
+                                    console.log(this.state.allBooksData[i].uniqueBookIds[u].isIssued);
+                                    temp[idx]["uniqueBookId"] = this.state.allBooksData[i].uniqueBookIds[u].value;
+                                    break;
+                                  }
                                 }
 
-
-                                this.setState(
-                                  {
-                                    rows: temp
-                                  })
-
-                            }}
-                            />
+                                temp[idx]["quantity"] = this.state.allBooksData[i].quantity;
 
 
-                                  </td>
-
-
-
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="quantity"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].quantity}
-
-                                        style={{textAlign:'center'}}
-                                        id="quantity"
-                                        size="lg"
-                                        disabled
-                                      />
-                                    </InputGroup>
-                                  </td>
-
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        name="uniqueBookId"
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.rows[idx].uniqueBookId}
-                                        disabled
-                                        style={{textAlign:'center'}}
-                                        id="quantity"
-                                        size="lg"
-                                      />
-                                    </InputGroup>
-                                  </td>
-
-
-
-                                  <td align="center">
-
-                                  <DatePicker
-
-name="dor"
-id="dor"
-value={this.state.rows[idx].dor}
-onChange={date=>{ var temp=this.state.rows;
-temp[idx]["dor"]=new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
-
-this.setState({rows:temp},()=>console.log(JSON.stringify(this.state.rows)))}
-
-}
-/>
-                                  </td>
-
-
-
-                                  <td align="center">
-                                  { idx>0 &&
-                                    <Button
-                                      className="btn btn-danger btn-sg"
-                                      onClick={this.handleRemoveSpecificRow(
-                                        idx
-                                      )}
-                                      size="lg"
-                                    >
-                                      Remove
-                                    </Button>}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                          {this.state.rowError && (
-                            <font color="red">
-                              <h6>
-                                {" "}
-                                <p>{this.state.rowError} </p>
-                              </h6>{" "}
-                            </font>
-                          )}
-
-
-<br/>
-<InputGroup className="mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText >
-                                <b>Remarks</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              type="text"
-                              size="lg"
-                             name="remarks"
-                              id="remarks"
-                             value={this.state.remarks}
-                             onChange={e => {
-                                this.setState(
-                                  { remarks: e.target.value })}}
-
-
-                            />
-                          </InputGroup>
-
-{this.state.error &&
-                              <font color="red">
-                                {" "}
-                                <p>{JSON.stringify(this.state.error)}</p>
-                              </font>
+                              }
                             }
-<Row>
-                            <Col>
-                            {!this.state.loader &&    <Button
-                                onClick={this.studentSubmitHandler}
-                                size="lg"
-                                color="success"
-                                block
-                              >
-                                Submit
+
+
+                            this.setState(
+                              {
+                                rows: temp
+                              })
+
+                          }}
+                        />
+
+
+                      </td>
+
+
+
+                      <td>
+                        <InputGroup className="mb-3">
+                          <Input
+                            name="quantity"
+                            type="text"
+                            className="form-control"
+                            value={this.state.rows[idx].quantity}
+
+                            style={{ textAlign: 'center' }}
+                            id="quantity"
+                            size="lg"
+                            disabled
+                          />
+                        </InputGroup>
+                      </td>
+
+                      <td>
+                        <InputGroup className="mb-3">
+                          <Input
+                            name="uniqueBookId"
+                            type="text"
+                            className="form-control"
+                            value={this.state.rows[idx].uniqueBookId}
+                            disabled
+                            style={{ textAlign: 'center' }}
+                            id="quantity"
+                            size="lg"
+                          />
+                        </InputGroup>
+                      </td>
+
+
+
+                      <td align="center">
+
+                        <DatePicker
+
+                          name="dor"
+                          id="dor"
+                          value={this.state.rows[idx].dor}
+                          onChange={date => {
+                            var temp = this.state.rows;
+                            temp[idx]["dor"] = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+
+                            this.setState({ rows: temp }, () => console.log(JSON.stringify(this.state.rows)))
+                          }
+
+                          }
+                        />
+                      </td>
+
+
+
+                      <td align="center">
+                        {idx > 0 &&
+                          <Button
+                            className="btn btn-danger btn-sg"
+                            onClick={this.handleRemoveSpecificRow(
+                              idx
+                            )}
+                            size="lg"
+                          >
+                            Remove
+                                    </Button>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              {this.state.rowError && (
+                <font color="red">
+                  <h6>
+                    {" "}
+                    <p>{this.state.rowError} </p>
+                  </h6>{" "}
+                </font>
+              )} */}
+
+              <Row>
+                <Col>
+                  {!this.state.loader && <Button
+                    onClick={this.studentSubmitHandler}
+                    size="lg"
+                    color="success"
+                    block
+                  >
+                    Submit
                               </Button>}
 
-                              {this.state.loader &&
-                          <div align="center"><ReactLoading type="spin"
-                            color="	#006400"
-                            height='2%' width='10%' />
-                            <br />
+                  {this.state.loader &&
+                    <div align="center"><ReactLoading type="spin"
+                      color="	#006400"
+                      height='2%' width='10%' />
+                      <br />
 
-                            <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
+                      <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
 
-                            </Col>
+                </Col>
 
-                            <Col>
-                              <Button
-                                onClick={this.reset}
-                                size="lg"
-                                color="secondary"
-                                block
-                              >
-                             Reset
+                <Col>
+                  <Button
+                    onClick={this.reset}
+                    size="lg"
+                    color="secondary"
+                    block
+                  >
+                    Reset
                               </Button>
-                            </Col>
-                          </Row>
+                </Col>
+              </Row>
 
 
-</CardBody></Card>
-              </Col>
-            </Row>
+            </CardBody></Card>
 
-
-
-            
-
-
-
-            </div>
-        );
-    }
+        </Container>
+      </div>
+    );
+  }
 }
 
 export default ScheduleExam;
