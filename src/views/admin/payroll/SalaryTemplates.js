@@ -30,16 +30,22 @@ class SalaryTemplates extends Component {
     this.getExistingSalaryTemplates();
     this.state = {
       showCreateTemplate: false,
-      status: "Active",
+     
       erorrs: null,
       success: null,
       userdata: null,
       templateName: "",
-      rows: [{ feeType: "", amount: "" }],
-      editRows: [{ feeType: "", amount: "" }],
-      existingRows: [{ templateName: "" }],
+      salaryRows: [{ earnType: "", amount: "" }],
+      deductRows: [{ deductType: "", amount: "" }],
+      editSalaryRows: [{ earnType: "", amount: "" }],
+      editDeductRows: [{ deductType: "", amount: "" }],
+totalEarning:0,
+totalDeduction:0,
+paidAmount:0,
+      existingSalaryRows: [{ templateName: "" }],
       showCreateButton: true,
-      rowError: false,
+      salaryRowError: "",
+      deductRowError:"",
       templateNameError: "",
       success: false,
       modalSuccess: false,
@@ -48,19 +54,21 @@ class SalaryTemplates extends Component {
       templateNo: "",
       showExistingTemplate:true,
       showCopyTemplate:false,
-      templateTypeError:"",
+   modalMessage:"",
       templateType:""
 
     };
 
 
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleAddRow = this.handleAddRow.bind(this);
-    this.handleRemoveSpecificRow = this.handleRemoveSpecificRow.bind(this);
-    this.handleEditChange = this.handleEditChange.bind(this);
-    this.handleEditAddRow = this.handleEditAddRow.bind(this);
-    this.handleEditRemoveSpecificRow = this.handleEditRemoveSpecificRow.bind(this);
+    this.handleSalaryChange = this.handleSalaryChange.bind(this);
+    this.handleDeductChange = this.handleDeductChange.bind(this);
+    this.handleAddSalaryRow = this.handleAddSalaryRow.bind(this);
+    this.handleAddDeductRow = this.handleAddDeductRow.bind(this);
+    this.handleRemoveSpecificSalaryRow = this.handleRemoveSpecificSalaryRow.bind(this);
+    this.handleRemoveSpecificDeductRow = this.handleRemoveSpecificDeductRow.bind(this);
+
+    
     this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
@@ -82,7 +90,7 @@ class SalaryTemplates extends Component {
         console.log("Existing RESULT.data " + JSON.stringify(result.data));
         if (result.data) {
           this.setState({
-            existingRows: result.data
+            existingSalaryRows: result.data
           });
         }
       });
@@ -99,7 +107,8 @@ class SalaryTemplates extends Component {
 
   toggleSuccess() {
     this.setState({
-      modalSuccess: !this.state.modalSuccess
+      modalSuccess: !this.state.modalSuccess,
+     
     });
   }
 
@@ -114,30 +123,26 @@ class SalaryTemplates extends Component {
   submitHandler(e) {
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.rows.length);
+    console.log("Row Length: " + this.state.salaryRows.length);
     this.setState({
-      rowError: "", templateNameError: "", success: false, templateTypeError:"",
-      modalSuccess: false
+      salaryRowError: "", templateNameError: "", success: false, 
+      modalSuccess: false, deductRowError:""
     }, () => {
       if (!this.state.templateName) {
         this.setState({ templateNameError: "Please Enter Template Name" });
         submit = false;}
 
-        if (!this.state.templateType) {
-          this.setState({ templateTypeError: "Please Select Template Type" });
-          submit = false;
-
-      }  if (this.state.rows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Fee Category" });
+        if (this.state.salaryRows.length === 0) {
+        this.setState({ salaryRowError: "Please add atleast one Earn Type" });
         submit = false;
       } else
-        for (var i = 0; i < this.state.rows.length; i++) {
+        for (var i = 0; i < this.state.salaryRows.length; i++) {
           if (
-            this.state.rows[i].feeType === "" ||
-            this.state.rows[i].amount === ""
+            this.state.salaryRows[i].feeType === "" ||
+            this.state.salaryRows[i].amount === ""
           ) {
             this.setState({
-              rowError: "Please fill all the table fields first"
+              salaryRowError: "Please fill all the table fields first"
             });
             submit = false;
 
@@ -145,10 +150,25 @@ class SalaryTemplates extends Component {
           }
         }
 
+       
+            for (var i = 0; i < this.state.deductRows.length; i++) {
+              if (
+                this.state.deductRows[i].deductType === "" ||
+                this.state.deductRows[i].amount === ""
+              ) {
+                this.setState({
+                  deductRowError: "Please fill all the table fields first"
+                });
+                submit = false;
+    
+                break;
+              }
+            }
+
       if (submit === true) {
         console.log("Submitting Template: ");
         axios
-          .post("http://localhost:8001/api/feeTemplate", this.state)
+          .post("http://localhost:8001/api/addSalaryTemplate", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
             if(result.data.errors)
@@ -158,16 +178,23 @@ class SalaryTemplates extends Component {
               });}
              else if (result.data.msg === "Success")
               this.setState({
-                templateName: "",
-                rows: [{ feeType: "", amount: "" }],
+              
                 success: true,
                 modalSuccess: true,
+                modalMessage:"Salary Template Created Successfully!",
+                templateName: "",
+                salaryRows: [{ earnType: "", amount: "" }],
+                deductRows: [{ deductType: "", amount: "" }],
+                
                 templateNameError:"",
-                templateTypeError:"",
-                rowError:"",
-templateType:""
+               deductRowError:"",
+                salaryRowError:"",
+                paidAmount:0,
+                totalDeduction:0,
+                totalEarning:0,
+
               });
-            this.getExistingTemplates();
+            this.getExistingSalaryTemplates();
           });
       }
     });
@@ -175,60 +202,68 @@ templateType:""
 
   updateHandler(e) {
     var submit = true;
-    console.log("in Submit State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.editRows.length);
+    console.log("in Update State: " + JSON.stringify(this.state));
+    console.log("Row Length: " + this.state.salaryRows.length);
     this.setState({
-      rowError: "", templateNameError: "", success: false,
+      salaryRowError: "", templateNameError: "", success: false,
       modalSuccess: false
     }, () => {
-      if (!this.state.templateName) {
-        this.setState({ templateNameError: "Please Enter Template Name" });
-        submit = false;
-
-      }
-      if (!this.state.templateType) {
-        this.setState({ templateTypeError: "Please Select Template Type" });
-        submit = false;
-
-    }
-
-      if (this.state.editRows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Fee Category" });
-        submit = false;
-      } else
-        for (var i = 0; i < this.state.editRows.length; i++) {
-          if (
-            this.state.editRows[i].feeType === "" ||
-            this.state.editRows[i].amount === ""
-          ) {
-            this.setState({
-              rowError: "Please fill all the table fields first"
-            });
+        if (!this.state.templateName) {
+            this.setState({ templateNameError: "Please Enter Template Name" });
+            submit = false;}
+    
+            if (this.state.salaryRows.length === 0) {
+            this.setState({ salaryRowError: "Please add atleast one Earn Type" });
             submit = false;
-
-            break;
-          }
-        }
+          } else
+            for (var i = 0; i < this.state.salaryRows.length; i++) {
+              if (
+                this.state.salaryRows[i].feeType === "" ||
+                this.state.salaryRows[i].amount === ""
+              ) {
+                this.setState({
+                  salaryRowError: "Please fill all the table fields first"
+                });
+                submit = false;
+    
+                break;
+              }
+            }
+    
+           
+                for (var i = 0; i < this.state.deductRows.length; i++) {
+                  if (
+                    this.state.deductRows[i].deductType === "" ||
+                    this.state.deductRows[i].amount === ""
+                  ) {
+                    this.setState({
+                      deductRowError: "Please fill all the table fields first"
+                    });
+                    submit = false;
+        
+                    break;
+                  }
+                }
+    
 
       if (submit === true) {
 
         this.setState()
         console.log("Updating Template for: ");
         axios
-          .post("http://localhost:8001/api/updateFeeTemplate", this.state)
+          .post("http://localhost:8001/api/updateSalaryTemplate", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
             if (result.data.msg === "Template Updated")
               this.setState({
                 success: true,
                 modalSuccess: true,
-                templateNameError:"",
-                templateTypeError:"",
-                rowError:""
+                modalMessage:"Salary Template Updated Successfully!"
+
 
               });
 
-            this.getExistingTemplates();
+            this.getExistingSalaryTemplates();
           });
       }
     });
@@ -238,46 +273,55 @@ templateType:""
   copyHandler(e) {
     var submit = true;
     console.log("in Copy State: " + JSON.stringify(this.state));
-    console.log("Row Length: " + this.state.editRows.length);
+    console.log("Row Length: " + this.state.salaryRows.length);
     this.setState({
-      rowError: "", templateNameError: "", success: false,
-      modalSuccess: false
+      salaryRowError: "", templateNameError: "", success: false,
+      modalSuccess: false, deductRowError:""
     }, () => {
-      if (!this.state.templateName) {
-        this.setState({ templateNameError: "Please Enter Template Name" });
-        submit = false;
-      }
-
-      if (!this.state.templateType) {
-        this.setState({ templateTypeError: "Please Select Template Type" });
-        submit = false;
-
-    }
-
-    if (this.state.editRows.length === 0) {
-        this.setState({ rowError: "Please add atleast one Fee Category" });
-        submit = false;
-      } else
-        for (var i = 0; i < this.state.editRows.length; i++) {
-          if (
-            this.state.editRows[i].feeType === "" ||
-            this.state.editRows[i].amount === ""
-          ) {
-            this.setState({
-              rowError: "Please fill all the table fields first"
-            });
+        if (!this.state.templateName) {
+            this.setState({ templateNameError: "Please Enter Template Name" });
+            submit = false;}
+    
+            if (this.state.salaryRows.length === 0) {
+            this.setState({ salaryRowError: "Please add atleast one Earn Type" });
             submit = false;
-
-            break;
-          }
-        }
+          } else
+            for (var i = 0; i < this.state.salaryRows.length; i++) {
+              if (
+                this.state.salaryRows[i].feeType === "" ||
+                this.state.salaryRows[i].amount === ""
+              ) {
+                this.setState({
+                  salaryRowError: "Please fill all the table fields first"
+                });
+                submit = false;
+    
+                break;
+              }
+            }
+    
+           
+                for (var i = 0; i < this.state.deductRows.length; i++) {
+                  if (
+                    this.state.deductRows[i].deductType === "" ||
+                    this.state.deductRows[i].amount === ""
+                  ) {
+                    this.setState({
+                      deductRowError: "Please fill all the table fields first"
+                    });
+                    submit = false;
+        
+                    break;
+                  }
+                }
+    
 
       if (submit === true) {
 
         this.setState()
         console.log("Copying Template for: ");
         axios
-          .post("http://localhost:8001/api/copyFeeTemplate", this.state)
+          .post("http://localhost:8001/api/copySalaryTemplate", this.state)
           .then(result => {
             console.log("COPY RESULT.data " + JSON.stringify(result.data));
                 if (result.data.msg === "already exist")
@@ -290,84 +334,120 @@ templateType:""
               this.setState({
                 success: true,
                 modalSuccess: true,
-                templateNameError:"",
-                templateTypeError:"",
-                rowError:""
+                modalMessage:"Salary Template Copied Successfully!"
 
               });
-            this.getExistingTemplates();
+            this.getExistingSalaryTemplates();
           });
       }
     });
   }
 
-  handleChange = idx => e => {
-    e.preventDefault();
+  handleSalaryChange = idx => e => {
+    console.log("Salary: ");
+   
     const { name, value } = e.target;
-    const temp = this.state.rows;
+    const temp = this.state.salaryRows;
+    temp[idx][name] = value;
+
+      this.setState(
+      {
+        salaryRows: temp
+      },
+      () => {
+        console.log("Change Salary: " + JSON.stringify(this.state.salaryRows));
+       // if(e.target.name==="amount"){
+            var temp=0;
+ for(var i=0;i<this.state.salaryRows.length;i++)
+temp=temp+parseInt(this.state.salaryRows[i].amount);
+      
+this.setState(
+            {
+              totalEarning: temp
+    
+            },
+            ()=>{this.setState({paidAmount:this.state.totalEarning-this.state.totalDeduction});
+
+           
+        }
+
+      
+    );});
+  
+  };
+  handleDeductChange = idx => e => {
+    
+    const { name, value } = e.target;
+    const temp = this.state.deductRows;
     temp[idx][name] = value;
 
     this.setState(
       {
-        rows: temp
+        deductRows: temp
       },
       () => {
-        console.log("Change State: " + JSON.stringify(this.state));
-      }
+        console.log("Change Deduct: " + JSON.stringify(this.state.deductRows));
+    
+             var temp=0;
+            for(var i=0;i<this.state.deductRows.length;i++)
+           temp=temp+parseInt(this.state.deductRows[i].amount)
+                   this.setState(
+                       {
+                         totalDeduction: temp
+               
+                       },()=>{this.setState({paidAmount:this.state.totalEarning-this.state.totalDeduction})});
+                   }
+      
     );
   };
-  handleAddRow = e => {
+
+  handleAddSalaryRow = e => {
     e.preventDefault();
-    this.setState({ rowError: "" });
+    this.setState({ salaryRowError: "" });
     const item = {
-      feeType: "",
+      earnType: "",
       amount: ""
     };
     this.setState({
-      rows: [...this.state.rows, item]
+      salaryRows: [...this.state.salaryRows, item]
     });
   };
-
-  handleRemoveSpecificRow = idx => () => {
-    const temp = [...this.state.rows];
-    temp.splice(idx, 1);
-    this.setState({ rows: temp });
-  };
-
-
-  handleEditChange = idx => e => {
+  handleAddDeductRow = e => {
     e.preventDefault();
-    const { name, value } = e.target;
-    const temp = this.state.editRows;
-    temp[idx][name] = value;
-
-    this.setState(
-      {
-        editRows: temp
-      },
-      () => {
-        console.log("Change State: " + JSON.stringify(this.state));
-      }
-    );
-  };
-  handleEditAddRow = e => {
-    e.preventDefault();
-    this.setState({ rowError: "" });
+    this.setState({ deductRowError: "" });
     const item = {
-      feeType: "",
+      deductType: "",
       amount: ""
     };
     this.setState({
-      editRows: [...this.state.editRows, item]
+      deductRows: [...this.state.deductRows, item]
     });
   };
 
-  handleEditRemoveSpecificRow = idx => () => {
-    const temp = [...this.state.editRows];
+
+  handleRemoveSpecificSalaryRow = idx => () => {
+    const temp = [...this.state.salaryRows];
+    this.setState({totalEarning:this.state.totalEarning-parseInt(temp[idx].amount)}) 
     temp.splice(idx, 1);
-    this.setState({ editRows: temp });
+    this.setState({ salaryRows: temp }
+
+
+        
+);
   };
 
+  handleRemoveSpecificDeductRow = idx => () => {
+    const temp = [...this.state.deductRows];
+    this.setState({totalDeduction:this.state.totalDeduction-parseInt(temp[idx].amount)}) 
+    temp.splice(idx, 1);
+    this.setState({ deductRows: temp });
+  };
+
+
+
+
+  
+  
 
   handleRemoveExistingSpecificRow= idx => () => {
 
@@ -375,25 +455,30 @@ templateType:""
       title: 'Confirm to Remove',
       message: 'Are you sure to Remove this Template?',
       buttons: [
+
+        
         {
           label: 'Yes',
           onClick: () => {
-            const temp = [...this.state.existingRows];
-            temp.splice(idx, 1);
-            this.setState({ existingRows: temp,
-            templateName: this.state.existingRows[idx].templateName},()=>{
-        
-        
+              
               axios
-              .post("http://localhost:8001/api/deleteTemplate", this.state)
+              .post("http://localhost:8001/api/deleteSalaryTemplate", {"templateName": this.state.existingSalaryRows[idx].templateName})
               .then(result => {
                 console.log("RESULT.data " + JSON.stringify(result.data));
                 if (result.data.error)
                  console.log(result.data.error);
-                this.getExistingTemplates();
+
+else if(result.data.msg==="Template Deleted")
+                {
+console.log("in Delete")
+  
+this.getExistingSalaryTemplates();
+}
+
+              
               });
         
-            });
+    
 
           }
           
@@ -435,7 +520,7 @@ templateType:""
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Salary Template saved Successfully!
+                       {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
@@ -452,12 +537,14 @@ templateType:""
                               showCreateButton: false,
                               showExistingTemplate:false,
                               templateName:"",
-                              templateType:"",
                               templateNameError:"",
-                              templateTypeError:"",
-                              rowError:"",
-                              rows: [{ feeType: "", amount: "" }],
-
+                              salaryRowError:"",
+                              deductRowError:"",
+                              salaryRows: [{ earnType: "", amount: "" }],
+                              deductRows:[{ deductType: "", amount: "" }],
+totalEarning:0,
+totalDeduction:0,
+paidAmount:0
                             });
                           }}
                         >
@@ -510,7 +597,7 @@ templateType:""
 
 
 
-
+<h4 align="center"> Earnings</h4>
 
 
 
@@ -519,15 +606,12 @@ templateType:""
 
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'backgroundColor': "palevioletred" }}>
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
 
                               <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
-                                <th className="text-center">
-                                  <h4> % of Basic </h4>{" "}
-                                </th>
-
+                               
                                 <th className="text-center">
                                   {" "}
                                   <h4>Earning Type</h4>
@@ -537,7 +621,7 @@ templateType:""
                                 </th>
                                 <th className="text-center">
                                   <Button
-                                    onClick={this.handleAddRow}
+                                    onClick={this.handleAddSalaryRow}
                                     className="btn btn-primary"
                                     color="primary"
                                     size="lg"
@@ -550,40 +634,26 @@ templateType:""
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.rows.map((item, idx) => (
+                              {this.state.salaryRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
-                                  <td>
-                                    <InputGroup className="mb-3">
-                                      <Input
-                                        type="text"
-                                        name="percentOfBasic"
-                                        value={this.state.rows[idx].percentOfBasic}
-                                        onChange={this.handleChange(idx)}
-                                        className="form-control"
-                                        style={{textAlign:'center'}}
-                                        size="lg"
-                                        id="percentOfBasic"
-                                        disabled={idx===0}
-                                      />
-                                    </InputGroup>
-                                  </td>
+                                 
 
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
-                                        name="earningType"
+                                        name="earnType"
                                         type="text"
                                       //  placeholder={e=>{if(idx===0) return("Basic Salary")}}
                                      defaultValue={()=>{return "ddf";}}
 
                                         className="form-control"
-                                        value={this.state.rows[idx].earningType}
-                                        onChange={this.handleChange(idx)}
+                                        value={this.state.salaryRows[idx].earnType}
+                                        onChange={this.handleSalaryChange(idx)}
                                         style={{textAlign:'center'}}
-                                        id="earningType"
+                                        id="earnType"
                                         size="lg"
                                       />
                                     </InputGroup>
@@ -595,8 +665,8 @@ templateType:""
                                         name="amount"
                                         type="number"
                                         className="form-control"
-                                        value={this.state.rows[idx].amount}
-                                        onChange={this.handleChange(idx)}
+                                        value={this.state.salaryRows[idx].amount}
+                                        onChange={this.handleSalaryChange(idx)}
                                         style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
@@ -606,7 +676,7 @@ templateType:""
                                   <td align="center">
                                     <Button
                                       className="btn btn-danger btn-sg"
-                                      onClick={this.handleRemoveSpecificRow(
+                                      onClick={this.handleRemoveSpecificSalaryRow(
                                         idx
                                       )}
                                       size="lg"
@@ -618,16 +688,169 @@ templateType:""
                               ))}
                             </tbody>
                           </Table>
-                          {this.state.rowError && (
+                          {this.state.salaryRowError && (
                             <font color="red">
                               <h6>
                                 {" "}
-                                <p>{this.state.rowError} </p>
+                                <p>{this.state.salaryRowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+<br/>
+
+<h4 align="center"> Deductions</h4>
+
+
+
+
+
+
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "red" }}>
+
+                              <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                               
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Deduction Type</h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  <Button
+                                    onClick={this.handleAddDeductRow}
+                                    className="btn btn-primary"
+                                    color="primary"
+                                    size="lg"
+                                  >
+                                    {" "}
+                                    Add Row
+                          </Button>
+
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.deductRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                 
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="deductType"
+                                        type="text"
+                                      //  placeholder={e=>{if(idx===0) return("Basic Salary")}}
+                                     defaultValue={()=>{return "ddf";}}
+
+                                        className="form-control"
+                                        value={this.state.deductRows[idx].deductType}
+                                        onChange={this.handleDeductChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="deductType"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="amount"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.deductRows[idx].amount}
+                                        onChange={this.handleDeductChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="amount"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td align="center">
+                                    <Button
+                                      className="btn btn-danger btn-sg"
+                                      onClick={this.handleRemoveSpecificDeductRow(
+                                        idx
+                                      )}
+                                      size="lg"
+                                    >
+                                      Remove
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                          {this.state.deductRowError  && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.deductRowError} </p>
                               </h6>{" "}
                             </font>
                           )}
 
 
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Earnings(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="totalEarning"
+                              id="totalEarning"
+                              value={this.state.totalEarning}
+                             disabled
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Deductions(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="totalDeduction"
+                              id="totalDeduction"
+                              value={this.state.totalDeduction}
+                             disabled
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Paid Amount(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="paidAmount"
+                              id="paidAmount"
+                              value={this.state.paidAmount}
+                             disabled
+                            />
+                          </InputGroup>
+                         
                           <br /> <br />
                           <Row>
                             <Col>
@@ -648,7 +871,7 @@ templateType:""
                                     showCreateTemplate: false,
                                     showCreateButton: true,
                                     showExistingTemplate:true,
-                                    rows: [{}]
+                                    salaryRows: [{}]
                                   });
                                 }}
                                 size="lg"
@@ -673,16 +896,17 @@ templateType:""
                         <CardBody className="p-2">
                           <h3 align="center"> Edit Template:  <font color="blue">
                            {this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}</font> </h3>
-                          <InputGroup className="mb-3">
+              
+                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
-                              <InputGroupText style={{ width: "120px" }}>
+                              <InputGroupText >
                                 <b>Template Name</b>
                               </InputGroupText>
                             </InputGroupAddon>
                             <Input
                               type="text"
-                              label="Template Name"
                               size="lg"
+                              label="Template Name"
                               name="templateName"
                               id="templateName"
                               value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
@@ -708,45 +932,10 @@ templateType:""
                             </font>
                           )}
 
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                <b>Template Type</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="templateType"
-                                id="templateType"
-                                size="lg"
-                                type="select"
-                                onChange={e => {
-                                  this.setState(
-                                    { templateType: e.target.value },
-                                    () => {
-                                      console.log(
-                                        "Template Type: " +
-                                        this.state.templateType
-                                      );
-                                    }
-                                  );
-                                }}
-                                value={this.state.templateType}
-                              >
 
-                               <option value="">Select</option>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Quarterly">Quarterly</option>
-                                <option value="Half Yearly">Half Yearly</option>
-                                <option value="Yearly">Yearly</option>
 
-                              </Input>
-                            </InputGroup>
-                            {this.state.templateTypeError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.templateTypeError}</p>
-                              </font>
-                            )}
+
+<h4 align="center"> Earnings</h4>
 
 
 
@@ -755,60 +944,67 @@ templateType:""
 
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'backgroundColor': "palevioletred" }}>
-                                <th className="text-center">
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
+
+                              <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
+                               
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Fee Category </h4>
+                                  <h4>Earning Type</h4>
                                 </th>
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
                                 <th className="text-center">
                                   <Button
-                                    onClick={this.handleEditAddRow}
+                                    onClick={this.handleAddSalaryRow}
                                     className="btn btn-primary"
                                     color="primary"
                                     size="lg"
                                   >
                                     {" "}
                                     Add Row
-                      </Button>
+                          </Button>
 
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.editRows.map((item, idx) => (
+                              {this.state.salaryRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
+                                 
+
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
+                                        name="earnType"
                                         type="text"
-                                        name="feeType"
-                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase()
-                                           + this.state.editRows[idx].feeType.slice(1)}
-                                        onChange={this.handleEditChange(idx)}
-                                        style={{textAlign:'center'}}
+                                      //  placeholder={e=>{if(idx===0) return("Basic Salary")}}
+                                     defaultValue={()=>{return "ddf";}}
+
                                         className="form-control"
+                                        value={this.state.salaryRows[idx].earnType}
+                                        onChange={this.handleSalaryChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="earnType"
                                         size="lg"
-                                        id="feeType"
                                       />
                                     </InputGroup>
                                   </td>
+
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
                                         name="amount"
                                         type="number"
                                         className="form-control"
-                                        value={this.state.editRows[idx].amount}
-                                        onChange={this.handleEditChange(idx)}
+                                        value={this.state.salaryRows[idx].amount}
+                                        onChange={this.handleSalaryChange(idx)}
                                         style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
@@ -818,28 +1014,181 @@ templateType:""
                                   <td align="center">
                                     <Button
                                       className="btn btn-danger btn-sg"
-                                      onClick={this.handleEditRemoveSpecificRow(
+                                      onClick={this.handleRemoveSpecificSalaryRow(
                                         idx
                                       )}
                                       size="lg"
                                     >
                                       Remove
-                                </Button>
+                                    </Button>
                                   </td>
                                 </tr>
                               ))}
                             </tbody>
                           </Table>
-                          {this.state.rowError && (
+                          {this.state.salaryRowError && (
                             <font color="red">
                               <h6>
                                 {" "}
-                                <p>{this.state.rowError} </p>
+                                <p>{this.state.salaryRowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+<br/>
+
+<h4 align="center"> Deductions</h4>
+
+
+
+
+
+
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "red" }}>
+
+                              <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                               
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Deduction Type</h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  <Button
+                                    onClick={this.handleAddDeductRow}
+                                    className="btn btn-primary"
+                                    color="primary"
+                                    size="lg"
+                                  >
+                                    {" "}
+                                    Add Row
+                          </Button>
+
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.deductRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                 
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="deductType"
+                                        type="text"
+                                      //  placeholder={e=>{if(idx===0) return("Basic Salary")}}
+                                     defaultValue={()=>{return "ddf";}}
+
+                                        className="form-control"
+                                        value={this.state.deductRows[idx].deductType}
+                                        onChange={this.handleDeductChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="deductType"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="amount"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.deductRows[idx].amount}
+                                        onChange={this.handleDeductChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="amount"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td align="center">
+                                    <Button
+                                      className="btn btn-danger btn-sg"
+                                      onClick={this.handleRemoveSpecificDeductRow(
+                                        idx
+                                      )}
+                                      size="lg"
+                                    >
+                                      Remove
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                          {this.state.deductRowError  && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.deductRowError} </p>
                               </h6>{" "}
                             </font>
                           )}
 
 
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Earnings(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="totalEarning"
+                              id="totalEarning"
+                              value={this.state.totalEarning}
+                             disabled
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Deductions(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="totalDeduction"
+                              id="totalDeduction"
+                              value={this.state.totalDeduction}
+                             disabled
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Paid Amount(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="paidAmount"
+                              id="paidAmount"
+                              value={this.state.paidAmount}
+                             disabled
+                            />
+                          </InputGroup>
+                         
                           <br /> <br />
                           <Row>
                             <Col>
@@ -861,27 +1210,27 @@ templateType:""
                                     showCreateTemplate: false,
                                     showCreateButton: true,
                                     showExistingTemplate:true,
-                                    rows: [{}]
+                                  
                                   });
                                 }}
                                 size="lg"
                                 color="secondary"
                                 block
                               >
-                                Cancel
+                                Cancel to go Back
                           </Button>
                             </Col>
                           </Row>
                         </CardBody>
                       </Card>
                     }
-
-{this.state.showCopyTemplate &&
+  {this.state.showCopyTemplate &&
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Copy Template:  <font color="blue"> {this.state.templateName.charAt(0).toUpperCase()
-                             + this.state.templateName.slice(1)}</font> </h3>
-                          <InputGroup className="mb-3">
+                          <h3 align="center"> Copy Template <font color="blue">
+                          </font> </h3>
+              
+                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText >
                                 <b>Template Name</b>
@@ -889,8 +1238,8 @@ templateType:""
                             </InputGroupAddon>
                             <Input
                               type="text"
-                              label="Template Name"
                               size="lg"
+                              label="Template Name"
                               name="templateName"
                               id="templateName"
                               value={this.state.templateName.charAt(0).toUpperCase() + this.state.templateName.slice(1)}
@@ -916,45 +1265,11 @@ templateType:""
                             </font>
                           )}
 
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText style={{ width: "120px" }}>
-                                <b>Template Type</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                name="templateType"
-                                id="templateType"
-                                size="lg"
-                                type="select"
-                                onChange={e => {
-                                  this.setState(
-                                    { templateType: e.target.value },
-                                    () => {
-                                      console.log(
-                                        "Template Type: " +
-                                        this.state.templateType
-                                      );
-                                    }
-                                  );
-                                }}
-                                value={this.state.templateType}
-                              >
 
-                               <option value="">Select</option>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Quarterly">Quarterly</option>
-                                <option value="Half Yearly">Half Yearly</option>
-                                <option value="Yearly">Yearly</option>
 
-                              </Input>
-                            </InputGroup>
-                            {this.state.templateTypeError &&(
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.templateTypeError}</p>
-                              </font>
-                            )}
+
+<h4 align="center"> Earnings</h4>
+
 
 
 
@@ -962,91 +1277,250 @@ templateType:""
 
                           <Table bordered hover>
                             <thead>
-                              <tr style={{ 'backgroundColor': "palevioletred" }}>
-                                <th className="text-center">
+                              <tr style={{ 'backgroundColor': "lightgreen" }}>
+
+                              <th className="text-center">
                                   <h4> S.No.</h4>{" "}
                                 </th>
+                               
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Fee Category </h4>
+                                  <h4>Earning Type</h4>
                                 </th>
                                 <th className="text-center">
                                   <h4> Amount(Rs)</h4>{" "}
                                 </th>
                                 <th className="text-center">
                                   <Button
-                                    onClick={this.handleEditAddRow}
+                                    onClick={this.handleAddSalaryRow}
                                     className="btn btn-primary"
                                     color="primary"
                                     size="lg"
                                   >
                                     {" "}
                                     Add Row
-                      </Button>
+                          </Button>
 
                                 </th>
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.editRows.map((item, idx) => (
+                              {this.state.salaryRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h4>{idx + 1}</h4>
                                   </td>
+                                 
+
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
+                                        name="earnType"
                                         type="text"
-                                        name="feeType"
-                                        value={this.state.editRows[idx].feeType.charAt(0).toUpperCase() +
-                                          this.state.editRows[idx].feeType.slice(1)}
-                                        onChange={this.handleEditChange(idx)}
+                                      //  placeholder={e=>{if(idx===0) return("Basic Salary")}}
+                                     defaultValue={()=>{return "ddf";}}
+
                                         className="form-control"
-                                        size="lg"
-                                        id="feeType"
+                                        value={this.state.salaryRows[idx].earnType}
+                                        onChange={this.handleSalaryChange(idx)}
                                         style={{textAlign:'center'}}
+                                        id="earnType"
+                                        size="lg"
                                       />
                                     </InputGroup>
                                   </td>
+
                                   <td>
                                     <InputGroup className="mb-3">
                                       <Input
                                         name="amount"
                                         type="number"
                                         className="form-control"
-                                        value={this.state.editRows[idx].amount}
-                                        onChange={this.handleEditChange(idx)}
+                                        value={this.state.salaryRows[idx].amount}
+                                        onChange={this.handleSalaryChange(idx)}
+                                        style={{textAlign:'center'}}
                                         id="amount"
                                         size="lg"
-                                        style={{textAlign:'center'}}
                                       />
                                     </InputGroup>
                                   </td>
                                   <td align="center">
                                     <Button
                                       className="btn btn-danger btn-sg"
-                                      onClick={this.handleEditRemoveSpecificRow(
+                                      onClick={this.handleRemoveSpecificSalaryRow(
                                         idx
                                       )}
                                       size="lg"
                                     >
                                       Remove
-                                </Button>
+                                    </Button>
                                   </td>
                                 </tr>
                               ))}
                             </tbody>
                           </Table>
-                          {this.state.rowError && (
+                          {this.state.salaryRowError && (
                             <font color="red">
                               <h6>
                                 {" "}
-                                <p>{this.state.rowError} </p>
+                                <p>{this.state.salaryRowError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+<br/>
+
+<h4 align="center"> Deductions</h4>
+
+
+
+
+
+
+                          <Table bordered hover>
+                            <thead>
+                              <tr style={{ 'backgroundColor': "red" }}>
+
+                              <th className="text-center">
+                                  <h4> S.No.</h4>{" "}
+                                </th>
+                               
+                                <th className="text-center">
+                                  {" "}
+                                  <h4>Deduction Type</h4>
+                                </th>
+                                <th className="text-center">
+                                  <h4> Amount(Rs)</h4>{" "}
+                                </th>
+                                <th className="text-center">
+                                  <Button
+                                    onClick={this.handleAddDeductRow}
+                                    className="btn btn-primary"
+                                    color="primary"
+                                    size="lg"
+                                  >
+                                    {" "}
+                                    Add Row
+                          </Button>
+
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {this.state.deductRows.map((item, idx) => (
+                                <tr id="addr0" key={idx}>
+                                  <td align="center">
+                                    <h4>{idx + 1}</h4>
+                                  </td>
+                                 
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="deductType"
+                                        type="text"
+                                     
+
+                                        className="form-control"
+                                        value={this.state.deductRows[idx].deductType}
+                                        onChange={this.handleDeductChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="deductType"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+
+                                  <td>
+                                    <InputGroup className="mb-3">
+                                      <Input
+                                        name="amount"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.deductRows[idx].amount}
+                                        onChange={this.handleDeductChange(idx)}
+                                        style={{textAlign:'center'}}
+                                        id="amount"
+                                        size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                  <td align="center">
+                                    <Button
+                                      className="btn btn-danger btn-sg"
+                                      onClick={this.handleRemoveSpecificDeductRow(
+                                        idx
+                                      )}
+                                      size="lg"
+                                    >
+                                      Remove
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                          {this.state.deductRowError  && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.deductRowError} </p>
                               </h6>{" "}
                             </font>
                           )}
 
 
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Earnings(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="totalEarning"
+                              id="totalEarning"
+                              value={this.state.totalEarning}
+                             disabled
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Deductions(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="totalDeduction"
+                              id="totalDeduction"
+                              value={this.state.totalDeduction}
+                             disabled
+                            />
+                          </InputGroup>
+
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Total Paid Amount(Rs)</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="number"
+                              size="lg"
+                             
+                              name="paidAmount"
+                              id="paidAmount"
+                              value={this.state.paidAmount}
+                             disabled
+                            />
+                          </InputGroup>
+                         
                           <br /> <br />
                           <Row>
                             <Col>
@@ -1056,7 +1530,7 @@ templateType:""
                                 color="success"
                                 block
                               >
-                               Create Copy
+                                Create Copy
                           </Button>
                             </Col>
 
@@ -1064,25 +1538,25 @@ templateType:""
                               <Button
                                 onClick={() => {
                                   this.setState({
-                                    showEditTemplate: false,
+                                    showCopyTemplate: false,
                                     showCreateTemplate: false,
                                     showCreateButton: true,
                                     showExistingTemplate:true,
-                                    showCopyTemplate:false,
-                                    rows: [{}]
+                                  
                                   });
                                 }}
                                 size="lg"
                                 color="secondary"
                                 block
                               >
-                                Cancel
+                                Cancel to go Back
                           </Button>
                             </Col>
                           </Row>
                         </CardBody>
                       </Card>
-                    }
+                  
+                  }
 
 
 
@@ -1094,7 +1568,7 @@ templateType:""
 
 
 
-              {this.state.showExistingTemplate && this.state.existingRows.length>0 &&
+              {this.state.showExistingTemplate && this.state.existingSalaryRows.length>0 &&
                 <Card className="mx-4">
                   <CardBody className="p-4">
 
@@ -1109,7 +1583,7 @@ templateType:""
                            &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
                            <Button
                                       color="primary"
-                                        onClick={this.getExistingTemplates}
+                                        onClick={this.getExistingSalaryTemplates}
                                       size="lg"
                                     >
                                       Refresh
@@ -1130,7 +1604,7 @@ templateType:""
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Template Type </h4>
+                                  <h4>Total Amount paid(Rs) </h4>
                                 </th>
 
                                 <th className="text-center">
@@ -1142,38 +1616,45 @@ templateType:""
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.existingRows.map((item, idx) => (
+                              {this.state.existingSalaryRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].templateName.charAt(0).toUpperCase() +
-                                      this.state.existingRows[idx].templateName.slice(1)}</h5>
+                                    <h5> {this.state.existingSalaryRows[idx].templateName.charAt(0).toUpperCase() +
+                                      this.state.existingSalaryRows[idx].templateName.slice(1)}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].templateType}</h5>
+                                    <h5> {this.state.existingSalaryRows[idx].paidAmount}</h5>
                                   </td>
 
                                   <td align="center">
                                     <Button
                                      color="primary"
                                       onClick={()=>{this.setState({
-                                        editRows:this.state.existingRows[idx].templateRows,
+                                        salaryRows:this.state.existingSalaryRows[idx].salaryRows,
+                                        paidAmount:this.state.existingSalaryRows[idx].paidAmount,
+                                        totalDeduction:this.state.existingSalaryRows[idx].totalDeduction,
+                                        totalEarning:this.state.existingSalaryRows[idx].totalEarning,
+
+
                                         showEditTemplate: true,
                                         templateNo: idx,
-                                        templateName: this.state.existingRows[idx].templateName,
-                                        templateType: this.state.existingRows[idx].templateType,
+                                        templateName: this.state.existingSalaryRows[idx].templateName,
+                                        deductRows:this.state.existingSalaryRows[idx].deductRows,
                                         showCreateTemplate:false,
                                         showCreateButton:false,
                                         showExistingTemplate:false,
                                         templateNameError:"",
                                         templateTypeError:"",
-                                        rowError:""
+                                        salaryRowError:"",
+                                        deductRowError:"",
 
 
-                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+
+                                      })
                                       }}
 
 
@@ -1185,21 +1666,26 @@ templateType:""
                                     <Button
                                       color="warning"
                                       onClick={()=>{this.setState({
-                                        editRows:this.state.existingRows[idx].templateRows,
-                                        showEditTemplate: false,
-                                        showCopyTemplate: true,
+                                        salaryRows:this.state.existingSalaryRows[idx].salaryRows,
+                                        paidAmount:this.state.existingSalaryRows[idx].paidAmount,
+                                        totalDeduction:this.state.existingSalaryRows[idx].totalDeduction,
+                                        totalEarning:this.state.existingSalaryRows[idx].totalEarning,
+
+
+                                        showCopyTemplate:true,
                                         templateNo: idx,
-                                        templateName: this.state.existingRows[idx].templateName,
-                                        templateType: this.state.existingRows[idx].templateType,
+                                        templateName: this.state.existingSalaryRows[idx].templateName,
+                                        deductRows:this.state.existingSalaryRows[idx].deductRows,
                                         showCreateTemplate:false,
                                         showCreateButton:false,
                                         showExistingTemplate:false,
                                         templateNameError:"",
                                         templateTypeError:"",
-                                        rowError:""
+                                        salaryRowError:"",
+                                        deductRowError:"",
 
 
-                                      },()=>{console.log("Updated State: "+JSON.stringify(this.state));})
+                                      })
                                       }}
 
                                       size="lg"

@@ -1,5 +1,5 @@
-const FeeTemplate = require("../../models/FeeTemplatesModel");
-
+const SalaryTemplates = require("../../models/SalaryTemplates");
+const Users = require("../../models/User");
 module.exports = function (app) {
 
 
@@ -7,11 +7,12 @@ async function addSalaryTemplate(req, res) {
 console.log("in Add Fee Req.body: "+JSON.stringify(req.body))
 
 var template = {
-  "templateName": req.body.templateName, "status": req.body.status, "templateRows": req.body.rows,
-  "templateType":req.body.templateType
+  "templateName": req.body.templateName, "status": "Active", "salaryRows": req.body.salaryRows,
+  "deductRows":req.body.deductRows,  "totalEarning":req.body.totalEarning, "totalDeduction":req.body.totalDeduction,
+  "paidAmount":req.body.paidAmount, 
 
 };
-var addTemplate = new FeeTemplate(template);
+var addTemplate = new SalaryTemplates(template);
 
 
 
@@ -31,7 +32,7 @@ await addTemplate
 function existingSalaryTemplates(req, res) {
   console.log("in Existing temp");
 
-  FeeTemplate
+  SalaryTemplates
     .find({status:"Active"})
     .then(data => {
         return res.send(data);
@@ -42,13 +43,63 @@ function existingSalaryTemplates(req, res) {
 
   }
 
-  function deleteTemplate(req,res)
+  function fetchEmployees(req, res) {
+    console.log("in fetchEmp: "+ req.body.empType);
+  
+    if(req.body.empType==="Admin")
+{    Users
+      .find({status:"Active", role:"admin"})
+      .then(data => {
+          return res.send(data);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+  
+    }
+
+    else   if(req.body.empType==="Staff")
+    {    Users
+          .find({status:"Active", role:"teacher"})
+          .then(data => {
+              return res.send(data);
+          })
+          .catch(err => {
+            return res.send({error:err});
+          });
+      
+        }
+
+}
+
+function getSalaryTemplate(req, res) {
+    console.log("in getSalaryTemplate: ");
+  
+  SalaryTemplates
+      .find({status:"Active"})
+      .then(data => {
+          return res.send(data);
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+  
+    
+
+
+}
+
+
+
+
+  async function deleteSalaryTemplate(req,res)
   {console.log("In Delete Template for: "+ JSON.stringify(req.body.templateName));
 
-FeeTemplate
+await SalaryTemplates
 .deleteOne({templateName:req.body.templateName})
-.then(data => {
-  return res.send({msg:"Template Deleted"});
+.then(data => { console.log("result deleted: "+JSON.stringify(data));
+  if(data){
+return res.send({msg:"Template Deleted"});}
 })
 .catch(err => {
 return res.send({error:err});
@@ -57,16 +108,19 @@ return res.send({error:err});
 
 }
 
-async function updateFeeTemplate(req,res)
+async function updateSalaryTemplate(req,res)
 {console.log("In Update Template for: "+ JSON.stringify(req.body));
 
 
 
-  FeeTemplate
-.updateOne({templateName:req.body.existingRows[req.body.templateNo].templateName},
+  SalaryTemplates
+.updateOne({templateName:req.body.existingSalaryRows[req.body.templateNo].templateName},
   {$set: {templateName:req.body.templateName,
-          templateRows:req.body.editRows,
-          templateType:req.body.templateType
+          salaryRows:req.body.salaryRows,
+          deductRows:req.body.deductRows,
+          totalDeduction:req.body.totalDeduction,
+          totalEarning:req.body.totalEarning,
+          paidAmount:req.body.paidAmount
 
   }}
   )
@@ -86,18 +140,19 @@ return res.send({error:err});
 
 }
 
-async function copyFeeTemplate(req,res)
+async function copySalaryTemplate(req,res)
 {console.log("In Copy Template for: "+ JSON.stringify(req.body));
 
 
 var template = {
-  "templateName": req.body.templateName, "status": req.body.status,
-  "templateRows": req.body.editRows,"templateType":req.body.templateType
+    "templateName": req.body.templateName, "status": "Active", "salaryRows": req.body.salaryRows,
+    "deductRows":req.body.deductRows,  "totalEarning":req.body.totalEarning, "totalDeduction":req.body.totalDeduction,
+    "paidAmount":req.body.paidAmount, 
+  
+  };
+var copyTemplate = new SalaryTemplates(template);
 
-};
-var copyTemplate = new FeeTemplate(template);
-
-await FeeTemplate.findOne({ templateName: req.body.templateName })
+await SalaryTemplates.findOne({ templateName: req.body.templateName })
 .then(data => {
   if(data)
   return res.send({msg:"already exist"});
@@ -123,9 +178,12 @@ else
 
   app.post("/api/addSalaryTemplate", addSalaryTemplate);
   app.get("/api/existingSalaryTemplates", existingSalaryTemplates);
-  app.post("/api/deleteTemplate", deleteTemplate);
-  app.post("/api/updateFeeTemplate", updateFeeTemplate);
-  app.post("/api/copyFeeTemplate", copyFeeTemplate);
+  app.post("/api/deleteSalaryTemplate", deleteSalaryTemplate);
+  app.post("/api/updateSalaryTemplate", updateSalaryTemplate);
+  app.post("/api/copySalaryTemplate", copySalaryTemplate);
+  app.post("/api/fetchEmployees", fetchEmployees);
+  
+  app.get("/api/getSalaryTemplate", getSalaryTemplate);
 
 
 

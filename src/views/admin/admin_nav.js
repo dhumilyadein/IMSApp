@@ -314,13 +314,7 @@ export default {
                     variant: 'success',
                   },
 
-                  {
-                    name: 'Deduction Templates',
-                    url: '/admin/payroll/DeductionTemplates',
-                    icon: 'fa fa-money',
-                    variant: 'success',
-                  },
-          
+              
                   {
                     name: 'Pay Salary',
                     url: '/admin/payroll/PaySalary',
