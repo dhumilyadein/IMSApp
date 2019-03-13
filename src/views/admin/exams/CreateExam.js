@@ -1,86 +1,294 @@
 import React, { Component } from "react";
-import DatePicker from 'react-date-picker';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Col,
   Container,
   Form,
-  FormGroup,
   Input,
   InputGroup,
   InputGroupAddon,
   InputGroupText,
   CardHeader,
-  Label,
   Row,
   Table,
   Modal,
   ModalHeader
 } from "reactstrap";
+import Select from 'react-select';
+import { AppSwitch } from "@coreui/react";
 
 import axios from "axios";
 
 class CreateExam extends Component {
   constructor(props) {
     super(props);
-this.getExistingExams();
-    this.state = {
 
+    this.state = {
+      showCreateExam: false,
+      status: "Active",
       erorrs: null,
       success: null,
-      examName: "",
-examNo:"",
+      userdata: null,
+      
+      // existingRows: [{ examName: "" }],
+      existingRows: [],
+      
+      showCreateButton: true,
+      rowError: false,
       examNameError: "",
       success: false,
       modalSuccess: false,
       visible: false,
-      totalMarksError:"",
-      passingMarksError:"",
-      existingExams:[],
-      totalMarks:"",
-      passingMarks:"",
-      showEditExam:false,
-      examNo:"",
-      timeLimit:"",
-      timeLimitError:""
+      showEditExam: false,
+      examNo: "",
+      examDescriptionError:"",
+      examDescription:"",
+
+      examName: "",
+      examNameError: "",
+
+      examDescription: "",
+      examDescriptionError: "",
+      percentageShareInFinalResult:null,
+      percentageShareInFinalResultError:"",
+      shareInFinalResult: null,
+      isMandatryToAttendForFinalResult: false,
+      classesAndSections: [],
+      classes: [],
+
+      // Contains both label and value the class value (eg - [{value='I', label='I'}])
+      selectClasses: [],
+
+      // Contains only the class value (eg - [I, II, III] etc)
+      applicableForClasses: [],
+
+      insertExamErrorMessage: "",
+
+      modalSuccess: false,
+      showExistingExams:true,
 
     };
 
-
-
-
-
-    this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.fetchExamDetails = this.fetchExamDetails.bind(this);
 
+    this.updateHandler = this.updateHandler.bind(this);
+    this.handleRemoveExistingSpecificRow = this.handleRemoveExistingSpecificRow.bind(this);
 
-    this.getExistingExams = this.getExistingExams.bind(this);
-    this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
-    this.editHandler = this.editHandler.bind(this);
+    this.changeHandler = this.changeHandler.bind(this);
+    this.fetchAllClassesAndSections = this.fetchAllClassesAndSections.bind(this);
+    this.fetchClasses = this.fetchClasses.bind(this);
+    this.handleClassChange = this.handleClassChange.bind(this);
+    this.createExamBtnHandler = this.createExamBtnHandler.bind(this);
+    this.insertExam = this.insertExam.bind(this);
+    this.isMandatryToAttendForFinalResultChangeHandler = this.isMandatryToAttendForFinalResultChangeHandler.bind(this);
 
+    // Fetching all classes to display in the classes dropdown on page load
+    this.fetchAllClassesAndSections();
 
-
+    // Fetching exam details on page load
+    this.fetchExamDetails();
 
   }
 
+/**
+   * @description Called when the change event is triggered for isMandatryToAttendForFinalResultChangeHandler appswith.
+   * @param {*} e
+   */
+  isMandatryToAttendForFinalResultChangeHandler(e) {
+    // console.log("Name: "+e.target.name +" Value: "+ e.target.checked);
+    this.setState({
+      [e.target.name]: e.target.checked
+    });
+  }
 
+  /**
+   * @description Called when the change event is triggered.
+   * @param {*} e
+   */
+  changeHandler(e) {
+    // console.log("Name: "+e.target.name +" Value: "+ e.target.value);
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+  }
+
+  /**
+   * Fetches all the classes and section details and nothing else
+   */
+  fetchAllClassesAndSections() {
+
+    axios.get("http://localhost:8001/api/fetchAllClassesAndSections").then(cRes => {
+
+      // console.log("CreateExam - fetchAllClassesAndSections - cRes.data - " + JSON.stringify(cRes.data));
+
+      if (cRes.data.errors) {
+
+        return this.setState({ errors: cRes.data.errors });
+
+      } else {
+
+        this.setState({ classesAndSections: cRes.data }, () => {
+
+          // Fetching unique classes from the classesAndSections 
+          this.fetchClasses();
+        });
+
+      }
+    });
+  }
+
+  /**
+   * @description - fetches unique classes from the class detail from DB
+   */
+  fetchClasses() {
+
+    var classArray = [];
+    this.state.classesAndSections.forEach(element => {
+
+      // console.log("element.class - " + element.class);
+      classArray.push(element.class);
+    });
+    // console.log("classArray - " + classArray);
+    var uniqueItems = Array.from(new Set(classArray));
+
+    var classesArray = [];
+    uniqueItems.forEach(element=> {
+
+      var classJSON = {};
+      classJSON.value = element;
+      classJSON.label = element;
+
+      classesArray.push(classJSON);
+    });
+
+    this.setState({ classes: classesArray }, () => {
+
+      console.log("CreateExam - fetchClasses - Unique classes - " + this.state.classes 
+      + " isArray - " + Array.isArray(this.state.classes));
+    });
+  }
+
+  /**
+   * Handles class change in the class dropdown
+   */
+  // handleClassChange(event) {
+
+  //   let newVal = event.target.value.value;
+  //   let stateVal = this.state.selectClasses;
+
+  //   console.log(stateVal)
+  //   console.log(newVal)
+
+  //   stateVal.indexOf(newVal) === -1
+  //     ? stateVal.push(newVal)
+  //     : stateVal.length === 1
+  //       ? (stateVal = [])
+  //       : stateVal.splice(stateVal.indexOf(newVal), 1)
+
+  //   this.setState({ selectClasses: stateVal }, () => {
+  //     console.log("CreateExam - handleClassChange - " + this.state.selectClasses);
+  //   });
+  // }
+
+  handleClassChange = (newValue, actionMeta) => {
+
+    console.log("CreateExam - handleClassChange - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+
+    var classesArrayTemp = [];
+    newValue.forEach(element => {
+      classesArrayTemp.push(element.value);
+    });
+    this.setState({
+      selectedClasses: newValue,
+      applicableForClasses: classesArrayTemp,
+    }, () => {
+      console.log("CreateExam - handleClassChange - selectedClasses - " + JSON.stringify(this.state.selectedClasses) 
+      + " applicableForClasses - " + JSON.stringify(this.state.applicableForClasses));
+    });
+
+  };
+
+  createExamBtnHandler() {
+
+    this.insertExam();
+  }
+
+  insertExam(){
+
+    var insertExamRequest = {};
+    insertExamRequest.examName = this.state.examName;
+    insertExamRequest.examDescription = this.state.examDescription;
+    insertExamRequest.applicableForClasses = this.state.applicableForClasses;
+    insertExamRequest.percentageShareInFinalResult = this.state.percentageShareInFinalResult;
+    insertExamRequest.isMandatryToAttendForFinalResult = this.state.isMandatryToAttendForFinalResult;
+
+    console.log("CreateExam - insertExam start - insertExamRequest- " + JSON.stringify(insertExamRequest));
+
+    axios.post("http://localhost:8001/api/insertExam", insertExamRequest).then(eRes => {
+
+      console.log("CreateExam - insertExam - response - " + JSON.stringify(eRes.data));
+
+      if (eRes.data.errors) {
+
+        console.log("CreateExam - insertExam - ERRORS - " + eRes.data.errors);
+        return this.setState({ insertExamErrorMessage: eRes.data.errors });
+
+      } else {
+
+        this.setState(
+          {
+            modalSuccess: true,
+            modalColor: "modal-success",
+            modalMessage: "Exam created successfully!"
+          }, () => {
+
+            // Fetching the exam details so that add the recently added exam to the existing exams table
+            this.fetchExamDetails();
+          }
+        );
+        console.log("CreateExam - insertExam - msg - " + eRes.data.msg);
+      }
+    });
+  }
+
+  fetchExamDetails() {
+
+    axios
+      .get("http://localhost:8001/api/fetchExamDetails")
+      .then(result => {
+        
+        // console.log("CreateExam - fetchExamDetails - exam details - " + JSON.stringify(result.data));
+        
+        if (result.errors) {
+          return this.setState({ errors: result.errors });
+        } else {
+  
+          this.setState({ existingRows: result.data });
+          // console.log('ClassDetails - fetchExamDetails - All exam details - ' + JSON.stringify(this.state.existingRows));
+        }
+        
+      });
+  }
+  /**
+   * @description Handles the form search request
+   * @param {*} e
+   */
+
+  /**
+   * @description Called when the change event is triggered.
+   * @param {*} e
+   */
 
   toggleSuccess() {
     this.setState({
-      modalSuccess: !this.state.modalSuccess,
-      examName:"",
-      totalMarks:"",
-      passingMarks:"",
-      description:"",
-      timeLimit:""
+      modalSuccess: !this.state.modalSuccess
     });
-
   }
 
   /**
@@ -91,358 +299,566 @@ examNo:"",
     this.setState({ visible: !this.state.visible });
   }
 
-  submitHandler(e) {
+  updateHandler(e) {
     var submit = true;
     console.log("in Submit State: " + JSON.stringify(this.state));
-
     this.setState({
-      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
-      modalSuccess: false, timeLimitError:""
+      rowError: "", examNameError: "", success: false,
+      modalSuccess: false
     }, () => {
       if (!this.state.examName) {
-        this.setState({ examNameError: "Please Enter Item Name" });
-        submit = false;}
-
-        if (!this.state.totalMarks) {
-          this.setState({ totalMarksError: "Please Enter Total Marks" });
-          submit = false;}
-
-          if (!this.state.passingMarks) {
-            this.setState({ passingMarksError: "Please Enter Passing Marks" });
-            submit = false;}
-
-            if (!this.state.timeLimit) {
-              this.setState({ timeLimitError: "Please Enter Time Limit" });
-              submit = false;}
-
-
-
+        this.setState({ examNameError: "Please Enter Exam Name" });
+        submit = false;
+      }
 
       if (submit === true) {
-        console.log("Creating Item: ");
-        axios
-          .post("http://localhost:8001/api/createExam", {"examName":this.state.examName,"totalMarks":this.state.totalMarks,
-          "passingMarks":this.state.passingMarks, "description":this.state.description,"timeLimit":this.state.timeLimit})
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
 
-            if(result.data.errors)
-            {
-            if(result.data.errors.examName)
-              this.setState({
-                examNameError:result.data.errors.examName.message
-              });}
-             else if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!"
-
-              },()=>{this.getExistingExams()});
-
-          });
-      }
-    });
-  }
-
-  editHandler(e) {
-    var submit = true;
-    console.log("in Edit State: " + JSON.stringify(this.state));
-
-    this.setState({
-      examNameError: "", totalMarksError: "", passingMarksError:"", success: false,
-      modalSuccess: false, timeLimitError:""
-    }, () => {
-      if (!this.state.examName) {
-        this.setState({ examNameError: "Please Enter Item Name" });
-        submit = false;}
-
-        if (!this.state.totalMarks) {
-          this.setState({ totalMarksError: "Please Enter Total Marks" });
-          submit = false;}
-
-          if (!this.state.passingMarks) {
-            this.setState({ passingMarksError: "Please Enter Passing Marks" });
-            submit = false;}
-
-            if (!this.state.timeLimit) {
-              this.setState({ timeLimitError: "Please Enter Time Limit" });
-              submit = false;}
-
-
-
-
-      if (submit === true) {
-        console.log("Updating Exam: "+ JSON.stringify(this.state));
-        axios
-          .post("http://localhost:8001/api/editExam", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-           if(result.data.error)
-          {  if(result.data.error.code===11000)
-            this.setState({
-              examNameError:"Exam name already in use"
-            });}
-           else  if (result.data.msg === "Exam Updated")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                showEditItem:false,
-                modalMessage:"Exam: "+ this.state.examName+" Saved Successfully!" 
-
-              },()=>{this.getExistingExams()});
-
-          });
-      }
-    });
-  }
-
-  getExistingExams() {
-
-    axios
-      .get("http://localhost:8001/api/existingExams")
-      .then(result => {
-        console.log("Existing RESULT.data " + JSON.stringify(result.data));
-        if (result.data) {
-          this.setState({
-            existingExams: result.data
-          });
+        var udpateExamRequest = {
+          "examName": this.state.examName.toLowerCase(),
+          "examDescription":this.state.examDescription,
+      "applicableForClasses": this.state.applicableForClasses,
+      "percentageShareInFinalResult": this.state.percentageShareInFinalResult,
+      "isMandatryToAttendForFinalResult": this.state.isMandatryToAttendForFinalResult,
         }
-      });
+        this.setState()
+        console.log("Updating Exam - udpateExamRequest - " + udpateExamRequest);
+        axios
+          .post("http://localhost:8001/api/updateExam", udpateExamRequest)
+          .then(result => {
+            console.log("RESULT.data " + JSON.stringify(result.data));
+
+            if (result.data.message === "Exam details updated successfully")
+              this.setState({
+                success: true,
+                modalSuccess: true,
+                modalMessage: "Exam details updated successfully.",
+                modalColor: "modal-success",
+                examNameError:"",
+                examDescriptionError:"",
+                rowError:""
+
+              });
+
+            this.fetchExamDetails();
+          });
+      }
+    });
   }
 
+  handleRemoveExistingSpecificRow= idx => () => {
 
+    console.log("CreateExam - handleRemoveExistingSpecificRow - examName - " + this.state.examName);
 
-deleteSpecificItem= idx => () => {
+    confirmAlert({
+      title: 'Confirm to Remove',
+      message: 'Are you sure to Remove this Exam?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {
+            const temp = [...this.state.existingRows];
+            temp.splice(idx, 1);
+            this.setState({ existingRows: temp,
+            examName: this.state.existingRows[idx].examName},()=>{
+        
+              axios
+              .post("http://localhost:8001/api/removeExam", this.state)
+              .then(result => {
+                
+                if (result.data.errors) {
+                  console.log("CreateExam - handleRemoveExistingSpecificRow - ERROR in removing exm - " + result.data.errors);
+                } else {
+                 this.fetchExamDetails();
+                }
+              });
+        
+            });
 
-  confirmAlert({
-    title: 'Confirm to Remove',
-    message: 'Are you sure to Remove this Exam?',
-    buttons: [
-      {
-        label: 'Yes',
-        onClick: () =>
+          }
+          
+         
+        },
+        {
+          label: 'No',
+          onClick: () =>  {  this.fetchExamDetails();}
+        }
+      ]
+    })
+  };
 
-        axios
-        .post("http://localhost:8001/api/deleteExam",{"examName":this.state.existingExams[idx].examName})
-        .then(result => {
-          console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Exam Deleted")
-            this.getExistingExams();
+  async toggleModalSuccess() {
 
-        })
-      },
-      {
-        label: 'No',
-        onClick: () =>  {this.getexistingExams();}
-      }
-    ]
-  })
-
-
-}
-
-
-
-
-
-
+    await console.log("CreateExam - toggleModalSuccess this.state.showModalFlag - " + this.state.showModalFlag);
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
+    });
+  }
 
   render() {
     return (
       <div>
         <Container>
-          <Row className="justify-content-center" lg="2">
-            <Col md="12">
 
-             <Card className="mx-4">
-                <CardBody className="p-4">
-                  <h1>Exam Management</h1>
-                  <br /> <br />
-                  {this.state.success && (
+              <Card className="mx-1">
+                <CardBody className="p-2">
+                  <h1>Manage Exams</h1>
+                  {this.state.modalSuccess && (
                     <Modal
                       isOpen={this.state.modalSuccess}
-                      className={"modal-success " + this.props.className}
+                      className={this.state.modalColor}
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        {this.state.modalMessage}
+                      {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
+                  <br />
+                    {this.state.showCreateButton && (
+                      <div className="justify-content-center">
+                        {" "}
+                        <Button
+                          color="success"
+                          size="lg"
+                          onClick={() => {
+                            this.setState({
+                              showCreateExam: true,
+                              showCreateButton: false,
+                              showExistingExams:false,
+                              examName:"",
+                              examDescription:"",
+                              examNameError:"",
+                              examDescriptionError:"",
+                              rowError:"",
 
+                            });
+                          }}
+                        >
+                          Create Exam
+                        </Button>
+                      </div>
+                    )}
 
-
-                  {!this.state.showEditExam &&  (
-
+                    {this.state.showCreateExam && (
                       <Card className="mx-1">
                         <CardBody className="p-2">
-                          <h3 align="center"> Create Exam</h3>
+                          <h2 align="center"> Create Exam</h2>
                           <br />
                           <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Exam Name</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Exam Name</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                              label="Exam Name"
+                              name="examName"
+                              id="examName"
+                              value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
+                              onChange={e => {
+                                this.setState(
+                                  { examName: e.target.value },
+                                  () => {
+                                    console.log(
+                                      "Exam name: " +
+                                      this.state.examName
+                                    );
+                                  }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.examNameError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.examNameError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
 
-                                name="examName"
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Exam Description</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                              label="Exam Description"
+                              name="examDescription"
+                              id="examDescription"
+                              value={this.state.examDescription.charAt(0).toUpperCase() + this.state.examDescription.slice(1)}
+                              onChange={e => {
+                                this.setState(
+                                  { examDescription: e.target.value }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.examDescriptionError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.examDescriptionError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
 
-                                id="examName"
-                                value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { examName: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.examNameError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.examNameError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
+                          <InputGroupAddon addonType="prepend">
+                <InputGroupText >
+                  <b>Applicable for Classes</b>
+                </InputGroupText>
+              </InputGroupAddon>
+              {/* <Creatable
+                simpleValue
+                size="lg"
+                value={this.state.selectedClasses}
+                onChange={this.handleClassChange}
+                isMulti={true}
+                closeMenuOnSelect={false}
+                autosize
+                onCreateOption={this.handleClassCreate}
+                options={this.state.classes}
+                openMenuOnFocus={true}
+              /> */}
+              <Select
+              placeholder="Select applicable for classes"
+              isMulti={true}
+              closeMenuOnSelect={false}
+              value={this.state.selectedClasses}
+              onChange={this.handleClassChange}
+              options={this.state.classes}
+              isClearable={true}
+              isSearchable={true}
+              openMenuOnFocus={true}
+              />
 
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Total Marks</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="totalMarks"
-                                 id="totalMarks"
-                                value={this.state.totalMarks}
-                                onChange={e => {
-                                  this.setState(
-                                    { totalMarks: e.target.value }
+              {this.state.dbErrors && this.state.dbErrors.classes && (
+                <font color="red">
+                  <h6>
+                    {" "}
+                    <p>{this.state.dbErrors.classes.msg} </p>
+                  </h6>{" "}
+                </font>
+              )}
 
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.totalMarksError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.totalMarksError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Passing Marks</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="passingMarks"
-                                 id="passingMarks"
-                                value={this.state.passingMarks}
-                                onChange={e => {
-                                  this.setState(
-                                    { passingMarks: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.passingMarksError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.passingMarksError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
+<br />
 
 <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Time Limit(Hours)</b>
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Percentage Share in Final result</b>
                                 </InputGroupText>
                               </InputGroupAddon>
                               <Input
-                                type="number"
-                                size="lg"
-                                name="timeLimit"
-                                 id="timeLimit"
-                                value={this.state.timeLimit}
-                                onChange={e => {console.log("limit "+JSON.stringify(e.target.value))
-                                  this.setState(
-                                    { timeLimit: e.target.value }
-
-                                  );
-                                }}
-                              />
+                                      type="number"
+                              size="lg"
+                                      name="percentageShareInFinalResult"
+                                      id="percentageShareInFinalResult"
+                                      autoComplete="shareInFinalResult"
+                                      onChange={this.changeHandler}
+                                      value={this.state.percentageShareInFinalResult}
+                                    />
                             </InputGroup>
-                            {this.state.timeLimitError && (
+                            {this.state.percentageShareInFinalResultError &&(
                               <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.timeLimitError} </p>
-                                </h6>{" "}
+                                {" "}
+                                <p>{this.state.percentageShareInFinalResultError}</p>
                               </font>
                             )}
 
-
-      <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Description</b>
+ <InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Mandatory to Attend for Final results</b>
                                 </InputGroupText>
                               </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
 
-                                name="description"
+                              &nbsp; &nbsp;
+                              <AppSwitch
+                                      name="isMandatryToAttendForFinalResult"
+                                      id="isMandatryToAttendForFinalResult"
+                              size="lg"
+                                      className={"mx-1"}
+                                      variant={"3d"}
+                                      color={"primary"}
+                                      size={"sm"}
+                                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
+                                      disabled={this.state.disabled}
+                                      checked={this.state.isMandatryToAttendForFinalResult}
+                                    /> 
+                            </InputGroup> 
 
-                                id="description"
-                                value={this.state.description}
-                                onChange={e => {
-                                  this.setState(
-                                    { description: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
+                            {/* <Table responsive size="sm" hover>
+                              <tbody>
+                                <tr>
+                                  <td>
+                                  <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Mandatory For Final Result</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                                  </td>
+                                  <td>
+                                    <AppSwitch
+                                      name="admin"
+                                      id="admin"
+                                      className={"mx-1"}
+                                      variant={"3d"}
+                                      color={"primary"}
+                                      size={"sm"}
+                                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
+                                      disabled={this.state.disabled}
+                                      checked={this.state.isMandatryToAttendForFinalResult}
+                                    />
+                                  </td>
+                                </tr>
+                                </tbody>
+                                </Table> */}
 
-<br/>
-<Row >
+                          <br />
+                          <Row>
                             <Col>
                               <Button
-                                onClick={this.submitHandler}
+                                id="createExamBtn"
+                                name="createExamBtn"
+                                onClick={this.createExamBtnHandler}
                                 size="lg"
                                 color="success"
-
+                                block
                               >
                                 Create
                               </Button>
+                              {this.state.insertExamErrorMessage &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.insertExamErrorMessage}</p>
+                              </font>
+                            )}  
                             </Col>
 
-
+                            <Col>
+                              <Button
+                                onClick={() => {
+                                  this.setState({
+                                    showCreateExam: false,
+                                    showCreateButton: true,
+                                    showExistingExams:true,
+                                  });
+                                }}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                                Cancel to go Back
+                              </Button>
+                            </Col>
                           </Row>
-                          <br /> <br />
+                        </CardBody>
 
-<h3 align="center"> Existing Exams</h3>
+                      </Card>
+
+                    )}
+
+
+
+
+                    {this.state.showEditExam &&
+                      <Card className="mx-1">
+                        <CardBody className="p-2">
+                          <h2 align="center"> Edit Exam :  <font color="blue">
+                           {this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}</font> </h2>
+                          <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText style={{ width: "120px" }}>
+                                <b>Exam Name</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              label="Exam Name"
+                              size="lg"
+                              name="examName"
+                              disabled={true}
+                              id="examName"
+                              value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
+                              onChange={e => {
+                                this.setState(
+                                  { examName: e.target.value },
+                                  () => {
+                                    console.log(
+                                      "Exam name: " +
+                                      this.state.examName
+                                    );
+                                  }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.examNameError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.examNameError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Exam Description</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                              label="Exam Description"
+                              name="examDescription"
+                              id="examDescription"
+                              value={this.state.examDescription.charAt(0).toUpperCase() + this.state.examDescription.slice(1)}
+                              onChange={e => {
+                                this.setState(
+                                  { examDescription: e.target.value }
+                                );
+                              }}
+                            />
+                          </InputGroup>
+                          {this.state.examDescriptionError && (
+                            <font color="red">
+                              <h6>
+                                {" "}
+                                <p>{this.state.examDescriptionError} </p>
+                              </h6>{" "}
+                            </font>
+                          )}
+
+                           <InputGroupAddon addonType="prepend">
+                <InputGroupText >
+                  <b>Applicable for Classes</b>
+                </InputGroupText>
+              </InputGroupAddon>
+              
+              <Select
+              placeholder="Select applicable for classes"
+              isMulti={true}
+              closeMenuOnSelect={false}
+              value={this.state.selectedClasses}
+              onChange={this.handleClassChange}
+              options={this.state.classes}
+              isClearable={true}
+              isSearchable={true}
+              openMenuOnFocus={true}
+              />
+
+              {this.state.dbErrors && this.state.dbErrors.classes && (
+                <font color="red">
+                  <h6>
+                    {" "}
+                    <p>{this.state.dbErrors.classes.msg} </p>
+                  </h6>{" "}
+                </font>
+              )}
+
+<br />
+
+<InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Percentage Share in Final result</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                      type="number"
+                              size="lg"
+                                      name="percentageShareInFinalResult"
+                                      id="percentageShareInFinalResult"
+                                      autoComplete="shareInFinalResult"
+                                      onChange={this.changeHandler}
+                                      value={this.state.percentageShareInFinalResult}
+                                    />
+                            </InputGroup>
+                            {this.state.percentageShareInFinalResultError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.percentageShareInFinalResultError}</p>
+                              </font>
+                            )}
+
+ <InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                <b>Mandatory to Attend for Final results</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp;
+                              <AppSwitch
+                                      name="isMandatryToAttendForFinalResult"
+                                      id="isMandatryToAttendForFinalResult"
+                              size="lg"
+                                      className={"mx-1"}
+                                      variant={"3d"}
+                                      color={"primary"}
+                                      size={"sm"}
+                                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
+                                      disabled={this.state.disabled}
+                                      checked={this.state.isMandatryToAttendForFinalResult}
+                                    /> 
+                            </InputGroup> 
+                            <br />  
+                          <Row>
+                            <Col>
+                              <Button
+                                onClick={this.updateHandler}
+                                size="lg"
+                                color="success"
+                                block
+                              >
+                                Update
+                          </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={() => {
+                                  this.setState({
+                                    showEditExam: false,
+                                    showCreateExam: false,
+                                    showCreateButton: true,
+                                    showExistingExams:true,
+                                  });
+                                }}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                                Cancel
+                          </Button>
+                            </Col>
+                          </Row>
+                        </CardBody>
+                      </Card>
+                    }
+                </CardBody>
+              </Card>
+
+              {this.state.showExistingExams && this.state.existingRows.length>0 &&
+                <Card className="mx-1">
+                  <CardBody className="p-2">
+
+                        <CardHeader style={{backgroundColor: 'Aqua', borderColor: 'black',  display: 'flex',
+  alignItems: 'center'}}>
+                          <h2> Existing Exams</h2>
+                           </CardHeader>
+
+
+
                           <br />
-
-
                           <Table bordered hover>
                             <thead>
                               <tr style={{ 'backgroundColor': "lightgreen" }}>
@@ -455,12 +871,12 @@ deleteSpecificItem= idx => () => {
                                 </th>
                                 <th className="text-center">
                                   {" "}
-                                  <h4>Total Marks</h4>
+                                  <h4>Exam Description </h4>
                                 </th>
 
-                                <th className="text-center">
+                                 <th className="text-center">
                                   {" "}
-                                  <h4>Passing Marks</h4>
+                                  <h4>Applicable For Classes</h4>
                                 </th>
 
                                 <th className="text-center">
@@ -472,54 +888,71 @@ deleteSpecificItem= idx => () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {this.state.existingExams.map((item, idx) => (
+                              {this.state.existingRows.map((item, idx) => (
                                 <tr id="addr0" key={idx}>
                                   <td align="center">
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingExams[idx].examName.charAt(0).toUpperCase() +
-                                      this.state.existingExams[idx].examName.slice(1)}</h5>
+                                    <h5> {this.state.existingRows[idx].examName.charAt(0).toUpperCase() +
+                                      this.state.existingRows[idx].examName.slice(1)}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingExams[idx].totalMarks}</h5>
+                                    <h5> {this.state.existingRows[idx].examDescription}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.existingExams[idx].passingMarks}</h5>
+                                    <h5> {this.state.existingRows[idx].applicableForClasses.toString()}</h5>
                                   </td>
 
                                   <td align="center">
-                                  <Button
-                                      color="primary"
-                                        onClick={ ()=>{ this.setState({showEditExam:true,
-                                       examName: this.state.existingExams[idx].examName,
-                                      totalMarks:this.state.existingExams[idx].totalMarks,
-                                      passingMarks:this.state.existingExams[idx].passingMarks,
-                                      description:this.state.existingExams[idx].description,
-                                    examNo:idx,
-                                  examNameError:"",
-                                totalMarksError:"",passingMarksError:""},()=>{console.log("showEditItem "+this.state.examNo)});}}
+                                    <Button
+                                     color="primary"
+                                      onClick={()=>{
+                                        
+                                        var selectedClassesArray = [];
+                                        this.state.existingRows[idx].applicableForClasses.forEach(element => {
+
+                                          var selectedClass = {};
+                                          selectedClass.value = element;
+                                          selectedClass.label = element;
+
+                                          selectedClassesArray.push(selectedClass);
+                                        })
+
+                                        
+                                        this.setState({
+                                        showEditExam: true,
+                                        examNo: idx,
+                                        examName: this.state.existingRows[idx].examName,
+                                        examDescription: this.state.existingRows[idx].examDescription,
+                                        selectedClasses: selectedClassesArray,
+                                        percentageShareInFinalResult: this.state.existingRows[idx].percentageShareInFinalResult,
+                                        isMandatryToAttendForFinalResult: this.state.existingRows[idx].isMandatryToAttendForFinalResult,
+                                        showCreateExam:false,
+                                        showCreateButton:false,
+                                        showExistingExams:false,
+                                        examNameError:"",
+                                        examDescriptionError:"",
+                                        rowError:""
+                                      },()=>{console.log("isMandatryToAttendForFinalResult - " + JSON.stringify(this.state.existingRows[idx])
+                                      + " Updated State: "+JSON.stringify(this.state));})
+                                      }}
 
 
                                       size="lg"
                                     >
-                                      Edit/View
+                                      Edit
                                     </Button>
-                                    &nbsp; &nbsp;
-
+                                    &nbsp;&nbsp;
                                     <Button
                                       color="danger"
-                                        onClick={ this.deleteSpecificItem(idx)}
-
-
+                                        onClick={this.handleRemoveExistingSpecificRow(idx)}
                                       size="lg"
                                     >
                                       Remove
                                     </Button>
-
-
 
 
                                   </td>
@@ -528,216 +961,9 @@ deleteSpecificItem= idx => () => {
                             </tbody>
                           </Table>
 
-
-
-
-
-                          <br /> <br />
-
-                        </CardBody>
-
-                      </Card>
-
-                   ) }
-
-{this.state.showEditExam && (
-  <Card className="mx-1">
-  <CardBody className="p-2">
-
-    <h3 align="center"> Edit Item</h3>
-                            <br />
-                            <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Item Name</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-
-                                name="examName"
-
-                                id="examName"
-                                value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
-                                onChange={e => {
-                                  this.setState(
-                                    { examName: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.examNameError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.examNameError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Total Marks</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="totalMarks"
-                                 id="totalMarks"
-                                value={this.state.totalMarks}
-                                onChange={e => {
-                                  this.setState(
-                                    { totalMarks: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.totalMarksError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.totalMarksError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-
-  <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Passing Marks</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="passingMarks"
-                                 id="passingMarks"
-                                value={this.state.passingMarks}
-                                onChange={e => {
-                                  this.setState(
-                                    { passingMarks: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.passingMarksError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.passingMarksError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-<InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Time Limit(hours)</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="number"
-                                size="lg"
-                                name="timeLimit"
-                                 id="timeLimit"
-                                value={this.state.timeLimit}
-                                onChange={e => {
-                                  this.setState(
-                                    { timeLimit: e.target.value }
-
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-                            {this.state.timeLimitError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.timeLimitError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
-
-
-
-      <InputGroup className="mb-3">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                  <b>Description</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                type="text"
-                                size="lg"
-
-                                name="description"
-
-                                id="description"
-                                value={this.state.description}
-                                onChange={e => {
-                                  this.setState(
-                                    { description: e.target.value }
-                                  );
-                                }}
-                              />
-                            </InputGroup>
-
-
-
-  <br/>
-  <Row >
-                              <Col>
-                                <Button
-                                  onClick={this.editHandler}
-                                  size="lg"
-                                  color="success"
-                                  block
-                                >
-                                  Update
-                                </Button>
-                              </Col>
-
-                              <Col>
-                                <Button
-                                  onClick={()=>{this.setState({showEditExam:false,examName:"" ,
-                                  totalMarks:"",
-                                  passingMarks:"",
-                                  description:""})}}
-                                  size="lg"
-                                  color="secondary"
-  block
-                                >
-                                  Cancel
-                                </Button>
-                              </Col>
-
-
-                            </Row>
-
-
-
-
-    </CardBody></Card>
-
-)}
-
-                </CardBody>
-              </Card>
-
-              </Col>
-          </Row>
+                  </CardBody>
+                </Card>}
         </Container>
-
-
-
-
-
       </div>
     );
   }

@@ -18,8 +18,6 @@ import {
 } from "reactstrap";
 import axios from "axios";
 
-var imageContext = require.context('../../../photoTemp', true);
-
 class ClassDetails extends Component {
 
   constructor(props) {
@@ -46,7 +44,7 @@ class ClassDetails extends Component {
         { value: "B", label: "B" },
         { value: "C", label: "C" },
       ],
-      sections: [],
+      sectionArray: [],
       selectedOptions: [],
 
       defaultSubjects: [
@@ -88,11 +86,21 @@ class ClassDetails extends Component {
   }
 
   handleSectionChange = (newValue, actionMeta) => {
-    console.log("selected value - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
-    this.setState({ selectedOptions: newValue }, () => {
-      console.log(`state selectedOptions : ${JSON.stringify(this.state.selectedOptions)}`)
+
+    console.log("CreateClass - handleSectionChange - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+
+    var sectionsTemp = [];
+    newValue.forEach(element => {
+      sectionsTemp.push(element.value);
     });
-    console.groupEnd();
+    this.setState({
+      selectedOptions: newValue,
+      sectionArray: sectionsTemp,
+    }, () => {
+      console.log("Available Sections - " + JSON.stringify(this.state.sectionArray) 
+      + " selectedOptions - " + JSON.stringify(this.state.selectedOptions));
+    });
+
   };
 
   handleCreate = (createdSection) => {
@@ -103,26 +111,25 @@ class ClassDetails extends Component {
     // We do not assume how users would like to add newly created options to the existing options list.
     // Instead we pass users through the new value in the onCreate prop
     this.setState({ isLoading: true });
-    this.setState({ sections: this.state.defaultSections });
 
     console.log('Wait a moment... input value -  ' + createdSection);
-    console.log("Initial Available Sections - " + JSON.stringify(this.state.sections));
 
     var createdOption = { "label": createdSection, "value": createdSection };
 
-    sectionsTemp = this.state.defaultSections;
-    sectionsTemp.push(createdOption);
+    sectionsTemp = this.state.sectionArray;
+    sectionsTemp.push(createdOption.value);
     this.setState({
-      sections: sectionsTemp,
+      sectionArray: sectionsTemp,
     }, () => {
-      console.log("Available Sections - " + JSON.stringify(this.state.sections));
+      console.log("Available Sections - " + JSON.stringify(this.state.sectionArray));
     });
 
-    console.log("check check selectedOptions - " + JSON.stringify(this.state.selectedOptions));
+    selectedOptionsTemp = this.state.selectedOptions;
+    selectedOptionsTemp.push(createdOption);
     this.setState({
-      selectedOptions: createdOption
+      selectedOptions: selectedOptionsTemp
     }, () => {
-      console.log("Selected Section - " + JSON.stringify(this.state.selectedOptions));
+      console.log("Selected subjects - " + JSON.stringify(this.state.selectedOptions));
     });
 
   };
@@ -130,7 +137,11 @@ class ClassDetails extends Component {
   handleSubjectChange = (newSubjectValue, actionMeta) => {
     console.log("selected value - " + JSON.stringify(newSubjectValue) + " action - " + actionMeta.action);
     this.setState({ selectedSubjects: newSubjectValue }, () => {
-      console.log(`state selectedSubjects : ${JSON.stringify(this.state.selectedSubjects)}`)
+      console.log(`CreateClass - handleSubjectChange - state selectedSubjects : ${JSON.stringify(this.state.selectedSubjects)}`);
+
+      console.log("CreateClass - createClassBtnHandler - Class - " + this.state.className + " section - "
+      + JSON.stringify(this.state.selectedOptions) + " subjects - "
+      + JSON.stringify(this.state.selectedSubjects));
     });
   };
 
@@ -169,7 +180,7 @@ class ClassDetails extends Component {
 
   async createClassBtnHandler() {
 
-    await console.log("Class - " + this.state.className + " section - "
+    await console.log("CreateClass - createClassBtnHandler - Class - " + this.state.className + " section - "
       + JSON.stringify(this.state.selectedOptions) + " subjects - "
       + JSON.stringify(this.state.selectedSubjects));
 
@@ -184,53 +195,68 @@ class ClassDetails extends Component {
       console.log("selectedSubjectsStrArray - " + this.state.selectedSubjectsStrArray);
     });
 
+    var insertClassDetailsArrayRequest = [];
 
-    var insertClassDetailsRequest = {
-      "class": this.state.className,
-      "section": this.state.selectedOptions.value,
-      "subjects": this.state.selectedSubjectsStrArray
-    }
+    this.state.selectedOptions.forEach(section => {
 
-    console.log("insertClassDetailsRequest - " + JSON.stringify(insertClassDetailsRequest));
+      var insertClassDetailsRequest = {};
 
-    axios.post("http://localhost:8001/api/insertClassDetails", insertClassDetailsRequest).then(res => {
+      insertClassDetailsRequest.class = this.state.className;
+      insertClassDetailsRequest.section = section.value;
+      insertClassDetailsRequest.subjects = this.state.selectedSubjectsStrArray;
 
-      console.log("frontend time - " + new Date().getMinutes() + " " + new Date().getMilliseconds());
+      insertClassDetailsArrayRequest.push(insertClassDetailsRequest);
+    });
+
+    // insertClassDetailsRequest = {
+    //   "class": this.state.className,
+    //   "section": this.state.selectedOptions.value,
+    //   "subjects": this.state.selectedSubjectsStrArray
+    // }
+
+    console.log("insertClassDetailsRequest - " + JSON.stringify(insertClassDetailsArrayRequest));
+
+    axios.post("http://localhost:8001/api/insertClassDetails", insertClassDetailsArrayRequest).then(res => {
 
       console.log("\nres.data - " + JSON.stringify(res.data));
-      if (res.data.errors) {
-        console.log("ERROR in insert class details - " + JSON.stringify(res.data.errors));
 
-        //Mongo DB error
-        if (res.data.errors.errmsg) {
-          console.log("Mongo DB error- " + JSON.stringify(res.data.errors.errmsg));
+      //Mongo DB error
+      if (res.data.errmsg) {
+
+        var errMsg = res.data.errmsg;
+        
+        console.log("ERROR in insert class details - " + JSON.stringify(errMsg));
+
+          console.log("Mongo DB error- " + JSON.stringify(errMsg));
 
           //for displaying error message on modal
-          if (res.data.errors.errmsg.indexOf('E11000 duplicate key error collection: IMS.Class index: class_1_section_1 dup key:') != -1) {
+          if (errMsg.indexOf('E11000 duplicate key error collection: IMS.Class index: class_1_section_1 dup key:') !== -1) {
+
+            var splitArr = errMsg.split("\"");
+
             this.setState({
               showModalFlag: true,
               modalColor: "modal-warning",
-              modalMessage: "Class '" + this.state.className + " " + this.state.selectedOptions.value + "' already exists."
+              modalMessage: "Class '" + splitArr[1] + " " + splitArr[3] + "' already exists."
             });
           } else {
             this.setState({
               showModalFlag: true,
               modalColor: "modal-warning",
-              modalMessage: res.data.errors.errmsg
+              modalMessage: errMsg
             });
           }
 
-        }
         return this.setState({ dbErrors: res.data.errors });
       } else {
 
-        console.log('Inserted class details in the Database - ' + JSON.stringify(insertClassDetailsRequest));
+        console.log('Inserted class details in the Database - ' + JSON.stringify(insertClassDetailsArrayRequest));
         this.setState({
           insertClassDetailsResponseMessage: res.data.message,
           classCreatedFlag: true,
           showModalFlag: true,
           modalColor: "modal-success",
-          modalMessage: "Class '" + this.state.className + " " + this.state.selectedOptions.value + "' successfully created!"
+          modalMessage: "Class '" + this.state.className + "' with Sections '" + this.state.sectionArray + "' successfully created!"
         });
 
         //Resetting form after updating the details
@@ -263,7 +289,7 @@ class ClassDetails extends Component {
         { value: "B", label: "B" },
         { value: "C", label: "C" },
       ],
-      sections: [],
+      sectionArray: [],
       selectedOptions: [],
 
       defaultSubjects: [
@@ -369,7 +395,9 @@ class ClassDetails extends Component {
                 simpleValue
                 value={this.state.selectedOptions}
                 onChange={this.handleSectionChange}
-                isMulti={false}
+                isMulti={true}
+                isOpen={true}
+                closeMenuOnSelect={false}
                 autosize
                 onCreateOption={this.handleCreate}
                 options={this.state.defaultSections}

@@ -236,9 +236,13 @@ module.exports = function (app) {
     //console.log("req.body.AllData - " + JSON.stringify(req.body.AllData));
 
     var response = {};
-    if (req.body.AllData) {
+    var request = req.body;
 
-      req.body.AllData.forEach(element => {
+    if (request && Array.isArray(request)) {
+
+      console.log("ClassDAO - insertClassDetails - Multiple records insert - " + JSON.stringify(request));
+
+      request.forEach(element => {
 
         // console.log("element - " + JSON.stringify(element));
 
@@ -259,7 +263,7 @@ module.exports = function (app) {
           "updatedAt": currentTime
         };
 
-        console.log("server - classData - " + JSON.stringify(classData));
+        // console.log("server - classData - " + JSON.stringify(classData));
 
         var classObj = new Class(classData);
 
@@ -268,17 +272,21 @@ module.exports = function (app) {
         classObj
           .save()
           .then(classObj => {
-            console.log("Data inserted successfully in class");
+            // console.log("Data inserted successfully in class");
+          response = { reqbody: request, message: "Class details inserted successfully" };
+          console.log("ClassDAO - insertClassDetails - Data inserted successfully in class. Server final response - " + JSON.stringify(response));
+          return res.send(response);
           })
           .catch(err => {
-            console.log("err err err - " + err);
-            //break;
-            return res.send(err);
+            console.log("Catching server err - " + err);
+          response = { errors: err };
+          console.log("server final response - " + JSON.stringify(response));
+          return res.send(response);
           });
       });
     } else {
 
-      console.log("NORMAL FLOW - " + JSON.stringify(req.body));
+      console.log("ClassDAO - insertClassDetails - Single record insert - " + JSON.stringify(request));
 
       var errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -293,22 +301,22 @@ module.exports = function (app) {
 
 
       var classData = {
-        "class": req.body.class,
-        "section": req.body.section,
-        "subjects": req.body.subjects,
-        "studentsData": req.body.studentsData,
+        "class": request.class,
+        "section": request.section,
+        "subjects": request.subjects,
+        "studentsData": request.studentsData,
         "createdAt": currentTime,
         "updatedAt": currentTime
       };
 
-      console.log("NORMAL FLOW server - classData - " + JSON.stringify(classData));
+      // console.log("NORMAL FLOW server - classData - " + JSON.stringify(classData));
 
       var classObj = new Class(classData);
       classObj
         .save()
         .then(classObj => {
           // console.log("Data inserted successfully in class");
-          response = { reqbody: req.body, message: "Class details inserted successfully" };
+          response = { reqbody: request, message: "Class details inserted successfully" };
           console.log("ClassDAO - insertClassDetails - Data inserted successfully in class. Server final response - " + JSON.stringify(response));
           return res.send(response);
         })

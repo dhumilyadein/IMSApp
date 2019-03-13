@@ -1069,10 +1069,12 @@ class UserDetails extends Component {
                                           type="file"
                                           name="photo"
                                           id="photo"
-                                          style={{ paddingLeft: "20px" }}
+                                          style={{ 
+                                            paddingLeft: "20px",
+                                            background: "white"
+                                           }}
                                           onChange={this.fileChange}
                                           disabled={this.state.editMode}
-                                          style={whiteTextFieldStyle}
                                         />
                                       </InputGroupAddon>
                                     </InputGroup>
@@ -1218,7 +1220,7 @@ class UserDetails extends Component {
                                 <Card className="mb-3">
                                   <CardBody className="p-2">
                                     {imgSource && (
-                                      <img id="displayImage" src={imgSource} />
+                                      <img id="displayImage" alt="User" src={imgSource} />
                                     )}
                                     {/* <img id="displayImage1" src={require('../../../photoTemp/kapil.jpg')} widht="200px" height="200px"/> */}
 
@@ -1459,11 +1461,11 @@ class UserDetails extends Component {
                                                   value="Fresher"
                                                   style={{
                                                     height: "35px",
-                                                    width: "25px"
+                                                    width: "25px",
+                                                    background: "white"
                                                   }}
                                                   onChange={this.changeHandler}
                                                   disabled={this.state.editMode}
-                                                  style={whiteTextFieldStyle}
                                                 />
                                                 <Label
                                                   className="form-check-label"
@@ -1482,11 +1484,11 @@ class UserDetails extends Component {
                                                   value="Experienced"
                                                   style={{
                                                     height: "35px",
-                                                    width: "25px"
+                                                    width: "25px",
+                                                    background: "white"
                                                   }}
                                                   onChange={this.changeHandler}
                                                   disabled={this.state.editMode}
-                                                  style={whiteTextFieldStyle}
                                                 />
                                                 <Label
                                                   className="form-check-label"
@@ -1516,12 +1518,11 @@ class UserDetails extends Component {
                                       </InputGroupText>
                                               </InputGroupAddon>
                                               <textarea
-                                                style={{ width: "200px" }}
+                                                style={{ width: "200px", background: "white" }}
                                                 name="experiencedetails"
                                                 value={this.state.experiencedetails}
                                                 onChange={this.changeHandler}
                                                 disabled={this.state.editMode}
-                                                style={whiteTextFieldStyle}
                                               />
 
                                               {this.state.errors &&
@@ -1951,12 +1952,11 @@ class UserDetails extends Component {
                                                 className="form-check-input"
                                                 type="checkbox"
                                                 id="parentaddresscheck"
-                                                style={{ height: "35px", width: "25px" }}
+                                                style={{ height: "35px", width: "25px", background: "white" }}
                                                 name="parentaddresscheck"
                                                 checked={this.state.parentaddresscheck}
                                                 onChange={this.copyAddress}
                                                 disabled={this.state.editMode}
-                                                style={whiteTextFieldStyle}
                                               />
                                               <Label
                                                 className="form-check-label"

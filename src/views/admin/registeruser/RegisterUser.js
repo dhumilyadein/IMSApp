@@ -12,11 +12,9 @@ import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Col,
   Container,
   Form,
-
   CardHeader,
   Input,
   InputGroup,
@@ -24,14 +22,13 @@ import {
   InputGroupText,
   Row,
   Table,
-  Alert,
   Modal,
   ModalHeader,
   FormGroup,
   Label
 } from "reactstrap";
 import { AppSwitch } from "@coreui/react";
-import axios, { post } from "axios";
+import axios from "axios";
 
 
 

@@ -1,41 +1,21 @@
 import React, { Component } from 'react';
-import Select from 'react-select';
 import classnames from 'classnames';
 import DatePicker from 'react-date-picker';
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import {
-    Badge,
     Button,
-    ButtonDropdown,
     Card,
     CardBody,
-    CardFooter,
-    CardHeader,
     Col,
-    Collapse,
-    DropdownItem,
-    DropdownMenu,
-    DropdownToggle,
-    Fade,
-    Form,
-    FormGroup,
-    FormText,
-    FormFeedback,
     Input,
     InputGroup,
     InputGroupAddon,
     InputGroupText,
-    Label,
     Row,
-    Modal,
-    ModalHeader,
-
     Table,
-    TabContent, TabPane, Nav, NavItem, NavLink,   CardTitle, CardText
+    TabContent, TabPane, Nav, NavItem, NavLink,
 } from 'reactstrap';
 
-import axios, { post } from "axios";
+import axios from "axios";
 
 
 class IssueReturnDetails extends Component {

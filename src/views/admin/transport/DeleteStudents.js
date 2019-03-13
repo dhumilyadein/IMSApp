@@ -1,25 +1,17 @@
 import React, { Component } from "react";
-import DatePicker from 'react-date-picker';
-import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import Select from 'react-select';
 import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Col,
   Container,
-  Form,
-  FormGroup,
   Input,
   InputGroup,
   InputGroupAddon,
   InputGroupText,
-  CardHeader,
-  Label,
   Row,
-  Table,
   Modal,
   ModalHeader
 } from "reactstrap";
