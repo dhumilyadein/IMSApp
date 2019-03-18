@@ -355,10 +355,7 @@ const ViewPayslip = Loadable({
   loading: Loading
 });
 
-const DeductionTemplates = Loadable({
-  loader: () => import("./views/admin/payroll/DeductionTemplates"),
-  loading: Loading
-});
+
 
 const SalaryTemplates = Loadable({
   loader: () => import("./views/admin/payroll/SalaryTemplates"),
@@ -404,11 +401,7 @@ const routes = [
     component: IssueReturnDetails
   },
 
-  {
-    path: "/admin/payroll/DeductionTemplates",
-    name: "Deduction Tempates",
-    component: DeductionTemplates
-  },
+ 
 
   {
     path: "/admin/payroll/SalaryTemplates",

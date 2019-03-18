@@ -587,52 +587,22 @@ return res.send({error:err});
 }
 
 function getBookDefaulters(req,res)
-{console.log("In getReturnedBooks for: "+ JSON.stringify(req.body));
+{console.log("In getBookDefaulters for: ");
 
 
-if(req.body.class&&req.body.section)
- { IssuedBooks
-.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
-  {class:req.body.class},{section:req.body.section},{ "issuedBookDetails.isReturned":true}] })
+  IssuedBooks
+.find(
+   { "issuedBookDetails.isReturned":false})
+    
 
 .then(data => {
-
+  console.log("In Data for: "+JSON.stringify(data));
 return res.send({data});
 })
 .catch(err => {
 return res.send({error:err});
 });
- }
-
- else if(req.body.class&&!req.body.section)
- { IssuedBooks
-.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
-  {class:req.body.class},{ "issuedBookDetails.isReturned":true}] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
- }
-
-
- else if(!req.body.class&&!req.body.section)
- { IssuedBooks
-.find({ $and: [ { doi: { $gte : new Date(req.body.dos) } }, { doi: { $lte : new Date(req.body.doe) } },
-   { "issuedBookDetails.isReturned":true}
-    ] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
- }
+ 
 
 
 
@@ -719,7 +689,7 @@ return res.send({error:err});
    app.post("/api/updateBook", updateBook);
    app.post("/api/getIssuedBooks", getIssuedBooks);
    app.post("/api/getReturnedBooks", getReturnedBooks);
-   
+   app.get("/api/getBookDefaulters", getBookDefaulters);
 
 
 

@@ -71,7 +71,7 @@ this.reset=this.reset.bind(this);
 this.getIssuedBooks=this.getIssuedBooks.bind(this);
  this.getBookDefaulters=this.getBookDefaulters.bind(this);
  this.getReturnedBooks=this.getReturnedBooks.bind(this);
-
+ this.fetchClassDetails=this.fetchClassDetails.bind(this);
  
     }
 
@@ -161,6 +161,7 @@ this.getIssuedBooks=this.getIssuedBooks.bind(this);
                   {var temp=[];
                     for(var i=0;i<result.data.data.length;i++)
                     for(var j=0;j<result.data.data[i].issuedBookDetails.length;j++)
+                    if(result.data.data[i].issuedBookDetails[j].isReturned===false)
                     temp.push({"bookNameId":result.data.data[i].issuedBookDetails[j].bookName.label+
                     "/"+result.data.data[i].issuedBookDetails[j].uniqueBookId,
                     
@@ -241,13 +242,14 @@ this.getIssuedBooks=this.getIssuedBooks.bind(this);
                     {var temp=[];
                       for(var i=0;i<result.data.data.length;i++)
                       for(var j=0;j<result.data.data[i].issuedBookDetails.length;j++)
+                      if(result.data.data[i].issuedBookDetails[j].isReturned===true)
                       temp.push({"bookNameId":result.data.data[i].issuedBookDetails[j].bookName.label+
                       "/"+result.data.data[i].issuedBookDetails[j].uniqueBookId,
                       
                       "issuedTo":result.data.data[i].issuedTo,
                       "class":result.data.data[i].class+" "+result.data.data[i].section,
-                      "doi":result.data.data[i].doi,
-                      "dor":result.data.data[i].issuedBookDetails[j].actualReturnedDate,
+                      "doi":result.data.data[i].doi.substring(0.10),
+                      "dor":result.data.data[i].issuedBookDetails[j].actualReturnedDate.substring(0.10),
                       "delayFine":result.data.data[i].issuedBookDetails[j].delayInReturn+
                       "/"+result.data.data[i].issuedBookDetails[j].totalFine
                   })
@@ -429,23 +431,25 @@ if(result.data.length===0)
       .get("http://localhost:8001/api/getBookDefaulters")
       .then(result => {
                   
-  
+        console.log("Temp.data " + JSON.stringify(result.data.data));
        if(result.data.data.length>0)
         {var temp=[];
           for(var i=0;i<result.data.data.length;i++)
           for(var j=0;j<result.data.data[i].issuedBookDetails.length;j++)
+          if(result.data.data[i].issuedBookDetails[j].isReturned===false&&
+           new Date( result.data.data[i].issuedBookDetails[j].dor)<new Date(Date.now()) )
           temp.push({"bookNameId":result.data.data[i].issuedBookDetails[j].bookName.label+
           "/"+result.data.data[i].issuedBookDetails[j].uniqueBookId,
-          
           "issuedTo":result.data.data[i].issuedTo,
           "class":result.data.data[i].class+" "+result.data.data[i].section,
-          "doi":result.data.data[i].doi.substring(0,10),
-          "dor":result.data.data[i].issuedBookDetails[j].dor.substring(0,10)
+          "delay":parseInt((new Date(Date.now())
+          - new Date(result.data.data[i].issuedBookDetails[j].dor )) / (1000 * 3600 * 24)+1),
+          "doir":result.data.data[i].doi.substring(0,10)+"/"+result.data.data[i].issuedBookDetails[j].dor.substring(0,10)
       })
       console.log("Temp.data " + JSON.stringify(temp));
             this.setState({
                 showSearchResults:true,
-                searchResults:temp,
+                defaulters:temp,
               
               });
 
@@ -890,11 +894,11 @@ if(result.data.length===0)
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.searchResults[idx].doi}</h5>
+                                    <h5> {this.state.searchResults[idx].doi.substring(0,10)}</h5>
                                   </td>
 
                                   <td align="center">
-                                    <h5> {this.state.searchResults[idx].dor}</h5>
+                                    <h5> {this.state.searchResults[idx].dor.substring(0,10)}</h5>
                                   </td>
                                   <td align="center">
                                     <h5> {this.state.searchResults[idx].delayFine}</h5>
@@ -943,7 +947,7 @@ if(result.data.length===0)
                                   <h4>Book Name/Id</h4>{" "}
                                 </th>
                                 <th className="text-center">
-                                  <h4> Expected Return Date</h4>{" "}
+                                  <h4> Issue/Expected Return Date</h4>{" "}
                                 </th>
 
                                 <th className="text-center">
@@ -958,7 +962,7 @@ if(result.data.length===0)
                                     <h4>{idx + 1}</h4>
                                   </td>
                                   <td align="center">
-                                <h5>   {this.state.defaulters[idx].name}</h5>
+                                <h5>   {this.state.defaulters[idx].issuedTo}</h5>
 
                                         
                                   </td>
@@ -968,14 +972,18 @@ if(result.data.length===0)
                                   </td>
 
                                   <td align="center">
-                                  <h5>   {this.state.defaulters[idx].rollNo}</h5>
+                                  <h5>   {this.state.defaulters[idx].bookNameId}</h5>
+                                       
+                                  </td>
+                                  <td align="center">
+                                  <h5>   {this.state.defaulters[idx].doir}</h5>
                                        
                                   </td>
 
 
 
                                   <td align="center">
-                                  <h5>   {this.state.defaulters[idx].pendingFeeAmount}</h5>
+                                  <h5>   {this.state.defaulters[idx].delay}</h5>
                                        
                                   </td>
 

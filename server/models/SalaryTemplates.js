@@ -43,36 +43,64 @@ var SalaryTemplatesSchema = new Schema({
    lowercase:true
   },
 
-  templateType: {
-    type: String,
-    required: true,
+ 
 
-  },
-
-  templateRows: {
+  salaryRows: {
     type: Array,
 
     required: true,
 
-    percentOfBasic:{
-        type: Number,
-        trim:true,
-        required: true,
-    
-      },
-
-      earningType:{
+    earnType:{
     type: String,
     trim:true,
     required: true,
 
   },
   amount:{
-    type: String,
+    type: Number,
     trim:true,
     required: true,
 
   }},
+
+  deductRows: {
+    type: Array,
+
+    required: true,
+
+    deductType:{
+    type: String,
+    trim:true,
+    required: true,
+
+  },
+  amount:{
+    type: Number,
+    trim:true,
+    required: true,
+
+  }},
+
+  paidAmount:{
+    type: Number,
+    trim:true,
+    required: true,
+
+  },
+
+  totalEarning:{
+    type: Number,
+    trim:true,
+    required: true,
+
+  },
+
+  totalDeduction:{
+    type: Number,
+    trim:true,
+    required: true,
+
+  },
 
   createdAt: {
     type: Date,
