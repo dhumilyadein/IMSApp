@@ -1,7 +1,7 @@
 var moment = require('moment');
 var util = require('util');
 
-var { check, validationResult } = require("express-validator/check");
+var { check, oneOf, validationResult } = require("express-validator/check");
 var fs = require('fs');
 const Class = require("../../models/Class");
 
@@ -24,7 +24,7 @@ module.exports = function (app) {
       .withMessage("Please Enter Subjects")
   ];
 
-  const updateClassValidation = [
+  const updateClassValidation = oneOf([
     check("class")
       .not()
       .isEmpty()
@@ -35,7 +35,19 @@ module.exports = function (app) {
       .isEmpty()
       .withMessage("Please Enter section"),
 
-  ];
+  ],
+  [
+    check("class")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter class"),
+
+    check("sectionArray")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter section array"),
+
+  ]);
 
   /**
      * @description Post method for fetchAllClassDetails service
@@ -145,12 +157,18 @@ module.exports = function (app) {
         fetchClassSpecificDetailsJSON.section = request.section;
       }
 
+      if(request.sectionArray) {
+
+        var sectionInClause = { $in: request.sectionArray }
+        fetchClassSpecificDetailsJSON.section = sectionInClause;
+      }
+
       var fetchClassSpecificDetailsResponseJSON = {};
 
       if(request.class) {
         fetchClassSpecificDetailsResponseJSON.class = 1
       }
-      if(request.section) {
+      if(request.section || request.sectionArray) {
         fetchClassSpecificDetailsResponseJSON.section = 1
       }
       if(request.timeTable) {
@@ -166,21 +184,24 @@ module.exports = function (app) {
         fetchClassSpecificDetailsResponseJSON.studentsData = 1
       }
 
-      console.log("classDAO - fetchClassSpecificDetails - fetchClassSpecificDetailsResponseJSON - " 
+      console.log("classDAO - fetchClassSpecificDetails - fetchClassSpecificDetailsJSON - " + JSON.stringify(fetchClassSpecificDetailsJSON) 
+      + " fetchClassSpecificDetailsResponseJSON - " 
       + JSON.stringify(fetchClassSpecificDetailsResponseJSON));
 
-      Class.findOne(
+      Class.find(
         fetchClassSpecificDetailsJSON,
         fetchClassSpecificDetailsResponseJSON
         )
         .then(function (classDetails) {
   
           console.log("classDAO - fetchClassSpecificDetails - All Classes and Sections -  " + classDetails);
-  
           res.send(classDetails);
         })
         .catch(function (error) {
-          console.log(error);
+
+          console.log("classDAO - fetchClassSpecificDetails - ERROR - " + err);
+          return res.send({ "errors" : error});
+
         });
   
     }

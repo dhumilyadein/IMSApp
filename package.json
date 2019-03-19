@@ -71,6 +71,7 @@
     "react-selectize": "^3.0.1",
     "react-spinners": "^0.5.1",
     "react-test-renderer": "^16.5.2",
+    "react-time-range": "^1.0.4",
     "react-transition-group": "^2.5.1",
     "reactstrap": "^7.1.0",
     "regex-email": "^1.0.2",
