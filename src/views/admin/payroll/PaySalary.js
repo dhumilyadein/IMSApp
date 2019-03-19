@@ -56,15 +56,14 @@ showSalaryTemplate:false,
 totalEarning:"",
 totalDeduction:"",
 paidAmount:"",
-
+dop:new Date(Date.now()),
 
 paidAmount:"",
 remarks:"",
-dop:new Date(Date.now()),
-
+month:"",
 paidAmountError:"",
-dosError:"",
-
+dopError:"",
+modelMessage:"",
 modalSuccess:false,
 success:false,
 studentName:"",
@@ -80,7 +79,7 @@ deductRows:[]
 
 
         this.empChangeHandler = this.empChangeHandler.bind(this);
-         this.feeSubmitHandler = this.feeSubmitHandler.bind(this);
+         this.SubmitHandler = this.SubmitHandler.bind(this);
          this.salaryTemplateSelectHandler = this.salaryTemplateSelectHandler.bind(this);
          this.toggleSuccess = this.toggleSuccess.bind(this);
 this.fetchEmployees=this.fetchEmployees.bind(this);
@@ -94,7 +93,10 @@ this.fetchEmployees=this.fetchEmployees.bind(this);
     toggleSuccess() {
 
       this.setState({
-        modalSuccess: !this.state.modalSuccess
+        modalSuccess: !this.state.modalSuccess,
+        selectedEmp:[],
+        modelMessage:""
+        
       });
   
     }
@@ -103,7 +105,7 @@ this.fetchEmployees=this.fetchEmployees.bind(this);
     fetchEmployees(e) {
         console.log("EmpType - " + e.target.value);
 
-        this.setState({ empType:e.target.value});
+        this.setState({ empType:e.target.value, selectedEmp:[]});
       axios.post("http://localhost:8001/api/fetchEmployees",{"empType":e.target.value}).then(cRes => {
         console.log("Result Emp - " +JSON.stringify(cRes));
 
@@ -145,98 +147,63 @@ this.fetchEmployees=this.fetchEmployees.bind(this);
 
 
 
-    feeSubmitHandler(e){
+    SubmitHandler(e){
       e.preventDefault();
-console.log("In FeeSubmit:"+ JSON.stringify(this.state));
+console.log("In PAySalrySubmit:"+ JSON.stringify(this.state));
 var submit=true;
 
-this.setState({yearError:"", quarterError:"",studentError:"", monthError:"",halfYearError:"",dosError:"", paidAmountError:"",sectionError:"", error:"", success: false,
-modalSuccess: false})
+this.setState({ monthError:"",dopError:"",  error:"", success: false,
+modalSuccess: false, })
 
-if(!this.state.year||this.state.year.length!=9)
-{
-this.setState({yearError:"Please Enter Year correctly (Eg. 2018-19)"});
-submit=false;
 
-}
-if(this.state.templateType==="Monthly")
 if(!this.state.month)
 {
 this.setState({monthError:"Please Select month"});
 submit=false;
 
 }
-if(this.state.templateType==="Quarterly")
-if(!this.state.quarter)
+  if(!this.state.dop)
 {
-this.setState({quarterError:"Please Select Quarter"});
-submit=false;
-
-}
-
-if(this.state.templateType==="Half Yearly")
-if(!this.state.halfYear)
-{
-this.setState({halfYearError:"Please Select Half Year"});
-submit=false;
-
-}
-
-if(!this.state.paidAmount)
-{
-  this.setState({paidAmountError:"Please Enter Paid Amount"});
+  this.setState({dopError:"Please Enter Date of Payment"});
   submit=false;
 
   }
 
-  if(!this.state.section)
-{
-  this.setState({sectionError:"Please Select Section"});
-  submit=false;
-
-  }
-
-  if(!this.state.dos)
-{
-  this.setState({dosError:"Please Enter Date of Submission"});
-  submit=false;
-
-  }
-
-  if(!this.state.selectedStudent.value)
+  if(!this.state.selectedEmp.value)
   {
-    this.setState({studentError:"Please Select Student"});
+    this.setState({studentError:"Please Select Employee"});
     submit=false;
 
     }
 
   if(submit)
-  { this.setState({totalDueAmount:document.getElementById("totalDueAmount").value,
-                    studentName:this.state.selectedStudent.label},()=>{
+  { 
 
     axios
-    .post("http://localhost:8001/api/feeSubmit", this.state)
+    .post("http://localhost:8001/api/paySalary",{
+        "salaryRows": this.state.salaryRows,"empType":this.state.empType,
+        "deductRows":this.state.deductRows,  "totalEarning":this.state.totalEarning, "totalDeduction":this.state.totalDeduction,
+        "paidAmount":this.state.paidAmount, "selectedEmp":this.state.selectedEmp,"month":this.state.month, "dop":this.state.dop, "remarks":this.state.remarks
+      
+      }
+)
     .then(result => {
-        console.log("result.data " + JSON.stringify(result.data));
+        console.log("result.data Pay " + JSON.stringify(result.data));
 
         if (result.data.msg === "Success")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                class:"",
-                section:"",
-
+               modelMessage:"Salary paid to "+this.state.selectedEmp.value,
                 selectedSalaryTemplate:[],
                 showSalaryTemplate:false,
                 paidAmount:"",
 
-                studentResults: [],
 
 
-                halfYear:"",
                 remarks:"",
-                quarter:"",
+               
                 month:""
 
 
@@ -249,7 +216,7 @@ if(!this.state.paidAmount)
             }
 
 
-    });
+    
   })
 
 
@@ -395,7 +362,11 @@ this.setState({selectedSalaryTemplate:e, },()=>{
                                     </font>
                                   )}
 
-
+<InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                      Employee/Staff
+                                </InputGroupText>
+                                    </InputGroupAddon>
                      <Select
                             id="selectedEmp"
                             name="selectedEmp"
@@ -420,7 +391,11 @@ this.setState({selectedSalaryTemplate:e, },()=>{
                             )}
                             <br/>
 
-
+                            <InputGroupAddon addonType="prepend">
+                                      <InputGroupText style={{ width: "120px" }}>
+                                   Salary Template
+                                </InputGroupText>
+                                    </InputGroupAddon>
 
 <Select
                             id="salaryTemplates"
@@ -439,6 +414,42 @@ this.setState({selectedSalaryTemplate:e, },()=>{
 
 
   <br/>
+
+  <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText style={{ width: "120px" }}>
+                               <b> For Month</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                name="month"
+                                id="month"
+                                type="select"
+                                value={this.state.month}
+                                onChange={e=>{this.setState({month:e.target.value})}}
+                              >
+                                <option value="">Select Month</option>
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <option value="March">March</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="July">July</option>
+                                <option value="August">August</option>
+                                <option value="September">September</option>
+                                <option value="October">October</option>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                                   </Input>
+
+                            </InputGroup>
+                            {this.state.monthError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.monthError}</p>
+                              </font>
+                            )}
 
   {this.state.showSalaryTemplate&& <p>
 
@@ -594,13 +605,7 @@ this.setState({selectedSalaryTemplate:e, },()=>{
                           </InputGroup>
                          
                                           
-                         
-
-
-
-
-
-
+                       
 
                           <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
@@ -620,10 +625,10 @@ this.setState({selectedSalaryTemplate:e, },()=>{
 
 
                             </InputGroup>
-                            {this.state.dosError &&(
+                            {this.state.dopError &&(
                                 <font color="red">
                                   {" "}
-                                  <p>{this.state.dosError}</p>
+                                  <p>{this.state.dopError}</p>
                                 </font>
                               )}
 
@@ -650,7 +655,7 @@ this.setState({selectedSalaryTemplate:e, },()=>{
 <br/> <Row>
                             <Col>
                               <Button
-                                onClick={this.feeSubmitHandler}
+                                onClick={this.SubmitHandler}
                                 size="lg"
                                 color="success"
                                 block
@@ -680,12 +685,6 @@ this.setState({selectedSalaryTemplate:e, },()=>{
 
 <br/>
 
-{this.state.error &&
-                              <font color="red">
-                                {" "}
-                                <p>{this.state.error}</p>
-                              </font>
-                            }
 
 </CardBody></Card>
               </Col>

@@ -260,10 +260,18 @@ if (!ClassCheck)
 
     else
 {console.log("in Class Update Else")
-  error= updateClassDetails(request);
+const studentCheck = await User.findOne({
+ 
+username:request.username
+});
+if (!studentCheck)
+ { error= updateClassDetails(request);
 if(Object.keys(error).length>0)
 valError["ClassError"] =
 "Class: " + request.class+" "+request.section + " "+JSON.stringify(error);
+}
+
+
 }
 }
 
