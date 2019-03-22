@@ -1,4 +1,4 @@
-var { check, validationResult } = require("express-validator/check");
+var { check, oneOf, validationResult } = require("express-validator/check");
 const exams = require("../../models/Exams");
 
 module.exports = function (app) {
@@ -12,8 +12,15 @@ module.exports = function (app) {
     check("applicableForClasses")
       .not()
       .isEmpty()
-      .withMessage("Please Enter Applicable for Classes"),
+      .withMessage("Please Enter Applicable for Classes")
   ];
+
+  const fetchExamValidation = oneOf([
+    check("applicableForClasses")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter Applicable for Classes")
+  ]);
 
   const ExamNameValidation = [
     check("examName")
@@ -70,12 +77,19 @@ module.exports = function (app) {
     console.log("in insertExam request - " + JSON.stringify(request))
 
     var date = new Date();
+
+    var classWiseExamDetailsArray = [];
+    request.applicableForClasses.forEach(element => {
+      classWiseExamDetailsArray.push(element);
+    });
+
     var examRequest = {
       "examName": request.examName,
       "examDescription":request.examDescription,
       "applicableForClasses": request.applicableForClasses,
       "percentageShareInFinalResult": request.percentageShareInFinalResult,
       "isMandatryToAttendForFinalResult": request.isMandatryToAttendForFinalResult,
+      "classWiseExamDetailsArray": classWiseExamDetailsArray,
       "createdAt": new Date(date.getTime()-(date.getTimezoneOffset() * 60000)),
       "updatedAt": new Date(date.getTime()-(date.getTimezoneOffset() * 60000))
     };
@@ -99,12 +113,18 @@ module.exports = function (app) {
     console.log("examsDAO - in updateExam -  request - " + JSON.stringify(request))
 
     var date = new Date();
+
+    var classWiseExamDetailsArray = [];
+    request.applicableForClasses.forEach(element => {
+      classWiseExamDetailsArray.push(element);
+    });
     
     var objForUpdate = {};
     if(request.examDescription) objForUpdate.examDescription = request.examDescription;
     if(request.applicableForClasses) objForUpdate.applicableForClasses = request.applicableForClasses;
     if(request.percentageShareInFinalResult) objForUpdate.percentageShareInFinalResult = request.percentageShareInFinalResult;
-    if(request.examDescription) objForUpdate.isMandatryToAttendForFinalResult = request.isMandatryToAttendForFinalResult;
+    if(request.isMandatryToAttendForFinalResult) objForUpdate.isMandatryToAttendForFinalResult = request.isMandatryToAttendForFinalResult;
+    if(classWiseExamDetailsArray) objForUpdate.classWiseExamDetailsArray = classWiseExamDetailsArray;
 
     objForUpdate.updatedAt = new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
 
@@ -174,6 +194,43 @@ module.exports = function (app) {
           return res.send({ "errors" : err});
         });
   
+    }
+
+    async function fetchExamDetailsOnInput(req, res) {
+
+      var request = req.body;
+      console.log("in fetchExamDetailsOnInput request - " + JSON.stringify(request))
+  
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      var examRequest = {
+        "applicableForClasses": {$elemMatch:{$eq:request.applicableForClasses}}
+      };
+
+      exams.find(examRequest,
+        {
+        "examName":1, 
+        "examDescription":1,
+        "percentageShareInFinalResult": 1,
+        "applicableForClasses": 1,
+        "isMandatryToAttendForFinalResult": 1
+      })
+        .then(function (examDetails) {
+  
+          console.log("examsDAO - fetchExamDetailsOnInput - Exam details -  " + examDetails);
+  
+          res.send(examDetails);
+        })
+        .catch(function (err) {
+          console.log("examsDAO - fetchExamDetailsOnInput - ERROR - " + err);
+          return res.send({ "errors" : err});
+        });
     }
 
   async function consumeexam(req, res) {
@@ -308,6 +365,10 @@ module.exports = function (app) {
 
   app.get("/api/fetchExamDetails", fetchExamDetails, (req, res) => {
     console.log("examsDAO - fetchExamDetails get method call");
+  });
+
+  app.post("/api/fetchExamDetailsOnInput", fetchExamValidation, fetchExamDetailsOnInput, (req, res) => {
+    console.log("examsDAO - fetchExamDetailsOnInput post method call");
   });
 
   app.post("/api/insertExam", insertExamValidation, insertExam, (req, res) => {

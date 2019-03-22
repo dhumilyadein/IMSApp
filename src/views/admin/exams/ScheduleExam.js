@@ -7,9 +7,8 @@ import ReactLoading from 'react-loading';
 import moment from 'moment';
 import "bootstrap/dist/css/bootstrap.css";
 import "react-datetime/css/react-datetime.css";
-import { AppSwitch } from "@coreui/react";
 import TimeRange from 'react-time-range';
-import { TimePicker } from 'antd';
+import { AppSwitch } from "@coreui/react";
 import {
   Badge,
   Button,
@@ -57,6 +56,8 @@ class ScheduleExam extends Component {
 
       classesView: true,
       sectionView: false,
+      showTabsFlag: false,
+      showExamNamesFlag: false,
 
       classesAndSections: [],
       classDetails: {},
@@ -69,14 +70,14 @@ class ScheduleExam extends Component {
       selectedSectionsLabelValueArray: [],
       disableSectionsFlag: false,
       allSectionCheck: false,
-      showTabsFlag: false,
+
 
       // To make tab 1 on focus
       activeTab: 'EXAM_DETAILS',
 
       subjectArray: [],
 
-      examDetailsArray: [{ examName: "" }],
+      inputExamDataArray: [{ examName: "" }],
 
       includeInResultFlag: true,
 
@@ -84,7 +85,22 @@ class ScheduleExam extends Component {
 
       examDate: new Date(),
 
-      defaultExamDuration: 0
+      defaultExamDuration: 0,
+
+      examName: "",
+      examNameError: "",
+      examDetailsArray: [],
+      selectedExamDetails: {},
+
+      // selectedVenueLabelValue: [],
+      // selectedVenue: "",
+
+      venueLabelValueArray: [
+        { label: "Hall 1", value: "Hall 1" },
+        { label: "Hall 2", value: "Hall 2" },
+        { label: "Hall 3", value: "Hall 3" },
+        { label: "Hall 4", value: "Hall 4" }
+      ]
 
     };
 
@@ -93,11 +109,15 @@ class ScheduleExam extends Component {
     this.fetchClassSpecificDetails = this.fetchClassSpecificDetails.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
+    this.examNameChangeHandler = this.examNameChangeHandler.bind(this);
+    this.changeHandler = this.changeHandler.bind(this);
     this.allSectionCheckHandler = this.allSectionCheckHandler.bind(this);
     this.sectionMenuCloseHandler = this.sectionMenuCloseHandler.bind(this);
     this.toggleTabs = this.toggleTabs.bind(this);
     this.isIncludeInResultHandler = this.isIncludeInResultHandler.bind(this);
     this.onChange = this.onChange.bind(this);
+    this.isMandatryToAttendForFinalResultChangeHandler = this.isMandatryToAttendForFinalResultChangeHandler.bind(this);
+
     // this.setStartMoment = this.setStartMoment.bind(this);
     // this.setEndMoment = this.setEndMoment.bind(this);
     // this.setExamDuration = this.setExamDuration.bind(this);
@@ -105,6 +125,35 @@ class ScheduleExam extends Component {
     this.totalMarksChangeHandler = this.totalMarksChangeHandler.bind(this);
 
     this.fetchAllClassesAndSections();
+  }
+
+  /**
+   * Fetching exam details
+   */
+  fetchExamDetailsOnInput() {
+
+    var fetchExamDetailsOnInputRequest = {
+      "applicableForClasses": this.state.class
+    }
+
+    axios
+      .post("http://localhost:8001/api/fetchExamDetailsOnInput", fetchExamDetailsOnInputRequest)
+      .then(result => {
+
+        // console.log("CreateExam - fetchExamDetails - exam details - " + JSON.stringify(result.data));
+
+        if (result.errors) {
+          return this.setState({ errors: result.errors });
+        } else {
+
+          this.setState({ examDetailsArray: result.data }, () => {
+
+            console.log('ScheduleExam - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
+          });
+
+        }
+
+      });
   }
 
   /**
@@ -210,44 +259,43 @@ class ScheduleExam extends Component {
 
           } else {
 
-            this.setState({
-              subjectArray: this.state.classDetails[0].subjects,
-            }, () => {
+            console.log("ScheduleExam - fetchClassSpecificDetails - this.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
 
-              /*
-              Setting temporary examDetailsArray for each subject
+            /*
+              Setting temporary inputExamDataArray for each subject
               */
-              var startMoment = new Date().setHours(12, 0, 0, 0);
-              var endMoment = new Date().setHours(12, 0, 0, 0);
-              var examDate = new Date(new Date().setHours(5, 30, 0, 0));
+            var startMoment = new Date(new Date().setHours(12, 0, 0, 0));
+            var endMoment = new Date(new Date().setHours(12, 0, 0, 0));
+            var examDate = new Date(new Date().setHours(5, 30, 0, 0));
 
-              var examDetailsArrayTemp = [];
-              this.state.subjectArray.forEach(element => {
+            var inputExamDataArrayTemp = [];
+            this.state.classDetails[0].subjects.forEach(element => {
 
-                const item = {
-                  subject: element,
-                  totalMarks: "",
-                  passingMarks: "",
-                  includeInResultFlag: false,
-                  examDate: examDate,
-                  startMoment: startMoment,
-                  endMoment: endMoment,
-                  examDuration: 0,
-                  venue: ""
-                };
+              const item = {
+                subject: element,
+                totalMarks: "",
+                passingMarks: "",
+                includeInResultFlag: true,
+                examDate: examDate,
+                startMoment: startMoment,
+                endMoment: endMoment,
+                examDuration: 0,
+                selectedVenueLabelValue: [],
+                selectedVenue: "",
+              };
 
-                examDetailsArrayTemp.push(item);
+              inputExamDataArrayTemp.push(item);
 
-              });
-
-              console.log("exam details array - " + JSON.stringify(examDetailsArrayTemp));
-              this.setState({
-                examDetailsArray: examDetailsArrayTemp
-              });
-
-              console.log("ScheduleExam - fetchClassSpecificDetails - subjectArray - " + this.state.subjectArray);
-              return;
             });
+
+            console.log("exam details array - " + JSON.stringify(inputExamDataArrayTemp));
+            this.setState({
+              inputExamDataArray: inputExamDataArrayTemp,
+              subjectArray: this.state.classDetails[0].subjects,
+            });
+
+            console.log("1 ScheduleExam - fetchClassSpecificDetails - subjectArray - " + this.state.subjectArray
+              + " \nthis.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
           }
         });
       }
@@ -275,8 +323,14 @@ class ScheduleExam extends Component {
   classChangeHandler(e) {
 
     var selectedClass = e.currentTarget.value;
+    var selectedClass = e.currentTarget.value;
 
-    this.setState({ class: selectedClass });
+    this.setState({
+      class: selectedClass,
+      showTabsFlag: false,
+      showExamNamesFlag: false,
+      selectedExamDetails: []
+    });
 
     var sectionArrayTemp = [];
     var sectionLabelValueArray = [];
@@ -311,7 +365,7 @@ class ScheduleExam extends Component {
     }, () => {
 
 
-      //this.fetchClassSpecificDetails();
+      this.fetchExamDetailsOnInput();
 
       console.log("Selected class - " + selectedClass + " Sections - " + sectionArrayTemp
         + " \nsectionLabelValueArray - " + JSON.stringify(this.state.sectionLabelValueArray));
@@ -322,35 +376,15 @@ class ScheduleExam extends Component {
 
     console.log("ScheduleExam - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
 
-    var startMoment = new Date().setHours(12, 0, 0, 0);
-    var endMoment = new Date().setHours(12, 0, 0, 0);
-    var examDate = new Date(new Date().setHours(5, 30, 0, 0));
-
     var sectionArrayTemp = [];
-    var examDetailsArrayTemp = [];
     newValue.forEach(element => {
 
-      const item = {
-        totalMarks: "100",
-        passingMarks: "40",
-        includeInResultFlag: false,
-        examDate: examDate,
-        startMoment: startMoment,
-        endMoment: endMoment,
-        examDuration: 120,
-        venue: "Hall1"
-      };
-
       sectionArrayTemp.push(element.value);
-      examDetailsArrayTemp.push(item);
-
     });
 
-    console.log("exam details array - " + JSON.stringify(examDetailsArrayTemp));
     this.setState({
       selectedSectionsArray: sectionArrayTemp.sort(),
       selectedSectionsLabelValueArray: newValue,
-      examDetailsArray: examDetailsArrayTemp
     }, () => {
       console.log("ScheduleExam - sectionChangeHandler - selectedSectionsLabelValueArray - " + JSON.stringify(this.state.selectedSectionsLabelValueArray));
       console.log("\nScheduleExam - sectionChangeHandler - selected class - " + JSON.stringify(this.state.class)
@@ -367,7 +401,7 @@ class ScheduleExam extends Component {
         selectedSectionsArray: this.state.sectionArray,
         selectedSectionsLabelValueArray: this.state.sectionLabelValueArray,
         disableSectionsFlag: true,
-        showTabsFlag: true
+        showExamNamesFlag: true
       }, () => {
 
         // Fetching subject details for selected sections
@@ -387,12 +421,69 @@ class ScheduleExam extends Component {
     }
   }
 
-  sectionMenuCloseHandler() {
+  // venueChangeHandler = (newValue, actionMeta) => {
+
+  //   console.log("ScheduleExam - venueChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+
+
+
+  //   if (typeof (this.state.inputExamDataArray[idx]).selectedVenueLabelValue === 'undefined' || this.state.inputExamDataArray[idx].selectedVenueLabelValue === null) {
+  //     temp[idx]["selectedVenueLabelValue"] = new Date().setHours(5, 30, 0, 0);
+  //   }
+
+
+  //   var temp = this.state.inputExamDataArray;
+  //   if (typeof (newValue) === 'undefined' || newValue === null) {
+
+  //     this.setState({
+  //       temp[idx]["selectedVenueLabelValue"] = newValue,
+  //       temp[idx]["selectedVenue"] = newValue.value,
+  //     }, () => {
+  //       console.log("ScheduleExam - selectedVenueLabelValue - " + JSON.stringify(this.state.selectedVenueLabelValue) + " selectedVenue - " + this.state.selectedVenue);
+  //     });
+  //   }
+
+  // };
+
+  examNameChangeHandler(e) {
+
+    var examName = e.currentTarget.value;
+
+    this.state.examDetailsArray.forEach(element => {
+
+      var selectedExamDetails = {};
+
+      if (examName === element.examName) {
+
+        selectedExamDetails.examName = element.examName;
+        selectedExamDetails.examDescription = element.examDescription;
+        selectedExamDetails.percentageShareInFinalResult = element.percentageShareInFinalResult;
+        selectedExamDetails.applicableForClasses = element.applicableForClasses;
+        selectedExamDetails.isMandatryToAttendForFinalResult = element.isMandatryToAttendForFinalResult;
+
+        this.setState({
+          selectedExamDetails: selectedExamDetails
+        });
+
+        console.log("Foreach setting exam details");
+        return true;
+      }
+
+    });
+
+    console.log("Foreach setting exam details after loop");
+    this.setState({
+      showTabsFlag: true
+    });
+
+  }
+
+  async sectionMenuCloseHandler() {
 
     if (this.state.selectedSectionsArray.length > 0) {
       this.fetchClassSpecificDetails();
       this.setState({
-        showTabsFlag: true
+        showExamNamesFlag: true
       });
     }
   }
@@ -428,74 +519,74 @@ class ScheduleExam extends Component {
 
   // setStartMoment(idx) {
 
-  //   var temp = this.state.examDetailsArray;
+  //   var temp = this.state.inputExamDataArray;
 
-  //   console.log('ScheduleExam - setStartMoment - this.state.examDetailsArray[idx]) - '  + this.state.examDetailsArray[idx]);
-  //   if (this.state.examDetailsArray) {
+  //   console.log('ScheduleExam - setStartMoment - this.state.inputExamDataArray[idx]) - '  + this.state.inputExamDataArray[idx]);
+  //   if (this.state.inputExamDataArray) {
 
   //     // temp[idx]["startMoment"] = new Date().setHours(12, 0, 0, 0);
-  //     // this.setState({ examDetailsArray: temp });
+  //     // this.setState({ inputExamDataArray: temp });
   //     return new Date().setHours(12, 0, 0, 0);
 
   //   } else {
 
-  //     if (typeof (this.state.examDetailsArray[idx].startMoment) === 'undefined' || this.state.examDetailsArray[idx].startMoment === null) {
+  //     if (typeof (this.state.inputExamDataArray[idx].startMoment) === 'undefined' || this.state.inputExamDataArray[idx].startMoment === null) {
   //       temp[idx]["startMoment"] = new Date().setHours(12, 0, 0, 0);
-  //       this.setState({ examDetailsArray: temp });
+  //       this.setState({ inputExamDataArray: temp });
   //       return new Date().setHours(12, 0, 0, 0);
   //     } else {
-  //       temp[idx]["startMoment"] = this.state.examDetailsArray[idx].startMoment;
-  //       this.setState({ examDetailsArray: temp });
-  //       return this.state.examDetailsArray[idx].startMoment;
+  //       temp[idx]["startMoment"] = this.state.inputExamDataArray[idx].startMoment;
+  //       this.setState({ inputExamDataArray: temp });
+  //       return this.state.inputExamDataArray[idx].startMoment;
   //     }
   //   }
   // }
 
   // setEndMoment(idx) {
 
-  //   var temp = this.state.examDetailsArray;
+  //   var temp = this.state.inputExamDataArray;
 
-  //   if (this.state.examDetailsArray) {
+  //   if (this.state.inputExamDataArray) {
 
   //     // temp[idx]["endMoment"] = new Date().setHours(12, 0, 0, 0);
-  //     // this.setState({ examDetailsArray: temp });
+  //     // this.setState({ inputExamDataArray: temp });
   //     return new Date().setHours(12, 0, 0, 0);
 
   //   } else {
 
-  //     if (typeof (this.state.examDetailsArray[idx].endMoment) === 'undefined' || this.state.examDetailsArray[idx].endMoment === null) {
+  //     if (typeof (this.state.inputExamDataArray[idx].endMoment) === 'undefined' || this.state.inputExamDataArray[idx].endMoment === null) {
   //       temp[idx]["endMoment"] = new Date().setHours(12, 0, 0, 0);
-  //       this.setState({ examDetailsArray: temp });
+  //       this.setState({ inputExamDataArray: temp });
   //       return new Date().setHours(12, 0, 0, 0);
   //     } else {
-  //       temp[idx]["endMoment"] = this.state.examDetailsArray[idx].endMoment;
-  //       this.setState({ examDetailsArray: temp });
-  //       return this.state.examDetailsArray[idx].endMoment;
+  //       temp[idx]["endMoment"] = this.state.inputExamDataArray[idx].endMoment;
+  //       this.setState({ inputExamDataArray: temp });
+  //       return this.state.inputExamDataArray[idx].endMoment;
   //     }
   //   }
   // }
 
   // setExamDuration(idx) {
 
-  //   var temp = this.state.examDetailsArray;
+  //   var temp = this.state.inputExamDataArray;
 
 
-  //   if (this.state.examDetailsArray) {
+  //   if (this.state.inputExamDataArray) {
 
   //     // temp[idx]["examDuration"] = new Date().setHours(12, 0, 0, 0);
-  //     // this.setState({ examDetailsArray: temp });
+  //     // this.setState({ inputExamDataArray: temp });
   //     return new Date().setHours(12, 0, 0, 0);
 
   //   } else {
 
-  //     if (typeof (this.state.examDetailsArray[idx].examDuration) === 'undefined' || this.state.examDetailsArray[idx].examDuration === null) {
+  //     if (typeof (this.state.inputExamDataArray[idx].examDuration) === 'undefined' || this.state.inputExamDataArray[idx].examDuration === null) {
   //       temp[idx]["examDuration"] = this.state.defaultExamDuration;
-  //       this.setState({ examDetailsArray: temp });
+  //       this.setState({ inputExamDataArray: temp });
   //       return this.state.defaultExamDuration;
   //     } else {
-  //       temp[idx]["examDuration"] = this.state.examDetailsArray[idx].examDuration;
-  //       this.setState({ examDetailsArray: temp });
-  //       return this.state.examDetailsArray[idx].examDuration;
+  //       temp[idx]["examDuration"] = this.state.inputExamDataArray[idx].examDuration;
+  //       this.setState({ inputExamDataArray: temp });
+  //       return this.state.inputExamDataArray[idx].examDuration;
   //     }
   //   }
   // }
@@ -503,7 +594,7 @@ class ScheduleExam extends Component {
   totalMarksChangeHandler(idx) {
 
 
-    if (typeof (this.state.examDetailsArray[idx]) === 'undefined' || this.state.examDetailsArray[idx] === null) {
+    if (typeof (this.state.inputExamDataArray[idx]) === 'undefined' || this.state.inputExamDataArray[idx] === null) {
 
       var examDate = new Date().setHours(5, 30, 0, 0);
       var startMoment = new Date().setHours(12, 0, 0, 0);
@@ -511,19 +602,66 @@ class ScheduleExam extends Component {
 
     } else {
 
-      var temp = this.state.examDetailsArray;
+      var temp = this.state.inputExamDataArray;
 
-      if (typeof (this.state.examDetailsArray[idx]).examDate === 'undefined' || this.state.examDetailsArray[idx].examDate === null) {
+      if (typeof (this.state.inputExamDataArray[idx]).examDate === 'undefined' || this.state.inputExamDataArray[idx].examDate === null) {
         temp[idx]["examDate"] = new Date().setHours(5, 30, 0, 0);
       }
-      if (typeof (this.state.examDetailsArray[idx]).startMoment === 'undefined' || this.state.examDetailsArray[idx].startMoment === null) {
+      if (typeof (this.state.inputExamDataArray[idx]).startMoment === 'undefined' || this.state.inputExamDataArray[idx].startMoment === null) {
         temp[idx]["startMoment"] = new Date().setHours(12, 0, 0, 0);
       }
-      if (typeof (this.state.examDetailsArray[idx]).endMoment === 'undefined' || this.state.examDetailsArray[idx].endMoment === null) {
+      if (typeof (this.state.inputExamDataArray[idx]).endMoment === 'undefined' || this.state.inputExamDataArray[idx].endMoment === null) {
         temp[idx]["endMoment"] = new Date().setHours(12, 0, 0, 0);
       }
 
     }
+  }
+
+  /**
+   * @description Called when the change event is triggered.
+   * @param {*} e
+   */
+  changeHandler(e) {
+
+    // console.log("Name: "+e.target.name +" Value: "+ e.target.value);
+
+    var selectedExamDetails = this.state.selectedExamDetails;
+
+    selectedExamDetails[e.target.name] = e.target.value;
+
+    this.setState({
+      selectedExamDetails: selectedExamDetails
+    });
+  }
+
+  /**
+   * @description Called when the change event is triggered for isMandatryToAttendForFinalResultChangeHandler appswith.
+   * @param {*} e
+   */
+  isMandatryToAttendForFinalResultChangeHandler(e) {
+    // console.log("Name: "+e.target.name +" Value: "+ e.target.checked);
+
+    var selectedExamDetails = this.state.selectedExamDetails;
+
+    selectedExamDetails[e.target.name] = e.target.checked;
+
+    this.setState({
+      selectedExamDetails: selectedExamDetails
+    });
+  }
+
+  scheduleExamSubmitHandler() {
+
+    console.log("BEFORE - " + JSON.stringify(this.state.inputExamDataArray))
+
+    var temp = this.state.inputExamDataArray;
+
+    temp.class = this.state.class;
+    temp.section = this.state.section;
+
+    this.setState({
+      inputExamDataArray : temp
+    }, console.log("AFTER - " + JSON.stringify(this.state.inputExamDataArray)));
   }
 
   render() {
@@ -625,8 +763,86 @@ class ScheduleExam extends Component {
                 </div>
               }
 
+              {this.state.showExamNamesFlag &&
+                <div>
+                  <InputGroup className="mb-3">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText >
+                        <b>Exam Name</b>
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <Input
+                      name="examName"
+                      id="examName"
+                      type="select"
+                      value={this.state.selectedExamDetails.examName}
+                      onChange={this.examNameChangeHandler}
+                    >
+                      <option value="">Select</option>
+                      {this.state.examDetailsArray.map(element => {
+                        return (<option key={element.examName} value={element.examName}>{element.examName}</option>);
+                      }
+                      )}
+                    </Input>
+                  </InputGroup>
+                  {this.state.examNameError && (
+                    <font color="red">
+                      {" "}
+                      <p>{this.state.examNameError}</p>
+                    </font>
+                  )}
+                </div>
+              }
+
+
               {this.state.showTabsFlag && (
                 <div>
+
+                  <InputGroup className="mb-3">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText>
+                        <b>Percentage Share in Final result</b>
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <Input
+                      type="number"
+                      // size="lg"
+                      name="percentageShareInFinalResult"
+                      id="percentageShareInFinalResult"
+                      autoComplete="shareInFinalResult"
+                      onChange={this.changeHandler}
+                      value={this.state.selectedExamDetails.percentageShareInFinalResult}
+                    />
+                  </InputGroup>
+                  {/* {this.state.examDetailsArray.percentageShareInFinalResultError &&(
+                              <font color="red">
+                                {" "}
+                                <p>{this.state.examDetailsArray.percentageShareInFinalResultError}</p>
+                              </font>
+                            )} */}
+
+                  <InputGroup className="mb-3">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText>
+                        <b>Mandatory to Attend for Final results</b>
+                      </InputGroupText>
+                    </InputGroupAddon>
+
+                    &nbsp; &nbsp;
+                              <AppSwitch
+                      name="isMandatryToAttendForFinalResult"
+                      id="isMandatryToAttendForFinalResult"
+                      size="lg"
+                      className={"mx-1"}
+                      variant={"3d"}
+                      color={"primary"}
+                      size={"sm"}
+                      onChange={this.isMandatryToAttendForFinalResultChangeHandler}
+                      disabled={this.state.disabled}
+                      checked={this.state.selectedExamDetails.isMandatryToAttendForFinalResult}
+                    />
+                  </InputGroup>
+
                   <Nav tabs>
                     {this.state.showTabsFlag && (
                       <NavItem>
@@ -678,31 +894,39 @@ class ScheduleExam extends Component {
                               <th className="text-center">
                                 <h5>Passing Marks</h5>{" "}
                               </th>
-                              <th className="text-center">
+                              <th className="text-center"
+                                width="3%">
                                 <h5>Include in result</h5>{" "}
                               </th>
                               <th className="text-center">
-                                <h5>Start Time</h5>{" "}
+                                <h5>Exam Date</h5>{" "}
                               </th>
                               <th
-                                // className="text-center" 
-                                width="40%">
-                                <h5>End Time</h5>{" "}
+                                className="text-center"
+                                width="24%">
+                                <h5>Exam Time</h5>{" "}
                               </th>
-                              <th className="text-center">
+                              {/* <th className="text-center">
                                 <h5>Exam Duration (Minutes)</h5>{" "}
-                              </th>
-                              <th className="text-center">
+                              </th> */}
+                              <th className="text-center"
+                                width="18%" >
                                 <h5>Venue</h5>{" "}
-                              </th>
-                              <th className="text-center">
-                                <Button
-                                  onClick={this.handleAddRow}
-                                  className="btn btn-primary"
-                                  color="primary"
-                                >
-                                  Add Row
-                          </Button>
+                              </th >
+                              <th className="text-center"
+                                width="2%">
+                                <FormGroup check inline>
+                                  <Input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="parentaddresscheck"
+                                    // style={{ height: "35px", width: "25px", background: "white" }}
+                                    name="parentaddresscheck"
+                                  // checked={this.state.parentaddresscheck}
+                                  // onChange={this.copyAddress}
+                                  // disabled={this.state.editMode}
+                                  />
+                                </FormGroup>
                               </th>
                             </tr>
                           </thead>
@@ -720,38 +944,16 @@ class ScheduleExam extends Component {
                                       name="totalMarks"
                                       type="text"
                                       className="form-control"
-                                      value={this.state.examDetailsArray[idx]
-                                        ? (this.state.examDetailsArray[idx].totalMarks ? this.state.examDetailsArray[idx].totalMarks : "")
-                                        : ""}
-                                      // value={this.state.examDetailsArray[idx].totalMarks}
+                                      value={this.state.inputExamDataArray[idx].totalMarks}
+                                      // value={this.state.inputExamDataArray[idx].totalMarks}
                                       onChange={e => {
 
                                         console.log("totalMarks - " + JSON.stringify(e.target.value));
 
-                                        var temp = this.state.examDetailsArray;
-
-                                        if (typeof (this.state.examDetailsArray[idx]) === 'undefined' || this.state.examDetailsArray[idx] === null) {
-
-                                          temp[idx]["examDate"] = new Date(new Date().setHours(5, 30, 0, 0));
-                                          temp[idx]["startMoment"] = new Date(new Date().setHours(12, 0, 0, 0));
-                                          temp[idx]["endMoment"] = new Date(new Date().setHours(12, 0, 0, 0));
-
-                                        } else {
-
-                                          if (typeof (this.state.examDetailsArray[idx].examDate) === 'undefined' || this.state.examDetailsArray[idx].examDate === null) {
-                                            temp[idx]["examDate"] = new Date(new Date().setHours(5, 30, 0, 0));
-                                          }
-                                          if (typeof (this.state.examDetailsArray[idx].startMoment) === 'undefined' || this.state.examDetailsArray[idx].startMoment === null) {
-                                            temp[idx]["startMoment"] = new Date(new Date().setHours(12, 0, 0, 0));
-                                          }
-                                          if (typeof (this.state.examDetailsArray[idx].endMoment) === 'undefined' || this.state.examDetailsArray[idx].endMoment === null) {
-                                            temp[idx]["endMoment"] = new Date(new Date().setHours(12, 0, 0, 0));
-                                          }
-                                          temp[idx]["totalMarks"] = e.target.value;
-
-                                        }
-                                        this.setState({ examDetailsArray: temp },
-                                          () => console.log("After - " + JSON.stringify(this.state.examDetailsArray)));
+                                        var temp = this.state.inputExamDataArray;
+                                        temp[idx]["totalMarks"] = e.target.value;
+                                        this.setState({ inputExamDataArray: temp },
+                                          () => console.log("After - " + JSON.stringify(this.state.inputExamDataArray)));
                                       }
                                       }
                                       // style={{ textAlign: 'center' }}
@@ -768,19 +970,17 @@ class ScheduleExam extends Component {
                                       name="passingMarks"
                                       type="text"
                                       className="form-control"
-                                      value={this.state.examDetailsArray[idx]
-                                        ? (this.state.examDetailsArray[idx].passingMarks ? this.state.examDetailsArray[idx].passingMarks : "")
-                                        : ""}
+                                      value={this.state.inputExamDataArray[idx].passingMarks}
                                       disabled={this.state.disabled}
                                       style={{ textAlign: 'center' }}
                                       id="passingMarks"
                                       onChange={e => {
 
-                                        var temp = this.state.examDetailsArray;
+                                        var temp = this.state.inputExamDataArray;
                                         temp[idx]["passingMarks"] = e.target.value;
 
-                                        this.setState({ examDetailsArray: temp },
-                                          () => console.log("After - " + JSON.stringify(this.state.examDetailsArray)));
+                                        this.setState({ inputExamDataArray: temp },
+                                          () => console.log("After - " + JSON.stringify(this.state.inputExamDataArray)));
                                       }
                                       }
                                     // size="lg"
@@ -800,16 +1000,14 @@ class ScheduleExam extends Component {
                                       disabled={this.state.disabled}
                                       onChange={e => {
 
-                                        var temp = this.state.examDetailsArray;
+                                        var temp = this.state.inputExamDataArray;
                                         temp[idx]["includeInResultFlag"] = e.target.checked;
 
-                                        this.setState({ examDetailsArray: temp },
-                                          () => console.log("After - " + JSON.stringify(this.state.examDetailsArray)));
+                                        this.setState({ inputExamDataArray: temp },
+                                          () => console.log("After - " + JSON.stringify(this.state.inputExamDataArray)));
                                       }
                                       }
-                                      checked={this.state.examDetailsArray[idx]
-                                        ? (this.state.examDetailsArray[idx].includeInResultFlag ? this.state.examDetailsArray[idx].includeInResultFlag : false)
-                                        : false}
+                                      checked={this.state.inputExamDataArray[idx].includeInResultFlag}
                                     />
                                   </InputGroup>
                                 </td>
@@ -820,15 +1018,15 @@ class ScheduleExam extends Component {
                                   {/* <Datetime
                                       name="examStartDate"
                                       id="examStartDate"
-                                      value={this.state.examDetailsArray[idx] 
-                                        ? (this.state.examDetailsArray[idx].examStartDate ? this.state.examDetailsArray[idx].examStartDate : new Date()) 
+                                      value={this.state.inputExamDataArray[idx] 
+                                        ? (this.state.inputExamDataArray[idx].examStartDate ? this.state.inputExamDataArray[idx].examStartDate : new Date()) 
                                         : new Date()}
                                       // input={ false }
-                                      // value={this.state.examDetailsArray[idx].examStartDate}
+                                      // value={this.state.inputExamDataArray[idx].examStartDate}
                                       onChange={date => {
-                                        var temp = this.state.examDetailsArray;
+                                        var temp = this.state.inputExamDataArray;
                                         temp[idx]["examStartDate"] = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-                                        this.setState({ examDetailsArray: temp }, () => console.log(JSON.stringify(this.state.examDetailsArray)))
+                                        this.setState({ inputExamDataArray: temp }, () => console.log(JSON.stringify(this.state.inputExamDataArray)))
                                       }}
                                     /> */}
 
@@ -836,20 +1034,18 @@ class ScheduleExam extends Component {
 
                                     name="examDate"
                                     id="examDate"
-                                    value={this.state.examDetailsArray[idx]
-                                      ? (this.state.examDetailsArray[idx].examDate ? this.state.examDetailsArray[idx].examDate : new Date())
-                                      : new Date()}
+                                    value={this.state.inputExamDataArray[idx].examDate}
                                     onChange={
                                       date => {
 
-                                        console.log("Before - " + JSON.stringify(this.state.examDetailsArray));
+                                        console.log("Before - " + JSON.stringify(this.state.inputExamDataArray));
 
-                                        var temp = this.state.examDetailsArray;
+                                        var temp = this.state.inputExamDataArray;
 
-                                        // if (typeof (this.state.examDetailsArray[idx].startMoment) === 'undefined' || this.state.examDetailsArray[idx].startMoment === null) {
+                                        // if (typeof (this.state.inputExamDataArray[idx].startMoment) === 'undefined' || this.state.inputExamDataArray[idx].startMoment === null) {
                                         //   temp[idx].startMoment = new Date().setHours(12, 0, 0, 0)
                                         // }
-                                        // if (typeof (this.state.examDetailsArray[idx].endMoment) === 'undefined' || this.state.examDetailsArray[idx].endMoment === null) {
+                                        // if (typeof (this.state.inputExamDataArray[idx].endMoment) === 'undefined' || this.state.inputExamDataArray[idx].endMoment === null) {
                                         //   temp[idx].endMoment = new Date().setHours(12, 0, 0, 0)
                                         // }
 
@@ -873,8 +1069,8 @@ class ScheduleExam extends Component {
                                         var diffMins = Math.round(diffMs / 60000); // minutes
                                         temp[idx]["examDuration"] = diffMins;
 
-                                        this.setState({ examDetailsArray: temp },
-                                          () => console.log("After - " + JSON.stringify(this.state.examDetailsArray)));
+                                        this.setState({ inputExamDataArray: temp },
+                                          () => console.log("After - " + JSON.stringify(this.state.inputExamDataArray)));
                                       }
                                     }
                                   />
@@ -885,28 +1081,22 @@ class ScheduleExam extends Component {
                                   {/* <Datetime
                                       name="examEndDate"
                                       id="examEndDate"
-                                      value={this.state.examDetailsArray[idx]
-                                        ? (this.state.examDetailsArray[idx].examEndDate ? this.state.examDetailsArray[idx].examEndDate : new Date())
+                                      value={this.state.inputExamDataArray[idx]
+                                        ? (this.state.inputExamDataArray[idx].examEndDate ? this.state.inputExamDataArray[idx].examEndDate : new Date())
                                         : new Date()}
                                       input={true}
                                       // viewMode="day"
-                                      // value={this.state.examDetailsArray[idx].examEndDate}
+                                      // value={this.state.inputExamDataArray[idx].examEndDate}
                                       onChange={date => {
-                                        var temp = this.state.examDetailsArray;
+                                        var temp = this.state.inputExamDataArray;
                                         temp[idx]["examEndDate"] = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-                                        this.setState({ examDetailsArray: temp }, () => console.log(JSON.stringify(this.state.examDetailsArray)))
+                                        this.setState({ inputExamDataArray: temp }, () => console.log(JSON.stringify(this.state.inputExamDataArray)))
                                       }}
                                     /> */}
 
                                   <TimeRange
-                                    startMoment={this.state.examDetailsArray[idx]
-                                      ? (this.state.examDetailsArray[idx].startMoment
-                                        ? this.state.examDetailsArray[idx].startMoment : new Date().setHours(12, 0, 0, 0))
-                                      : new Date().setHours(12, 0, 0, 0)}
-                                    endMoment={this.state.examDetailsArray[idx]
-                                      ? (this.state.examDetailsArray[idx].endMoment
-                                        ? this.state.examDetailsArray[idx].endMoment : new Date().setHours(12, 0, 0, 0))
-                                      : new Date().setHours(12, 0, 0, 0)}
+                                    startMoment={this.state.inputExamDataArray[idx].startMoment}
+                                    endMoment={this.state.inputExamDataArray[idx].endMoment}
 
                                     // startMoment={this.setStartMoment(idx)}
                                     // endMoment={this.setEndMoment(idx)}
@@ -920,11 +1110,11 @@ class ScheduleExam extends Component {
 
                                       console.log("onStartTimeChange - " + date);
 
-                                      console.log(JSON.stringify(this.state.examDetailsArray))
+                                      console.log(JSON.stringify(this.state.inputExamDataArray))
 
                                       var startTimeWithOffset = new Date(date.startTime);
 
-                                      var examDate = this.state.examDetailsArray[idx]["examDate"];
+                                      var examDate = this.state.inputExamDataArray[idx]["examDate"];
 
                                       if (typeof (examDate) === 'undefined' || examDate === null) {
                                         examDate = new Date();
@@ -943,26 +1133,24 @@ class ScheduleExam extends Component {
                                       console.log("ScheduleExam - startTimeHandler - startTimeWithOffset - " + JSON.stringify(startTimeWithOffset)
                                         + "startTimeForDB - " + JSON.stringify(startTimeForDB));
 
-                                      var temp = this.state.examDetailsArray;
+                                      var temp = this.state.inputExamDataArray;
                                       temp[idx]["examDate"] = examDate;
                                       temp[idx]["startMoment"] = startTimeWithOffset;
 
-                                      var diffMs = this.state.examDetailsArray[idx].endMoment - startTimeWithOffset;
+                                      var diffMs = this.state.inputExamDataArray[idx].endMoment - startTimeWithOffset;
                                       var diffMins = Math.round(diffMs / 60000); // minutes
 
                                       temp[idx]["examDuration"] = diffMins;
 
                                       console.log("ScheduleExam - startTimeHandler - startTimeWithOffset - diffMins - " + JSON.stringify(diffMins));
-                                      // var examDuration = moment.duration(new Date(this.state.examDetailsArray[idx].endMoment).diff(new Date(startTimeWithOffset))).asMinutes;
-                                      // temp[idx]["examDuration"] = examDuration;
 
-                                      this.setState({ examDetailsArray: temp }, () => console.log(JSON.stringify(this.state.examDetailsArray)))
+                                      this.setState({ inputExamDataArray: temp }, () => console.log(JSON.stringify(this.state.inputExamDataArray)))
                                     }}
                                     onEndTimeChange={date => {
 
                                       var endTimeWithOffset = new Date(date.endTime);
 
-                                      var examDate = this.state.examDetailsArray[idx]["examDate"];
+                                      var examDate = this.state.inputExamDataArray[idx]["examDate"];
 
                                       if (typeof (examDate) === 'undefined' || examDate === null) {
                                         examDate = new Date();
@@ -978,10 +1166,11 @@ class ScheduleExam extends Component {
                                       //   endTime: endTimeWithOffset,
                                       // });
 
-                                      var temp = this.state.examDetailsArray;
+                                      var temp = this.state.inputExamDataArray;
+                                      temp[idx]["examDate"] = examDate;
                                       temp[idx]["endMoment"] = endTimeWithOffset;
 
-                                      var diffMs = new Date(endTimeWithOffset) - new Date(this.state.examDetailsArray[idx].startMoment);
+                                      var diffMs = new Date(endTimeWithOffset) - new Date(this.state.inputExamDataArray[idx].startMoment);
                                       var diffMins = Math.round(diffMs / 60000); // minutes
 
                                       console.log("ScheduleExam - endTimeHandler - endTimeWithOffset - " + JSON.stringify(endTimeWithOffset)
@@ -991,13 +1180,12 @@ class ScheduleExam extends Component {
 
                                       console.log("ScheduleExam - endTimeHandler - endTimeWithOffset - diffMins - " + JSON.stringify(diffMins));
 
-                                      this.setState({ examDetailsArray: temp }, () => console.log(JSON.stringify(this.state.examDetailsArray)));
+                                      this.setState({ inputExamDataArray: temp }, () => console.log(JSON.stringify(this.state.inputExamDataArray)));
 
                                       console.log("ScheduleExam - endTimeHandler - endTimeWithOffset - " + JSON.stringify(endTimeWithOffset)
                                         + "endTimeForDB - " + JSON.stringify(endTimeForDB));
-                                      // console.log("Start time - " + JSON.stringify(date));
                                     }}
-                                    onChange={this.returnFunction}
+                                  // onChange={this.returnFunction}
                                   />
 
                                   {/* <TimePicker
@@ -1009,52 +1197,70 @@ class ScheduleExam extends Component {
 
                                 </td>
 
-                                <td style={{ "vertical-align": "middle" }}>
+                                {/* <td style={{ "vertical-align": "middle" }}>
                                   <InputGroup className="mb-3">
                                     <Input
                                       name="examDuration"
                                       type="text"
                                       className="form-control"
                                       // value={this.setExamDuration(idx)}
-                                      value={
-                                        this.state.examDetailsArray[idx]
-                                          ? (this.state.examDetailsArray[idx].examDuration
-                                            ? this.state.examDetailsArray[idx].examDuration : this.state.defaultExamDuration)
-                                          : this.state.defaultExamDuration
-                                      }
+                                      value={this.state.inputExamDataArray[idx].examDuration}
                                       disabled={true}
                                       style={{ textAlign: 'center' }}
                                       id="examDuration"
                                     // size="lg"
                                     />
                                   </InputGroup>
-                                </td>
+                                </td> */}
 
-                                <td style={{ "vertical-align": "middle" }}>
-                                  <InputGroup className="mb-3">
-                                    <Select
-                                      placeholder="Select applicable for classes"
-                                      isMulti={true}
-                                      closeMenuOnSelect={false}
-                                      // value={this.state.selectedClasses}
-                                      onChange={this.handleClassChange}
-                                      options={this.state.classes}
-                                      isClearable={true}
-                                      isSearchable={true}
-                                      openMenuOnFocus={true}
-                                    />
+
+
+                                <td
+                                // style={{width: '20%'}}
+                                // width="80%"
+                                // style={{ "vertical-align": "middle" }}
+                                >
+
+                                  <InputGroup className="mb-3 ">
+                                    <div className="col-md-12">
+                                      <Select
+                                        placeholder="Select"
+                                        isMulti={false}
+                                        closeMenuOnSelect={true}
+                                        // value={this.state.selectedVenueLabelValue}
+                                        value={this.state.inputExamDataArray[idx]["selectedVenueLabelValue"]}
+                                        // style={{ width: '200px' }}
+                                        // width="100%"
+                                        // onChange={this.venueChangeHandler}
+                                        onChange={
+                                          (newValue, actionMeta) => {
+
+                                            console.log("newValue - " + JSON.stringify(newValue) + " idx - " + idx);
+                                            var temp = this.state.inputExamDataArray;
+                                            if (!(typeof (newValue) === 'undefined' || newValue === null)) {
+
+                                              temp[idx]["selectedVenueLabelValue"] = newValue;
+                                              temp[idx]["selectedVenue"] = newValue.value;
+
+                                              this.setState({ inputExamDataArray: temp }, () => {
+                                                console.log(JSON.stringify(this.state.inputExamDataArray));
+                                              });
+                                            }
+                                          }
+                                        }
+                                        // options={this.state.classes}
+                                        options={this.state.venueLabelValueArray}
+                                        isClearable={true}
+                                        isSearchable={true}
+                                        openMenuOnFocus={false}
+                                      />
+                                    </div>
                                   </InputGroup>
+
                                 </td>
 
                                 <td align="center" style={{ "vertical-align": "middle" }}>
-                                  {idx > 0 &&
-                                    <Button
-                                      className="btn btn-danger btn-sg"
-                                    // onClick={this.handleRemoveSpecificRow(idx)}
-                                    // size="lg"
-                                    >
-                                      Remove
-                                    </Button>}
+
                                 </td>
                               </tr>
                             ))}
@@ -1088,7 +1294,7 @@ class ScheduleExam extends Component {
                   <Row>
                     <Col>
                       {!this.state.loader && <Button
-                        onClick={this.studentSubmitHandler}
+                        onClick={this.scheduleExamSubmitHandler}
                         size="lg"
                         color="success"
                         block

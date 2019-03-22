@@ -76,6 +76,10 @@ var ExamsSchema = new Schema({
     type: Boolean,
   },
 
+  classWiseExamDetailsArray: {
+    type: Array
+  },
+
   createdAt: {
     type: Date,
     required: true,
