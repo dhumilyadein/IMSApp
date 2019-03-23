@@ -37,6 +37,12 @@ var PaidSalarySchema = new Schema({
     type: String,
     required: true,
     trim:true,
+  },
+
+  year: {
+    type: String,
+    required: true,
+    trim:true,
    lowercase:true
   },
 

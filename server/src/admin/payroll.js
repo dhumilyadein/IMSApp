@@ -4,6 +4,7 @@ const Teacher = require("../../models/Teacher");
 
 const Admin = require("../../models/Admin");
 const PaidSalary = require("../../models/PaidSalary");
+const EmpAttendance = require("../../models/EmpAttendance");
 
 
 module.exports = function (app) {
@@ -34,6 +35,30 @@ module.exports = function (app) {
             });
 
     }
+    async function addStaffAttendance(req, res) {
+        console.log("in addStaffAttendance: " + JSON.stringify(req.body))
+
+        var template = {
+            "empType": req.body.empType, "date": req.body.attendance.date , "empInfo": req.body.attendance.empInfo,
+           
+        };
+        var addTemplate = new EmpAttendance(template);
+
+
+
+
+
+        await addTemplate
+            .save()
+            .then(user => {
+                return res.send({ msg: "Success" });
+            })
+            .catch(err => {
+                return res.send(err);
+            });
+
+    }
+    addStaffAttendance
     async function paySalary(req, res) {
         console.log("in paySal Req.body: " + JSON.stringify(req.body.dop));
         console.log("username: " + JSON.stringify(req.body.selectedEmp.value.substring(req.body.selectedEmp.value.indexOf('(') + 1,
@@ -55,7 +80,7 @@ module.exports = function (app) {
                         }, "salaryRows":
                             req.body.salaryRows, "deductRows": req.body.deductRows,"totalEarning":
  req.body.totalEarning, "totalDeduction": req.body.totalDeduction, "paidAmount":
-                            req.body.paidAmount, "month": req.body.month, "dop": req.body.dop, "remarks": req.body.remarks
+                            req.body.paidAmount, "month": req.body.month, "dop": req.body.dop, "remarks": req.body.remarks, "year":req.body.year
                     };
                 
 
@@ -67,7 +92,7 @@ module.exports = function (app) {
                         .save()
                         .then(user => {
                             console.log("Succes Paid: " + JSON.stringify(user));
-                            return res.send({ msg: "Success" });
+                            return res.send({ msg: "Success",empData:string });
                         })
                          .catch(err => {
                             console.log("Error Paid: " + JSON.stringify(err))
@@ -99,7 +124,7 @@ module.exports = function (app) {
                         }, "salaryRows":
                             req.body.salaryRows, "deductRows": req.body.deductRows,"totalEarning":
  req.body.totalEarning, "totalDeduction": req.body.totalDeduction, "paidAmount":
-                            req.body.paidAmount, "month": req.body.month, "dop": req.body.dop, "remarks": req.body.remarks
+                            req.body.paidAmount, "month": req.body.month, "dop": req.body.dop, "remarks": req.body.remarks,  "year":req.body.year
                     };
                 
 
@@ -111,7 +136,7 @@ module.exports = function (app) {
                         .save()
                         .then(user => {
                             console.log("Succes Paid: " + JSON.stringify(user));
-                            return res.send({ msg: "Success" });
+                            return res.send({ msg: "Success",empData:string });
                         })
                          .catch(err => {
                             console.log("Error Paid: " + JSON.stringify(err))
@@ -185,6 +210,23 @@ module.exports = function (app) {
 
         SalaryTemplates
             .find({ status: "Active" })
+            .then(data => {
+                return res.send(data);
+            })
+            .catch(err => {
+                return res.send({ error: err });
+            });
+
+
+
+
+    }
+
+    function getPayslip(req, res) {
+        console.log("in getPayslip: "+JSON.stringify(req.body));
+
+        PaidSalary
+            .find({ "empDetails.empName": req.body.selectedEmp,year:req.body.year,month:req.body.month })
             .then(data => {
                 return res.send(data);
             })
@@ -296,9 +338,14 @@ module.exports = function (app) {
     app.post("/api/copySalaryTemplate", copySalaryTemplate);
     app.post("/api/fetchEmployees", fetchEmployees);
 
+    app.post("/api/fetchEmployees", fetchEmployees);
     app.post("/api/paySalary", paySalary);
 
     app.get("/api/getSalaryTemplate", getSalaryTemplate);
+    app.post("/api/getPayslip", getPayslip);
+    app.post("/api/addStaffAttendance", addStaffAttendance);
+    
+
 
 
 
