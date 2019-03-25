@@ -662,6 +662,8 @@ class ScheduleExam extends Component {
     this.setState({
       inputExamDataArray : temp
     }, console.log("AFTER - " + JSON.stringify(this.state.inputExamDataArray)));
+
+    
   }
 
   render() {

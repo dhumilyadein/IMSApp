@@ -15,6 +15,22 @@ module.exports = function (app) {
       .withMessage("Please Enter Applicable for Classes")
   ];
 
+  const insertClassAndSectionInExamsValidation = [
+    check("examName")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter exam name"),
+
+    check("class")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter Class"),
+    check("section")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter section"),
+  ];
+
   const fetchExamValidation = oneOf([
     check("applicableForClasses")
       .not()
@@ -78,20 +94,26 @@ module.exports = function (app) {
 
     var date = new Date();
 
-    var classWiseExamDetailsArray = [];
-    request.applicableForClasses.forEach(element => {
-      classWiseExamDetailsArray.push(element);
-    });
+    // var classWiseExamDetailsArray = [];
+    // request.applicableForClasses.forEach(element => {
+
+    //   var emptyArray = [];
+    //   var json = {};
+    //    json[element] = "emptyArray";
+    //   classWiseExamDetailsArray.push(json);
+    // });
+
+
 
     var examRequest = {
       "examName": request.examName,
-      "examDescription":request.examDescription,
+      "examDescription": request.examDescription,
       "applicableForClasses": request.applicableForClasses,
       "percentageShareInFinalResult": request.percentageShareInFinalResult,
       "isMandatryToAttendForFinalResult": request.isMandatryToAttendForFinalResult,
-      "classWiseExamDetailsArray": classWiseExamDetailsArray,
-      "createdAt": new Date(date.getTime()-(date.getTimezoneOffset() * 60000)),
-      "updatedAt": new Date(date.getTime()-(date.getTimezoneOffset() * 60000))
+      // "classWiseExamDetailsArray": classWiseExamDetailsArray,
+      "createdAt": new Date(date.getTime() - (date.getTimezoneOffset() * 60000)),
+      "updatedAt": new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
     };
     var insertExam = new Exams(examRequest);
 
@@ -114,19 +136,33 @@ module.exports = function (app) {
 
     var date = new Date();
 
-    var classWiseExamDetailsArray = [];
-    request.applicableForClasses.forEach(element => {
-      classWiseExamDetailsArray.push(element);
-    });
-    
-    var objForUpdate = {};
-    if(request.examDescription) objForUpdate.examDescription = request.examDescription;
-    if(request.applicableForClasses) objForUpdate.applicableForClasses = request.applicableForClasses;
-    if(request.percentageShareInFinalResult) objForUpdate.percentageShareInFinalResult = request.percentageShareInFinalResult;
-    if(request.isMandatryToAttendForFinalResult) objForUpdate.isMandatryToAttendForFinalResult = request.isMandatryToAttendForFinalResult;
-    if(classWiseExamDetailsArray) objForUpdate.classWiseExamDetailsArray = classWiseExamDetailsArray;
 
-    objForUpdate.updatedAt = new Date(date.getTime()-(date.getTimezoneOffset() * 60000));
+    // request.applicableForClasses.forEach(element => {
+    //   classWiseExamDetailsArray.push(element);
+    // });
+    // var classWiseExamDetailsArray = [];
+    // request.applicableForClasses.forEach(element => {
+
+    //   var emptyArray = [];
+    //   var json = {};
+    //    json[element] = emptyArray;
+    //   classWiseExamDetailsArray.push(json);
+    // });
+
+    var objForUpdate = {};
+    if (request.examDescription) objForUpdate.examDescription = request.examDescription;
+    if (request.applicableForClasses) objForUpdate.applicableForClasses = request.applicableForClasses;
+    if (request.percentageShareInFinalResult) objForUpdate.percentageShareInFinalResult = request.percentageShareInFinalResult;
+    if (request.isMandatryToAttendForFinalResult) objForUpdate.isMandatryToAttendForFinalResult = request.isMandatryToAttendForFinalResult;
+    // if(classWiseExamDetailsArray) objForUpdate.classWiseExamDetailsArray = classWiseExamDetailsArray;
+
+    // if(request.classWiseExamDetailsArray) {
+    //   objForUpdate.$push = request.classWiseExamDetailsArray;
+    // }
+
+    // {"$set": {"studentDetails.$.students":template.students}}
+
+    objForUpdate.updatedAt = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
 
     console.log("\nexamName - " + request.examName + "\nobjForUpdate objForUpdate - " + JSON.stringify(objForUpdate));
 
@@ -160,78 +196,246 @@ module.exports = function (app) {
 
   }
 
+  async function insertClassAndSectionInExamsFind(req, res) {
+
+    var request = req.body;
+
+    await exams.find(
+      {
+        'examName': request.examName,
+        'classWiseExamDetailsArray.class': request.class,
+        'classWiseExamDetailsArray.sectionWiseExamDetailsArray.section': request.section
+      },
+      {
+        'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': 1
+      }
+    ).then(function (examData) {
+
+      console.log("examData HERE HERE HERE HERE- " + examData);
+      response = { reqbody: examData, message: "Class wise Exam details updated successfully" };
+      console.log("examsDAO - insertClassAndSectionInExams - Class wise Exam details udpated successfully - server final response - " + JSON.stringify(response));
+
+      return res.send(response);
+    }).catch(function (err) {
+      console.log("Catching server err - " + err);
+      response = { errors: err };
+      console.log("examsDAO - insertClassAndSectionInExams - Errors in examsDAO - server final response - " + JSON.stringify(response));
+      return res.send(response);
+    });
+
+
+  }
+
+  async function insertClassAndSectionInExams(req, res) {
+
+    var request = req.body;
+    console.log("examsDAO - insertClassAndSectionInExams - request - " + JSON.stringify(request))
+
+    var date = new Date();
+
+    await exams.find(
+      {
+        'examName': request.examName,
+        'classWiseExamDetailsArray.class': request.class
+      },
+      {
+        'classWiseExamDetailsArray.$.class': 1
+      }
+    ).then(function (availableExamClassData) {
+      console.log("examsDAO - insertClassAndSectionInExams - Fetched Class and section array details - EXAM MODIFIED - " + JSON.stringify(availableExamClassData));
+
+      // If availableExamClassData is null, it means the class is not present in the collection and so inserting it for the first time
+      if (availableExamClassData.length === 0) {
+
+        console.log("Inserting class first and then section will be inserted");
+
+        /*
+        Inserting class details first
+        */
+        exams.findOneAndUpdate(
+          {
+            "examName": request.examName
+          },
+          {
+            $addToSet: {
+              'classWiseExamDetailsArray': {
+                'class': request.class,
+                sectionWiseExamDetailsArray: []
+              }
+            }
+          }
+        ).then(function (examclassData) {
+
+          console.log("examsDAO - insertClassAndSectionInExams - ONLY CLASS array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examclassData));
+
+          /*
+      Second adding the section in the exam
+    */
+          exams.findOneAndUpdate(
+            {
+              'examName': request.examName,
+              'classWiseExamDetailsArray.class': request.class
+              // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
+            },
+            {
+              $addToSet: {
+                'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+                  'section': request.section,
+                  'details': []
+                }
+              }
+              // $addToSet: { "classWiseExamDetailsArray.$": request.section }
+            }
+          ).then(function (examSectionData) {
+
+            console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
+
+            response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
+            return res.send(response);
+
+          }).catch(function (err) {
+
+            console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
+
+            response = { errors: err };
+            return res.send(response);
+          });
+
+        }).catch(function (err) {
+
+          console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam CLASS array details - " + JSON.stringify(err));
+
+          response = { errors: err };
+          return res.send(response);
+        });
+
+      } else {
+
+        /*
+      Class alrady present so  adding the section in the exam
+    */
+        exams.findOneAndUpdate(
+          {
+            'examName': request.examName,
+            'classWiseExamDetailsArray.class': request.class
+            // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
+          },
+          {
+            $addToSet: {
+              'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+                'section': request.section,
+                'details': []
+              }
+            }
+            // $addToSet: { "classWiseExamDetailsArray.$": request.section }
+          }
+        ).then(function (examSectionData) {
+
+          console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
+
+          response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
+          return res.send(response);
+
+        }).catch(function (err) {
+
+          console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
+
+          response = { errors: err };
+          return res.send(response);
+        });
+      }
+
+    }).catch(function (err) {
+
+      console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
+
+      response = { errors: err };
+      return res.send(response);
+    });
+
+
+
+
+
+
+
+
+
+
+  }
+
   /**
      * @description get method for fetchExamDetails service
      */
-    function fetchExamDetails(req, res) {
+  function fetchExamDetails(req, res) {
 
-      console.log("examsDAO - fetchExamDetails - ENTRY");
-  
-      //Initial validation like fields empty check
-      var errors = validationResult(req);
-  
-      //Mapping the value to the same object
-      if (!errors.isEmpty()) {
-        return res.send({ errors: errors.mapped() });
-      }
-  
-      exams.find({},
-        {
-        "examName":1, 
-        "examDescription":1,
+    console.log("examsDAO - fetchExamDetails - ENTRY");
+
+    //Initial validation like fields empty check
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.mapped() });
+    }
+
+    exams.find({},
+      {
+        "examName": 1,
+        "examDescription": 1,
         "percentageShareInFinalResult": 1,
         "applicableForClasses": 1,
         "isMandatryToAttendForFinalResult": 1
       })
-        .then(function (examDetails) {
-  
-          console.log("examsDAO - fetchExamDetails - Exam details -  " + examDetails);
-  
-          res.send(examDetails);
-        })
-        .catch(function (err) {
-          console.log("examsDAO - fetchExamDetails - ERROR - " + err);
-          return res.send({ "errors" : err});
-        });
-  
+      .then(function (examDetails) {
+
+        console.log("examsDAO - fetchExamDetails - Exam details -  " + examDetails);
+
+        res.send(examDetails);
+      })
+      .catch(function (err) {
+        console.log("examsDAO - fetchExamDetails - ERROR - " + err);
+        return res.send({ "errors": err });
+      });
+
+  }
+
+  async function fetchExamDetailsOnInput(req, res) {
+
+    var request = req.body;
+    console.log("in fetchExamDetailsOnInput request - " + JSON.stringify(request))
+
+    //Initial validation like fields empty check
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.mapped() });
     }
 
-    async function fetchExamDetailsOnInput(req, res) {
+    var examRequest = {
+      "applicableForClasses": { $elemMatch: { $eq: request.applicableForClasses } }
+    };
 
-      var request = req.body;
-      console.log("in fetchExamDetailsOnInput request - " + JSON.stringify(request))
-  
-      //Initial validation like fields empty check
-      var errors = validationResult(req);
-  
-      //Mapping the value to the same object
-      if (!errors.isEmpty()) {
-        return res.send({ errors: errors.mapped() });
-      }
-  
-      var examRequest = {
-        "applicableForClasses": {$elemMatch:{$eq:request.applicableForClasses}}
-      };
-
-      exams.find(examRequest,
-        {
-        "examName":1, 
-        "examDescription":1,
+    exams.find(examRequest,
+      {
+        "examName": 1,
+        "examDescription": 1,
         "percentageShareInFinalResult": 1,
         "applicableForClasses": 1,
         "isMandatryToAttendForFinalResult": 1
       })
-        .then(function (examDetails) {
-  
-          console.log("examsDAO - fetchExamDetailsOnInput - Exam details -  " + examDetails);
-  
-          res.send(examDetails);
-        })
-        .catch(function (err) {
-          console.log("examsDAO - fetchExamDetailsOnInput - ERROR - " + err);
-          return res.send({ "errors" : err});
-        });
-    }
+      .then(function (examDetails) {
+
+        console.log("examsDAO - fetchExamDetailsOnInput - Exam details -  " + examDetails);
+
+        res.send(examDetails);
+      })
+      .catch(function (err) {
+        console.log("examsDAO - fetchExamDetailsOnInput - ERROR - " + err);
+        return res.send({ "errors": err });
+      });
+  }
 
   async function consumeexam(req, res) {
     console.log("in consumeexam Req.body: " + JSON.stringify(req.body))
@@ -373,6 +577,14 @@ module.exports = function (app) {
 
   app.post("/api/insertExam", insertExamValidation, insertExam, (req, res) => {
     console.log("examsDAO - insertExam post method call");
+  });
+
+  app.post("/api/insertClassAndSectionInExams", insertClassAndSectionInExamsValidation, insertClassAndSectionInExams, (req, res) => {
+    console.log("examsDAO - insertClassAndSectionInExams post method call");
+  });
+
+  app.post("/api/insertClassAndSectionInExamsFind", insertClassAndSectionInExamsValidation, insertClassAndSectionInExamsFind, (req, res) => {
+    console.log("examsDAO - insertClassAndSectionInExamsFind post method call");
   });
 
   app.post("/api/updateExam", ExamNameValidation, updateExam, (req, res) => {
