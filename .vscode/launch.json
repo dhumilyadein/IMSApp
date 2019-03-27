@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Chrome Debugger",
-            "url": "http://localhost:3000",
+            "url":["http://localhost:3000","http://localhost:8001"],
             "webRoot": "C:/Users/maytiwar/Desktop/IMS/IMSApp"
         }
     ]

@@ -35,30 +35,7 @@ module.exports = function (app) {
             });
 
     }
-    async function addStaffAttendance(req, res) {
-        console.log("in addStaffAttendance: " + JSON.stringify(req.body))
-
-        var template = {
-            "empType": req.body.empType, "date": req.body.attendance.date , "empInfo": req.body.attendance.empInfo,
-           
-        };
-        var addTemplate = new EmpAttendance(template);
-
-
-
-
-
-        await addTemplate
-            .save()
-            .then(user => {
-                return res.send({ msg: "Success" });
-            })
-            .catch(err => {
-                return res.send(err);
-            });
-
-    }
-    addStaffAttendance
+     
     async function paySalary(req, res) {
         console.log("in paySal Req.body: " + JSON.stringify(req.body.dop));
         console.log("username: " + JSON.stringify(req.body.selectedEmp.value.substring(req.body.selectedEmp.value.indexOf('(') + 1,
@@ -331,6 +308,79 @@ module.exports = function (app) {
 
     }
 
+    async function fetchEmpAttendanceOnDate(req, res) {
+
+        await console.log("fetchEmpAttendanceOnDate Req: "+JSON.stringify(req.body));
+    
+        var request = req.body;
+    
+      
+        EmpAttendance.findOne(
+          {"empType": request.empType, 
+          "date": request.date
+          // ,"attendance.date": request.date
+         
+        },
+       
+        ).then(function (empData) {
+            if (!(typeof (empData) === 'undefined' || empData === null))
+        {  response = { response: empData, message: "Attendance details fetched successfully" };
+          console.log("ClassDAO - fetchAttendanceOnDate - Attendance details fetched successfull - " + JSON.stringify(empData));
+          return res.send(response);}
+        }).catch(function (err) {
+         
+          return res.send(err);
+        });
+      }
+
+      async function addStaffAttendance(req, res) {
+        console.log("in addStaffAttendance: " + JSON.stringify(req.body))
+
+     await EmpAttendance.findOne({date:req.body.attendance.date,empType:req.body.empType})
+        .then(data => {   
+
+
+            if (!(typeof (data) === 'undefined' || data === null))
+                       {
+EmpAttendance.updateOne({ date:req.body.attendance.date,empType:req.body.empType },
+    {
+        $set: {
+            "empInfo": req.body.attendance.empInfo
+
+        }
+    }
+) .then(user => {
+    return res.send({ msg: "Success" });
+})
+                        
+                       }
+
+            else{ console.log("in else");
+                const template = {
+                    "empType": req.body.empType, "date": req.body.attendance.date , "empInfo": req.body.attendance.empInfo
+                   
+                };
+                const addTemplate = new EmpAttendance(template);
+                 addTemplate
+                    .save()
+                    .then(user => {
+                        return res.send({ msg: "Success" });
+                    })
+                    .catch(err => {
+                        return res.send(err);
+                    });
+        
+
+            }
+        })
+        .catch(err => { console.log("err : "+err)
+            return res.send(err);
+        });
+
+      
+    }
+      
+      app.post("/api/fetchEmpAttendanceOnDate", fetchEmpAttendanceOnDate);
     app.post("/api/addSalaryTemplate", addSalaryTemplate);
     app.get("/api/existingSalaryTemplates", existingSalaryTemplates);
     app.post("/api/deleteSalaryTemplate", deleteSalaryTemplate);
@@ -338,7 +388,7 @@ module.exports = function (app) {
     app.post("/api/copySalaryTemplate", copySalaryTemplate);
     app.post("/api/fetchEmployees", fetchEmployees);
 
-    app.post("/api/fetchEmployees", fetchEmployees);
+  
     app.post("/api/paySalary", paySalary);
 
     app.get("/api/getSalaryTemplate", getSalaryTemplate);

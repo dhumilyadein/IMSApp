@@ -36,6 +36,7 @@ import {
   NavLink
 } from "reactstrap";
 import axios from "axios";
+import { resolveMx } from "dns";
 
 
 
@@ -57,21 +58,16 @@ class StaffAttendance extends Component {
       sectionView: false,
       empView: false,
       markAttendanceView: false,
-      viewAttendanceView: false,
-
-      classDetails: {},
-      classes: [],
-      class: "",
-      section: "",
-      sectionArray: [],
+   
+     empType:"",
+     empDetails:[],
       studentsDataArray: [],
-      studentsDataArrayPageLoad: [],
+     
 
       tempArray: ["kapil", "mayank"],
 
-      timeTableView: false,
-      subjectArray: [],
-      timeTableArray: [],
+    
+     
       nameBtnColorFlag: false, // false means grey color, change color to green when button is clicked (true - green)
       nameBtnColor: 'grey',
 
@@ -100,14 +96,48 @@ class StaffAttendance extends Component {
     this.dayChangeHandler = this.dayChangeHandler.bind(this);
     this.toggleCalendar = this.toggleCalendar.bind(this);
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
-    this.viewAttendanceHandler = this.viewAttendanceHandler.bind(this);
-    this.markAttendanceHandler = this.markAttendanceHandler.bind(this);
+
     this.fetchAttendanceOnDate = this.fetchAttendanceOnDate.bind(this);
     this.fetchEmployees = this.fetchEmployees.bind(this);
+    this.fetchEmployeesWithoutEvent = this.fetchEmployeesWithoutEvent.bind(this);
+    this.reset = this.reset.bind(this);
+
+    
 
     
   
 
+  }
+
+  reset(){
+
+    this.setState({    classesView: true,
+      sectionView: false,
+      empView: false,
+      markAttendanceView: false,
+   
+     empType:"",
+     empDetails:[],
+      studentsDataArray: [],
+     
+
+      tempArray: ["kapil", "mayank"],
+
+    
+     
+      nameBtnColorFlag: false, // false means grey color, change color to green when button is clicked (true - green)
+      nameBtnColor: 'grey',
+
+      attendance: [],
+
+      isOpen: false,
+      
+      attendanceDate: new Date(new Date(moment().startOf('day')).getTime()-(new Date(moment().startOf('day')).getTimezoneOffset() * 60000)),
+      // attendanceDate: new Date(moment().startOf('day')),
+
+      displayDate: moment().format('LL'),
+
+      modalSuccess: false});
   }
 
   toggleCalendar (e) {
@@ -121,6 +151,7 @@ class StaffAttendance extends Component {
     this.setState({
       modalSuccess: !this.state.modalSuccess
     });
+    this.reset();
   }
 
   dayChangeHandler(date) {
@@ -131,10 +162,10 @@ class StaffAttendance extends Component {
       + "\nnew Date(date.getTime()-(date.getTimezoneOffset() * 60000)) - " + new Date(date.getTime()-(date.getTimezoneOffset() * 60000))
       );
       
-      this.setState({ attendanceDate: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }, () => {
+      this.setState({ attendanceDate: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)), empDetails:[]}, () => {
         this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
 
-        this.fetchAttendanceOnDate();
+        this.fetchEmployeesWithoutEvent();
         
       });
 
@@ -147,31 +178,8 @@ class StaffAttendance extends Component {
   }
 
 
-  viewAttendanceHandler() {
 
-    console.log("viewAttendanceHandler");
-
-    this.fetchAttendanceOnDate();
-
-    this.setState({
-      viewAttendanceView: true,
-      markAttendanceView: false
-    });
-
-
-  }
-
-  markAttendanceHandler() {
-
-    console.log("markAttendanceHandler");
-
-    this.fetchAttendanceOnDate();
-
-    this.setState({
-      markAttendanceView: true,
-      viewAttendanceView: false
-    });
-  }
+ 
 
   submitAttendance() {
 
@@ -211,7 +219,7 @@ class StaffAttendance extends Component {
       attendance.empInfo = empInfoArray;
   
       this.setState({
-        attendance: attendance
+        attendance: attendance, error:""
       }, () => {
         console.log(" attendance array - " + JSON.stringify(this.state.attendance));
   
@@ -222,44 +230,77 @@ class StaffAttendance extends Component {
   }
 
   fetchEmployees(e) {
-    console.log("EmpType - " + e.target.value);
+    console.log("EmpType - " + e );
 
-    this.setState({ empType: e.target.value, selectedEmp: [] });
+    this.setState({ empType: e.target.value , error:"", empDetails:[]});
     axios.post("http://localhost:8001/api/fetchEmployees", { "empType": e.target.value }).then(cRes => {
-      console.log("Result Emp - " + JSON.stringify(cRes));
+      console.log("Result Emp - " + JSON.stringify(cRes.data));
 
       if (cRes.data.errors) {
 
-        return this.setState({ errors: cRes.data.errors });
+        return this.setState({ error: cRes.data.errors });
 
-      } else {
+      } 
+else{  var empArray = [];
+  cRes.data.forEach(element => {
+   
+    if(this.state.empType==="Admin" && element.role.indexOf("teacher")===-1)
+    
+           empArray.push(element);
 
-        this.setState({ empDetails: cRes.data,empView:true,  markAttendanceView: true }, () => {
-
-          var empArray = [];
-          this.state.empDetails.forEach(element => {
-
-            console.log("element.class - " + element.username);
-            empArray.push({
-              "label": element.firstname + " " + element.lastname + "(" + element.username + ")",
-              "value": element.firstname + " " + element.lastname + "(" + element.username + ")"
-            });
-          });
-          // console.log("classArray - " + classArray);
-          var uniqueItems = Array.from(new Set(empArray));
+          else if(this.state.empType==="Staff")
+    
+           empArray.push(element);
 
 
+         });
+         var uniqueItems = Array.from(new Set(empArray)).sort();
+         this.setState({ empDetails: uniqueItems ,empView:true,  markAttendanceView: true } );
 
-          this.setState({ empArray: uniqueItems });
-        });
-
-
+this.fetchAttendanceOnDate();
 
       }
     });
   }
 
-  nameBtnClicked( username, firstname, lastname) {
+  fetchEmployeesWithoutEvent() {
+   if(!this.state.empType)
+   this.setState({error:"Please select Employess Type first!",empDetails:[]});
+
+   else
+    axios.post("http://localhost:8001/api/fetchEmployees", { "empType": this.state.empType }).then(cRes => {
+      console.log("Result Emp - " + JSON.stringify(cRes.data));
+
+      if (cRes.data.errors) {
+
+        return this.setState({ error: cRes.data.errors });
+
+      } 
+else{  var empArray = [];
+  cRes.data.forEach(element => {
+   
+    if(this.state.empType==="Admin" && element.role.indexOf("teacher")===-1)
+    
+           empArray.push(element);
+
+          else if(this.state.empType==="Staff")
+    
+           empArray.push(element);
+
+
+         });
+         var uniqueItems = Array.from(new Set(empArray)).sort();
+         this.setState({ empDetails: uniqueItems ,empView:true,  markAttendanceView: true } );
+
+this.fetchAttendanceOnDate();
+
+      }
+    });
+  }
+
+
+
+  nameBtnClicked( username) {
 
     var nameBtn = document.getElementById(username);
    
@@ -289,41 +330,32 @@ class StaffAttendance extends Component {
 
     // Resetting studentsDataArray to clear the previous date so that only the selected records are present on the page
     this.setState({
-      studentsDataArray: []
+      studentsDataArray: [], error:""
     });
 
     var fetchAttendanceOnDateRequest = {
-      "class": this.state.class,
-      "section": this.state.section,
+      "empType": this.state.empType,
       "date": this.state.attendanceDate
     }
 
     console.log("Attendance - fetchAttendanceOnDate - fetchAttendanceOnDateRequest - "
       + JSON.stringify(fetchAttendanceOnDateRequest));
 
-    await axios.post("http://localhost:8001/api/fetchAttendanceOnDate", fetchAttendanceOnDateRequest).then(attendanceRes => {
-
-      if (attendanceRes.data.errors) {
-        return this.setState({ errors: attendanceRes.data.errors });
+    await axios.post("http://localhost:8001/api/fetchEmpAttendanceOnDate", fetchAttendanceOnDateRequest).then(attendanceRes => {
+      console.log("Attendance Result - "
+      + JSON.stringify(attendanceRes.data));
+      if (attendanceRes.data.err) {
+        return this.setState({ error: attendanceRes.data.err });
       } else {
 
         // Setting studentsDataArray from Class.attendance.empInfo which was earlier set from Class.studentsData table
-        if(attendanceRes.data.response && attendanceRes.data.response.attendance 
-          && attendanceRes.data.response.attendance[0] && attendanceRes.data.response.attendance[0].empInfo) {
+        if(attendanceRes.data.response && attendanceRes.data.response.empInfo) {
 
             // Setting students data for the selected date
           this.setState({
-            studentsDataArray: attendanceRes.data.response.attendance[0].empInfo
+            empDetails: attendanceRes.data.response.empInfo
           });
-        } else {
-
-          // If there is no data for the selected date and view is markAttendance - show all the students of the class from studentsDataArrayPageLoad
-          if(this.state.markAttendanceView) {
-            this.setState({
-              studentsDataArray: this.state.studentsDataArrayPageLoad
-            });
-          }
-        }
+        } 
         
       }
     });
@@ -341,60 +373,21 @@ class StaffAttendance extends Component {
       + JSON.stringify(updateStudentsAttendanceRequest));
 
     await axios.post("http://localhost:8001/api/addStaffAttendance", updateStudentsAttendanceRequest).then(res => {
+      console.log("Result: "+JSON.stringify(res.data))
 
-      if (res.data.errors) {
-        return this.setState({ errors: res.data.errors });
-      } else {
-
-        this.setState({
-          modalSuccess: true
-        });
+if(res.data.msg==="Success")
+this.setState({
+  modalSuccess: true
+});
+  
+      else if(res.data.err)
+      {
+        return this.setState({ error: res.data.err });
       }
     });
   }
 
-  nameBtnClicked1(e) {
-
-    console.log("Button clicked for username - " + e.currentTarget.id);
-
-    // For hiding blue highlight border on click
-    e.currentTarget.blur();
-
-    // var btn = document.getElementById(e.currentTarget.id);
-    var btn = document.getElementById('muksha');
-    if(btn.style.backgroundColor === 'grey') {
-      btn.style.backgroundColor='green';
-    } else {
-      btn.style.backgroundColor='grey';
-    }
-
-    var btn1 = document.getElementById('87878');
-    if(btn1.style.backgroundColor === 'grey') {
-      btn1.style.backgroundColor='green';
-    } else {
-      btn1.style.backgroundColor='grey';
-    }
-    
-
-    // this.setState({
-    //   nameBtnColorFlag: !this.state.nameBtnColorFlag
-    // }, () => {
-
-    //   if (this.state.nameBtnColorFlag) {
-    //     this.setState({
-    //       nameBtnColor: 'green'
-    //     });
-    //   }
-    //   else {
-    //     this.setState({
-    //       nameBtnColor: 'grey'
-    //     });
-    //   }
-    // });
-    
-    
-
-  }
+ 
 
  
 
@@ -466,11 +459,9 @@ class StaffAttendance extends Component {
 <Row>
 <Col className="col-md-4"/>
 { this.state.markAttendanceView && (
-<Col className="col-md-4 " align="center"><h3><b>MARK Attendance for</b></h3></Col>
+<Col className="col-md-4 " align="center"><h5><b>MARK Attendance for</b></h5></Col>
 )}
-{ this.state.viewAttendanceView && (
-  <Col className="col-md-4 " align="center"><h3><b>VIEW Attendance for</b></h3></Col>
-  )}
+
 </Row>
 <Row>
 <Col className="col-md-4"/>
@@ -487,15 +478,7 @@ class StaffAttendance extends Component {
                                     onClick={this.toggleCalendar}
                                       size="lg"></Input>
 </Col>
-<Col className="col-md-4">
-{ this.state.markAttendanceView && (
-  <NavLink href="#"
-  style={{ color: 'red'}}
-onClick={this.viewAttendanceHandler} ><h3><b><u>Go to View Attendance</u></b></h3></NavLink> )}
-{ this.state.viewAttendanceView && (
-  <NavLink href="#"
-onClick={this.markAttendanceHandler} ><h3><b><u>Go to Mark Attendance</u></b></h3></NavLink> )}
-</Col>
+
 </Row>
 </div>
             )}
@@ -518,6 +501,12 @@ onClick={this.markAttendanceHandler} ><h3><b><u>Go to Mark Attendance</u></b></h
         </Col>
         </Row>
 <br/>
+{this.state.error && (
+                    <font color="red">
+                      {" "}
+                      <p><b>{this.state.error}</b></p>
+                    </font>
+                  )}
               <Row>
                 <Col>
                   <Card>
@@ -548,7 +537,7 @@ onClick={this.markAttendanceHandler} ><h3><b><u>Go to Mark Attendance</u></b></h
                                     <Input
                                     type="button"
                                     id={studentsData.username}
-                                      onClick={ () => this.nameBtnClicked( studentsData.username, studentsData.firstname, studentsData.lastname) }
+                                      onClick={ () => this.nameBtnClicked( studentsData.username) }
                                       size="lg"
                                       disabled={this.state.viewAttendanceView}
                                       style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'grey'), 
