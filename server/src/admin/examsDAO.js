@@ -269,38 +269,38 @@ module.exports = function (app) {
           console.log("examsDAO - insertClassAndSectionInExams - ONLY CLASS array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examclassData));
 
           /*
-      Second adding the section in the exam
+      Second adding the section(s) in the exam
     */
-          exams.findOneAndUpdate(
-            {
-              'examName': request.examName,
-              'classWiseExamDetailsArray.class': request.class
-              // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
-            },
-            {
-              $addToSet: {
-                'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
-                  'section': request.section,
-                  'details': []
+            exams.findOneAndUpdate(
+              {
+                'examName': request.examName,
+                'classWiseExamDetailsArray.class': request.class
+                // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
+              },
+              {
+                $addToSet: {
+                  'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+                    'section': request.section,
+                    'examDetails': request.examDetails
+                  }
                 }
+                // $addToSet: { "classWiseExamDetailsArray.$": request.section }
               }
-              // $addToSet: { "classWiseExamDetailsArray.$": request.section }
-            }
-          ).then(function (examSectionData) {
-
-            console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
-
-            response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
-            return res.send(response);
-
-          }).catch(function (err) {
-
-            console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
-
-            response = { errors: err };
-            return res.send(response);
-          });
-
+            ).then(function (examSectionData) {
+  
+              console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
+  
+              response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
+              return res.send(response);
+  
+            }).catch(function (err) {
+  
+              console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
+  
+              response = { errors: err };
+              return res.send(response);
+            });
+          
         }).catch(function (err) {
 
           console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam CLASS array details - " + JSON.stringify(err));
@@ -312,7 +312,7 @@ module.exports = function (app) {
       } else {
 
         /*
-      Class alrady present so  adding the section in the exam
+      Class alrady present so  adding the section(s) in the exam
     */
         exams.findOneAndUpdate(
           {
@@ -324,7 +324,7 @@ module.exports = function (app) {
             $addToSet: {
               'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
                 'section': request.section,
-                'details': []
+                'examDetails': request.examDetails
               }
             }
             // $addToSet: { "classWiseExamDetailsArray.$": request.section }
@@ -343,6 +343,8 @@ module.exports = function (app) {
           response = { errors: err };
           return res.send(response);
         });
+
+        
       }
 
     }).catch(function (err) {

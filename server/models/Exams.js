@@ -98,7 +98,7 @@ var ExamsSchema = new Schema({
         unique: true
       },
 
-      details: {
+      examDetails: {
         type: Array,
         required: true,
 
@@ -134,9 +134,18 @@ var ExamsSchema = new Schema({
           type: Number,
           required: true
         },
-        selectedVenue: {
+        venue: {
           type: String,
           required: true
+        },
+        venueLabelValue: {
+          
+          label: {
+            type: String,
+          },
+          value: {
+            type: String,
+          }
         }
       }
     }
@@ -155,7 +164,5 @@ var ExamsSchema = new Schema({
 
 
 }, { collection: 'Exams' });
-
-
 
 module.exports = Exams = mongoose.model("Exams", ExamsSchema);

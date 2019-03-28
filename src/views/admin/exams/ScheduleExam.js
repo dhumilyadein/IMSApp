@@ -92,15 +92,15 @@ class ScheduleExam extends Component {
       examDetailsArray: [],
       selectedExamDetails: {},
 
-      // selectedVenueLabelValue: [],
-      // selectedVenue: "",
-
       venueLabelValueArray: [
         { label: "Hall 1", value: "Hall 1" },
         { label: "Hall 2", value: "Hall 2" },
         { label: "Hall 3", value: "Hall 3" },
         { label: "Hall 4", value: "Hall 4" }
-      ]
+      ],
+
+      insertExamDetailsErrorMessage: "",
+      copyFirstRowExamDetailsToAllRowsFlag: false
 
     };
 
@@ -117,13 +117,13 @@ class ScheduleExam extends Component {
     this.isIncludeInResultHandler = this.isIncludeInResultHandler.bind(this);
     this.onChange = this.onChange.bind(this);
     this.isMandatryToAttendForFinalResultChangeHandler = this.isMandatryToAttendForFinalResultChangeHandler.bind(this);
-
-    // this.setStartMoment = this.setStartMoment.bind(this);
-    // this.setEndMoment = this.setEndMoment.bind(this);
-    // this.setExamDuration = this.setExamDuration.bind(this);
-
+    this.scheduleExamSubmitHandler = this.scheduleExamSubmitHandler.bind(this);
+    this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
+    this.resetExamDetails = this.resetExamDetails.bind(this);
+    this.copyFirstRowExamDetailsToAllRows = this.copyFirstRowExamDetailsToAllRows.bind(this);
     this.totalMarksChangeHandler = this.totalMarksChangeHandler.bind(this);
 
+    // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
   }
 
@@ -280,8 +280,8 @@ class ScheduleExam extends Component {
                 startMoment: startMoment,
                 endMoment: endMoment,
                 examDuration: 0,
-                selectedVenueLabelValue: [],
-                selectedVenue: "",
+                venueLabelValue: [],
+                venue: "",
               };
 
               inputExamDataArrayTemp.push(item);
@@ -329,7 +329,8 @@ class ScheduleExam extends Component {
       class: selectedClass,
       showTabsFlag: false,
       showExamNamesFlag: false,
-      selectedExamDetails: []
+      selectedExamDetails: [],
+      copyFirstRowExamDetailsToAllRowsFlag: false
     });
 
     var sectionArrayTemp = [];
@@ -373,6 +374,13 @@ class ScheduleExam extends Component {
   }
 
   sectionChangeHandler = (newValue, actionMeta) => {
+
+    this.setState({
+      showTabsFlag: false,
+      showExamNamesFlag: false,
+      selectedExamDetails: [],
+      copyFirstRowExamDetailsToAllRowsFlag: false
+    });
 
     console.log("ScheduleExam - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
 
@@ -427,8 +435,8 @@ class ScheduleExam extends Component {
 
 
 
-  //   if (typeof (this.state.inputExamDataArray[idx]).selectedVenueLabelValue === 'undefined' || this.state.inputExamDataArray[idx].selectedVenueLabelValue === null) {
-  //     temp[idx]["selectedVenueLabelValue"] = new Date().setHours(5, 30, 0, 0);
+  //   if (typeof (this.state.inputExamDataArray[idx]).venueLabelValue === 'undefined' || this.state.inputExamDataArray[idx].venueLabelValue === null) {
+  //     temp[idx]["venueLabelValue"] = new Date().setHours(5, 30, 0, 0);
   //   }
 
 
@@ -436,10 +444,10 @@ class ScheduleExam extends Component {
   //   if (typeof (newValue) === 'undefined' || newValue === null) {
 
   //     this.setState({
-  //       temp[idx]["selectedVenueLabelValue"] = newValue,
-  //       temp[idx]["selectedVenue"] = newValue.value,
+  //       temp[idx]["venueLabelValue"] = newValue,
+  //       temp[idx]["venue"] = newValue.value,
   //     }, () => {
-  //       console.log("ScheduleExam - selectedVenueLabelValue - " + JSON.stringify(this.state.selectedVenueLabelValue) + " selectedVenue - " + this.state.selectedVenue);
+  //       console.log("ScheduleExam - venueLabelValue - " + JSON.stringify(this.state.venueLabelValue) + " venue - " + this.state.venue);
   //     });
   //   }
 
@@ -447,13 +455,22 @@ class ScheduleExam extends Component {
 
   examNameChangeHandler(e) {
 
+    this.setState({
+      showTabsFlag: false,
+      selectedExamDetails: [],
+      copyFirstRowExamDetailsToAllRowsFlag: false
+    });
+
     var examName = e.currentTarget.value;
 
+    var isExamNameValid = false;
     this.state.examDetailsArray.forEach(element => {
 
       var selectedExamDetails = {};
 
       if (examName === element.examName) {
+
+        isExamNameValid = true;
 
         selectedExamDetails.examName = element.examName;
         selectedExamDetails.examDescription = element.examDescription;
@@ -471,10 +488,12 @@ class ScheduleExam extends Component {
 
     });
 
-    console.log("Foreach setting exam details after loop");
-    this.setState({
-      showTabsFlag: true
-    });
+    if (isExamNameValid) {
+      console.log("Foreach setting exam details after loop");
+      this.setState({
+        showTabsFlag: true
+      });
+    }
 
   }
 
@@ -652,18 +671,176 @@ class ScheduleExam extends Component {
 
   scheduleExamSubmitHandler() {
 
-    console.log("BEFORE - " + JSON.stringify(this.state.inputExamDataArray))
+    console.log("BEFORE - " + JSON.stringify(this.state.inputExamDataArray));
 
+    // var allExamDetailsFilledFlag = true;
     var temp = this.state.inputExamDataArray;
+    var examDetailsArrayTemp = [];
+    var allExamDetailsFilledFlag = true;
 
-    temp.class = this.state.class;
-    temp.section = this.state.section;
+    // temp.forEach(element => {
+    for (var i = 0; i < temp.length; i++) {
+
+      if (temp[i].totalMarks === "" || temp[i].passingMarks === "" || temp[i].startMoment === temp[i].endMoment || temp[i].examDuration === 0 || temp[i].venue === "" || temp[i].venueLabelValue.length < 1) {
+
+        allExamDetailsFilledFlag = false
+        alert('Please fill in all the Exam details to submit');
+        break;
+        // allExamDetailsFilledFlag = false;
+        // return false;
+      }
+      examDetailsArrayTemp.push(temp[i]);
+    }
+
+    if (allExamDetailsFilledFlag) {
+
+      temp.class = this.state.class;
+      temp.sectionArray = this.state.selectedSectionsArray;
+
+      this.setState({
+        inputExamDataArray: temp
+      }, console.log("AFTER - " + JSON.stringify(this.state.inputExamDataArray)));
+
+      this.state.selectedSectionsArray.forEach(element => {
+
+        var insertClassAndSectionInExamsRequest = {};
+
+        insertClassAndSectionInExamsRequest.examName = this.state.selectedExamDetails.examName;
+        insertClassAndSectionInExamsRequest.class = this.state.class;
+        insertClassAndSectionInExamsRequest.section = element;
+        insertClassAndSectionInExamsRequest.examDetails = examDetailsArrayTemp;
+
+        console.log("ScheduleExam - scheduleExamSubmitHandler - insertClassAndSectionInExamsRequest - " + JSON.stringify(insertClassAndSectionInExamsRequest));
+
+        /*
+        Calling service to insert the exam details
+        */
+        axios
+          .post("http://localhost:8001/api/insertClassAndSectionInExams", insertClassAndSectionInExamsRequest)
+          .then(result => {
+
+            // console.log("ScheduleExam - scheduleExamSubmitHandler - exam details - " + JSON.stringify(result.data));
+
+            if (result.data.errors) {
+
+              console.log("ScheduleExam - scheduleExamSubmitHandler - ERROR in inserting exam details - ERRORS - " + result.data.errors);
+              return this.setState({ insertExamDetailsErrorMessage: result.data.errors });
+
+            } else {
+
+              /*
+              Resetting exam details fields as the data is inserted successfully
+              */
+              this.resetExamDetails();
+
+              this.setState(
+                {
+                  modalSuccess: true,
+                  modalColor: "modal-success",
+                  modalMessage: "Exam details inserted successfully!"
+                });
+              console.log("ScheduleExam - scheduleExamSubmitHandler - exam details inserted message - " + result.data.message);
+            }
+
+          });
+
+
+      });
+
+    }
+  }
+
+  async toggleModalSuccess() {
+
+    await console.log("CreateExam - toggleModalSuccess this.state.showModalFlag - " + this.state.showModalFlag);
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
+    });
+  }
+
+  /** 
+  Reset exam details after inserting the exam details and on reset button click
+  */
+  resetExamDetails() {
+
+    /*
+      Setting temporary inputExamDataArray for each subject
+    */
+    var startMoment = new Date(new Date().setHours(12, 0, 0, 0));
+    var endMoment = new Date(new Date().setHours(12, 0, 0, 0));
+    var examDate = new Date(new Date().setHours(5, 30, 0, 0));
+
+    var inputExamDataArrayTemp = [];
+    this.state.classDetails[0].subjects.forEach(element => {
+
+      const item = {
+        subject: element,
+        totalMarks: "",
+        passingMarks: "",
+        includeInResultFlag: true,
+        examDate: examDate,
+        startMoment: startMoment,
+        endMoment: endMoment,
+        examDuration: 0,
+        venueLabelValue: [],
+        venue: "",
+      };
+
+      inputExamDataArrayTemp.push(item);
+
+    });
+
+    console.log("exam details array - " + JSON.stringify(inputExamDataArrayTemp));
+    this.setState({
+      inputExamDataArray: inputExamDataArrayTemp,
+      subjectArray: this.state.classDetails[0].subjects,
+    });
+  }
+
+  /**
+   * Copy first row exam details to all the other rows
+   */
+  copyFirstRowExamDetailsToAllRows(e) {
+
+    console.log("ScheduleExam - copyFirstRowExamDetailsToAllRows- exam details array before copying first row exam details - " + JSON.stringify(this.state.inputExamDataArray));
 
     this.setState({
-      inputExamDataArray : temp
-    }, console.log("AFTER - " + JSON.stringify(this.state.inputExamDataArray)));
+      copyFirstRowExamDetailsToAllRowsFlag: !this.state.copyFirstRowExamDetailsToAllRowsFlag
+    }, () => {
 
-    
+      if (this.state.copyFirstRowExamDetailsToAllRowsFlag) {
+        /*
+          Setting temporary inputExamDataArray for each subject
+        */
+        var inputExamDataArrayTemp = [];
+        var firstRowExamDetails = this.state.inputExamDataArray[0];
+
+        for (var i = 0; i < this.state.classDetails[0].subjects.length; i++) {
+
+          const item = {
+            subject: this.state.classDetails[0].subjects[i],
+            totalMarks: firstRowExamDetails.totalMarks,
+            passingMarks: firstRowExamDetails.passingMarks,
+            includeInResultFlag: firstRowExamDetails.includeInResultFlag,
+            examDate: firstRowExamDetails.examDate,
+            startMoment: firstRowExamDetails.startMoment,
+            endMoment: firstRowExamDetails.endMoment,
+            examDuration: firstRowExamDetails.examDuration,
+            venueLabelValue: firstRowExamDetails.venueLabelValue,
+            venue: firstRowExamDetails.venue,
+          };
+
+          inputExamDataArrayTemp.push(item);
+        }
+
+        console.log("ScheduleExam - copyFirstRowExamDetailsToAllRows- exam details array after copying first row exam details - " + JSON.stringify(inputExamDataArrayTemp));
+        this.setState({
+          inputExamDataArray: inputExamDataArrayTemp,
+        });
+      }
+    });
+
+
   }
 
   render() {
@@ -674,13 +851,13 @@ class ScheduleExam extends Component {
 
           <Row>
             <Col sm="12">
-              {this.state.success && (
+              {this.state.modalSuccess && (
                 <Modal
                   isOpen={this.state.modalSuccess}
-                  className={"modal-success " + this.props.className}
-                  toggle={this.toggleSuccess}
+                  className={this.state.modalColor}
+                  toggle={this.toggleModalSuccess}
                 >
-                  <ModalHeader toggle={this.toggleSuccess}>
+                  <ModalHeader toggle={this.toggleModalSuccess}>
                     {this.state.modalMessage}
                   </ModalHeader>
                 </Modal>
@@ -924,8 +1101,8 @@ class ScheduleExam extends Component {
                                     id="parentaddresscheck"
                                     // style={{ height: "35px", width: "25px", background: "white" }}
                                     name="parentaddresscheck"
-                                  // checked={this.state.parentaddresscheck}
-                                  // onChange={this.copyAddress}
+                                    checked={this.state.copyFirstRowExamDetailsToAllRowsFlag}
+                                    onChange={this.copyFirstRowExamDetailsToAllRows}
                                   // disabled={this.state.editMode}
                                   />
                                 </FormGroup>
@@ -1229,8 +1406,8 @@ class ScheduleExam extends Component {
                                         placeholder="Select"
                                         isMulti={false}
                                         closeMenuOnSelect={true}
-                                        // value={this.state.selectedVenueLabelValue}
-                                        value={this.state.inputExamDataArray[idx]["selectedVenueLabelValue"]}
+                                        // value={this.state.venueLabelValue}
+                                        value={this.state.inputExamDataArray[idx]["venueLabelValue"]}
                                         // style={{ width: '200px' }}
                                         // width="100%"
                                         // onChange={this.venueChangeHandler}
@@ -1241,8 +1418,8 @@ class ScheduleExam extends Component {
                                             var temp = this.state.inputExamDataArray;
                                             if (!(typeof (newValue) === 'undefined' || newValue === null)) {
 
-                                              temp[idx]["selectedVenueLabelValue"] = newValue;
-                                              temp[idx]["selectedVenue"] = newValue.value;
+                                              temp[idx]["venueLabelValue"] = newValue;
+                                              temp[idx]["venue"] = newValue.value;
 
                                               this.setState({ inputExamDataArray: temp }, () => {
                                                 console.log(JSON.stringify(this.state.inputExamDataArray));
@@ -1292,7 +1469,12 @@ class ScheduleExam extends Component {
 
                   <br />
 
-
+                  {this.state.insertExamDetailsErrorMessage && (
+                    <font color="red">
+                      {" "}
+                      <p>{this.state.insertExamDetailsErrorMessage}</p>
+                    </font>
+                  )}
                   <Row>
                     <Col>
                       {!this.state.loader && <Button
@@ -1316,7 +1498,7 @@ class ScheduleExam extends Component {
 
                     <Col>
                       <Button
-                        onClick={this.reset}
+                        onClick={this.resetExamDetails}
                         size="lg"
                         color="secondary"
                         block
