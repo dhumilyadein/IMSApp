@@ -907,6 +907,7 @@ if(result.data.length===0)
                       
                        </Row> }
                       </CardBody></Card>
+                    
                       <br/>
                       <Table  bordered hover
 >

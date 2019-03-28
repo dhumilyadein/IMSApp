@@ -327,8 +327,17 @@ export default {
                     icon: 'fa fa-money',
                     variant: 'success',
                   },
+              
+                  {
+                    name: 'Staff Attendance',
+                    url: '/admin/payroll/StaffAttendance',
+                    icon: 'icon-bag',
+                    variant: 'success',
+                  },
                  
+                  
               ]},
+
 
 
     {

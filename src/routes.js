@@ -367,6 +367,11 @@ const PaySalary = Loadable({
   loading: Loading
 });
 
+const StaffAttendance = Loadable({
+  loader: () => import("./views/admin/payroll/StaffAttendance"),
+  loading: Loading
+});
+
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -393,6 +398,12 @@ const routes = [
     path: "/admin/payroll/ViewPayslip",
     name: "View Payslip",
     component: ViewPayslip
+  },
+
+  {
+    path: "/admin/payroll/StaffAttendance",
+    name: "Staff Attendance",
+    component: StaffAttendance
   },
 
   {
