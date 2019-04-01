@@ -5,11 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Chrome Debugger",
-            "url":["http://localhost:3000","http://localhost:8001"],
-            "webRoot": "C:/Users/maytiwar/Desktop/IMS/IMSApp"
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceRoot}"
         }
     ]
 }
