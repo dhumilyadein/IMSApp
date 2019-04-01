@@ -53,7 +53,7 @@ class StaffAttendance extends Component {
     super(props);
 
     this.state = {
-
+      dateChangeCounter:1,
       classesView: true,
       sectionView: false,
       empView: false,
@@ -115,7 +115,7 @@ class StaffAttendance extends Component {
       sectionView: false,
       empView: false,
       markAttendanceView: false,
-   
+      dateChangeCounter:1,
      empType:"",
      empDetails:[],
       studentsDataArray: [],
@@ -155,26 +155,31 @@ class StaffAttendance extends Component {
   }
 
   dayChangeHandler(date) {
+console.log(" dateChangeCounter: "+this.state.dateChangeCounter)
+    this.setState({dateChangeCounter:this.state.dateChangeCounter+1},()=>{
 
-    if(date) {
+     if(this.state.dateChangeCounter<=5)
+     {
+      if(date) {
 
-      console.log("GMT - " + new Date()
-      + "\nnew Date(date.getTime()-(date.getTimezoneOffset() * 60000)) - " + new Date(date.getTime()-(date.getTimezoneOffset() * 60000))
-      );
-      
-      this.setState({ attendanceDate: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)), empDetails:[]}, () => {
-        this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
+        this.setState({ attendanceDate: new Date(date.getTime()-(date.getTimezoneOffset() * 60000))
+       }, () => {
+       this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
 
-        this.fetchEmployeesWithoutEvent();
-        
-      });
+       this.fetchEmployeesWithoutEvent();
+       
+     });
 
-      // this.setState({ attendanceDate: new Date(moment(date.getTime()).startOf('day')) }, () => {
-      //   this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
-      // });
-    }
-    
-    this.toggleCalendar();
+ 
+   }
+   
+   this.toggleCalendar();
+
+     }
+
+     else{window.location.reload();}
+
+    })
   }
 
 
@@ -229,11 +234,11 @@ class StaffAttendance extends Component {
     console.log("Attendance - submitAttendance - updateStudentsAttendance called");
   }
 
-  fetchEmployees(e) {
+ async fetchEmployees(e) {
     console.log("EmpType - " + e );
 
     this.setState({ empType: e.target.value , error:"", empDetails:[]});
-    axios.post("http://localhost:8001/api/fetchEmployees", { "empType": e.target.value }).then(cRes => {
+   await  axios.post("http://localhost:8001/api/fetchEmployees", { "empType": e.target.value }).then(cRes => {
       console.log("Result Emp - " + JSON.stringify(cRes.data));
 
       if (cRes.data.errors) {
@@ -257,18 +262,18 @@ else{  var empArray = [];
          var uniqueItems = Array.from(new Set(empArray)).sort();
          this.setState({ empDetails: uniqueItems ,empView:true,  markAttendanceView: true } );
 
-this.fetchAttendanceOnDate();
+          this.fetchAttendanceOnDate();
 
       }
     });
   }
 
-  fetchEmployeesWithoutEvent() {
+  async fetchEmployeesWithoutEvent() {
    if(!this.state.empType)
    this.setState({error:"Please select Employess Type first!",empDetails:[]});
 
    else
-    axios.post("http://localhost:8001/api/fetchEmployees", { "empType": this.state.empType }).then(cRes => {
+ await   axios.post("http://localhost:8001/api/fetchEmployees", { "empType": this.state.empType }).then(cRes => {
       console.log("Result Emp - " + JSON.stringify(cRes.data));
 
       if (cRes.data.errors) {
@@ -292,7 +297,7 @@ else{  var empArray = [];
          var uniqueItems = Array.from(new Set(empArray)).sort();
          this.setState({ empDetails: uniqueItems ,empView:true,  markAttendanceView: true } );
 
-this.fetchAttendanceOnDate();
+ this.fetchAttendanceOnDate();
 
       }
     });
@@ -330,7 +335,7 @@ this.fetchAttendanceOnDate();
 
     // Resetting studentsDataArray to clear the previous date so that only the selected records are present on the page
     this.setState({
-      studentsDataArray: [], error:""
+       error:""
     });
 
     var fetchAttendanceOnDateRequest = {
@@ -349,13 +354,13 @@ this.fetchAttendanceOnDate();
       } else {
 
         // Setting studentsDataArray from Class.attendance.empInfo which was earlier set from Class.studentsData table
-        if(attendanceRes.data.response && attendanceRes.data.response.empInfo) {
-
+        if(attendanceRes.data.response ) 
+          if(attendanceRes.data.response.empInfo)
             // Setting students data for the selected date
           this.setState({
             empDetails: attendanceRes.data.response.empInfo
           });
-        } 
+        
         
       }
     });
@@ -441,7 +446,12 @@ this.setState({
                 </InputGroup>
                
             
-
+{this.state.error && (
+  <font color="red">
+    {" "}
+    <p><b>{this.state.error}</b></p>
+  </font>
+)}
             
 
             </CardBody>
@@ -501,20 +511,15 @@ this.setState({
         </Col>
         </Row>
 <br/>
-{this.state.error && (
-                    <font color="red">
-                      {" "}
-                      <p><b>{this.state.error}</b></p>
-                    </font>
-                  )}
+
               <Row>
                 <Col>
                   <Card>
                     <CardHeader>
                     <h4 align="center">  Employees List </h4>
                     </CardHeader>
-                    <CardBody>
-
+                    <CardBody align="center">
+<div align="center">
                       <Row align="center">
                        
 
@@ -524,7 +529,7 @@ this.setState({
                                       size="lg"
                                       disabled
                                     >
-                                     Employee Name
+                                   <b>  Employee Name </b>
                                     </Button>
                         </Col>
                       </Row>
@@ -535,6 +540,7 @@ this.setState({
                   <Col className="col-md-10">
              
                                     <Input
+                                    block
                                     type="button"
                                     id={studentsData.username}
                                       onClick={ () => this.nameBtnClicked( studentsData.username) }
@@ -548,8 +554,8 @@ this.setState({
                                       value={studentsData.firstname.toUpperCase() + " " + studentsData.lastname.toUpperCase() + " ( " + studentsData.username + " )"} >
                                       </Input>
                         </Col>
-  </Row>
-))}
+  </Row> 
+))} </div>
 
                      
                     </CardBody>

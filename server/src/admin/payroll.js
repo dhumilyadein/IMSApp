@@ -310,12 +310,12 @@ module.exports = function (app) {
 
     async function fetchEmpAttendanceOnDate(req, res) {
 
-        await console.log("fetchEmpAttendanceOnDate Req: "+JSON.stringify(req.body));
+         console.log("fetchEmpAttendanceOnDate Req: "+JSON.stringify(req.body));
     
         var request = req.body;
     
       
-        EmpAttendance.findOne(
+        await  EmpAttendance.findOne(
           {"empType": request.empType, 
           "date": request.date
           // ,"attendance.date": request.date
@@ -349,7 +349,7 @@ EmpAttendance.updateOne({ date:req.body.attendance.date,empType:req.body.empType
 
         }
     }
-) .then(user => {
+) .then(user => { 
     return res.send({ msg: "Success" });
 })
                         
