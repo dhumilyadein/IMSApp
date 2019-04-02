@@ -537,7 +537,7 @@ var height = pdf.internal.pageSize.getHeight();
                         </tr>
                       </thead>
                       <tbody>
-                        {this.state.salaryTemplates.map((item, idx) => (
+                        {this.state.salaryRows.map((item, idx) => (
                           <tr id="addr0" key={idx}>
                             <td align="center">
                               <h4>{idx + 1}</h4>
@@ -851,7 +851,7 @@ var height = pdf.internal.pageSize.getHeight();
                    </tr>
                  </thead>
                  <tbody>
-                   {this.state.salaryTemplates.map((item, idx) => (
+                   {this.state.salaryRows.map((item, idx) => (
                      <tr id="addr0" key={idx}>
                        <td align="center">
                          <h4>{idx + 1}</h4>
