@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
+<<<<<<< HEAD
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
@@ -16,6 +17,13 @@
             "name": "Chrome Debugger",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceRoot}"
+=======
+            "type": "chrome",
+            "request": "launch",
+            "name": "Chrome Debugger",
+            "url":["http://localhost:3000","http://localhost:8001"],
+            "webRoot": "C:/Users/maytiwar/Desktop/IMS/IMSApp"
+>>>>>>> 0810bc62f9a2c91c57438a07a824872d0b15480f
         }
     ]
 }

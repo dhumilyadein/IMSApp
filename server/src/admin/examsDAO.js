@@ -36,6 +36,16 @@ module.exports = function (app) {
       .not()
       .isEmpty()
       .withMessage("Please Enter Applicable for Classes")
+  ],
+  [
+    check("examName")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter Exam name"),
+      check("className")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter Class name")
   ]);
 
   const ExamNameValidation = [
@@ -407,26 +417,52 @@ module.exports = function (app) {
     var request = req.body;
     console.log("in fetchExamDetailsOnInput request - " + JSON.stringify(request))
 
-    //Initial validation like fields empty check
-    var errors = validationResult(req);
+    // KAPILTODO Commented to check later 
+    // //Initial validation like fields empty check
+    // var errors = validationResult(req);
 
-    //Mapping the value to the same object
-    if (!errors.isEmpty()) {
-      return res.send({ errors: errors.mapped() });
-    }
+    // //Mapping the value to the same object
+    // if (!errors.isEmpty()) {
+    //   return res.send({ errors: errors.mapped() });
+    // }
 
-    var examRequest = {
-      "applicableForClasses": { $elemMatch: { $eq: request.applicableForClasses } }
-    };
+    var examRequest = {};
+    var examResponse = {};
+    
+    if(!(typeof (request.applicableForClasses) === 'undefined' || request.applicableForClasses === null )) {
+      examRequest = {
 
-    exams.find(examRequest,
-      {
+        "applicableForClasses": { $elemMatch: { $eq: request.applicableForClasses } }
+      };
+      examResponse = {
         "examName": 1,
         "examDescription": 1,
         "percentageShareInFinalResult": 1,
         "applicableForClasses": 1,
         "isMandatryToAttendForFinalResult": 1
-      })
+      }
+    } else if(!(typeof (request.examName) === 'undefined' || request.examName === null ) && !(typeof (request.className) === 'undefined' || request.className === null )) {
+
+      //For fetching class subject details to show on ScheduleExam view on page load
+
+      examRequest = {
+        "examName": request.examName ,
+        "classWiseExamDetailsArray.class" : request.className
+      };
+      examResponse = {
+        "examName": 1,
+        "examDescription": 1,
+        "percentageShareInFinalResult": 1,
+        "applicableForClasses": 1,
+        "isMandatryToAttendForFinalResult": 1,
+        "classWiseExamDetailsArray.$.sectionWiseExamDetailsArray": 1
+      }
+    }
+    
+    console.log("ExamsDAO - fetchExamDetailsOnInput - searchString - examRequest - " + examRequest + " examResponse - " + examResponse);
+
+    exams.find(examRequest,
+      examResponse)
       .then(function (examDetails) {
 
         console.log("examsDAO - fetchExamDetailsOnInput - Exam details -  " + examDetails);
@@ -573,7 +609,7 @@ module.exports = function (app) {
     console.log("examsDAO - fetchExamDetails get method call");
   });
 
-  app.post("/api/fetchExamDetailsOnInput", fetchExamValidation, fetchExamDetailsOnInput, (req, res) => {
+  app.post("/api/fetchExamDetailsOnInput", fetchExamDetailsOnInput, (req, res) => {
     console.log("examsDAO - fetchExamDetailsOnInput post method call");
   });
 
