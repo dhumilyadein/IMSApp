@@ -92,12 +92,12 @@ class ScheduleExam extends Component {
       examDetailsArray: [],
       selectedExamDetails: {},
 
-      venueLabelValueArray: [
-        { label: "Hall 1", value: "Hall 1" },
-        { label: "Hall 2", value: "Hall 2" },
-        { label: "Hall 3", value: "Hall 3" },
-        { label: "Hall 4", value: "Hall 4" }
-      ],
+      // venueLabelValueArray: [
+      //   { label: "Hall 1", value: "Hall 1" },
+      //   { label: "Hall 2", value: "Hall 2" },
+      //   { label: "Hall 3", value: "Hall 3" },
+      //   { label: "Hall 4", value: "Hall 4" }
+      // ],
 
       insertExamDetailsErrorMessage: "",
       copyFirstRowExamDetailsToAllRowsFlag: false
@@ -122,9 +122,56 @@ class ScheduleExam extends Component {
     this.resetExamDetails = this.resetExamDetails.bind(this);
     this.copyFirstRowExamDetailsToAllRows = this.copyFirstRowExamDetailsToAllRows.bind(this);
     this.totalMarksChangeHandler = this.totalMarksChangeHandler.bind(this);
+    this.fetchClassWiseExamDetails = this.fetchClassWiseExamDetails.bind(this);
 
     // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
+  }
+
+  /**
+   * Fetching exam details
+   */
+  fetchClassWiseExamDetails() {
+
+    var fetchExamDetailsOnInputRequest = {
+      "examName": this.state.selectedExamDetails.examName ,
+      "className" : this.state.class
+    }
+
+    axios
+      .post("http://localhost:8001/api/fetchExamDetailsOnInput", fetchExamDetailsOnInputRequest)
+      .then(result => {
+
+        // console.log("CreateExam - fetchExamDetails - exam details - " + JSON.stringify(result.data));
+
+        if (result.errors) {
+          return this.setState({ errors: result.errors });
+        } else {
+
+          var classWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0];
+          var sectionWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray;
+
+          sectionWiseExamDetailsArray.forEach(element => {
+            
+            // Comparing with selected section [0] (as only sections with same subjects can be selected, so comparing with the first in the array) to fetch data of the selected sections
+            if(element.section === this.state.selectedSectionsArray[0]) {
+
+              this.setState({
+                inputExamDataArray: element.examDetails
+              });
+            }
+          });
+
+          console.log('ScheduleExam - fetchClassWiseExamDetails - classWiseExamDetailsArray - ' + JSON.stringify(classWiseExamDetailsArray) + " sectionWiseExamDetailsArray - " + JSON.stringify(sectionWiseExamDetailsArray));
+
+          // this.setState({ examDetailsArray: result.data }, () => {
+
+          //   console.log('ScheduleExam - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
+          // });
+
+        }
+
+      });
   }
 
   /**
@@ -280,8 +327,8 @@ class ScheduleExam extends Component {
                 startMoment: startMoment,
                 endMoment: endMoment,
                 examDuration: 0,
-                venueLabelValue: [],
-                venue: "",
+                // venueLabelValue: [],
+                // venue: "",
               };
 
               inputExamDataArrayTemp.push(item);
@@ -480,6 +527,11 @@ class ScheduleExam extends Component {
 
         this.setState({
           selectedExamDetails: selectedExamDetails
+        }, () => {
+
+          //Fetching class wise exam details on examName selection
+
+          this.fetchClassWiseExamDetails();
         });
 
         console.log("Foreach setting exam details");
@@ -585,30 +637,30 @@ class ScheduleExam extends Component {
   //   }
   // }
 
-  // setExamDuration(idx) {
+  setExamDuration(idx) {
 
-  //   var temp = this.state.inputExamDataArray;
+    var temp = this.state.inputExamDataArray;
 
 
-  //   if (this.state.inputExamDataArray) {
+    if (this.state.inputExamDataArray) {
 
-  //     // temp[idx]["examDuration"] = new Date().setHours(12, 0, 0, 0);
-  //     // this.setState({ inputExamDataArray: temp });
-  //     return new Date().setHours(12, 0, 0, 0);
+      // temp[idx]["examDuration"] = new Date().setHours(12, 0, 0, 0);
+      // this.setState({ inputExamDataArray: temp });
+      return new Date().setHours(12, 0, 0, 0);
 
-  //   } else {
+    } else {
 
-  //     if (typeof (this.state.inputExamDataArray[idx].examDuration) === 'undefined' || this.state.inputExamDataArray[idx].examDuration === null) {
-  //       temp[idx]["examDuration"] = this.state.defaultExamDuration;
-  //       this.setState({ inputExamDataArray: temp });
-  //       return this.state.defaultExamDuration;
-  //     } else {
-  //       temp[idx]["examDuration"] = this.state.inputExamDataArray[idx].examDuration;
-  //       this.setState({ inputExamDataArray: temp });
-  //       return this.state.inputExamDataArray[idx].examDuration;
-  //     }
-  //   }
-  // }
+      if (typeof (this.state.inputExamDataArray[idx].examDuration) === 'undefined' || this.state.inputExamDataArray[idx].examDuration === null) {
+        temp[idx]["examDuration"] = this.state.defaultExamDuration;
+        this.setState({ inputExamDataArray: temp });
+        return this.state.defaultExamDuration;
+      } else {
+        temp[idx]["examDuration"] = this.state.inputExamDataArray[idx].examDuration;
+        this.setState({ inputExamDataArray: temp });
+        return this.state.inputExamDataArray[idx].examDuration;
+      }
+    }
+  }
 
   totalMarksChangeHandler(idx) {
 
@@ -623,13 +675,13 @@ class ScheduleExam extends Component {
 
       var temp = this.state.inputExamDataArray;
 
-      if (typeof (this.state.inputExamDataArray[idx]).examDate === 'undefined' || this.state.inputExamDataArray[idx].examDate === null) {
+      if (typeof (this.state.inputExamDataArray[idx].examDate) === 'undefined' || this.state.inputExamDataArray[idx].examDate === null) {
         temp[idx]["examDate"] = new Date().setHours(5, 30, 0, 0);
       }
-      if (typeof (this.state.inputExamDataArray[idx]).startMoment === 'undefined' || this.state.inputExamDataArray[idx].startMoment === null) {
+      if (typeof (this.state.inputExamDataArray[idx].startMoment) === 'undefined' || this.state.inputExamDataArray[idx].startMoment === null) {
         temp[idx]["startMoment"] = new Date().setHours(12, 0, 0, 0);
       }
-      if (typeof (this.state.inputExamDataArray[idx]).endMoment === 'undefined' || this.state.inputExamDataArray[idx].endMoment === null) {
+      if (typeof (this.state.inputExamDataArray[idx].endMoment) === 'undefined' || this.state.inputExamDataArray[idx].endMoment === null) {
         temp[idx]["endMoment"] = new Date().setHours(12, 0, 0, 0);
       }
 
@@ -681,7 +733,9 @@ class ScheduleExam extends Component {
     // temp.forEach(element => {
     for (var i = 0; i < temp.length; i++) {
 
-      if (temp[i].totalMarks === "" || temp[i].passingMarks === "" || temp[i].startMoment === temp[i].endMoment || temp[i].examDuration === 0 || temp[i].venue === "" || temp[i].venueLabelValue.length < 1) {
+      if (temp[i].totalMarks === "" || temp[i].passingMarks === "" || temp[i].startMoment === temp[i].endMoment || temp[i].examDuration === 0
+      //  || temp[i].venue === "" || temp[i].venueLabelValue.length < 1
+       ) {
 
         allExamDetailsFilledFlag = false
         alert('Please fill in all the Exam details to submit');
@@ -782,8 +836,8 @@ class ScheduleExam extends Component {
         startMoment: startMoment,
         endMoment: endMoment,
         examDuration: 0,
-        venueLabelValue: [],
-        venue: "",
+        // venueLabelValue: [],
+        // venue: "",
       };
 
       inputExamDataArrayTemp.push(item);
@@ -826,8 +880,8 @@ class ScheduleExam extends Component {
             startMoment: firstRowExamDetails.startMoment,
             endMoment: firstRowExamDetails.endMoment,
             examDuration: firstRowExamDetails.examDuration,
-            venueLabelValue: firstRowExamDetails.venueLabelValue,
-            venue: firstRowExamDetails.venue,
+            // venueLabelValue: firstRowExamDetails.venueLabelValue,
+            // venue: firstRowExamDetails.venue,
           };
 
           inputExamDataArrayTemp.push(item);
@@ -1085,13 +1139,13 @@ class ScheduleExam extends Component {
                                 width="24%">
                                 <h5>Exam Time</h5>{" "}
                               </th>
-                              {/* <th className="text-center">
+                              <th className="text-center">
                                 <h5>Exam Duration (Minutes)</h5>{" "}
-                              </th> */}
-                              <th className="text-center"
+                              </th>
+                              {/* <th className="text-center"
                                 width="18%" >
                                 <h5>Venue</h5>{" "}
-                              </th >
+                              </th > */}
                               <th className="text-center"
                                 width="2%">
                                 <FormGroup check inline>
@@ -1213,7 +1267,7 @@ class ScheduleExam extends Component {
 
                                     name="examDate"
                                     id="examDate"
-                                    value={this.state.inputExamDataArray[idx].examDate}
+                                    value={new Date(this.state.inputExamDataArray[idx].examDate)}
                                     onChange={
                                       date => {
 
@@ -1274,8 +1328,8 @@ class ScheduleExam extends Component {
                                     /> */}
 
                                   <TimeRange
-                                    startMoment={this.state.inputExamDataArray[idx].startMoment}
-                                    endMoment={this.state.inputExamDataArray[idx].endMoment}
+                                    startMoment={new Date(this.state.inputExamDataArray[idx].startMoment)}
+                                    endMoment={new Date(this.state.inputExamDataArray[idx].endMoment)}
 
                                     // startMoment={this.setStartMoment(idx)}
                                     // endMoment={this.setEndMoment(idx)}
@@ -1293,7 +1347,7 @@ class ScheduleExam extends Component {
 
                                       var startTimeWithOffset = new Date(date.startTime);
 
-                                      var examDate = this.state.inputExamDataArray[idx]["examDate"];
+                                      var examDate = new Date(this.state.inputExamDataArray[idx]["examDate"]);
 
                                       if (typeof (examDate) === 'undefined' || examDate === null) {
                                         examDate = new Date();
@@ -1316,7 +1370,7 @@ class ScheduleExam extends Component {
                                       temp[idx]["examDate"] = examDate;
                                       temp[idx]["startMoment"] = startTimeWithOffset;
 
-                                      var diffMs = this.state.inputExamDataArray[idx].endMoment - startTimeWithOffset;
+                                      var diffMs = new Date(this.state.inputExamDataArray[idx].endMoment) - startTimeWithOffset;
                                       var diffMins = Math.round(diffMs / 60000); // minutes
 
                                       temp[idx]["examDuration"] = diffMins;
@@ -1329,7 +1383,9 @@ class ScheduleExam extends Component {
 
                                       var endTimeWithOffset = new Date(date.endTime);
 
-                                      var examDate = this.state.inputExamDataArray[idx]["examDate"];
+                                      var examDate = new Date(this.state.inputExamDataArray[idx]["examDate"]);
+
+                                      console.log("examDate examDate examDate examDate examDate - " + examDate + " To Date - " + new Date(examDate));
 
                                       if (typeof (examDate) === 'undefined' || examDate === null) {
                                         examDate = new Date();
@@ -1376,7 +1432,7 @@ class ScheduleExam extends Component {
 
                                 </td>
 
-                                {/* <td style={{ "vertical-align": "middle" }}>
+                                <td style={{ "vertical-align": "middle" }}>
                                   <InputGroup className="mb-3">
                                     <Input
                                       name="examDuration"
@@ -1390,15 +1446,11 @@ class ScheduleExam extends Component {
                                     // size="lg"
                                     />
                                   </InputGroup>
-                                </td> */}
+                                </td>
 
 
 
-                                <td
-                                // style={{width: '20%'}}
-                                // width="80%"
-                                // style={{ "vertical-align": "middle" }}
-                                >
+                                {/* <td>
 
                                   <InputGroup className="mb-3 ">
                                     <div className="col-md-12">
@@ -1406,11 +1458,7 @@ class ScheduleExam extends Component {
                                         placeholder="Select"
                                         isMulti={false}
                                         closeMenuOnSelect={true}
-                                        // value={this.state.venueLabelValue}
                                         value={this.state.inputExamDataArray[idx]["venueLabelValue"]}
-                                        // style={{ width: '200px' }}
-                                        // width="100%"
-                                        // onChange={this.venueChangeHandler}
                                         onChange={
                                           (newValue, actionMeta) => {
 
@@ -1427,7 +1475,6 @@ class ScheduleExam extends Component {
                                             }
                                           }
                                         }
-                                        // options={this.state.classes}
                                         options={this.state.venueLabelValueArray}
                                         isClearable={true}
                                         isSearchable={true}
@@ -1436,7 +1483,7 @@ class ScheduleExam extends Component {
                                     </div>
                                   </InputGroup>
 
-                                </td>
+                                </td> */}
 
                                 <td align="center" style={{ "vertical-align": "middle" }}>
 
