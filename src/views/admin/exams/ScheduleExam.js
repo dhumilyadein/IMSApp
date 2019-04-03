@@ -859,7 +859,14 @@ class ScheduleExam extends Component {
     console.log("exam details array - " + JSON.stringify(inputExamDataArrayTemp));
     this.setState({
       inputExamDataArray: inputExamDataArrayTemp,
-      subjectArray: this.state.classDetails[0].subjects,
+      subjectArray: [],
+
+      class: "",
+      showTabsFlag: false,
+      showExamNamesFlag: false,
+      sectionView: false,
+      selectedExamDetails: [],
+      copyFirstRowExamDetailsToAllRowsFlag: false
     });
   }
 
