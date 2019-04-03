@@ -3,7 +3,8 @@ import DatePicker from 'react-date-picker';
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'
-
+import 'react-perfect-scrollbar/dist/css/styles.css';
+import PerfectScrollbar from 'react-perfect-scrollbar';
 import {
   Button,
   Card,
@@ -296,6 +297,7 @@ this.setState({grandTotal:amount})
 
   render() {
     return (
+      <PerfectScrollbar>
       <div>
         <Container>
           <Row className="justify-content-center" lg="2">
@@ -652,7 +654,8 @@ this.setState({grandTotal:amount})
           </Row>
         </Container>
       </div>
-    );
+   
+      </PerfectScrollbar> );
   }
 }
 
