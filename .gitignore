@@ -8,6 +8,7 @@
 /server/ZipUploads
 package-lock.json
 /src/photoTemp
+/.vscode
 
 # testing
 /coverage

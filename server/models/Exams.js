@@ -86,6 +86,16 @@ var ExamsSchema = new Schema({
       required: true,
       unique: true
     },
+
+    percentageShareInFinalResult: {
+      type: Number,
+      required: true,
+    },
+
+    isMandatryToAttendForFinalResult: {
+      type: Boolean
+    },
+
     sectionWiseExamDetailsArray: {
 
       type: Array,
