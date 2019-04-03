@@ -146,7 +146,8 @@ class ScheduleExam extends Component {
 
         if (result.errors) {
           return this.setState({ errors: result.errors });
-        } else {
+
+        } else if(!(typeof (result.data[0]) === 'undefined' || result.data[0] === null)) {
 
           var classWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0];
           var sectionWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray;
@@ -156,8 +157,17 @@ class ScheduleExam extends Component {
             // Comparing with selected section [0] (as only sections with same subjects can be selected, so comparing with the first in the array) to fetch data of the selected sections
             if(element.section === this.state.selectedSectionsArray[0]) {
 
+              var percentageShareInFinalResult = result.data[0].classWiseExamDetailsArray[0].percentageShareInFinalResult;
+              var isMandatryToAttendForFinalResult = result.data[0].classWiseExamDetailsArray[0].isMandatryToAttendForFinalResult;
+
+              var selectedExamDetailsTemp = this.state.selectedExamDetails;
+
+              selectedExamDetailsTemp.percentageShareInFinalResult = percentageShareInFinalResult;
+              selectedExamDetailsTemp.isMandatryToAttendForFinalResult = isMandatryToAttendForFinalResult;
+
               this.setState({
-                inputExamDataArray: element.examDetails
+                inputExamDataArray: element.examDetails,
+                selectedExamDetails: selectedExamDetailsTemp
               });
             }
           });
@@ -763,6 +773,8 @@ class ScheduleExam extends Component {
         insertClassAndSectionInExamsRequest.class = this.state.class;
         insertClassAndSectionInExamsRequest.section = element;
         insertClassAndSectionInExamsRequest.examDetails = examDetailsArrayTemp;
+        insertClassAndSectionInExamsRequest.percentageShareInFinalResult = this.state.selectedExamDetails.percentageShareInFinalResult;
+        insertClassAndSectionInExamsRequest.isMandatryToAttendForFinalResult = this.state.selectedExamDetails.isMandatryToAttendForFinalResult;
 
         console.log("ScheduleExam - scheduleExamSubmitHandler - insertClassAndSectionInExamsRequest - " + JSON.stringify(insertClassAndSectionInExamsRequest));
 
