@@ -100,7 +100,7 @@ class ScheduleExam extends Component {
       // ],
 
       insertExamDetailsErrorMessage: "",
-      copyFirstRowExamDetailsToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false
 
     };
 
@@ -120,7 +120,9 @@ class ScheduleExam extends Component {
     this.scheduleExamSubmitHandler = this.scheduleExamSubmitHandler.bind(this);
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
     this.resetExamDetails = this.resetExamDetails.bind(this);
-    this.copyFirstRowExamDetailsToAllRows = this.copyFirstRowExamDetailsToAllRows.bind(this);
+    this.copyTotalMarksToAllRows = this.copyTotalMarksToAllRows.bind(this);
+    this.copyPassingMarksToAllRows = this.copyPassingMarksToAllRows.bind(this);
+    this.copyExamTimeToAllRows = this.copyExamTimeToAllRows.bind(this);
     this.totalMarksChangeHandler = this.totalMarksChangeHandler.bind(this);
     this.fetchClassWiseExamDetails = this.fetchClassWiseExamDetails.bind(this);
 
@@ -134,8 +136,8 @@ class ScheduleExam extends Component {
   fetchClassWiseExamDetails() {
 
     var fetchExamDetailsOnInputRequest = {
-      "examName": this.state.selectedExamDetails.examName ,
-      "className" : this.state.class
+      "examName": this.state.selectedExamDetails.examName,
+      "className": this.state.class
     }
 
     axios
@@ -147,15 +149,15 @@ class ScheduleExam extends Component {
         if (result.errors) {
           return this.setState({ errors: result.errors });
 
-        } else if(!(typeof (result.data[0]) === 'undefined' || result.data[0] === null)) {
+        } else if (!(typeof (result.data[0]) === 'undefined' || result.data[0] === null)) {
 
           var classWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0];
           var sectionWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray;
 
           sectionWiseExamDetailsArray.forEach(element => {
-            
+
             // Comparing with selected section [0] (as only sections with same subjects can be selected, so comparing with the first in the array) to fetch data of the selected sections
-            if(element.section === this.state.selectedSectionsArray[0]) {
+            if (element.section === this.state.selectedSectionsArray[0]) {
 
               var percentageShareInFinalResult = result.data[0].classWiseExamDetailsArray[0].percentageShareInFinalResult;
               var isMandatryToAttendForFinalResult = result.data[0].classWiseExamDetailsArray[0].isMandatryToAttendForFinalResult;
@@ -387,7 +389,9 @@ class ScheduleExam extends Component {
       showTabsFlag: false,
       showExamNamesFlag: false,
       selectedExamDetails: [],
-      copyFirstRowExamDetailsToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false,
+      copyPassingMarksToAllRowsFlag: false,
+      copyExamTimeToAllRowsFlag: false
     });
 
     var sectionArrayTemp = [];
@@ -436,7 +440,9 @@ class ScheduleExam extends Component {
       showTabsFlag: false,
       showExamNamesFlag: false,
       selectedExamDetails: [],
-      copyFirstRowExamDetailsToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false,
+      copyPassingMarksToAllRowsFlag: false,
+      copyExamTimeToAllRowsFlag: false
     });
 
     console.log("ScheduleExam - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
@@ -515,7 +521,9 @@ class ScheduleExam extends Component {
     this.setState({
       showTabsFlag: false,
       selectedExamDetails: [],
-      copyFirstRowExamDetailsToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false,
+      copyPassingMarksToAllRowsFlag: false,
+      copyExamTimeToAllRowsFlag: false
     });
 
     var examName = e.currentTarget.value;
@@ -743,9 +751,9 @@ class ScheduleExam extends Component {
     // temp.forEach(element => {
     for (var i = 0; i < temp.length; i++) {
 
-      if (temp[i].totalMarks === "" || temp[i].passingMarks === "" || temp[i].startMoment === temp[i].endMoment || temp[i].examDuration === 0
-      //  || temp[i].venue === "" || temp[i].venueLabelValue.length < 1
-       ) {
+      if (temp[i].totalMarks === "" || temp[i].passingMarks === "" || temp[i].startMoment === temp[i].endMoment || temp[i].examDuration <= 0
+        //  || temp[i].venue === "" || temp[i].venueLabelValue.length < 1
+      ) {
 
         allExamDetailsFilledFlag = false
         alert('Please fill in all the Exam details to submit');
@@ -866,54 +874,111 @@ class ScheduleExam extends Component {
       showExamNamesFlag: false,
       sectionView: false,
       selectedExamDetails: [],
-      copyFirstRowExamDetailsToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false,
+      copyPassingMarksToAllRowsFlag: false,
+      copyExamTimeToAllRowsFlag: false
     });
   }
 
   /**
-   * Copy first row exam details to all the other rows
+   * Copy first row Total marks to all the other rows
    */
-  copyFirstRowExamDetailsToAllRows(e) {
+  copyTotalMarksToAllRows(e) {
 
-    console.log("ScheduleExam - copyFirstRowExamDetailsToAllRows- exam details array before copying first row exam details - " + JSON.stringify(this.state.inputExamDataArray));
+    console.log("ScheduleExam - copyTotalMarksToAllRows- exam details array before copying first row total marks - " + JSON.stringify(this.state.inputExamDataArray));
 
     this.setState({
-      copyFirstRowExamDetailsToAllRowsFlag: !this.state.copyFirstRowExamDetailsToAllRowsFlag
+      copyTotalMarksToAllRowsFlag: !this.state.copyTotalMarksToAllRowsFlag
     }, () => {
 
-      if (this.state.copyFirstRowExamDetailsToAllRowsFlag) {
+      if (this.state.copyTotalMarksToAllRowsFlag) {
         /*
           Setting temporary inputExamDataArray for each subject
         */
-        var inputExamDataArrayTemp = [];
+        var inputExamDataArrayTemp = this.state.inputExamDataArray;
         var firstRowExamDetails = this.state.inputExamDataArray[0];
 
         for (var i = 0; i < this.state.classDetails[0].subjects.length; i++) {
 
-          const item = {
-            subject: this.state.classDetails[0].subjects[i],
-            totalMarks: firstRowExamDetails.totalMarks,
-            passingMarks: firstRowExamDetails.passingMarks,
-            includeInResultFlag: firstRowExamDetails.includeInResultFlag,
-            examDate: firstRowExamDetails.examDate,
-            startMoment: firstRowExamDetails.startMoment,
-            endMoment: firstRowExamDetails.endMoment,
-            examDuration: firstRowExamDetails.examDuration,
-            // venueLabelValue: firstRowExamDetails.venueLabelValue,
-            // venue: firstRowExamDetails.venue,
-          };
-
-          inputExamDataArrayTemp.push(item);
+          inputExamDataArrayTemp[i].totalMarks = firstRowExamDetails.totalMarks;
         }
 
-        console.log("ScheduleExam - copyFirstRowExamDetailsToAllRows- exam details array after copying first row exam details - " + JSON.stringify(inputExamDataArrayTemp));
+        console.log("ScheduleExam - copyTotalMarksToAllRows- exam details array after copying first row total marks - " + JSON.stringify(inputExamDataArrayTemp));
         this.setState({
           inputExamDataArray: inputExamDataArrayTemp,
         });
       }
     });
+  }
 
+  /**
+   * Copy first row Passing marks to all the other rows
+   */
+  copyPassingMarksToAllRows(e) {
 
+    console.log("ScheduleExam - copyPassingMarksToAllRows- exam details array before copying first row passing marks - " + JSON.stringify(this.state.inputExamDataArray));
+
+    this.setState({
+      copyPassingMarksToAllRowsFlag: !this.state.copyPassingMarksToAllRowsFlag
+    }, () => {
+
+      if (this.state.copyPassingMarksToAllRowsFlag) {
+        /*
+          Setting temporary inputExamDataArray for each subject
+        */
+        var inputExamDataArrayTemp = this.state.inputExamDataArray;
+        var firstRowExamDetails = this.state.inputExamDataArray[0];
+
+        for (var i = 0; i < this.state.classDetails[0].subjects.length; i++) {
+
+          inputExamDataArrayTemp[i].passingMarks = firstRowExamDetails.passingMarks;
+        }
+
+        console.log("ScheduleExam - copyPassingMarksToAllRows- exam details array after copying first row passing marks - " + JSON.stringify(inputExamDataArrayTemp));
+        this.setState({
+          inputExamDataArray: inputExamDataArrayTemp,
+        });
+      }
+    });
+  }
+
+  /**
+   * Copy first row Exam Time to all the other rows
+   */
+  copyExamTimeToAllRows(e) {
+
+    console.log("ScheduleExam - copyExamTimeToAllRows- exam details array before copying first row exam time - " + JSON.stringify(this.state.inputExamDataArray));
+
+    this.setState({
+      copyExamTimeToAllRowsFlag: !this.state.copyExamTimeToAllRowsFlag
+    }, () => {
+
+      if (this.state.copyExamTimeToAllRowsFlag) {
+        /*
+          Setting temporary inputExamDataArray for each subject
+        */
+        var inputExamDataArrayTemp = this.state.inputExamDataArray;
+        var firstRowExamDetails = this.state.inputExamDataArray[0];
+
+        // Calculating examDuration from the first row, as it will be same for all now just doing it once
+        var std = new Date(firstRowExamDetails.startMoment);
+        var etd = new Date(firstRowExamDetails.endMoment);
+        var diffMs = new Date(etd) - new Date(std);
+        var diffMins = Math.round(diffMs / 60000); // minutes
+
+        for (var i = 0; i < this.state.classDetails[0].subjects.length; i++) {
+
+          inputExamDataArrayTemp[i].examDuration = diffMins;
+          inputExamDataArrayTemp[i].startMoment = firstRowExamDetails.startMoment;
+          inputExamDataArrayTemp[i].endMoment = firstRowExamDetails.endMoment;
+        }
+
+        console.log("ScheduleExam - copyExamTimeToAllRows- exam details array after copying first row exam time - " + JSON.stringify(inputExamDataArrayTemp));
+        this.setState({
+          inputExamDataArray: inputExamDataArrayTemp,
+        });
+      }
+    });
   }
 
   render() {
@@ -1141,9 +1206,33 @@ class ScheduleExam extends Component {
                                 <h5>Subject</h5>
                               </th>
                               <th className="text-center">
+                                <FormGroup check inline>
+                                  <Input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="parentaddresscheck"
+                                    style={{ height: "35px", width: "25px", background: "white" }}
+                                    name="parentaddresscheck"
+                                    checked={this.state.copyTotalMarksToAllRowsFlag}
+                                    onChange={this.copyTotalMarksToAllRows}
+                                  // disabled={this.state.editMode}
+                                  />
+                                </FormGroup>
                                 <h5>Total Marks</h5>{" "}
                               </th>
                               <th className="text-center">
+                                <FormGroup check inline>
+                                  <Input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="parentaddresscheck"
+                                    style={{ height: "35px", width: "25px", background: "white" }}
+                                    name="parentaddresscheck"
+                                    checked={this.state.copyPassingMarksToAllRowsFlag}
+                                    onChange={this.copyPassingMarksToAllRows}
+                                  // disabled={this.state.editMode}
+                                  />
+                                </FormGroup>
                                 <h5>Passing Marks</h5>{" "}
                               </th>
                               <th className="text-center"
@@ -1156,6 +1245,18 @@ class ScheduleExam extends Component {
                               <th
                                 className="text-center"
                                 width="24%">
+                                <FormGroup check inline>
+                                  <Input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="parentaddresscheck"
+                                    style={{ height: "35px", width: "25px", background: "white" }}
+                                    name="parentaddresscheck"
+                                    checked={this.state.copyExamTimeToAllRowsFlag}
+                                    onChange={this.copyExamTimeToAllRows}
+                                  // disabled={this.state.editMode}
+                                  />
+                                </FormGroup>
                                 <h5>Exam Time</h5>{" "}
                               </th>
                               <th className="text-center">
@@ -1165,21 +1266,6 @@ class ScheduleExam extends Component {
                                 width="18%" >
                                 <h5>Venue</h5>{" "}
                               </th > */}
-                              <th className="text-center"
-                                width="2%">
-                                <FormGroup check inline>
-                                  <Input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="parentaddresscheck"
-                                    // style={{ height: "35px", width: "25px", background: "white" }}
-                                    name="parentaddresscheck"
-                                    checked={this.state.copyFirstRowExamDetailsToAllRowsFlag}
-                                    onChange={this.copyFirstRowExamDetailsToAllRows}
-                                  // disabled={this.state.editMode}
-                                  />
-                                </FormGroup>
-                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1216,7 +1302,7 @@ class ScheduleExam extends Component {
                                   </InputGroup>
                                 </td>
 
-                                <td style={{ "vertical-align": "middle" }}>
+                                <td width="10%" style={{ "vertical-align": "middle" }}>
                                   <InputGroup className="mb-3">
                                     <Input
                                       name="passingMarks"
@@ -1451,7 +1537,7 @@ class ScheduleExam extends Component {
 
                                 </td>
 
-                                <td style={{ "vertical-align": "middle" }}>
+                                <td width="10%" style={{ "vertical-align": "middle" }}>
                                   <InputGroup className="mb-3">
                                     <Input
                                       name="examDuration"
@@ -1503,10 +1589,6 @@ class ScheduleExam extends Component {
                                   </InputGroup>
 
                                 </td> */}
-
-                                <td align="center" style={{ "vertical-align": "middle" }}>
-
-                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -1524,11 +1606,7 @@ class ScheduleExam extends Component {
 
                     {this.state.showTabsFlag && (
                       <TabPane tabId="SCHEDULER">
-                        3. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore
-                        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                        aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                        dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-                        officia deserunt mollit anim id est laborum.
+                        To be Added later
               </TabPane>
                     )}
                   </TabContent>
