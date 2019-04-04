@@ -22,9 +22,11 @@ import DefaultAside from './DefaultAside';
 import DefaultFooter from './DefaultFooter';
 import DefaultHeader from './DefaultHeader';
 
+
 class DefaultLayout extends Component {
   render() {
     return (
+     
       <div className="app">
         <AppHeader fixed>
           <DefaultHeader />
@@ -39,7 +41,7 @@ class DefaultLayout extends Component {
           </AppSidebar>
           <main className="main">
             <AppBreadcrumb appRoutes={routes}/>
-            <Container fluid>
+            <Container fluid  style={{'overflow-x': 'scroll'}}>
               <Switch>
                 {routes.map((route, idx) => {
                     return route.component ? (<Route key={idx} path={route.path} exact={route.exact} name={route.name} render={props => (
@@ -60,6 +62,9 @@ class DefaultLayout extends Component {
           <DefaultFooter />
         </AppFooter>
       </div>
+    
+    
+    
     );
   }
 }
