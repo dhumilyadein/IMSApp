@@ -382,7 +382,6 @@ class ScheduleExam extends Component {
   classChangeHandler(e) {
 
     var selectedClass = e.currentTarget.value;
-    var selectedClass = e.currentTarget.value;
 
     this.setState({
       class: selectedClass,

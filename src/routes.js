@@ -340,8 +340,8 @@ const ScheduleExam = Loadable({
   loading: Loading
 });
 
-const AddResults = Loadable({
-  loader: () => import("./views/admin/exams/AddResults"),
+const AddResult = Loadable({
+  loader: () => import("./views/admin/exams/AddResult"),
   loading: Loading
 });
 
@@ -464,9 +464,9 @@ const routes = [
   },
 
   {
-    path: "/admin/exams/AddResults",
+    path: "/admin/exams/AddResult",
     name: "Add Results",
-    component: AddResults
+    component: AddResult
   },
 
   {
