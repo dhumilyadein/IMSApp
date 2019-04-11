@@ -677,7 +677,7 @@ else
 
                                       <Input
                                         name="lateFine"
-                                        type="text"
+                                        type="number"
                                         className="form-control"
                                         value={this.state.rows[idx].lateFine}
 defaultValue="0"
@@ -706,7 +706,34 @@ defaultValue="0"
                                   </td>
                                   <td align="center">
 
-{this.state.rows[idx].totalFine}
+                                  <Input
+                                        name="totalFine"
+                                        type="number"
+                                        className="form-control"
+                                        value={this.state.rows[idx].totalFine}
+defaultValue="0"
+                                        style={{textAlign:'center'}}
+                                        id="lateFine"
+                                        size="sm"
+
+                                        onChange={e=>{ e.preventDefault();
+
+                                          const { name, value } = e.target;
+                                          const temp = this.state.rows;
+                                          temp[idx][name] = value;
+
+                                          temp[idx]["totalFine"]= value ;
+
+
+                                          this.setState(
+                                            {
+                                              rows: temp
+                                            }
+
+                                          );}}
+
+                                      />
+
                                   </td>
 
 
@@ -719,6 +746,12 @@ defaultValue="0"
 if(!this.state.rows[idx].lateFine && this.state.rows[idx].delay>0)
 {
   this.setState({rowError: "Please enter Late Fine/day for Book: "+this.state.rows[idx].bookName});
+  submit=false;
+}
+
+if(!this.state.rows[idx].totalFine && this.state.rows[idx].delay>0)
+{
+  this.setState({rowError: "Please enter Total Fine for Book: "+this.state.rows[idx].bookName});
   submit=false;
 }
 

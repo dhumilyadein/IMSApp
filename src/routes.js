@@ -372,6 +372,31 @@ const StaffAttendance = Loadable({
   loading: Loading
 });
 
+const AddLeaveTypes = Loadable({
+  loader: () => import("./views/admin/leaves/AddLeaveTypes"),
+  loading: Loading
+});
+
+
+const ApplyLeave = Loadable({
+  loader: () => import("./views/admin/leaves/ApplyLeave"),
+  loading: Loading
+});
+
+const ApproveLeave = Loadable({
+  loader: () => import("./views/admin/leaves/ApproveLeave"),
+  loading: Loading
+});
+
+const ViewLeave = Loadable({
+  loader: () => import("./views/admin/leaves/ViewLeave"),
+  loading: Loading
+});
+
+const AddHoliday = Loadable({
+  loader: () => import("./views/admin/leaves/AddHoliday"),
+  loading: Loading
+});
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -592,7 +617,35 @@ const routes = [
     component: ParentTeacherMeet
   },
 
+  {
+    path: "/admin/leaves/AddLeaveTypes",
+    name: "AddLeaveTypes",
+    component: AddLeaveTypes
+  },
 
+  {
+    path: "/admin/leave/ApplyLeave",
+    name: "ApplyLeave",
+    component: ApplyLeave
+  },
+
+  {
+    path: "/admin/leave/ApproveLeave",
+    name: "ApproveLeave",
+    component: ApproveLeave
+  },
+
+  {
+    path: "/admin/leave/ViewLeave",
+    name: "ViewLeave",
+    component: ViewLeave
+  },
+
+  {
+    path: "/admin/leave/AddHoliday",
+    name: "AddHoliday",
+    component: AddHoliday
+  },
 
 
 

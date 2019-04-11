@@ -338,6 +338,49 @@ export default {
                   
               ]},
 
+              {
+                name: 'Manage Emp Leaves',
+                url: '/leaves',
+                icon: 'fa fa-money',
+                children: [
+                  {
+                    name: 'Add Leave Types',
+                    url: '/admin/leaves/AddLeaveTypes',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+
+              
+                  {
+                    name: 'Apply Leaves',
+                    url: '/admin/leaves/ApplyLeave',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+              
+                  {
+                    name: 'Approve Leaves',
+                    url: '/admin/leaves/ApproveLeave',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+              
+                 
+                  {
+                    name: 'View Leaves',
+                    url: '/admin/leaves/ViewLeave',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+                 
+                  {
+                    name: 'Add Holidays',
+                    url: '/admin/leaves/AddHoliday',
+                    icon: 'fa fa-money',
+                    variant: 'success',
+                  },
+                  
+              ]},
 
 
     {
