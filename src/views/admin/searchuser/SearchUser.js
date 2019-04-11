@@ -40,7 +40,7 @@ class SearchUser extends Component {
 
     this.state = {
       find: null,
-      using: "username",
+      using: "fullName",
       role: "student",
       searchCriteria: "containsSearchCriteria",
       status: null,
@@ -48,6 +48,9 @@ class SearchUser extends Component {
       success: null,
       userdata: null,
       redirectSearchUserToUsers: false,
+      searchText: "",
+
+      searchUsersView: true,
 
       chosenSearchValue: null,
 
@@ -126,7 +129,8 @@ class SearchUser extends Component {
 
     this.setState({
       find: inputValue,
-      using: 'firstNameLastName'
+      searchText: inputValue,
+      using: this.state.using
     }, function () {
       this.performSearch();
     });
@@ -224,6 +228,8 @@ class SearchUser extends Component {
 
     this.setState(
       {
+        // find: "",
+        // searchText: "",
         [e.target.name]: e.target.value
       }
     );
@@ -236,6 +242,8 @@ class SearchUser extends Component {
         <Container>
           <Row className="justify-content-center" lg="2">
             <Col md="10">
+
+            {this.state.searchUsersView && (
               <Card className="mx-4">
                 <CardBody className="p-4">
                   <Form>
@@ -257,6 +265,7 @@ class SearchUser extends Component {
                           maxSearchResults={5}
                           onNewRequest={this.selectedItem}
                           autoFocus="true"
+                          searchText = {this.state.searchText}
                         />
                       </MuiThemeProvider>
 
@@ -294,7 +303,7 @@ class SearchUser extends Component {
                         onChange={this.changeHandler}
                       >
 
-
+                        <option value="fullName">Full Name</option>
                         <option value="username">User Name</option>
                         <option value="firstname">First Name</option>
                         <option value="lastname">Last Name</option>
@@ -365,6 +374,7 @@ class SearchUser extends Component {
                   </Form>
                 </CardBody>
               </Card>
+              )}
             </Col>
           </Row>
         </Container>
