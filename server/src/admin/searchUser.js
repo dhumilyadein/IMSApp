@@ -67,6 +67,64 @@ module.exports = function (app) {
     }
   }
 
+  /**
+     * @description Post method for SearchUser service
+     */
+    function searchUsersOnFirstNameLastName(req, res) {
+
+      console.log("SEARCH USER ENTRY");
+  
+      var searchJSON = {};
+      //Initial validation like fields empty check
+      var errors = validationResult(req);
+  
+      //Mapping the value to the same object
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.mapped() });
+      }
+  
+      var using = req.body.using;
+      var find = req.body.find;
+      var role = req.body.role;
+      var searchCriteria = req.body.searchCriteria;
+  
+      console.log("find - " + find + " using - " + using + " role - " + role + " searchCriteria - " + searchCriteria);
+  
+      if ("containsSearchCriteria" === searchCriteria) {
+        find = "/" + find + "/i";
+      } else {
+        find = "/^" + find + "$/i";
+      }
+  
+      if (role.indexOf("anyRole") != -1) {
+
+        searchJSON = {
+          [using]: { $regex: eval(find) }
+          //role: { $all: role }
+        }
+      } else {
+        searchJSON = {
+          [using]: { $regex: eval(find) },
+          role: { $in: role }
+        }
+      }
+  
+      console.log("searchJSON - " + JSON.stringify(searchJSON));
+  
+      User.find(searchJSON)
+        .then(function (userData) {
+  
+          console.log("SEARCH USER RESULT " + searchCriteria + "\n" + userData + " find - " + find);
+          res.send(userData);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+  
+      //console.log("searchString - " + JSON.stringify(searchString));
+  
+      console.log("SEARCH USER EXIT");
+    }
 
   /**
      * @description Post method for SearchUser service

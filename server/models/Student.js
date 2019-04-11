@@ -26,6 +26,10 @@ var StudentSchema = new Schema({
     required: true,
     trim:true
   },
+  fullName: {
+    type: String,
+    required: true,
+  },
 
   parentfirstname: {
     type: String,
@@ -36,6 +40,10 @@ var StudentSchema = new Schema({
     type: String,
     required: true,
     trim:true
+  },
+  parentFullName: {
+    type: String,
+    required: true,
   },
   parentpostalcode: {
     type: String,

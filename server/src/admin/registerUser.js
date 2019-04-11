@@ -521,6 +521,7 @@ module.exports = function (app) {
 
     var parentUser = {
       "username": req.body.parentusername, "firstname": req.body.parentfirstname, "lastname": req.body.parentlastname,
+      "fullName": req.body.firstname + " " + req.body.lastname,
       "email": req.body.parentemail, "password": req.body.parentpassword, "role": "parent", status: req.body.status
     };
     var user = new User(parentUser);
@@ -553,6 +554,7 @@ req.body["userid"]=user.userid;
 
     var studentUser = {
       "username": req.body.username, "firstname": req.body.firstname, "lastname": req.body.lastname,
+      "fullName": req.body.firstname + " " + req.body.lastname,
       "email": req.body.email, "password": req.body.password, "role": "student", "status": req.body.status
     };
     user = new User(studentUser);
@@ -607,6 +609,7 @@ req.body["userid"]=user.userid;
 
     var empUser = {
       "username": req.body.username, "firstname": req.body.firstname, "lastname": req.body.lastname,
+      "fullName": req.body.firstname + " " + req.body.lastname,
       "email": req.body.email, "password": req.body.password, "role": req.body.role, "status": req.body.status
     };
     user = new User(empUser);
@@ -622,6 +625,9 @@ req.body["userid"]=user.userid;
       });
 
 req.body["userid"]=user.userid;
+req.body["fullName"]=req.body.firstname + " " + req.body.lastname;
+
+
     if (req.body.role.indexOf("admin") !== -1) {
       user = new Admin(req.body);
       console.log("Admin = " + user);
@@ -639,7 +645,8 @@ req.body["userid"]=user.userid;
     }
 
     if (req.body.role.indexOf("teacher") !== -1) {
-      user = new Teacher(req.body);
+      user = new 
+      (req.body);
       console.log("Teacher = " + user);
       user.password = user.hashPassword(user.password);
       user.photo.data = fs.readFileSync(photoPath);

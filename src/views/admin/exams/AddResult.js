@@ -40,7 +40,6 @@ import {
   Table,
   TabContent, TabPane, Nav, NavItem, NavLink, CardTitle, CardText
 } from 'reactstrap';
-import ReactTableContainer from "react-table-container";
 
 import axios, { post } from "axios";
 import { stat } from 'fs';

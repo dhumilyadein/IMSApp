@@ -62,6 +62,7 @@ class RegisterUser extends Component {
       username: "",
       email: "",
       firstname: "",
+      fullName: "",
       lastname: "",
       password: "",
       password_con: "",
@@ -87,6 +88,7 @@ class RegisterUser extends Component {
       modalSuccess: true,
       parentfirstname: "",
       parentlastname: "",
+      parentFullName: "",
       parentrelation: "",
       parentoccupation: "",
       parentusername: "",
@@ -300,6 +302,12 @@ class RegisterUser extends Component {
    * @param {*} e
    */
    photoUpload() {
+
+    this.setState({
+      fullName: this.state.firstname + " " + this.state.lastname,
+      parentFullName: this.state.parentfirstname + " " + this.state.parentlastname
+    });
+
     console.log("in PhotoUpload for file - " + this.state.photoname)
 
     const data = new FormData();  //photo upload
@@ -315,10 +323,6 @@ class RegisterUser extends Component {
             return this.setState({
               corruptphoto: true,
               loader: false
-
-
-
-
 
             });
 
@@ -623,6 +627,7 @@ class RegisterUser extends Component {
         "rollno": this.state.rollno,
         "username": this.state.username,
         "firstname": this.state.firstname,
+        "fullName": this.state.firstname + " " + this.state.lastname,
         "lastname": this.state.lastname,
         "email": this.state.email,
         "parentemail": this.state.parentemail

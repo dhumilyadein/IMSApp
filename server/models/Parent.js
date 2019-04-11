@@ -22,7 +22,10 @@ var ParentSchema = new Schema({
     required: true,
     trim:true,
   },
-
+  parentFullName: {
+    type: String,
+    required: true,
+  },
 
   relation: {
     type: String,
