@@ -278,9 +278,100 @@ module.exports = function (app) {
 
           console.log("examsDAO - insertClassAndSectionInExams - ONLY CLASS array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examclassData));
 
-          /*
-      Second adding the section(s) in the exam
+          /**
+           * Second, Before updating the new section wise details, deleting the previous section wise details
+           */
+          exams.update(
+            {
+              'examName': request.examName,
+              'classWiseExamDetailsArray.class': request.class,
+            },
+            {
+              $pull: {
+                'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+                  'section': request.section,
+                }
+              }
+            }
+          ).then(function (examSectionData) {
+
+            console.log("examsDAO deleteSubjectWiseExamDetails - exam subject details updated successfully - " + JSON.stringify(examSectionData));
+
+            /*
+                  Third adding the section(s) in the exam
+                */
+            exams.findOneAndUpdate(
+              {
+                'examName': request.examName,
+                'classWiseExamDetailsArray.class': request.class
+                // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
+              },
+              {
+                $addToSet: {
+                  'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+                    'section': request.section,
+                    'examDetails': request.examDetails
+                  }
+                },
+                $set: {
+                  'classWiseExamDetailsArray.$.percentageShareInFinalResult': request.percentageShareInFinalResult,
+                  'classWiseExamDetailsArray.$.isMandatryToAttendForFinalResult': request.isMandatryToAttendForFinalResult
+                }
+                // $addToSet: { "classWiseExamDetailsArray.$": request.section }
+              }
+            ).then(function (examSectionData) {
+
+              console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
+
+              response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
+              return res.send(response);
+
+            }).catch(function (err) {
+
+              console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
+
+              response = { errors: err };
+              return res.send(response);
+            });
+
+          }).catch(function (err) {
+            console.log("examsDAO deleteSubjectWiseExamDetails - Catching server ERROR - " + JSON.stringify(err));
+            response = { errors: err };
+            return res.send(response);
+          });
+
+
+        }).catch(function (err) {
+
+          console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam CLASS array details - " + JSON.stringify(err));
+
+          response = { errors: err };
+          return res.send(response);
+        });
+
+      } else {
+
+        /*
+      Class alrady present so  adding the section(s) in the exam
     */
+        console.log("Class alrady present so  adding the section(s) in the exam - request - " + JSON.stringify(request));
+
+        exams.update(
+          {
+            'examName': request.examName,
+            'classWiseExamDetailsArray.class': request.class,
+          },
+          {
+            $pull: {
+              'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+                'section': request.section,
+              }
+            }
+          }
+        ).then(function (examSectionData) {
+    
+          console.log("examsDAO deleteSubjectWiseExamDetails - exam subject details updated successfully - " + JSON.stringify(examSectionData));
+          
           exams.findOneAndUpdate(
             {
               'examName': request.examName,
@@ -301,69 +392,25 @@ module.exports = function (app) {
               // $addToSet: { "classWiseExamDetailsArray.$": request.section }
             }
           ).then(function (examSectionData) {
-
+  
             console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
-
+  
             response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
             return res.send(response);
-
+  
           }).catch(function (err) {
-
+  
             console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
-
+  
             response = { errors: err };
             return res.send(response);
           });
 
         }).catch(function (err) {
-
-          console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam CLASS array details - " + JSON.stringify(err));
-
+          console.log("examsDAO deleteSubjectWiseExamDetails - Catching server ERROR - " + JSON.stringify(err));
           response = { errors: err };
           return res.send(response);
         });
-
-      } else {
-
-        /*
-      Class alrady present so  adding the section(s) in the exam
-    */
-        console.log("Class alrady present so  adding the section(s) in the exam - request - " + JSON.stringify(request));
-
-        exams.findOneAndUpdate(
-          {
-            'examName': request.examName,
-            'classWiseExamDetailsArray.class': request.class
-            // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
-          },
-          {
-            $addToSet: {
-              'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
-                'section': request.section,
-                'examDetails': request.examDetails
-              }
-            },
-            $set: {
-              'classWiseExamDetailsArray.$.percentageShareInFinalResult': request.percentageShareInFinalResult,
-              'classWiseExamDetailsArray.$.isMandatryToAttendForFinalResult': request.isMandatryToAttendForFinalResult
-            }
-            // $addToSet: { "classWiseExamDetailsArray.$": request.section }
-          }
-        ).then(function (examSectionData) {
-
-          console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
-
-          response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
-          return res.send(response);
-
-        }).catch(function (err) {
-
-          console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
-
-          response = { errors: err };
-          return res.send(response);
-        });
-
 
       }
 
@@ -374,15 +421,6 @@ module.exports = function (app) {
       response = { errors: err };
       return res.send(response);
     });
-
-
-
-
-
-
-
-
-
 
   }
 
@@ -486,6 +524,35 @@ module.exports = function (app) {
         console.log("examsDAO - fetchExamDetailsOnInput - ERROR - " + err);
         return res.send({ "errors": err });
       });
+  }
+
+  async function deleteSubjectWiseExamDetails(req, res) {
+
+    var request = req.body;
+    console.log("examsDAO deleteSubjectWiseExamDetails request - " + JSON.stringify(request));
+
+    exams.update(
+      {
+        'examName': request.examName,
+        'classWiseExamDetailsArray.class': request.class,
+      },
+      {
+        $pull: {
+          'classWiseExamDetailsArray.$.sectionWiseExamDetailsArray': {
+            'section': request.section,
+          }
+        }
+      }
+    ).then(function (examSectionData) {
+
+      console.log("examsDAO deleteSubjectWiseExamDetails - exam subject details updated successfully - " + JSON.stringify(examSectionData));
+      response = { response: examSectionData, message: "examsDAO deleteSubjectWiseExamDetails - exam subject details updated successfully" };
+      return res.send(response);
+    }).catch(function (err) {
+      console.log("examsDAO deleteSubjectWiseExamDetails - Catching server ERROR - " + JSON.stringify(err));
+      response = { errors: err };
+      return res.send(response);
+    });
   }
 
   async function consumeexam(req, res) {
@@ -632,6 +699,10 @@ module.exports = function (app) {
 
   app.post("/api/insertClassAndSectionInExams", insertClassAndSectionInExamsValidation, insertClassAndSectionInExams, (req, res) => {
     console.log("examsDAO - insertClassAndSectionInExams post method call");
+  });
+
+  app.post("/api/deleteSubjectWiseExamDetails", deleteSubjectWiseExamDetails, (req, res) => {
+    console.log("examsDAO - deleteSubjectWiseExamDetails post method call");
   });
 
   // app.post("/api/insertClassAndSectionInExamsFind", insertClassAndSectionInExamsValidation, insertClassAndSectionInExamsFind, (req, res) => {

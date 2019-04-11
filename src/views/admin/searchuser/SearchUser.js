@@ -92,9 +92,9 @@ class SearchUser extends Component {
 
     var searchUserRequest = {
       "find": this.state.find,
-      "using": "username",
-      "role": "student",
-      "searchCriteria": "containsSearchCriteria",
+      "using": this.state.using,
+      "role": this.state.role,
+      "searchCriteria": this.state.searchCriteria,
     }
     await axios.post("http://localhost:8001/api/searchUsers", searchUserRequest).then(uRes => {
 
@@ -125,7 +125,8 @@ class SearchUser extends Component {
     if (params.source == 'touchTap' || params.source == 'click') return;
 
     this.setState({
-      find: inputValue
+      find: inputValue,
+      using: 'firstNameLastName'
     }, function () {
       this.performSearch();
     });

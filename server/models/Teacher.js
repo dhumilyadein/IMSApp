@@ -19,6 +19,10 @@ var TeacherSchema = new Schema({
     required: true,
     trim:true
   },
+  fullName: {
+    type: String,
+    required: true,
+  },
   maritalstatus: {
     type: String,
     required: true

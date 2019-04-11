@@ -118,6 +118,10 @@ var ClassSchema = new Schema({
         type: String,
         required: true
       },
+      fullName: {
+        type: String,
+        required: true
+      },
       rollno: {
         type: String,
         required: true,

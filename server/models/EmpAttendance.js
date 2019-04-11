@@ -33,7 +33,10 @@ var EmpAttendanceSchema = new Schema({
         type: String,
         required: true
       },
-     
+      fullName: {
+        type: String,
+        required: true
+      },
       attendanceStatus: {
         type: String,
         required: true

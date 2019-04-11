@@ -47,6 +47,7 @@ module.exports = function (app) {
                 $set: {
                     firstname: request.firstname,
                     lastname: request.lastname,
+                    fullName: request.firstname + " " + request.lastname,
                     email: request.email,
                     status: request.status,
                     updatedAt: currentTime.getDate()
@@ -70,8 +71,10 @@ module.exports = function (app) {
                     email: request.email,
                     firstname: request.firstname,
                     lastname: request.lastname,
+                    fullName: request.firstname + " " + request.lastname,
                     parentfirstname: request.parentfirstname,
                     parentlastname: request.parentlastname,
+                    parentFullName: request.parentfirstname + " " + request.parentlastname,
                     parentemail: request.parentemail,
                     parentphone1: request.parentphone1,
                     parentphone2: request.parentphone2,
@@ -107,6 +110,7 @@ module.exports = function (app) {
                 $set: {
                     parentfirstname: request.parentfirstname,
                     parentlastname: request.parentlastname,
+                    parentFullName: request.parentfirstname + " " + request.parentlastname,
                     parentemail: request.parentemail,
                     parentphone1: request.parentphone1,
                     parentphone2: request.parentphone2,

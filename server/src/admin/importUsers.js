@@ -98,6 +98,7 @@ console.log( "Update Class: "+JSON.stringify(request));
         "rollno": request.rollno,
         "username": request.username,
         "firstname": request.firstname,
+        "fullName": request.firstname + " " + request.lastname,
         "lastname": request.lastname,
         "email": request.email,
         "parentemail": request.parentemail
@@ -502,10 +503,18 @@ console.log("Role: "+result[i].role);
                 if (Object.keys(impValResult).length === 0) {
                   // console.log("result[i].role: " + result[i].role);
                   var user = null;
+
+                  /*
+                  Adding fullName and parentFullName
+                  */
+                  result[i]["parentFullName"] = result[i].parentfirstname + " " + result[i].parentlastname;
+                  result[i]["fullName"] = result[i].firstname + " " + result[i].lastname;
+
                   if (result[i].role.indexOf("student") !== -1) {
                     var parentUser = {
                       username: result[i].parentusername,
                       firstname: result[i].parentfirstname,
+                      fullName: result[i].parentfirstname + " " + result[i].parentlastname,
                       lastname: result[i].parentlastname,
                       email: result[i].parentemail,
                       password: result[i].parentpassword,
@@ -526,6 +535,7 @@ console.log("Role: "+result[i].role);
                     // console.log("Parent user  = " + user);
 
                     result[i]["userid"] = user.userid;
+
                     user = new Parent(result[i]);
 
                     user.parentpassword = user.hashPassword(

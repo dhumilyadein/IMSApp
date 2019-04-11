@@ -252,8 +252,8 @@ export default {
                 variant: 'success',
               },
               {
-                name: 'Add Results',
-                url: '/admin/exams/AddResults',
+                name: 'Add Result',
+                url: '/admin/exams/AddResult',
                 icon: 'icon-basket-loaded',
                 variant: 'success',
               },

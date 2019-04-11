@@ -604,6 +604,7 @@ class UserDetails extends Component {
         "username": this.state.username,
         "firstname": this.state.firstname,
         "lastname": this.state.lastname,
+        "fullName": this.state.firstname + " " + this.state.lastname,
         "email": this.state.email,
         "parentemail": this.state.parentemail
       },
