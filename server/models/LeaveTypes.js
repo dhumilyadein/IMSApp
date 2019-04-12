@@ -30,7 +30,7 @@ var LeaveTypesSchema = new Schema({
 
           })
       },
-      message:  'The Item Name is already in use'
+      message:  'The Leave Name is already in use'
   },
 
     trim:true,

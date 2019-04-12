@@ -40,7 +40,7 @@ this.getExistingLeaveTypes();
       visible: false,
       unitError:"",
       existingLeaveTypes:[],
-      showEditItem:false,
+      showEditLeave:false,
       itemNo:""
     };
 
@@ -129,6 +129,7 @@ this.getExistingLeaveTypes();
 
                 success: true,
                 modalSuccess: true,
+                modalMessage:"Leave "+ this.state.leaveName+ " Created Successfully!"
 
               },()=>{
                 this.getExistingLeaveTypes()
@@ -144,38 +145,43 @@ this.getExistingLeaveTypes();
     console.log("in Edit State: " + JSON.stringify(this.state));
 
     this.setState({
-      leaveNameError: "", unitError: "", success: false,
-      modalSuccess: false
-    }, () => {
-      if (!this.state.leaveName) {
-        this.setState({ leaveNameError: "Please Enter Item Name" });
-        submit = false;}
-
-        if (!this.state.unit) {
-            this.setState({ unitError: "Please Enter Unit" });
+        leaveNameError: "", leaveCountError: "", maxLeaveCountError:"", success: false,
+        modalSuccess: false
+      }, () => {
+        if (!this.state.leaveName) {
+          this.setState({ leaveNameError: "Please Enter Leave Name" });
+          submit = false;}
+  
+          if (!this.state.leaveCount) {
+              this.setState({ leaveCountError: "Please Enter Leave Count" });
+              submit = false;}
+  
+  
+  
+          if (this.state.carryForward&&!this.state.maxLeaveCount) {
+            this.setState({ maxLeaveCountError: "Please Enter Max Leave Count" });
             submit = false;}
-
-
-
-      if (submit === true) {
-        console.log("Updating Item: "+ JSON.stringify(this.state));
+  
+  
+        if (submit === true) {
+        console.log("Updating Leave: "+ JSON.stringify(this.state));
         axios
-          .post("http://localhost:8001/api/editItem", {"leaveName":this.state.leaveName,"unit":this.state.unit,
-          "existingLeaveTypes":this.state.existingLeaveTypes,"itemNo":this.state.itemNo})
+          .post("http://localhost:8001/api/editLeave", {"leaveName":this.state.leaveName,"leaveType":this.state.leaveType, "leaveCount":this.state.leaveCount, "carryForward":this.state.carryForward, "maxLeaveCount":this.state.maxLeaveCount,
+          "existingLeaveTypes":this.state.existingLeaveTypes,"leaveNo":this.state.leaveNo})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
            if(result.data.error)
           {  if(result.data.error.code===11000)
             this.setState({
-              leaveNameError:"Item name already in use"
+              leaveNameError:"Leave name already in use"
             });}
-           else  if (result.data.msg === "Item Updated")
+           else  if (result.data.msg === "Leave Updated")
               this.setState({
 
                 success: true,
                 modalSuccess: true,
-                showEditItem:false
-
+                showEditLeave:false,
+                modalMessage:"Leave "+ this.state.leaveName+ " Updated Successfully!"
               },()=>{this.getExistingLeaveTypes()});
 
           });
@@ -210,10 +216,10 @@ deleteSpecificItem= idx => () => {
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/deleteItem",{"leaveName":this.state.existingLeaveTypes[idx].leaveName})
+        .post("http://localhost:8001/api/deleteLeave",{"leaveName":this.state.existingLeaveTypes[idx].leaveName})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
-          if (result.data.msg==="Item Deleted")
+          if (result.data.msg==="Leave Deleted")
             this.getExistingLeaveTypes();
 
         })
@@ -252,14 +258,15 @@ deleteSpecificItem= idx => () => {
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                      {this.state.leaveName} Leave Saved Successfully!
+                     
+                     {this.state.modalMessage} 
                       </ModalHeader>
                     </Modal>
                   )}
 
 
 
-                  {!this.state.showEditItem &&  (
+                  {!this.state.showEditLeave &&  (
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
@@ -360,14 +367,15 @@ deleteSpecificItem= idx => () => {
                                         if (e.target.checked === true) {
                                             console.log("carryForward true: " + e.target.checked);
                                             this.setState({
-                                             showMaxLeaveCount:true,
+                                           
                                              carryForward:true
                                             });
                                           } else if (e.target.checked === false) {
                                             console.log("carryForward false: " + e.target.checked);
                                             this.setState({
-                                                showMaxLeaveCount:false,
-                                                carryForward:false
+                                               
+                                                carryForward:false,
+                                                maxLeaveCount:""
                                             });
                                           }
 
@@ -382,7 +390,7 @@ deleteSpecificItem= idx => () => {
                                     </Label>
                                   </FormGroup>
 <br/>
-{this.state.showMaxLeaveCount && <p> <InputGroup className="mb-3">
+{this.state.carryForward && <p> <InputGroup className="mb-3">
 <InputGroupAddon addonType="prepend">
   <InputGroupText >
     <b>Max Leave Count</b>
@@ -491,18 +499,24 @@ deleteSpecificItem= idx => () => {
         </td>
 
         <td align="center">
-          <h5> {this.state.existingLeaveTypes[idx].carryForward}</h5>
+          <h5> {this.state.existingLeaveTypes[idx].carryForward+""}</h5>
         </td>
 
         <td align="center">
         <Button
             color="primary"
-              onClick={ ()=>{ this.setState({showEditItem:true,
+              onClick={ ()=>{ this.setState({showEditLeave:true,
              leaveName: this.state.existingLeaveTypes[idx].leaveName,
-            unit:this.state.existingLeaveTypes[idx].unit,
-          itemNo:idx,
+            leaveType:this.state.existingLeaveTypes[idx].leaveType,
+            leaveCount:this.state.existingLeaveTypes[idx].leaveCount,
+            carryForward:this.state.existingLeaveTypes[idx].carryForward,
+            maxLeaveCount:this.state.existingLeaveTypes[idx].maxLeaveCount,
+leaveCountError:"",
+maxLeaveCountError:"",
+
+          leaveNo:idx,
         leaveNameError:"",
-      unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+     },()=>{console.log("showEditLeave "+this.state.showEditLeave)});}}
 
 
             size="lg"
@@ -546,7 +560,7 @@ deleteSpecificItem= idx => () => {
 
                    ) }
 
-{this.state.showEditItem && (
+{this.state.showEditLeave && (
   <Card className="mx-1">
   <CardBody className="p-2">
 
@@ -604,6 +618,102 @@ deleteSpecificItem= idx => () => {
                                     </Input>
                             </InputGroup>
 
+                            <InputGroup className="mb-3">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                  <b>Leave Count/Year</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                type="number"
+                                size="lg"
+
+                                name="leaveCount"
+
+                                id="leaveCount"
+                                value={this.state.leaveCount}
+                                onChange={e => {
+                                  this.setState(
+                                    { leaveCount: e.target.value }
+                                  );
+                                }}
+                              />
+                            </InputGroup>
+                            {this.state.leaveCountError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.leaveCountError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
+
+                        <FormGroup check inline>
+                                    <Input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      id="carryForward"
+                                      style={{ height: "35px", width: "25px" }}
+                                      name="carryForward"
+                                      checked={this.state.carryForward}
+                                      onChange={e=>{
+                                        if (e.target.checked === true) {
+                                            console.log("carryForward true: " + e.target.checked);
+                                            this.setState({
+                                             carryForward:true
+                                            });
+                                          } else if (e.target.checked === false) {
+                                            console.log("carryForward false: " + e.target.checked);
+                                            this.setState({
+                                                carryForward:false,
+                                                maxLeaveCount:""
+
+                                            });
+                                          }
+
+                                      }}
+                                    />
+                                    <Label
+                                      className="form-check-label"
+                                      check
+                                      htmlFor="inline-checkbox1"
+                                    >
+                                     <b> Carry Forward</b>
+                                    </Label>
+                                  </FormGroup>
+<br/>
+{this.state.carryForward && <p> <InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+  <InputGroupText >
+    <b>Max Leave Count</b>
+  </InputGroupText>
+</InputGroupAddon>
+<Input
+  type="number"
+  size="lg"
+
+  name="maxLeaveCount"
+
+  id="maxLeaveCount"
+  value={this.state.maxLeaveCount}
+  onChange={e => {
+    this.setState(
+      { maxLeaveCount: e.target.value }
+    );
+  }}
+/>
+</InputGroup>
+{this.state.maxLeaveCountError && (
+<font color="red">
+  <h6>
+    {" "}
+    <p>{this.state.maxLeaveCountError} </p>
+  </h6>{" "}
+</font>
+)} </p> }
+
+
   <br/>
   <Row >
                               <Col>
@@ -619,7 +729,10 @@ deleteSpecificItem= idx => () => {
 
                               <Col>
                                 <Button
-                                  onClick={()=>{this.setState({showEditItem:false,leaveName:"",unit:""})}}
+                                  onClick={()=>{this.setState({
+                                      showEditLeave:false,leaveName:"",leaveCount:"",leaveType:"Paid",
+                                   carryForward:false,maxLeaveCount:"",leaveCountError:"",leaveNameError:"",
+                                maxLeaveCountError:"" })}}
                                   size="lg"
                                   color="secondary"
   block

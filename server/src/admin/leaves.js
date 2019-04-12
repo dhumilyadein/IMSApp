@@ -109,13 +109,13 @@ function getExistingLeaveTypes(req, res) {
 
   }
 
-  function deleteItem(req,res)
-  {console.log("In deleteItem: "+ JSON.stringify(req.body.itemName));
+  function deleteLeave(req,res)
+  {console.log("In deleteLeave: "+ JSON.stringify(req.body.itemName));
 
-Items
-.deleteOne({itemName:req.body.itemName})
+LeaveTypes
+.deleteOne({leaveName:req.body.leaveName})
 .then(data => {
-  return res.send({msg:"Item Deleted"});
+  return res.send({msg:"Leave Deleted"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -124,20 +124,23 @@ return res.send({error:err});
 
 }
 
-async function editItem(req,res)
-{console.log("In editItem for: "+ JSON.stringify(req.body));
+async function editLeave(req,res)
+{console.log("In editLeave for: "+ JSON.stringify(req.body));
 
 
 
-  Items
-.updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
-  {$set: {itemName:req.body.itemName,
-          unit:req.body.unit,
+  LeaveTypes
+.updateOne({leaveName:req.body.existingLeaveTypes[req.body.leaveNo].leaveName},
+  {$set: {leaveName:req.body.leaveName,
+          leaveType:req.body.leaveType,
+          leaveCount:req.body.leaveCount,
+          carryForward:req.body.carryForward,
+          maxLeaveCount:req.body.maxLeaveCount
            }}
   )
 .then(data => {
 
-return res.send({msg:"Item Updated"});
+return res.send({msg:"Leave Updated"});
 })
 .catch(err => {
 return res.send({error:err});
@@ -206,8 +209,8 @@ return res.send({error:err});
   app.post("/api/addItems", addItems);
   app.post("/api/createLeave", createLeave);
   app.get("/api/getExistingLeaveTypes", getExistingLeaveTypes);
-  app.post("/api/deleteItem", deleteItem);
-  app.post("/api/editItem", editItem);
+  app.post("/api/deleteLeave", deleteLeave);
+  app.post("/api/editLeave", editLeave);
   app.post("/api/consumeItem", consumeItem);
   app.post("/api/getAddedItems", getAddedItems);
   app.post("/api/getConsumedItems", getConsumedItems);
