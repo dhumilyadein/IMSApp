@@ -23,13 +23,13 @@ import axios from "axios";
 class AddLeaveTypes extends Component {
   constructor(props) {
     super(props);
-//this.getExistingItems();
+this.getExistingLeaveTypes();
     this.state = {
 
       erorrs: null,
       success: null,
       leaveName: "",
-      leaveType:"",
+      leaveType:"Paid",
       leaveCycle:"",
       leaveCount:"",
       carryForward:false,
@@ -39,7 +39,7 @@ class AddLeaveTypes extends Component {
       modalSuccess: false,
       visible: false,
       unitError:"",
-      existingItems:[],
+      existingLeaveTypes:[],
       showEditItem:false,
       itemNo:""
     };
@@ -53,7 +53,7 @@ class AddLeaveTypes extends Component {
     this.onDismiss = this.onDismiss.bind(this);
 
 
-    this.getExistingItems = this.getExistingItems.bind(this);
+    this.getExistingLeaveTypes = this.getExistingLeaveTypes.bind(this);
     this.deleteSpecificItem = this.deleteSpecificItem.bind(this);
     this.editHandler = this.editHandler.bind(this);
 
@@ -68,7 +68,10 @@ class AddLeaveTypes extends Component {
     this.setState({
       modalSuccess: !this.state.modalSuccess,
       leaveName:"",
-      unit:""
+      leaveCount:"",
+      maxLeaveCount:"",
+      carryForward:false,
+      leaveType:"Paid",
     });
 
   }
@@ -86,23 +89,32 @@ class AddLeaveTypes extends Component {
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      leaveNameError: "", unitError: "", success: false,
+      leaveNameError: "", leaveCountError: "", maxLeaveCountError:"", success: false,
       modalSuccess: false
     }, () => {
       if (!this.state.leaveName) {
-        this.setState({ leaveNameError: "Please Enter Item Name" });
+        this.setState({ leaveNameError: "Please Enter Leave Name" });
         submit = false;}
 
-        if (!this.state.unit) {
-            this.setState({ unitError: "Please Enter Unit" });
+        if (!this.state.leaveCount) {
+            this.setState({ leaveCountError: "Please Enter Leave Count" });
             submit = false;}
+
+
+
+        if (this.state.carryForward&&!this.state.maxLeaveCount) {
+          this.setState({ maxLeaveCountError: "Please Enter Max Leave Count" });
+          submit = false;}
+
+
+
 
 
 
       if (submit === true) {
         console.log("Creating Item: ");
         axios
-          .post("http://localhost:8001/api/createItem", {"leaveName":this.state.leaveName,"unit":this.state.unit})
+          .post("http://localhost:8001/api/createLeave", {"leaveName":this.state.leaveName,"leaveType":this.state.leaveType, "leaveCount":this.state.leaveCount, "carryForward":this.state.carryForward, "maxLeaveCount":this.state.maxLeaveCount})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
@@ -118,7 +130,9 @@ class AddLeaveTypes extends Component {
                 success: true,
                 modalSuccess: true,
 
-              },()=>{this.getExistingItems()});
+              },()=>{
+                this.getExistingLeaveTypes()
+              });
 
           });
       }
@@ -147,7 +161,7 @@ class AddLeaveTypes extends Component {
         console.log("Updating Item: "+ JSON.stringify(this.state));
         axios
           .post("http://localhost:8001/api/editItem", {"leaveName":this.state.leaveName,"unit":this.state.unit,
-          "existingItems":this.state.existingItems,"itemNo":this.state.itemNo})
+          "existingLeaveTypes":this.state.existingLeaveTypes,"itemNo":this.state.itemNo})
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
            if(result.data.error)
@@ -162,22 +176,22 @@ class AddLeaveTypes extends Component {
                 modalSuccess: true,
                 showEditItem:false
 
-              },()=>{this.getExistingItems()});
+              },()=>{this.getExistingLeaveTypes()});
 
           });
       }
     });
   }
 
-  getExistingItems() {
+  getExistingLeaveTypes() {
 
     axios
-      .get("http://localhost:8001/api/existingItems")
+      .get("http://localhost:8001/api/getExistingLeaveTypes")
       .then(result => {
         console.log("Existing RESULT.data " + JSON.stringify(result.data));
         if (result.data) {
           this.setState({
-            existingItems: result.data
+            existingLeaveTypes: result.data
           });
         }
       });
@@ -196,17 +210,17 @@ deleteSpecificItem= idx => () => {
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/deleteItem",{"leaveName":this.state.existingItems[idx].leaveName})
+        .post("http://localhost:8001/api/deleteItem",{"leaveName":this.state.existingLeaveTypes[idx].leaveName})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
           if (result.data.msg==="Item Deleted")
-            this.getExistingItems();
+            this.getExistingLeaveTypes();
 
         })
       },
       {
         label: 'No',
-        onClick: () =>  {this.getExistingItems();}
+        onClick: () =>  {this.getExistingLeaveTypes();}
       }
     ]
   })
@@ -238,7 +252,7 @@ deleteSpecificItem= idx => () => {
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                        Leave: {this.state.leaveName} Saved Successfully!
+                      {this.state.leaveName} Leave Saved Successfully!
                       </ModalHeader>
                     </Modal>
                   )}
@@ -296,17 +310,17 @@ deleteSpecificItem= idx => () => {
                                       value={this.state.leaveType}
 
                                     >
-                                     
+
                                       <option value="Paid">Paid</option>
                                       <option value="Unpaid">Unpaid</option>
-                                      
+
                                     </Input>
                             </InputGroup>
 
                             <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
-                                  <b>Leave Count</b>
+                                  <b>Leave Count/Year</b>
                                 </InputGroupText>
                               </InputGroupAddon>
                               <Input
@@ -332,7 +346,7 @@ deleteSpecificItem= idx => () => {
                                 </h6>{" "}
                               </font>
                             )}
-                            
+
 
                         <FormGroup check inline>
                                     <Input
@@ -346,12 +360,14 @@ deleteSpecificItem= idx => () => {
                                         if (e.target.checked === true) {
                                             console.log("carryForward true: " + e.target.checked);
                                             this.setState({
-                                             showMaxLeaveCount:true
+                                             showMaxLeaveCount:true,
+                                             carryForward:true
                                             });
                                           } else if (e.target.checked === false) {
                                             console.log("carryForward false: " + e.target.checked);
                                             this.setState({
-                                                showMaxLeaveCount:false
+                                                showMaxLeaveCount:false,
+                                                carryForward:false
                                             });
                                           }
 
@@ -362,15 +378,44 @@ deleteSpecificItem= idx => () => {
                                       check
                                       htmlFor="inline-checkbox1"
                                     >
-                                      Carry Forward
+                                     <b> Carry Forward</b>
                                     </Label>
                                   </FormGroup>
-                                      
+<br/>
+{this.state.showMaxLeaveCount && <p> <InputGroup className="mb-3">
+<InputGroupAddon addonType="prepend">
+  <InputGroupText >
+    <b>Max Leave Count</b>
+  </InputGroupText>
+</InputGroupAddon>
+<Input
+  type="number"
+  size="lg"
+
+  name="maxLeaveCount"
+
+  id="maxLeaveCount"
+  value={this.state.maxLeaveCount}
+  onChange={e => {
+    this.setState(
+      { maxLeaveCount: e.target.value }
+    );
+  }}
+/>
+</InputGroup>
+{this.state.maxLeaveCountError && (
+<font color="red">
+  <h6>
+    {" "}
+    <p>{this.state.maxLeaveCountError} </p>
+  </h6>{" "}
+</font>
+)} </p> }
 
 
 
 <br/>
-<Row >
+<Row align="center" >
                             <Col>
                               <Button
                                 onClick={this.submitHandler}
@@ -378,7 +423,7 @@ deleteSpecificItem= idx => () => {
                                 color="success"
 
                               >
-                                Create
+                                Create Leave
                               </Button>
                             </Col>
 
@@ -386,94 +431,110 @@ deleteSpecificItem= idx => () => {
                           </Row>
                           <br /> <br />
 
-<h3 align="center"> Existing Items</h3>
-                          <br />
+
+ {this.state.existingLeaveTypes.length>0  &&<p>
+
+<h3 align="center"> Existing Leave Types</h3>
+<br />
 
 
-                          <Table bordered hover>
-                            <thead>
-                              <tr style={{ 'backgroundColor': "lightgreen" }}>
-                                <th className="text-center">
-                                  <h4> S.No.</h4>{" "}
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Item Name </h4>
-                                </th>
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Unit</h4>
-                                </th>
+<Table bordered hover>
+  <thead>
+    <tr style={{ 'backgroundColor': "lightgreen" }}>
+      <th className="text-center">
+        <h4> S.No.</h4>{" "}
+      </th>
+      <th className="text-center">
+        {" "}
+        <h4>Leave Name </h4>
+      </th>
 
-                                <th className="text-center">
-                                  {" "}
-                                  <h4>Quantity</h4>
-                                </th>
+      <th className="text-center">
+        {" "}
+        <h4>Leave Type </h4>
+      </th>
+      <th className="text-center">
+        {" "}
+        <h4>Count/Year</h4>
+      </th>
 
-                                <th className="text-center">
-                                 <h4> Actions</h4>
+      <th className="text-center">
+        {" "}
+        <h4>Carry Forward</h4>
+      </th>
 
-
-                                </th>
-
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {this.state.existingItems.map((item, idx) => (
-                                <tr id="addr0" key={idx}>
-                                  <td align="center">
-                                    <h5>{idx + 1}</h5>
-                                  </td>
-                                  <td align="center">
-                                    <h5> {this.state.existingItems[idx].leaveName.charAt(0).toUpperCase() +
-                                      this.state.existingItems[idx].leaveName.slice(1)}</h5>
-                                  </td>
-
-                                  <td align="center">
-                                    <h5> {this.state.existingItems[idx].unit}</h5>
-                                  </td>
-
-                                  <td align="center">
-                                    <h5> {this.state.existingItems[idx].quantity}</h5>
-                                  </td>
-
-                                  <td align="center">
-                                  <Button
-                                      color="primary"
-                                        onClick={ ()=>{ this.setState({showEditItem:true,
-                                       leaveName: this.state.existingItems[idx].leaveName,
-                                      unit:this.state.existingItems[idx].unit,
-                                    itemNo:idx,
-                                  leaveNameError:"",
-                                unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
+      <th className="text-center">
+       <h4> Actions</h4>
 
 
-                                      size="lg"
-                                    >
-                                      Edit
-                                    </Button>
-                                    &nbsp; &nbsp;
+      </th>
 
-                                    <Button
-                                      color="danger"
-                                        onClick={ this.deleteSpecificItem(idx)}
+    </tr>
+  </thead>
+  <tbody>
+    {this.state.existingLeaveTypes.map((item, idx) => (
+      <tr id="addr0" key={idx}>
+        <td align="center">
+          <h5>{idx + 1}</h5>
+        </td>
+        <td align="center">
+          <h5> {this.state.existingLeaveTypes[idx].leaveName.charAt(0).toUpperCase() +
+            this.state.existingLeaveTypes[idx].leaveName.slice(1)}</h5>
+        </td>
+
+        <td align="center">
+          <h5> {this.state.existingLeaveTypes[idx].leaveType}</h5>
+        </td>
+
+        <td align="center">
+          <h5> {this.state.existingLeaveTypes[idx].leaveCount}</h5>
+        </td>
+
+        <td align="center">
+          <h5> {this.state.existingLeaveTypes[idx].carryForward}</h5>
+        </td>
+
+        <td align="center">
+        <Button
+            color="primary"
+              onClick={ ()=>{ this.setState({showEditItem:true,
+             leaveName: this.state.existingLeaveTypes[idx].leaveName,
+            unit:this.state.existingLeaveTypes[idx].unit,
+          itemNo:idx,
+        leaveNameError:"",
+      unitError:""},()=>{console.log("showEditItem "+this.state.showEditItem)});}}
 
 
-                                      size="lg"
-                                    >
-                                      Remove
-                                    </Button>
+            size="lg"
+          >
+            Edit
+          </Button>
+          &nbsp; &nbsp;
+
+          <Button
+            color="danger"
+              onClick={ this.deleteSpecificItem(idx)}
+
+
+            size="lg"
+          >
+            Remove
+          </Button>
 
 
 
 
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
 
 
+
+
+</p>
+}
 
 
 
@@ -536,13 +597,13 @@ deleteSpecificItem= idx => () => {
                                       value={this.state.leaveType}
 
                                     >
-                                     
+
                                       <option value="Paid">Paid</option>
                                       <option value="Unpaid">Unpaid</option>
-                                      
+
                                     </Input>
                             </InputGroup>
-                        
+
   <br/>
   <Row >
                               <Col>
