@@ -437,7 +437,7 @@ const routes = [
     component: IssueReturnDetails
   },
 
- 
+
 
   {
     path: "/admin/payroll/SalaryTemplates",
@@ -474,7 +474,7 @@ const routes = [
     name: "Remove Students",
     component: DeleteStudents
   },
-  
+
 
 
   {
@@ -624,7 +624,7 @@ const routes = [
   },
 
   {
-    path: "/admin/leave/ApplyLeave",
+    path: "/admin/leaves/ApplyLeave",
     name: "ApplyLeave",
     component: ApplyLeave
   },

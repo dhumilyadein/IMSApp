@@ -204,6 +204,24 @@ return res.send({error:err});
 
 }
 
+function fetchAllEmployees(req, res) {
+  console.log("in fetchEmp: " + req.body.empType);
+
+
+      Users
+          .find({ status: "Active", role: "admin" })
+      .then(data => {
+          return res.send(data);
+      })
+      .catch(err => {
+          return res.send({ error: err });
+      });
+
+
+
+
+}
+
 
 
   app.post("/api/addItems", addItems);
