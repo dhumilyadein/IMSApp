@@ -27,7 +27,6 @@ this.getExistingLeaveTypes();
     this.state = {
 
       erorrs: null,
-      success: null,
       leaveName: "",
       leaveType:"Paid",
       leaveCycle:"",
@@ -38,10 +37,8 @@ this.getExistingLeaveTypes();
       success: false,
       modalSuccess: false,
       visible: false,
-      unitError:"",
       existingLeaveTypes:[],
       showEditLeave:false,
-      itemNo:""
     };
 
 

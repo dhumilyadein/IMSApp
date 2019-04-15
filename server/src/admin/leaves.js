@@ -1,44 +1,17 @@
 const PurchaseItems = require("../../models/PurchaseItems");
-const ConsumedItems = require("../../models/ConsumedItems");
+const AppliedLeaves = require("../../models/AppliedLeaves");
 const LeaveTypes = require("../../models/LeaveTypes");
 
 module.exports = function (app) {
 
 
-async function addItems(req, res) {
-console.log("in addItems Req.body: "+JSON.stringify(req.body))
+async function applyLeave(req, res) {
+console.log("in applyLeave Req.body: "+JSON.stringify(req.body))
 
-var template = {
-  "listName": req.body.listName, "dos": req.body.dos, "itemRows": req.body.rows,
-  "grandTotal":req.body.grandTotal, "remarks":req.body.remarks
+req.body["status"]="Applied";
+var applyLeave= new AppliedLeaves(req.body);
 
-};
-var addItem = new PurchaseItems(template);
-
-
-for(var i=0;i<req.body.rows.length;i++)
-{
-
-  await Items
-  .updateOne({itemName:req.body.rows[i].itemName.value},
-    {$inc: {quantity:req.body.rows[i].quantity
-
-             }}
-    )
-  .then(data => {
-
-
-
-  })
-  .catch(err => {
-  return res.send({error:err});
-  });
-
-
-
-}
-
-addItem
+applyLeave
 .save()
 .then(user => {
     return res.send({msg:"Success"});
@@ -67,30 +40,26 @@ async function createLeave(req, res) {
 
   }
 
-  async function consumeItem(req, res) {
-    console.log("in consumeItem Req.body: "+JSON.stringify(req.body))
+  async function approveLeave(req, res) {
+    console.log("in approveLeave Req.body: "+JSON.stringify(req.body))
 
-    Items
-    .updateOne({itemName:req.body.itemName},
-      {$inc: {quantity:-1*parseInt(req.body.consumedQuantity)
-
-               }}
+    AppliedLeaves
+    .updateOne({_id:req.body._id},
+      {status:"Approved",
+      dateOfApproveOrReject:req.body.dateOfApproveOrReject
+               }
       )
-    .then(data => {
-     var consumeItems = new ConsumedItems(req.body);
-     consumeItems.save()
+   
      .then(user => {
-         return res.send({msg:"Success"});
+         return res.send({msg:"Leave Approved"});
      })
      .catch(err => {
        return res.send(err);
      });
 
 
-    })
-    .catch(err => {
-    return res.send({error:err});
-    });
+  
+  
 
     }
 
@@ -153,39 +122,13 @@ return res.send({error:err});
 
 
 }
-async function getAddedItems(req,res)
-{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
+async function getPendingleaves(req,res)
+{console.log("In getPendingleaves for: "+ JSON.stringify(req.body));
 
 
 
-  PurchaseItems
-.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } }] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
-
-
-
-
-
-
-
-}
-
-
-async function getConsumedItems(req,res)
-{console.log("In getConsumedItems for: "+ JSON.stringify(req.body));
-
-
-
-
-ConsumedItems
-.find({ $and: [ { doc: { $gte : new Date(req.body.dos) } }, { doc: { $lte : new Date(req.body.doe) } }] })
+  AppliedLeaves
+.find({ status:"Applied" })
 
 .then(data => {
 
@@ -201,37 +144,48 @@ return res.send({error:err});
 
 
 
-
-}
-
-function fetchAllEmployees(req, res) {
-  console.log("in fetchEmp: " + req.body.empType);
-
-
-      Users
-          .find({ status: "Active", role: "admin" })
-      .then(data => {
-          return res.send(data);
-      })
-      .catch(err => {
-          return res.send({ error: err });
-      });
-
-
-
-
 }
 
 
+async function getAvailableLeaveCount(req,res)
+{console.log("In getAvailableLeaveCount for: "+ JSON.stringify(req.body));
 
-  app.post("/api/addItems", addItems);
+
+
+
+AppliedLeaves
+.find({leaveType:req.body.leaveType, empName:req.body.empName,year:req.body.year,
+  $or:[ {status:"Approved"}, {status:"Applied"} ]})
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+  app.post("/api/applyLeave", applyLeave);
   app.post("/api/createLeave", createLeave);
   app.get("/api/getExistingLeaveTypes", getExistingLeaveTypes);
   app.post("/api/deleteLeave", deleteLeave);
   app.post("/api/editLeave", editLeave);
-  app.post("/api/consumeItem", consumeItem);
-  app.post("/api/getAddedItems", getAddedItems);
-  app.post("/api/getConsumedItems", getConsumedItems);
+  app.post("/api/approveLeave", approveLeave);
+  app.get("/api/getPendingleaves", getPendingleaves);
+  app.post("/api/getAvailableLeaveCount", getAvailableLeaveCount);
 
 
 

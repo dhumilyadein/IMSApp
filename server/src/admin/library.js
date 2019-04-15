@@ -445,7 +445,7 @@ function gettingStaff(req, res) {
   console.log("in gettingBooks ");
 
   Users
-    .find({ $or:[ {role:"admin"}, {role:"teacher"} ]})
+    .find({ $or:[ {role:"admin"}, {role:"teacher"} ],status: "Active"})
     .then(data => {
         return res.send(data);
     })

@@ -630,7 +630,7 @@ const routes = [
   },
 
   {
-    path: "/admin/leave/ApproveLeave",
+    path: "/admin/leaves/ApproveLeave",
     name: "ApproveLeave",
     component: ApproveLeave
   },

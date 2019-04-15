@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
-import classnames from 'classnames';
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+
+import moment from 'moment';
+
 import DatePicker from 'react-date-picker';
 import {
   Badge,
@@ -30,6 +30,7 @@ import {
   Row,
   Modal,
   ModalHeader,
+  Container,
 
   Table,
   TabContent, TabPane, Nav, NavItem, NavLink, CardTitle, CardText
@@ -43,51 +44,49 @@ class ApplyLeave extends Component {
 
   constructor(props) {
     super(props);
+    this.fetchEmployees();
+   
     this.state = {
-      empType: "",
-
-      empArray: [],
-
-      salaryTemplates: [],
-      selectedEmp: [],
+     
       error: "",
-      showSalaryTemplate: false,
-
-      totalEarning: "",
-      totalDeduction: "",
-      paidAmount: "",
-      dop:  new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)),
+      
+      doa:  new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)),
       year: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
-      paidAmount: "",
+     
       remarks: "",
-      month: "",
-      paidAmountError: "",
-      dopError: "",
+    showApplyLeave:false,
+     
       modelMessage: "",
       modalSuccess: false,
       success: false,
 
-      empArray: [],
-      empDetails: [],
-      AllSalaryTemplateDetails: [],
-      salaryRows: [],
-      deductRows: [],showPaySlip:false,      empDetailsResponse:{},
+     existingLeaveTypes:[],
+     existingEmp:[]
 
     };
 
 
-    this.empChangeHandler = this.empChangeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
-    this.salaryTemplateSelectHandler = this.salaryTemplateSelectHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.fetchEmployees = this.fetchEmployees.bind(this);
-    this.downloadPDF = this.downloadPDF.bind(this);
-
+    this.getExistingLeaveTypes = this.getExistingLeaveTypes.bind(this);
+this.leaveChangeHandler=this.leaveChangeHandler.bind(this);
   }
 
 
+  getExistingLeaveTypes() {
 
-
+    axios
+      .get("http://localhost:8001/api/getExistingLeaveTypes")
+      .then(result => {
+       
+        if (result.data) {
+          this.setState({
+            existingLeaveTypes: result.data
+          },()=>{ console.log("Existing RESULT.data " + JSON.stringify(this.state.existingLeaveTypes));});
+        }
+      });
+  }
 
   toggleSuccess() {
 
@@ -95,7 +94,14 @@ class ApplyLeave extends Component {
       modalSuccess: !this.state.modalSuccess,
 
       modelMessage: "",
-      showPaySlip:true
+showApplyLeave:false,
+selectedEmp:"",
+selectedLeaveType:"",
+leavesAvailable:"",
+selectedLeaveCount:"",
+dof:"",
+dot:"",
+remarks:""
      /*  selectedSalaryTemplate: [],
       showSalaryTemplate: false,
       paidAmount: "",
@@ -107,43 +113,27 @@ class ApplyLeave extends Component {
   }
 
 
-  fetchEmployees(e) {
-    console.log("EmpType - " + e.target.value);
+  fetchEmployees()
+    {
+      axios
+      .get("http://localhost:8001/api/gettingStaff")
+      .then(result => {
+        console.log("Existing Staff data " + JSON.stringify(result.data));
+        if (result.data) {
+ var temp=[];
+  for(var i=0;i<result.data.length;i++)
+   temp.push({"label":result.data[i].firstname.charAt(0).toUpperCase()+result.data[i].firstname.slice(1)+
+   " "+result.data[i].lastname.charAt(0).toUpperCase()+result.data[i].lastname.slice(1)+" ("+result.data[i].username+")",
+  "value": result.data[i].username})
 
-    this.setState({ empType: e.target.value, selectedEmp: [] });
-    axios.post("http://localhost:8001/api/fetchEmployees", { "empType": e.target.value }).then(cRes => {
-      console.log("Result Emp - " + JSON.stringify(cRes));
+            this.setState({
+            existingEmp: temp,
 
-      if (cRes.data.errors) {
-
-        return this.setState({ errors: cRes.data.errors });
-
-      } else {
-
-        this.setState({ empDetails: cRes.data }, () => {
-
-          var empArray = [];
-          this.state.empDetails.forEach(element => {
-
-            console.log("element.class - " + element.username);
-            empArray.push({
-              "label": element.firstname + " " + element.lastname + "(" + element.username + ")",
-              "value": element.firstname + " " + element.lastname + "(" + element.username + ")"
-            });
           });
-          // console.log("classArray - " + classArray);
-          var uniqueItems = Array.from(new Set(empArray));
+        }
+      });
 
-
-
-          this.setState({ empArray: uniqueItems });
-        });
-
-
-
-      }
-    });
-  }
+    }
 
   /**
    * @description - fetches unique classes from the class detail from DB
@@ -156,12 +146,12 @@ class ApplyLeave extends Component {
 
   submitHandler(e) {
     e.preventDefault();
-    console.log("In PAySalrySubmit:" + JSON.stringify(this.state));
+    console.log("In ApplyLeaveSubmit:" + JSON.stringify(this.state));
     var submit = true;
 
     this.setState({
-      monthError: "", dopError: "", error: "", success: false,
-      modalSuccess: false,
+      monthError: "", doaError: "", error: "", success: false,
+      modalSuccess: false, leaveTypeError:"",yearError:"", dateError:""
     })
 
     if (!this.state.year || this.state.year.length != 9) {
@@ -169,47 +159,68 @@ class ApplyLeave extends Component {
       submit = false;
 
     }
+    
+     var  years = this.state.year.split("-")
+    if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
+   {this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"});
+  submit=false}
 
-    if (!this.state.month) {
-      this.setState({ monthError: "Please Select month" });
+    if (!this.state.selectedLeaveType) {
+      this.setState({ leaveTypeError: "Please Select Leave Type" });
       submit = false;
 
     }
-    if (!this.state.dop) {
-      this.setState({ dopError: "Please Enter Date of Payment" });
+    if (!this.state.doa) {
+      this.setState({ doaError: "Please Select Date of Apply" });
       submit = false;
 
     }
+
+    if (!this.state.dof) {
+      this.setState({ dateError: "Please Select From Date" });
+      submit = false;
+
+    }
+
+    if (!this.state.dot) {
+      this.setState({ dateError: "Please Select To Date" });
+      submit = false;
+
+    }
+
 
     if (!this.state.selectedEmp.value) {
-      this.setState({ studentError: "Please Select Employee" });
+      this.setState({ empError: "Please Select Employee" });
       submit = false;
 
     }
+
+    if (this.state.leavesAvailable===0) {
+      this.setState({ error: "No Leaves Available!" });
+      submit = false;
+
+    }
+  
+
 
     if (submit) {
 
       axios
-        .post("http://localhost:8001/api/paySalary", {
-          "salaryRows": this.state.salaryRows, "empType": this.state.empType,
-          "deductRows": this.state.deductRows, "totalEarning": this.state.totalEarning, "totalDeduction": this.state.totalDeduction,
-          "paidAmount": this.state.paidAmount, "selectedEmp": this.state.selectedEmp, "month": this.state.month, "dop": this.state.dop, "remarks": this.state.remarks, "year": this.state.year
+        .post("http://localhost:8001/api/applyLeave", {
+          "empName": this.state.selectedEmp.label, "leaveType": this.state.selectedLeaveType,
+          "year": this.state.year, "doa": this.state.doa, "remarks": this.state.remarks, 
+          "dof":this.state.dof, "dot":this.state.dot, "selectedLeaveCount": this.state.selectedLeaveCount
 
         }
         )
         .then(result => {
-          console.log("result.data Pay " + JSON.stringify(result.data));
+          console.log("result.data ApplyLeave " + JSON.stringify(result.data));
 
           if (result.data.msg === "Success")
             this.setState({
-empDetailsResponse:result.data.empData,
               success: true,
               modalSuccess: true,
-              modelMessage: "Salary paid to " + this.state.selectedEmp.value.toLowerCase()
-              .split(' ')
-              .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-              .join(' '),
-
+              modelMessage: this.state.selectedLeaveCount+ " Leaves applied for " + this.state.selectedEmp.label
 
 
 
@@ -236,53 +247,55 @@ empDetailsResponse:result.data.empData,
 
   }
 
-  downloadPDF(){
-
-    const input = document.getElementById('divToPrint1');
-  html2canvas(input)
-    .then((canvas) => {
-      const imgData = canvas.toDataURL('image/jpeg');
-      const pdf = new jsPDF("l");
-      var width = pdf.internal.pageSize.getWidth();
-var height = pdf.internal.pageSize.getHeight();
-      pdf.addImage(imgData, 'JPEG', 10, 10,width,height);
-      // pdf.output('dataurlnewwindow');
-      pdf.save("PaySlip-"+this.state.selectedEmp.value.split(' ').join('_')+".pdf");
-
-
-    });
-
-  }
 
 
 
-  empChangeHandler(e) {
+
+
+ 
+  leaveChangeHandler(e) {
     if (e) {
-      console.log("In Emp change " + (e.value));
+      console.log("In leave change " + (e.target.value));
 
-      this.setState({ selectedEmp: e, selectedSalaryTemplate: [], showSalaryTemplate: false }, () => {
 
+      this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:""}, () => {
+       var  years = this.state.year.split("-")
+
+        if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
+       return(this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"}));
         axios
-          .get("http://localhost:8001/api/getSalaryTemplate")
+          .post("http://localhost:8001/api/getAvailableLeaveCount",
+          {
+            "leaveType":this.state.selectedLeaveType,
+            "year":this.state.year,
+            "empName":this.state.selectedEmp.label           
+          })
           .then(result => {
-            console.log("result.data " + JSON.stringify(result.data));
+            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data.data));
 
-            if (result.data) {
-              var temp = [];
-              for (var i = 0; i < result.data.length; i++) {
-                temp.push({
-                  "value": result.data[i].templateName,
-                  "label": result.data[i].templateName
-                });
+            if (result.data.error) {
 
-              }
-              this.setState({ salaryTemplates: temp, AllSalaryTemplateDetails: result.data });
-            }
+             return( this.setState({ error: result.data.error.message })); 
 
-            else if (result.data.error) {
+                      }
+var totalAppliedLeaveCount=0;
+                      for(var i=0;i<result.data.data.length;i++)
+totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveCount;
 
-              this.setState({ error: result.data.error.message });
-            }
+         for(var i=0;i<this.state.existingLeaveTypes.length;i++)
+         if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
+         { if((this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount)>=0)
+           this.setState({leavesAvailable: this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount})
+           else
+           this.setState({leavesAvailable: 0})
+           if(this.state.leavesAvailable>0)
+           this.setState({showApplyLeave:true})
+           else
+
+           this.setState({error:"No "+this.state.selectedLeaveType+" Leaves Avalable!"})
+         }
+
+                    
 
 
 
@@ -301,35 +314,6 @@ var height = pdf.internal.pageSize.getHeight();
     }
 
   }
-
-  salaryTemplateSelectHandler(e) {
-    if (e) {
-      console.log("In Salary Template " + (e.value));
-
-      this.setState({ selectedSalaryTemplate: e, }, () => {
-
-        for (var i = 0; i < this.state.AllSalaryTemplateDetails.length; i++) {
-          if (this.state.AllSalaryTemplateDetails[i].templateName === this.state.selectedSalaryTemplate.value)
-            this.setState({
-              salaryRows: this.state.AllSalaryTemplateDetails[i].salaryRows,
-              deductRows: this.state.AllSalaryTemplateDetails[i].deductRows, showSalaryTemplate: true,
-              totalDeduction: this.state.AllSalaryTemplateDetails[i].totalDeduction,
-              totalEarning: this.state.AllSalaryTemplateDetails[i].totalEarning,
-              paidAmount: this.state.AllSalaryTemplateDetails[i].paidAmount
-            })
-
-        }
-
-      })
-
-
-
-
-
-    }
-
-  }
-
   /**
    * @description Called when the role(s) are selected. To update role Array
    * @param {*} e
@@ -340,9 +324,11 @@ var height = pdf.internal.pageSize.getHeight();
 
     return (
       <div>
-
-        <Row>
-
+   <Container>
+          <Row className="justify-content-center" lg="2">
+            <Col md="12">
+            <Card> <CardBody>
+<h1>Leave Management</h1>
           {this.state.success && (
             <Modal
               isOpen={this.state.modalSuccess}
@@ -355,139 +341,168 @@ var height = pdf.internal.pageSize.getHeight();
             </Modal>
           )}
 
-          <Col sm="12">
-          {!this.state.showPaySlip &&
-            <Card className="mx-5">
-              <h1 align="center">Pay Salary</h1>
-              <CardBody className="p-1">
+<Card className="mx-1">
+                          <CardBody className="p-1">
+                          <h3 align="center"> Apply Leave</h3>
+                          <br/>
+                          <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b>  Select/Search Employee</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              
+                                 <Select
+                            id="staffSelect"
+                            name="staffSelect"
 
-                <br />
+                          placeholder="Select Staff/Employee or Type to search"
+                            options={this.state.existingEmp}
+                          closeMenuOnSelect={true}
+                         value={this.state.selectedEmp}
+                         isClearable={true}
+                         //menuIsOpen ={this.state.studentOpen}
+                            isSearchable={true}
 
-                <InputGroup className="mb-4">
+                            onChange={selected=>{this.setState({selectedEmp:selected, showApplyLeave:false,selectedLeaveType:"", leavesAvailable:"",error:""},()=>{
+                              this.getExistingLeaveTypes();
+                            });}}
+                            />
+   {this.state.empError && (
+                                    <font color="red">
+                                      {" "}
+                                      <p>{this.state.empError}</p>
+                                    </font>
+                                  )}
+
+<br/>
+
+<InputGroup className="mb-3">
                   <InputGroupAddon addonType="prepend">
-                    <InputGroupText >
-                    <b>  Employee Type</b>
+                    <InputGroupText style={{ width: "120px" }}>
+                    <b> Leave Type</b> 
                                 </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                    name="empType"
-                    id="empType"
+                    name="selectedLeaveType"
+                    id="selectedLeaveType"
                     type="select"
-                    value={this.state.empType}
-                    onChange={this.fetchEmployees}
+                    value={this.state.selectedLeaveType}
+                    onChange={this.leaveChangeHandler}
                   >
                     <option value="">Select</option>
-                    <option value="Staff">Staff</option>
-                    <option value="Admin">Admin</option>
-
+                    {this.state.existingLeaveTypes.map(element => {
+                      return (<option key={element.leaveName} value={element.leaveName}>{element.leaveName}</option>);
+                    }
+                    )}
                   </Input>
                 </InputGroup>
-                {this.state.empTypeError && (
-                  <font color="red">
-                    {" "}
-                    <p>{this.state.empTypeError}</p>
-                  </font>
-                )}
+              
 
-                <InputGroupAddon addonType="prepend">
-                  <InputGroupText>
-                  <b>  Employee/Staff</b>
-                                </InputGroupText>
-                </InputGroupAddon>
-                <Select
-                  id="selectedEmp"
-                  name="selectedEmp"
-
-                  placeholder="Select Employee/Staff or Type to search"
-                  options={this.state.empArray}
-                  closeMenuOnSelect={true}
-                  value={this.state.selectedEmp}
-                  isClearable={true}
-                  //menuIsOpen ={this.state.studentOpen}
-                  isSearchable={true}
-
-                  onChange={this.empChangeHandler}
-                />
-
-                <br />
-                {this.state.empError && (
-                  <font color="red">
-                    {" "}
-                    <p>{this.state.empError}</p>
-                  </font>
-                )}
-                <br />
-
-                <InputGroupAddon addonType="prepend">
-                  <InputGroupText >
-                 <b>   Salary Template</b>
-                                </InputGroupText>
-                </InputGroupAddon>
-
-                <Select
-                  id="salaryTemplates"
-                  name="salaryTemplates"
-
-                  placeholder="Select Salary Template"
-                  options={this.state.salaryTemplates}
-                  closeMenuOnSelect={true}
-                  value={this.state.selectedSalaryTemplate}
-                  isClearable={true}
-                  //menuIsOpen ={this.state.studentOpen}
-                  isSearchable={true}
-
-                  onChange={this.salaryTemplateSelectHandler}
-                />
+              {this.state.leaveTypeError && (
+                <font color="red">
+                  {" "}
+                  <p>{this.state.leaveTypeError}</p>
+                </font>
+              )}
 
 
-                <br />
-
-
-                {this.state.showSalaryTemplate && <p>
-
-                  <InputGroup className="mb-3">
+<InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
-                        <b> For Month</b>
+                        <b>Available leaves</b>
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input
-                      name="month"
-                      id="month"
-                      type="select"
-                      value={this.state.month}
-                      onChange={e => { this.setState({ month: e.target.value },()=>
-
-                      {
-
+                      type="number"
+                      size="lg"
+                      name="leavesAvailable"
+                      id="leavesAvailable"
+                      value={this.state.leavesAvailable}
+                     disabled
 
 
-                      }) }}
-                    >
-                      <option value="">Select Month</option>
-                      <option value="January">January</option>
-                      <option value="February">February</option>
-                      <option value="March">March</option>
-                      <option value="April">April</option>
-                      <option value="May">May</option>
-                      <option value="June">June</option>
-                      <option value="July">July</option>
-                      <option value="August">August</option>
-                      <option value="September">September</option>
-                      <option value="October">October</option>
-                      <option value="November">November</option>
-                      <option value="December">December</option>
-                    </Input>
 
+                    />
                   </InputGroup>
-                  {this.state.monthError && (
-                    <font color="red">
-                      {" "}
-                      <p>{this.state.monthError}</p>
-                    </font>
-                  )}
+{this.state.showApplyLeave && <p>
+              
+                          <InputGroup className="mb-2">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b> From Date</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
 
-                  <InputGroup className="mb-3">
+                              &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+
+                                name="dof"
+                                id="dof"
+                                value={this.state.dof}
+                                onChange={date=>{this.setState({dof:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dof)})}}
+                              />
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+<InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b> To Date</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
+
+                              &nbsp; &nbsp; &nbsp; &nbsp;
+                              <DatePicker
+                                name="dot"
+                                id="dot"
+                                value={this.state.dot}
+                                onChange={date=>{this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
+                                  
+if(!this.state.dof) this.setState({dateError:"Please Select From Date First!",dot:"",submitDisabled:true});
+else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
+{
+    this.setState({  dateError: "Start Date can't be Greater than End Date!",submitDisabled:true});
+   }
+   else if(moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')>=this.state.leavesAvailable)
+   this.setState({  dateError: "You can't apply more than "+this.state.leavesAvailable+" leaves!",
+   submitDisabled:true});  
+  else 
+  this.setState({selectedLeaveCount:moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')+1})
+
+  })
+  
+  
+  }}
+                              />
+                            </InputGroup>
+
+
+
+ 
+ {this.state.dateError &&(
+                                <font color="red"><h6>
+                                  {" "}
+                                  <p>{this.state.dateError}</p></h6>
+                                </font>
+                              )}
+
+<InputGroup className="mb-3">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText >
+                        <b>Total Leaves Selected</b>
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <Input
+                      type="number"
+                      size="lg"
+                      name="selectedLeaveCount"
+                      id="selectedLeaveCount"
+                      value={this.state.selectedLeaveCount}
+                     disabled
+
+
+
+                    />
+                  </InputGroup>
+
+<InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
                         <b>Year</b>
@@ -511,562 +526,102 @@ var height = pdf.internal.pageSize.getHeight();
                       {" "}
                       <p>{this.state.yearError}</p>
                     </font>
-                  )}
+                  )} 
 
+<InputGroup className="mb-2">
+                              <InputGroupAddon addonType="prepend">
+                                <InputGroupText >
+                                <b>  Date of Apply</b>
+                                </InputGroupText>
+                              </InputGroupAddon>
 
-
-                  <Row><Col>
-
-
-
-
-                    <h4 align="center"> Earnings</h4>
-
-
-
-                    <Table bordered hover>
-                      <thead>
-                        <tr style={{ 'backgroundColor': "lightgreen" }}>
-
-                          <th className="text-center">
-                            <h4> S.No.</h4>{" "}
-                          </th>
-
-                          <th className="text-center">
-                            {" "}
-                            <h4>Earning Type</h4>
-                          </th>
-                          <th className="text-center">
-                            <h4> Amount(Rs)</h4>{" "}
-                          </th>
-
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {this.state.salaryRows.map((item, idx) => (
-                          <tr id="addr0" key={idx}>
-                            <td align="center">
-                              <h4>{idx + 1}</h4>
-                            </td>
-
-
-                            <td align="center">
-                              <h4>  {this.state.salaryRows[idx].earnType}</h4>
-
-                            </td>
-
-                            <td align="center">
-                              <h4> {this.state.salaryRows[idx].amount}</h4>
-                            </td>
-
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-
-                  </Col><Col>
-
-
-                      <h4 align="center"> Deductions</h4>
-
-
-
-
-
-
-                      <Table bordered hover>
-                        <thead>
-                          <tr style={{ 'backgroundColor': "red" }}>
-
-                            <th className="text-center">
-                              <h4> S.No.</h4>{" "}
-                            </th>
-
-                            <th className="text-center">
-                              {" "}
-                              <h4>Deduction Type</h4>
-                            </th>
-                            <th className="text-center">
-                              <h4> Amount(Rs)</h4>{" "}
-                            </th>
-
-
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {this.state.deductRows.map((item, idx) => (
-                            <tr id="addr0" key={idx}>
-                              <td align="center">
-                                <h4>{idx + 1}</h4>
-                              </td>
-
-
-                              <td align="center">
-                                <h4> {this.state.deductRows[idx].deductType}</h4>
-                              </td>
-
-                              <td align="center">
-                                <h4> {this.state.deductRows[idx].amount}</h4>
-                              </td>
-
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-
-                    </Col></Row>
-
-                  <InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Total Earnings(Rs)</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="number"
-                      size="lg"
-
-                      name="totalEarning"
-                      id="totalEarning"
-                      value={this.state.totalEarning}
-                      disabled
-                    />
-                  </InputGroup>
-
-                  <InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Total Deductions(Rs)</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="number"
-                      size="lg"
-
-                      name="totalDeduction"
-                      id="totalDeduction"
-                      value={this.state.totalDeduction}
-                      disabled
-                    />
-                  </InputGroup>
-
-                  <InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Total Paid Amount(Rs)</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="number"
-                      size="lg"
-
-                      name="paidAmount"
-                      id="paidAmount"
-                      value={this.state.paidAmount}
-                      disabled
-                    />
-                  </InputGroup>
-
-
-
-
-                  <InputGroup className="mb-2">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>  Date of Payment</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-
-                    &nbsp; &nbsp; &nbsp;
+                              &nbsp; &nbsp; &nbsp;
                               <DatePicker
 
-                      name="dop"
-                      id="dop"
-                      value={this.state.dop}
-                      onChange={date => { this.setState({ dop: new Date(date.getTime() - (date.getTimezoneOffset() * 60000)) }) }}
-                    />
+                                name="doa"
+                                id="doa"
+                                value={this.state.doa}
+                                onChange={date=>{this.setState({doa:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.doa)})}}
+                              />
+
+
+                            </InputGroup>
+                            {this.state.doaError &&(
+                                <font color="red"><h6>
+                                  {" "}
+                                  <p>{this.state.doaError}</p></h6>
+                                </font>
+                              )}
+
+
+<InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText >
+                                <b>Remarks</b>
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              type="text"
+                              size="lg"
+                             name="remarks"
+                              id="remarks"
+                             value={this.state.remarks}
+                             onChange={e => {
+                                this.setState(
+                                  { remarks: e.target.value })}}
+
+
+                            />
+                          </InputGroup>
+
+                          
 
 
-                  </InputGroup>
-                  {this.state.dopError && (
-                    <font color="red">
-                      {" "}
-                      <p>{this.state.dopError}</p>
-                    </font>
-                  )}
-
-                  <InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Remarks</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="textarea"
-                      size="lg"
-                      name="remarks"
-                      id="remarks"
-                      value={this.state.remarks}
-                      onChange={e => { this.setState({ remarks: e.target.value }) }}
-
-
-
-
-                    />
-                  </InputGroup>
-
-                  <br /> <Row>
-                    <Col>
-                      <Button
-                        onClick={this.submitHandler}
-                        size="lg"
-                        color="success"
-                        block
-                      >
-                        Submit
-                              </Button>
-                    </Col>
-
-                    <Col>
-                      <Button
-                        onClick={() => {
-                          this.setState({
-                            showPaySlip:false,
-                              selectedSalaryTemplate: [],
-                             showSalaryTemplate: false,
-                             paidAmount: "",
-                             remarks: "",
-                             month: "" ,
-                             selectedEmp: [],
-
-                          });
-                        }}
-                        size="lg"
-                        color="secondary"
-                        block
-                      >
-                        Reset
-                              </Button>
-                    </Col>
-                  </Row>
-
-                </p>
-                }
-
-
-
-                <br />
-
-
-              </CardBody></Card>
-          }
-          </Col>
-
-        </Row>
-
-        {this.state.showPaySlip && (<p>
-<div id='divToPrint1'>
-
-
-<div >  <h3 align="center" >        Payslip For {this.state.empDetailsResponse.month}({this.state.year} )   </h3></div>
-         <br/>
-         <Card className="mx-5">
-
-         <CardBody className="p-1">
-
-           <br />
-
-           <Card><CardBody>   <Row>        <h5>Employee Name:</h5>
-
-                      &nbsp; &nbsp;
-                   <font color="blue"> <h5>{this.state.empDetailsResponse.empDetails.empName
-                  .toLowerCase()
-                  .split(' ')
-                  .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-                  .join(' ')} </h5></font>
-                    &nbsp; &nbsp; &nbsp; &nbsp;
-                    <h5>Emp. No:</h5>
-
-               &nbsp; &nbsp;
-               <font color="blue"> <h5>{this.state.empDetailsResponse.empDetails.empNo} </h5></font>
-
-             &nbsp; &nbsp; &nbsp; &nbsp;
-                    <h5>Date of Joining:</h5>
-
-               &nbsp; &nbsp;
-               <font color="blue"> <h5>{this.state.empDetailsResponse.empDetails.doj.substring(0,10)} </h5></font>
-
-               &nbsp; &nbsp; &nbsp; &nbsp;
-                    <h5>Payment Date:</h5>
-
-               &nbsp; &nbsp;
-               <font color="blue"> <h5>{this.state.empDetailsResponse.dop.substring(0,10)} </h5></font>
-
-
-
-
-                    </Row>
-                     <Row>     <h5>For Month of</h5>
-
-               &nbsp; &nbsp;
-               <font color="blue"> <h5>{this.state.empDetailsResponse.month} </h5></font>
-               &nbsp; &nbsp; &nbsp; &nbsp;
-               <h5>Year:</h5>
-
-               &nbsp; &nbsp;
-               <font color="blue"> <h5>{this.state.empDetailsResponse.year} </h5></font>
-               &nbsp; &nbsp; &nbsp; &nbsp;
-
-
-               </Row>
-
-               </CardBody></Card>
-
-
-
-
-
-
-
-
-             <Row><Col>
-
-
-
-
-               <h4 align="center"> Earnings</h4>
-
-
-
-               <Table bordered hover>
-                 <thead>
-                   <tr style={{ 'backgroundColor': "lightgreen" }}>
-
-                     <th className="text-center">
-                       <h4> S.No.</h4>{" "}
-                     </th>
-
-                     <th className="text-center">
-                       {" "}
-                       <h4>Earning Type</h4>
-                     </th>
-                     <th className="text-center">
-                       <h4> Amount(Rs)</h4>{" "}
-                     </th>
-
-                   </tr>
-                 </thead>
-                 <tbody>
-                   {this.state.salaryRows.map((item, idx) => (
-                     <tr id="addr0" key={idx}>
-                       <td align="center">
-                         <h4>{idx + 1}</h4>
-                       </td>
-
-
-                       <td align="center">
-                         <h4>  {this.state.salaryRows[idx].earnType}</h4>
-
-                       </td>
-
-                       <td align="center">
-                         <h4> {this.state.salaryRows[idx].amount}</h4>
-                       </td>
-
-                     </tr>
-                   ))}
-                 </tbody>
-               </Table>
-
-             </Col><Col>
-
-
-                 <h4 align="center"> Deductions</h4>
-
-
-
-
-
-
-                 <Table bordered hover>
-                   <thead>
-                     <tr style={{ 'backgroundColor': "red" }}>
-
-                       <th className="text-center">
-                         <h4> S.No.</h4>{" "}
-                       </th>
-
-                       <th className="text-center">
-                         {" "}
-                         <h4>Deduction Type</h4>
-                       </th>
-                       <th className="text-center">
-                         <h4> Amount(Rs)</h4>{" "}
-                       </th>
-
-
-                     </tr>
-                   </thead>
-                   <tbody>
-                     {this.state.deductRows.map((item, idx) => (
-                       <tr id="addr0" key={idx}>
-                         <td align="center">
-                           <h4>{idx + 1}</h4>
-                         </td>
-
-
-                         <td align="center">
-                           <h4> {this.state.deductRows[idx].deductType}</h4>
-                         </td>
-
-                         <td align="center">
-                           <h4> {this.state.deductRows[idx].amount}</h4>
-                         </td>
-
-                       </tr>
-                     ))}
-                   </tbody>
-                 </Table>
-
-               </Col></Row>
-
-             <InputGroup className="mb-3">
-               <InputGroupAddon addonType="prepend">
-                 <InputGroupText >
-                   <b>Total Earnings(Rs)</b>
-                 </InputGroupText>
-               </InputGroupAddon>
-               <Input
-                 type="number"
-                 size="lg"
-
-                 name="totalEarning"
-                 id="totalEarning"
-                 value={this.state.totalEarning}
-                 disabled
-               />
-             </InputGroup>
-
-             <InputGroup className="mb-3">
-               <InputGroupAddon addonType="prepend">
-                 <InputGroupText >
-                   <b>Total Deductions(Rs)</b>
-                 </InputGroupText>
-               </InputGroupAddon>
-               <Input
-                 type="number"
-                 size="lg"
-
-                 name="totalDeduction"
-                 id="totalDeduction"
-                 value={this.state.totalDeduction}
-                 disabled
-               />
-             </InputGroup>
-
-             <InputGroup className="mb-3">
-               <InputGroupAddon addonType="prepend">
-                 <InputGroupText >
-                   <b>Total Paid Amount(Rs)</b>
-                 </InputGroupText>
-               </InputGroupAddon>
-               <Input
-                 type="number"
-                 size="lg"
-
-                 name="paidAmount"
-                 id="paidAmount"
-                 value={this.state.paidAmount}
-                 disabled
-               />
-             </InputGroup>
-
-
-
-
-
-     {this.state.remarks &&
-
-      <InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Remarks</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="textarea"
-                      size="lg"
-                      name="remarks"
-                      id="remarks"
-                      value={this.state.remarks}
-disabled
-
-
-
-                    />
-                  </InputGroup>
-
-                 }
-
-             <br />
-
-
-
-
-
-
-
-
-
-           <br />
-
-
-         </CardBody></Card>  </div>
 
 <Row>
-<Col>
-  <Button
-    onClick={this.downloadPDF}
-    size="lg"
-    color="success"
-    block
-  >
-    Download as PDF
-          </Button>
+                            <Col>
+                              <Button
+                                onClick={this.submitHandler}
+                                size="lg"
+                                color="success"
+                                block
+                                disabled={this.state.submitDisabled}
+                              >
+                                Submit
+                              </Button>
+                            </Col>
+
+                            <Col>
+                              <Button
+                                onClick={this.reset}
+                                size="lg"
+                                color="secondary"
+                                block
+                              >
+                             Reset
+                              </Button> 
+                            </Col>
+                          </Row> </p>}
+{this.state.error &&
+  <font color="red">
+    {" "}
+    <p>{JSON.stringify(this.state.error)}</p>
+  </font>
+}
+
+</CardBody></Card>
+     
+     
+     
+      </CardBody>
+       </Card>       
 </Col>
+        </Row>
 
-<Col>
-  <Button
-    onClick={() => {
-      this.setState({
-        showPaySlip:false,
-          selectedSalaryTemplate: [],
-         showSalaryTemplate: false,
-         paidAmount: "",
-         remarks: "",
-         month: "" ,
-         selectedEmp: [],
-
-      });
-    }}
-    size="lg"
-    color="secondary"
-    block
-  >
-    Cancel
-          </Button>
-</Col>
-</Row>
+    
 
 
-
-
-         </p>) }
-
-
-
-
-
+</Container>
       </div>
     );
   }
