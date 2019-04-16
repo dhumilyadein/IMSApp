@@ -45,17 +45,17 @@ class ApplyLeave extends Component {
   constructor(props) {
     super(props);
     this.fetchEmployees();
-   
+
     this.state = {
-     
+
       error: "",
-      
+
       doa:  new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)),
       year: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
-     
+
       remarks: "",
     showApplyLeave:false,
-     
+
       modelMessage: "",
       modalSuccess: false,
       success: false,
@@ -79,7 +79,7 @@ this.leaveChangeHandler=this.leaveChangeHandler.bind(this);
     axios
       .get("http://localhost:8001/api/getExistingLeaveTypes")
       .then(result => {
-       
+
         if (result.data) {
           this.setState({
             existingLeaveTypes: result.data
@@ -159,7 +159,7 @@ remarks:""
       submit = false;
 
     }
-    
+
      var  years = this.state.year.split("-")
     if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
    {this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"});
@@ -200,7 +200,7 @@ remarks:""
       submit = false;
 
     }
-  
+
 
 
     if (submit) {
@@ -208,7 +208,7 @@ remarks:""
       axios
         .post("http://localhost:8001/api/applyLeave", {
           "empName": this.state.selectedEmp.label, "leaveType": this.state.selectedLeaveType,
-          "year": this.state.year, "doa": this.state.doa, "remarks": this.state.remarks, 
+          "year": this.state.year, "doa": this.state.doa, "remarks": this.state.remarks,
           "dof":this.state.dof, "dot":this.state.dot, "selectedLeaveCount": this.state.selectedLeaveCount
 
         }
@@ -252,7 +252,7 @@ remarks:""
 
 
 
- 
+
   leaveChangeHandler(e) {
     if (e) {
       console.log("In leave change " + (e.target.value));
@@ -268,14 +268,14 @@ remarks:""
           {
             "leaveType":this.state.selectedLeaveType,
             "year":this.state.year,
-            "empName":this.state.selectedEmp.label           
+            "empName":this.state.selectedEmp.label
           })
           .then(result => {
             console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data.data));
 
             if (result.data.error) {
 
-             return( this.setState({ error: result.data.error.message })); 
+             return( this.setState({ error: result.data.error.message }));
 
                       }
 var totalAppliedLeaveCount=0;
@@ -295,8 +295,31 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
            this.setState({error:"No "+this.state.selectedLeaveType+" Leaves Avalable!"})
          }
 
-                    
 
+for(var j=0;j<this.state.existingLeaveTypes.length; j++)
+{if(this.state.existingLeaveTypes[i].carryForward)
+    {
+      axios
+          .post("http://localhost:8001/api/getAvailableLeaveCount",
+          {
+            "leaveType":this.state.selectedLeaveType,
+            "year":this.state.year,
+            "empName":this.state.selectedEmp.label
+          })
+          .then(result => {
+            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data.data));
+
+            if (result.data.error) {
+
+             return( this.setState({ error: result.data.error.message }));
+
+                      }});
+
+    }
+
+
+
+}
 
 
 
@@ -350,7 +373,7 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                                 <b>  Select/Search Employee</b>
                                 </InputGroupText>
                               </InputGroupAddon>
-                              
+
                                  <Select
                             id="staffSelect"
                             name="staffSelect"
@@ -379,7 +402,7 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
 <InputGroup className="mb-3">
                   <InputGroupAddon addonType="prepend">
                     <InputGroupText style={{ width: "120px" }}>
-                    <b> Leave Type</b> 
+                    <b> Leave Type</b>
                                 </InputGroupText>
                   </InputGroupAddon>
                   <Input
@@ -396,7 +419,7 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                     )}
                   </Input>
                 </InputGroup>
-              
+
 
               {this.state.leaveTypeError && (
                 <font color="red">
@@ -425,7 +448,7 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                     />
                   </InputGroup>
 {this.state.showApplyLeave && <p>
-              
+
                           <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -454,7 +477,7 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                                 id="dot"
                                 value={this.state.dot}
                                 onChange={date=>{this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
-                                  
+
 if(!this.state.dof) this.setState({dateError:"Please Select From Date First!",dot:"",submitDisabled:true});
 else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
 {
@@ -462,20 +485,20 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
    }
    else if(moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')>=this.state.leavesAvailable)
    this.setState({  dateError: "You can't apply more than "+this.state.leavesAvailable+" leaves!",
-   submitDisabled:true});  
-  else 
+   submitDisabled:true, dot:""});
+  else
   this.setState({selectedLeaveCount:moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')+1})
 
   })
-  
-  
+
+
   }}
                               />
                             </InputGroup>
 
 
 
- 
+
  {this.state.dateError &&(
                                 <font color="red"><h6>
                                   {" "}
@@ -526,7 +549,7 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
                       {" "}
                       <p>{this.state.yearError}</p>
                     </font>
-                  )} 
+                  )}
 
 <InputGroup className="mb-2">
                               <InputGroupAddon addonType="prepend">
@@ -574,7 +597,7 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
                             />
                           </InputGroup>
 
-                          
+
 
 
 
@@ -593,13 +616,13 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
 
                             <Col>
                               <Button
-                                onClick={this.reset}
+                                onClick={e=>{ this.setState({showApplyLeave:false, selectedEmp:"", selectedLeaveType:"", leavesAvailable:""})}}
                                 size="lg"
                                 color="secondary"
                                 block
                               >
                              Reset
-                              </Button> 
+                              </Button>
                             </Col>
                           </Row> </p>}
 {this.state.error &&
@@ -610,15 +633,15 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
 }
 
 </CardBody></Card>
-     
-     
-     
+
+
+
       </CardBody>
-       </Card>       
+       </Card>
 </Col>
         </Row>
 
-    
+
 
 
 </Container>

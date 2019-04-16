@@ -49,7 +49,7 @@ async function createLeave(req, res) {
       dateOfApproveOrReject:req.body.dateOfApproveOrReject
                }
       )
-   
+
      .then(user => {
          return res.send({msg:"Leave Approved"});
      })
@@ -58,11 +58,33 @@ async function createLeave(req, res) {
      });
 
 
-  
-  
+
+
 
     }
 
+    async function rejectLeave(req, res) {
+      console.log("in rejectLeave Req.body: "+JSON.stringify(req.body))
+
+      AppliedLeaves
+      .updateOne({_id:req.body._id},
+        {status:"Rejected",
+        dateOfApproveOrReject:req.body.dateOfApproveOrReject
+                 }
+        )
+
+       .then(user => {
+           return res.send({msg:"Leave Rejected"});
+       })
+       .catch(err => {
+         return res.send(err);
+       });
+
+
+
+
+
+      }
 
 function getExistingLeaveTypes(req, res) {
   console.log("in getExistingLeaveTypes ");
@@ -166,13 +188,29 @@ return res.send({error:err});
 });
 
 
+}
+
+async function getEmpAllLeaveDetails(req,res)
+{console.log("In getEmpAllLeaveDetails for: "+ JSON.stringify(req.body));
 
 
 
 
+AppliedLeaves
+.find({empName:req.body.empName,year:req.body.year,
+  $or:[ {status:"Approved"}, {status:"Applied"} ]})
+
+.then(data => {
+
+return res.send({data});
+})
+.catch(err => {
+return res.send({error:err});
+});
 
 
 }
+
 
 
 
@@ -186,7 +224,8 @@ return res.send({error:err});
   app.post("/api/approveLeave", approveLeave);
   app.get("/api/getPendingleaves", getPendingleaves);
   app.post("/api/getAvailableLeaveCount", getAvailableLeaveCount);
-
+  app.post("/api/rejectLeave", rejectLeave);
+  app.post("/api/getEmpAllLeaveDetails", getEmpAllLeaveDetails);
 
 
 

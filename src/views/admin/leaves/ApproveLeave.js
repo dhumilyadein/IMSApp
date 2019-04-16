@@ -31,7 +31,7 @@ this.getPendingLeaves();
     this.state = {
 
       erorrs: null,
-     
+
       success: false,
       modalSuccess: false,
       visible: false,
@@ -43,14 +43,14 @@ this.getPendingLeaves();
 
 
 
-    this.submitHandler = this.submitHandler.bind(this);
+    this.rejectHandler = this.rejectHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
 
 
     this.getPendingLeaves = this.getPendingLeaves.bind(this);
     this.approveHandler = this.approveHandler.bind(this);
-    this.editHandler = this.editHandler.bind(this);
+
 
 
 
@@ -62,11 +62,7 @@ this.getPendingLeaves();
   toggleSuccess() {
     this.setState({
       modalSuccess: !this.state.modalSuccess,
-      leaveName:"",
-      leaveCount:"",
-      maxLeaveCount:"",
-      carryForward:false,
-      leaveType:"Paid",
+
     });
 
   }
@@ -79,110 +75,7 @@ this.getPendingLeaves();
     this.setState({ visible: !this.state.visible });
   }
 
-  submitHandler(e) {
-    var submit = true;
-    console.log("in Submit State: " + JSON.stringify(this.state));
 
-    this.setState({
-      leaveNameError: "", leaveCountError: "", maxLeaveCountError:"", success: false,
-      modalSuccess: false
-    }, () => {
-      if (!this.state.leaveName) {
-        this.setState({ leaveNameError: "Please Enter Leave Name" });
-        submit = false;}
-
-        if (!this.state.leaveCount) {
-            this.setState({ leaveCountError: "Please Enter Leave Count" });
-            submit = false;}
-
-
-
-        if (this.state.carryForward&&!this.state.maxLeaveCount) {
-          this.setState({ maxLeaveCountError: "Please Enter Max Leave Count" });
-          submit = false;}
-
-
-
-
-
-
-      if (submit === true) {
-        console.log("Creating Item: ");
-        axios
-          .post("http://localhost:8001/api/createLeave", {"leaveName":this.state.leaveName,"leaveType":this.state.leaveType, "leaveCount":this.state.leaveCount, "carryForward":this.state.carryForward, "maxLeaveCount":this.state.maxLeaveCount})
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-
-            if(result.data.errors)
-            {
-            if(result.data.errors.leaveName)
-              this.setState({
-                leaveNameError:result.data.errors.leaveName.message
-              });}
-             else if (result.data.msg === "Success")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                modalMessage:"Leave "+ this.state.leaveName+ " Created Successfully!"
-
-              },()=>{
-                this.getPendingLeaves()
-              });
-
-          });
-      }
-    });
-  }
-
-  editHandler(e) {
-    var submit = true;
-    console.log("in Edit State: " + JSON.stringify(this.state));
-
-    this.setState({
-        leaveNameError: "", leaveCountError: "", maxLeaveCountError:"", success: false,
-        modalSuccess: false
-      }, () => {
-        if (!this.state.leaveName) {
-          this.setState({ leaveNameError: "Please Enter Leave Name" });
-          submit = false;}
-  
-          if (!this.state.leaveCount) {
-              this.setState({ leaveCountError: "Please Enter Leave Count" });
-              submit = false;}
-  
-  
-  
-          if (this.state.carryForward&&!this.state.maxLeaveCount) {
-            this.setState({ maxLeaveCountError: "Please Enter Max Leave Count" });
-            submit = false;}
-  
-  
-        if (submit === true) {
-        console.log("Updating Leave: "+ JSON.stringify(this.state));
-        axios
-          .post("http://localhost:8001/api/editLeave", {"leaveName":this.state.leaveName,"leaveType":this.state.leaveType, "leaveCount":this.state.leaveCount, "carryForward":this.state.carryForward, "maxLeaveCount":this.state.maxLeaveCount,
-          "pendingLeaves":this.state.pendingLeaves,"leaveNo":this.state.leaveNo})
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-           if(result.data.error)
-          {  if(result.data.error.code===11000)
-            this.setState({
-              leaveNameError:"Leave name already in use"
-            });}
-           else  if (result.data.msg === "Leave Updated")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                showDetails:false,
-                modalMessage:"Leave "+ this.state.leaveName+ " Updated Successfully!"
-              },()=>{this.getPendingLeaves()});
-
-          });
-      }
-    });
-  }
 
   getPendingLeaves() {
 
@@ -217,14 +110,52 @@ approveHandler= idx => () => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
           if (result.data.msg==="Leave Approved")
           {
-            
+
             this.setState({showDetails:false,
                 success: true,
                 modalSuccess: true,
-                modelMessage:"Leaves Request Approved"
-  
+                modalMessage:"Leaves Request Approved"
+
             },()=>{this.getPendingLeaves();});
-            
+
+          }
+        })
+      },
+      {
+        label: 'No',
+        onClick: () =>  {this.getPendingLeaves();}
+      }
+    ]
+  })
+
+
+}
+
+rejectHandler= idx => () => {
+
+  confirmAlert({
+    title: 'Confirm to Remove',
+    message: 'Are you sure to Approve this Leave Request?',
+    buttons: [
+      {
+        label: 'Yes',
+        onClick: () =>
+
+        axios
+        .post("http://localhost:8001/api/rejectLeave",{"_id":this.state.pendingLeaves[idx]._id,
+        "dateOfApproveOrReject": new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000))})
+        .then(result => {
+          console.log("Existing RESULT.data " + JSON.stringify(result.data));
+          if (result.data.msg==="Leave Rejected")
+          {
+
+            this.setState({showDetails:false,
+                success: true,
+                modalSuccess: true,
+                modalMessage:"Leaves Request Rejected"
+
+            },()=>{this.getPendingLeaves();});
+
           }
         })
       },
@@ -262,21 +193,27 @@ approveHandler= idx => () => {
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                     
-                     {this.state.modalMessage} 
+
+                     {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
 
+ {this.state.pendingLeaves.length===0 &&(
+                                <font color="red"><h5>
+                                  {" "}
+                                  <p>No Leave Requests pending for Approvals!</p></h5>
+                                </font>
+                              )}
 
 
-                  {!this.state.showDetails &&  (
+                  {(!this.state.showDetails && this.state.pendingLeaves.length>0)&& (
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
                           <h3 align="center"> Leave Applications Pending Approval</h3>
                           <br />
-           
+
 
 
 <Table bordered hover>
@@ -349,7 +286,7 @@ approveHandler= idx => () => {
           doa:this.state.pendingLeaves[idx].doa,
           year:this.state.pendingLeaves[idx].year
 
-       
+
      },()=>{console.log("showDetails "+this.state.showDetails)});}}
 
 
@@ -420,7 +357,7 @@ disabled
 <InputGroup className="mb-3">
 <InputGroupAddon addonType="prepend">
 <InputGroupText style={{ width: "120px" }}>
-<b> Leave Type</b> 
+<b> Leave Type</b>
           </InputGroupText>
 </InputGroupAddon>
 <Input
@@ -527,7 +464,7 @@ disabled
 
 
       </InputGroup>
-    
+
 
 <InputGroup className="mb-3">
       <InputGroupAddon addonType="prepend">
@@ -546,7 +483,7 @@ disabled
       />
     </InputGroup>
 
-    
+
 
 
 
@@ -557,7 +494,7 @@ disabled
           size="lg"
           color="success"
           block
-        
+
         >
           Approve
         </Button>
@@ -565,11 +502,11 @@ disabled
 
       <Col>
         <Button
-          onClick={this.rejectHandler}
+          onClick={this.rejectHandler(this.state.leaveNo)}
           size="lg"
           color="danger"
           block
-        
+
         >
           Reject
         </Button>
@@ -583,9 +520,9 @@ disabled
           block
         >
        Cancel
-        </Button> 
+        </Button>
       </Col>
-    </Row> 
+    </Row>
 
 
 </CardBody></Card>

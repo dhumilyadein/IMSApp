@@ -636,7 +636,7 @@ const routes = [
   },
 
   {
-    path: "/admin/leave/ViewLeave",
+    path: "/admin/leaves/ViewLeave",
     name: "ViewLeave",
     component: ViewLeave
   },
