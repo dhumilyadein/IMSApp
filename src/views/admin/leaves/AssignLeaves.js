@@ -40,11 +40,11 @@ import axios, { post } from "axios";
 import { allSettled } from 'q';
 
 
-class ApplyLeave extends Component {
+class AssignLeaves extends Component {
 
   constructor(props) {
     super(props);
-    this.fetchEmployees();
+    this.getExistingLeaveTypes();
 
     this.state = {
 
@@ -338,9 +338,39 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
 
 <Card className="mx-1">
                           <CardBody className="p-1">
-                          <h3 align="center"> Apply Leave</h3>
+                          <h3 align="center"> Assign Leaves to Employee</h3>
                           <br/>
-                          <InputGroupAddon addonType="prepend">
+
+<InputGroup className="mb-3">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText style={{ width: "120px" }}>
+                    <b> Leave Type</b>
+                                </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                    name="selectedLeaveType"
+                    id="selectedLeaveType"
+                    type="select"
+                    value={this.state.selectedLeaveType}
+                    onChange={this.leaveChangeHandler}
+                  >
+                    <option value="">Select</option>
+                    {this.state.existingLeaveTypes.map(element => {
+                      return (<option key={element.leaveName} value={element.leaveName}>{element.leaveName}</option>);
+                    }
+                    )}
+                  </Input>
+                </InputGroup>
+
+
+              {this.state.leaveTypeError && (
+                <font color="red">
+                  {" "}
+                  <p>{this.state.leaveTypeError}</p>
+                </font>
+              )}
+
+<InputGroupAddon addonType="prepend">
                                 <InputGroupText >
                                 <b>  Select/Search Employee</b>
                                 </InputGroupText>
@@ -371,34 +401,6 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
 
 <br/>
 
-<InputGroup className="mb-3">
-                  <InputGroupAddon addonType="prepend">
-                    <InputGroupText style={{ width: "120px" }}>
-                    <b> Leave Type</b>
-                                </InputGroupText>
-                  </InputGroupAddon>
-                  <Input
-                    name="selectedLeaveType"
-                    id="selectedLeaveType"
-                    type="select"
-                    value={this.state.selectedLeaveType}
-                    onChange={this.leaveChangeHandler}
-                  >
-                    <option value="">Select</option>
-                    {this.state.existingLeaveTypes.map(element => {
-                      return (<option key={element.leaveName} value={element.leaveName}>{element.leaveName}</option>);
-                    }
-                    )}
-                  </Input>
-                </InputGroup>
-
-
-              {this.state.leaveTypeError && (
-                <font color="red">
-                  {" "}
-                  <p>{this.state.leaveTypeError}</p>
-                </font>
-              )}
 
 
 <InputGroup className="mb-3">
@@ -622,5 +624,5 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
   }
 }
 
-export default ApplyLeave;
+export default AssignLeaves;
 

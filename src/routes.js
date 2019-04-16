@@ -383,6 +383,11 @@ const ApplyLeave = Loadable({
   loading: Loading
 });
 
+const AssignLeaves = Loadable({
+  loader: () => import("./views/admin/leaves/AssignLeaves"),
+  loading: Loading
+});
+
 const ApproveLeave = Loadable({
   loader: () => import("./views/admin/leaves/ApproveLeave"),
   loading: Loading
@@ -619,31 +624,37 @@ const routes = [
 
   {
     path: "/admin/leaves/AddLeaveTypes",
-    name: "AddLeaveTypes",
+    name: "Add Leave Types",
     component: AddLeaveTypes
   },
 
   {
+    path: "/admin/leaves/AssignLeaves",
+    name: "Assign Leaves",
+    component: AssignLeaves
+  },
+
+  {
     path: "/admin/leaves/ApplyLeave",
-    name: "ApplyLeave",
+    name: "Apply Leave",
     component: ApplyLeave
   },
 
   {
     path: "/admin/leaves/ApproveLeave",
-    name: "ApproveLeave",
+    name: "Approve Leave",
     component: ApproveLeave
   },
 
   {
     path: "/admin/leaves/ViewLeave",
-    name: "ViewLeave",
+    name: "View Leave",
     component: ViewLeave
   },
 
   {
     path: "/admin/leave/AddHoliday",
-    name: "AddHoliday",
+    name: "Add Holiday",
     component: AddHoliday
   },
 
