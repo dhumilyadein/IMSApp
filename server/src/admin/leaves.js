@@ -1,6 +1,7 @@
 const PurchaseItems = require("../../models/PurchaseItems");
 const AppliedLeaves = require("../../models/AppliedLeaves");
 const LeaveTypes = require("../../models/LeaveTypes");
+const EmpLeaveStatus = require("../../models/EmpLeaveStatus");
 
 module.exports = function (app) {
 
@@ -211,7 +212,91 @@ return res.send({error:err});
 
 }
 
+async function assignLeave(req,res)
+{console.log("In assignLeave for: "+ JSON.stringify(req.body));
 
+if(!req.body.carryForward)
+for(var i=0;i<req.body.selectedEmp.length;i++)
+
+{  await EmpLeaveStatus.findOne({empName:req.body.selectedEmp[i].label
+  //leaveDetails: {$elemMatch: {leaveType:req.body.leaveType}}
+   })
+  .then(data => {
+    if(data!=null)
+    
+    {
+        console.log("Emp Leave Data: "+JSON.stringify(data));
+          var leaveTypeFound=false;
+          for(var j=0;j <data.leaveDetails.length;j++)
+          if(data.leaveDetails[j].leaveType===req.body.leaveType)
+          {  leaveTypeFound=true;
+
+           EmpLeaveStatus.updateOne({empName:req.body.selectedEmp[i].label,
+            'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
+              'leaveDetails.$.total': req.body.leaveCount,
+              'leaveDetails.$.used':0,
+              'leaveDetails.$.remaining': req.body.leaveCount,
+              'leaveDetails.$.carryForward':req.body.carryForward
+
+          }})
+          .then(data => {
+      
+            return res.send({msg:"Leave Assigned"});
+            })
+            .catch(err => {
+            return res.send({error:err});
+            });
+      
+        
+          break;
+          }
+
+          if(!leaveTypeFound)
+          EmpLeaveStatus.updateOne(
+            { empName:req.body.selectedEmp[i].label }, 
+            { $push: { leaveDetails: {"leaveType":req.body.leaveType,"total": req.body.leaveCount,"used":0,remaining: req.body.leaveCount,  "carryForward":req.body.carryForward} } })
+            .then(data => {
+      
+              return res.send({msg:"Leave Assigned"});
+              })
+              .catch(err => {
+              return res.send({error:err});
+              });
+           
+     
+
+    }
+     else{ console.log("Emp data not found.. creating new entry")
+      var addLeaveDetails= new EmpLeaveStatus({"empName":req.body.selectedEmp[i].label,
+       leaveDetails:[{"leaveType":req.body.leaveType,"total": req.body.leaveCount,"used":0,remaining: req.body.leaveCount,  "carryForward":req.body.carryForward} ]});
+
+       addLeaveDetails
+      .save()
+      .then(user => {
+          return res.send({msg:"Leave Assigned"});
+      })
+      .catch(err => {
+        return res.send({error:err});
+      });
+
+     }
+  })
+
+
+
+}
+
+else{}
+
+
+
+
+
+
+
+
+
+}
 
 
 
@@ -225,6 +310,8 @@ return res.send({error:err});
   app.get("/api/getPendingleaves", getPendingleaves);
   app.post("/api/getAvailableLeaveCount", getAvailableLeaveCount);
   app.post("/api/rejectLeave", rejectLeave);
+  app.post("/api/assignLeave", assignLeave);
+
   app.post("/api/getEmpAllLeaveDetails", getEmpAllLeaveDetails);
 
 

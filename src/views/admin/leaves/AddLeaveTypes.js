@@ -178,7 +178,7 @@ this.getExistingLeaveTypes();
                 success: true,
                 modalSuccess: true,
                 showEditLeave:false,
-                modalMessage:"Leave "+ this.state.leaveName+ " Updated Successfully!"
+                modalMessage:this.state.leaveName+" Leave"+  " Updated Successfully!"
               },()=>{this.getExistingLeaveTypes()});
 
           });

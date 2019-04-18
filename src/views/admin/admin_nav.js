@@ -350,7 +350,7 @@ export default {
                     variant: 'success',
                   },
                   {
-                    name: 'Assign Leaves',
+                    name: 'Assign/Reset Leaves',
                     url: '/admin/leaves/AssignLeaves',
                     icon: 'icon-drop',
                     variant: 'success',

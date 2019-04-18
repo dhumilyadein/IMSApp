@@ -49,19 +49,19 @@ class AssignLeaves extends Component {
     this.state = {
 
       error: "",
-
+      leaveCountDisabled:true,
       doa:  new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)),
       year: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
 
       remarks: "",
-    showApplyLeave:false,
-
+    showLeaveCount:false,
       modelMessage: "",
       modalSuccess: false,
       success: false,
-
+selectAllEmp:false,
      existingLeaveTypes:[],
-     existingEmp:[]
+     existingEmp:[],
+     selectedEmp:[]
 
     };
 
@@ -70,10 +70,23 @@ class AssignLeaves extends Component {
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.fetchEmployees = this.fetchEmployees.bind(this);
     this.getExistingLeaveTypes = this.getExistingLeaveTypes.bind(this);
-this.leaveChangeHandler=this.leaveChangeHandler.bind(this);
+    this.leaveChangeHandler=this.leaveChangeHandler.bind(this);
   }
 
+leaveChangeHandler(e)
+{
+  this.setState({  selectedLeaveType: e.target.value,leaveCountDisabled:true, leaveCount:""},
+    ()=>{
+      for(var i=0;i<this.state.existingLeaveTypes.length;i++)
+      if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType &&
+        this.state.existingLeaveTypes[i].carryForward)
+        this.setState({showLeaveCount:true, leaveCountDisabled:false});
+        else if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType &&
+          !this.state.existingLeaveTypes[i].carryForward)
+          this.setState({leaveCount:this.state.existingLeaveTypes[i].leaveCount,leaveCountDisabled:true, showLeaveCount:true});
+      this.fetchEmployees();})
 
+}
   getExistingLeaveTypes() {
 
     axios
@@ -142,81 +155,44 @@ remarks:""
 
   submitHandler(e) {
     e.preventDefault();
-    console.log("In ApplyLeaveSubmit:" + JSON.stringify(this.state));
+    console.log("In AssignLeaveSubmit:" + JSON.stringify(this.state));
     var submit = true;
 
     this.setState({
-      monthError: "", doaError: "", error: "", success: false,
-      modalSuccess: false, leaveTypeError:"",yearError:"", dateError:""
-    })
+      leaveTypeError: "", empError: "", error: "", success: false,
+      modalSuccess: false})
 
-    if (!this.state.year || this.state.year.length != 9) {
-      this.setState({ yearError: "Please Enter Year correctly (Eg. 2018-19)" });
-      submit = false;
-
-    }
-
-     var  years = this.state.year.split("-")
-    if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
-   {this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"});
-  submit=false}
+   
 
     if (!this.state.selectedLeaveType) {
       this.setState({ leaveTypeError: "Please Select Leave Type" });
       submit = false;
 
     }
-    if (!this.state.doa) {
-      this.setState({ doaError: "Please Select Date of Apply" });
-      submit = false;
-
-    }
-
-    if (!this.state.dof) {
-      this.setState({ dateError: "Please Select From Date" });
-      submit = false;
-
-    }
-
-    if (!this.state.dot) {
-      this.setState({ dateError: "Please Select To Date" });
-      submit = false;
-
-    }
-
-
-    if (!this.state.selectedEmp.value) {
+    if (this.state.selectedEmp.length===0) {
       this.setState({ empError: "Please Select Employee" });
       submit = false;
 
     }
 
-    if (this.state.leavesAvailable===0) {
-      this.setState({ error: "No Leaves Available!" });
-      submit = false;
-
-    }
-
+   
 
 
     if (submit) {
 
       axios
-        .post("http://localhost:8001/api/applyLeave", {
-          "empName": this.state.selectedEmp.label, "leaveType": this.state.selectedLeaveType,
-          "year": this.state.year, "doa": this.state.doa, "remarks": this.state.remarks,
-          "dof":this.state.dof, "dot":this.state.dot, "selectedLeaveCount": this.state.selectedLeaveCount
-
-        }
+        .post("http://localhost:8001/api/assignLeave", {
+          "selectedEmp": this.state.selectedEmp, "leaveType": this.state.selectedLeaveType,
+         "leaveCount":this.state.leaveCount,"carryForward":!this.state.leaveCountDisabled}
         )
         .then(result => {
           console.log("result.data ApplyLeave " + JSON.stringify(result.data));
 
-          if (result.data.msg === "Success")
+          if (result.data.msg === "Leave Assigned")
             this.setState({
               success: true,
               modalSuccess: true,
-              modelMessage: this.state.selectedLeaveCount+ " Leaves applied for " + this.state.selectedEmp.label
+              modelMessage: "Leave Assgined succesfully"
 
 
 
@@ -249,66 +225,7 @@ remarks:""
 
 
 
-  leaveChangeHandler(e) {
-    if (e) {
-      console.log("In leave change " + (e.target.value));
-
-
-      this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:""}, () => {
-       var  years = this.state.year.split("-")
-
-        if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
-       return(this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"}));
-        axios
-          .post("http://localhost:8001/api/getAvailableLeaveCount",
-          {
-            "leaveType":this.state.selectedLeaveType,
-            "year":this.state.year,
-            "empName":this.state.selectedEmp.label
-          })
-          .then(result => {
-            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data.data));
-
-            if (result.data.error) {
-
-             return( this.setState({ error: result.data.error.message }));
-
-                      }
-var totalAppliedLeaveCount=0;
-                      for(var i=0;i<result.data.data.length;i++)
-totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveCount;
-
-         for(var i=0;i<this.state.existingLeaveTypes.length;i++)
-         if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
-         { if((this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount)>=0)
-           this.setState({leavesAvailable: this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount})
-           else
-           this.setState({leavesAvailable: 0})
-           if(this.state.leavesAvailable>0)
-           this.setState({showApplyLeave:true})
-           else
-
-           this.setState({error:"No "+this.state.selectedLeaveType+" Leaves Avalable!"})
-         }
-
-
-
-
-
-
-          });
-
-
-
-
-      })
-
-
-
-
-    }
-
-  }
+  
   /**
    * @description Called when the role(s) are selected. To update role Array
    * @param {*} e
@@ -341,6 +258,9 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                           <h3 align="center"> Assign Leaves to Employee</h3>
                           <br/>
 
+                   
+                          <div> <font color="red"> <h5>Note: Leaves should be assigned/reset only once every year.</h5> </font></div>
+
 <InputGroup className="mb-3">
                   <InputGroupAddon addonType="prepend">
                     <InputGroupText style={{ width: "120px" }}>
@@ -370,6 +290,8 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                 </font>
               )}
 
+{ !this.state.selectAllEmp &&<p>
+
 <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
                                 <b>  Select/Search Employee</b>
@@ -387,9 +309,10 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                          isClearable={true}
                          //menuIsOpen ={this.state.studentOpen}
                             isSearchable={true}
+                            isMulti={true}
 
-                            onChange={selected=>{this.setState({selectedEmp:selected, showApplyLeave:false,selectedLeaveType:"", leavesAvailable:"",error:""},()=>{
-                              this.getExistingLeaveTypes();
+                            onChange={selected=>{this.setState({selectedEmp:selected},()=>{
+                             
                             });}}
                             />
    {this.state.empError && (
@@ -397,214 +320,88 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                                       {" "}
                                       <p>{this.state.empError}</p>
                                     </font>
-                                  )}
+                                  )}</p>}
+
+
+<FormGroup check inline>
+                                    <Input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      id="forAllEmp"
+                                      style={{ height: "35px", width: "25px" }}
+                                      name="forAllEmp"
+                                      checked={this.state.forAllEmp}
+                                      onChange={e=>{
+                                        if (e.target.checked === true) {
+                                            console.log("forAllEmp true: " + e.target.checked);
+                                            this.setState({
+                                           
+                                             selectAllEmp:true,
+                                             selectedEmp:this.state.existingEmp
+                                            });
+                                          } else if (e.target.checked === false) {
+                                            console.log("forAllEmp false: " + e.target.checked);
+                                            this.setState({
+                                               
+                                                selectAllEmp:false,
+                                                selectedEmp:[]
+                                               
+                                            });
+                                          }
+
+                                      }}
+                                    />
+                                    <Label
+                                      className="form-check-label"
+                                      check
+                                      htmlFor="inline-checkbox1"
+                                    >
+                                     <b> Select All Employee</b>
+                                    </Label>
+                                  </FormGroup>
 
 <br/>
-
-
-
+{ this.state.showLeaveCount &&
 <InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
-                        <b>Available leaves</b>
+                        <b>Leave Count<i>(optional)</i></b>
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input
                       type="number"
                       size="lg"
-                      name="leavesAvailable"
-                      id="leavesAvailable"
-                      value={this.state.leavesAvailable}
-                     disabled
-
-
-
-                    />
-                  </InputGroup>
-{this.state.showApplyLeave && <p>
-
-                          <InputGroup className="mb-2">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                <b> From Date</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-
-                              &nbsp; &nbsp; &nbsp;
-                              <DatePicker
-
-                                name="dof"
-                                id="dof"
-                                value={this.state.dof}
-                                onChange={date=>{this.setState({dof:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dof)})}}
-                              />
-&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
-<InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                <b> To Date</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-
-                              &nbsp; &nbsp; &nbsp; &nbsp;
-                              <DatePicker
-                                name="dot"
-                                id="dot"
-                                value={this.state.dot}
-                                onChange={date=>{this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
-
-if(!this.state.dof) this.setState({dateError:"Please Select From Date First!",dot:"",submitDisabled:true});
-else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
-{
-    this.setState({  dateError: "Start Date can't be Greater than End Date!",submitDisabled:true});
-   }
-   else if(moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')>=this.state.leavesAvailable)
-   this.setState({  dateError: "You can't apply more than "+this.state.leavesAvailable+" leaves!",
-   submitDisabled:true, dot:""});
-  else
-  this.setState({selectedLeaveCount:moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')+1})
-
-  })
-
-
-  }}
-                              />
-                            </InputGroup>
-
-
-
-
- {this.state.dateError &&(
-                                <font color="red"><h6>
-                                  {" "}
-                                  <p>{this.state.dateError}</p></h6>
-                                </font>
-                              )}
-
-<InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Total Leaves Selected</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="number"
-                      size="lg"
-                      name="selectedLeaveCount"
-                      id="selectedLeaveCount"
-                      value={this.state.selectedLeaveCount}
-                     disabled
-
-
+                      name="leaveCount"
+                      id="leaveCount"
+                      value={this.state.leaveCount}
+                     onChange={e=>{this.setState({leaveCount:e.target.value})}}
+disabled={this.state.leaveCountDisabled}
 
                     />
                   </InputGroup>
-
-<InputGroup className="mb-3">
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Year</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="text"
-                      size="lg"
-                      name="year"
-                      id="year"
-                      value={this.state.year}
-                      onChange={e => { this.setState({ year: e.target.value }) }}
-
-
-
-
-                    />
-                  </InputGroup>
-                  {this.state.yearError && (
-                    <font color="red">
-                      {" "}
-                      <p>{this.state.yearError}</p>
-                    </font>
-                  )}
-
-<InputGroup className="mb-2">
-                              <InputGroupAddon addonType="prepend">
-                                <InputGroupText >
-                                <b>  Date of Apply</b>
-                                </InputGroupText>
-                              </InputGroupAddon>
-
-                              &nbsp; &nbsp; &nbsp;
-                              <DatePicker
-
-                                name="doa"
-                                id="doa"
-                                value={this.state.doa}
-                                onChange={date=>{this.setState({doa:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.doa)})}}
-                              />
-
-
-                            </InputGroup>
-                            {this.state.doaError &&(
-                                <font color="red"><h6>
-                                  {" "}
-                                  <p>{this.state.doaError}</p></h6>
-                                </font>
-                              )}
-
-
-<InputGroup className="mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText >
-                                <b>Remarks</b>
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              type="text"
-                              size="lg"
-                             name="remarks"
-                              id="remarks"
-                             value={this.state.remarks}
-                             onChange={e => {
-                                this.setState(
-                                  { remarks: e.target.value })}}
-
-
-                            />
-                          </InputGroup>
-
-
-
-
-
-<Row>
-                            <Col>
-                              <Button
-                                onClick={this.submitHandler}
-                                size="lg"
-                                color="success"
-                                block
-                                disabled={this.state.submitDisabled}
-                              >
-                                Submit
-                              </Button>
-                            </Col>
-
-                            <Col>
-                              <Button
-                                onClick={e=>{ this.setState({showApplyLeave:false, selectedEmp:"", selectedLeaveType:"", leavesAvailable:""})}}
-                                size="lg"
-                                color="secondary"
-                                block
-                              >
-                             Reset
-                              </Button>
-                            </Col>
-                          </Row> </p>}
+}
 {this.state.error &&
   <font color="red">
     {" "}
     <p>{JSON.stringify(this.state.error)}</p>
   </font>
 }
+
+<br/>
+<Row align="center" >
+                            <Col>
+                              <Button
+                                onClick={this.submitHandler}
+                                size="lg"
+                                color="success"
+
+                              >
+                                Submit
+                              </Button>
+                            </Col>
+
+
+                          </Row>
 
 </CardBody></Card>
 

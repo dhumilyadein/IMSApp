@@ -20,6 +20,8 @@ var EmpLeaveStatusSchema = new Schema({
 
   },
 
+ 
+
   createdAt: {
     type: Date,
     required: true,
