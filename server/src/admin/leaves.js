@@ -45,7 +45,7 @@ async function createLeave(req, res) {
     console.log("in approveLeave Req.body: "+JSON.stringify(req.body))
 
     AppliedLeaves
-    .updateOne({_id:req.body._id},
+    .findOneAndUpdate({_id:req.body._id},
       {status:"Approved",
       dateOfApproveOrReject:req.body.dateOfApproveOrReject
                }
@@ -68,7 +68,7 @@ async function createLeave(req, res) {
       console.log("in rejectLeave Req.body: "+JSON.stringify(req.body))
 
       AppliedLeaves
-      .updateOne({_id:req.body._id},
+      .findOneAndUpdate({_id:req.body._id},
         {status:"Rejected",
         dateOfApproveOrReject:req.body.dateOfApproveOrReject
                  }
@@ -122,7 +122,7 @@ async function editLeave(req,res)
 
 
   LeaveTypes
-.updateOne({leaveName:req.body.existingLeaveTypes[req.body.leaveNo].leaveName},
+.findOneAndUpdate({leaveName:req.body.existingLeaveTypes[req.body.leaveNo].leaveName},
   {$set: {leaveName:req.body.leaveName,
           leaveType:req.body.leaveType,
           leaveCount:req.body.leaveCount,
@@ -215,7 +215,7 @@ return res.send({error:err});
 async function assignLeave(req,res)
 {console.log("In assignLeave for: "+ JSON.stringify(req.body));
 
-if(!req.body.carryForward)
+
 for(var i=0;i<req.body.selectedEmp.length;i++)
 
 {  await EmpLeaveStatus.findOne({empName:req.body.selectedEmp[i].label
@@ -225,68 +225,92 @@ for(var i=0;i<req.body.selectedEmp.length;i++)
     if(data!=null)
     
     {
-        console.log("Emp Leave Data: "+JSON.stringify(data));
+        console.log("Emp Leave Data Found: "+JSON.stringify(data));
           var leaveTypeFound=false;
           for(var j=0;j <data.leaveDetails.length;j++)
           if(data.leaveDetails[j].leaveType===req.body.leaveType)
           {  leaveTypeFound=true;
 
-           EmpLeaveStatus.updateOne({empName:req.body.selectedEmp[i].label,
+           EmpLeaveStatus.findOneAndUpdate({empName:req.body.selectedEmp[i].label,
             'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
               'leaveDetails.$.total': req.body.leaveCount,
               'leaveDetails.$.used':0,
               'leaveDetails.$.remaining': req.body.leaveCount,
-              'leaveDetails.$.carryForward':req.body.carryForward
+              'leaveDetails.$.carryForward':req.body.carryForward,
+              'leaveDetails.$.maxLeaveCount':data.leaveDetails.maxLeaveCount,
 
-          }})
-          .then(data => {
+          }}, {new: true})
+          .then(LeaveDetailsData1 => {
+
+            if(req.body.maxLeaveCount<=data.LeaveDetailsData1.total)
+              EmpLeaveStatus.findOneAndUpdate({empName:req.body.selectedEmp[i].label,
+                'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
+                  'leaveDetails.$.total': LeaveDetailsData1.leaveDetails.maxLeaveCount,
+                  'leaveDetails.$.used':0,
+                  'leaveDetails.$.remaining': LeaveDetailsData1.leaveDetails.maxLeaveCount,
+                  'leaveDetails.$.carryForward':req.body.carryForward,
+                  'leaveDetails.$.maxLeaveCount':LeaveDetailsData1.leaveDetails.maxLeaveCount,
+                  
+    
+              }})
       
             return res.send({msg:"Leave Assigned"});
             })
-            .catch(err => {
-            return res.send({error:err});
-            });
+         
       
         
-          break;
+          
           }
 
           if(!leaveTypeFound)
-          EmpLeaveStatus.updateOne(
+          EmpLeaveStatus.findOneAndUpdate(
             { empName:req.body.selectedEmp[i].label }, 
-            { $push: { leaveDetails: {"leaveType":req.body.leaveType,"total": req.body.leaveCount,"used":0,remaining: req.body.leaveCount,  "carryForward":req.body.carryForward} } })
-            .then(data => {
+            { $push: { leaveDetails: {"leaveType":req.body.leaveType,"total": parseInt(req.body.leaveCount)+parseInt(req.body.CFLC),"used":0,remaining:  parseInt(req.body.leaveCount)+parseInt(req.body.CFLC),  carryForward:req.body.carryForward,
+            maxLeaveCount:req.body.maxLeaveCount} } }, {new: true})
+            .then(LeaveDetailsData2 => {
+ console.log("LeaveDetailsData2 "+JSON.stringify(LeaveDetailsData2))
+              if(req.body.maxLeaveCount<LeaveDetailsData2.leaveDetails.total)
+              EmpLeaveStatus.findOneAndUpdate({empName:req.body.selectedEmp[i].label,
+                'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
+                  'leaveDetails.$.total': LeaveDetailsData2.leaveDetails.maxLeaveCount,
+                  'leaveDetails.$.used':0,
+                  'leaveDetails.$.remaining': LeaveDetailsData2.leaveDetails.maxLeaveCount,
+                  'leaveDetails.$.carryForward':req.body.carryForward,
+                  'leaveDetails.$.maxLeaveCount':LeaveDetailsData2.leaveDetails.maxLeaveCount,
+                    
+
+    
+              }})
       
               return res.send({msg:"Leave Assigned"});
               })
-              .catch(err => {
-              return res.send({error:err});
-              });
+         
            
      
 
     }
      else{ console.log("Emp data not found.. creating new entry")
       var addLeaveDetails= new EmpLeaveStatus({"empName":req.body.selectedEmp[i].label,
-       leaveDetails:[{"leaveType":req.body.leaveType,"total": req.body.leaveCount,"used":0,remaining: req.body.leaveCount,  "carryForward":req.body.carryForward} ]});
+       leaveDetails:[{"leaveType":req.body.leaveType,"total": req.body.leaveCount,"used":0,remaining: req.body.leaveCount,  "carryForward":req.body.carryForward, maxLeaveCount:data.leaveDetails.maxLeaveCount} ]});
 
        addLeaveDetails
       .save()
       .then(user => {
           return res.send({msg:"Leave Assigned"});
       })
-      .catch(err => {
-        return res.send({error:err});
-      });
-
+   
      }
   })
+  .catch(err => {
+    return res.send({error:err});
+    });
+ 
 
 
 
 }
 
-else{}
+
 
 
 

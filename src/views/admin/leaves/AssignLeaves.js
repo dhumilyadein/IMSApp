@@ -49,16 +49,16 @@ class AssignLeaves extends Component {
     this.state = {
 
       error: "",
-      leaveCountDisabled:true,
+      
       doa:  new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)),
       year: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
-
+forAllEmp:false,
       remarks: "",
-    showLeaveCount:false,
+   CFLC:"",
       modelMessage: "",
       modalSuccess: false,
       success: false,
-selectAllEmp:false,
+maxLeaveCount:"",
      existingLeaveTypes:[],
      existingEmp:[],
      selectedEmp:[]
@@ -74,17 +74,19 @@ selectAllEmp:false,
   }
 
 leaveChangeHandler(e)
-{
-  this.setState({  selectedLeaveType: e.target.value,leaveCountDisabled:true, leaveCount:""},
+{ 
+  this.setState({  selectedLeaveType: e.target.value,leaveCount:"",CFLcFromLastYear:false},
     ()=>{
+
       for(var i=0;i<this.state.existingLeaveTypes.length;i++)
-      if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType &&
-        this.state.existingLeaveTypes[i].carryForward)
-        this.setState({showLeaveCount:true, leaveCountDisabled:false});
-        else if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType &&
-          !this.state.existingLeaveTypes[i].carryForward)
-          this.setState({leaveCount:this.state.existingLeaveTypes[i].leaveCount,leaveCountDisabled:true, showLeaveCount:true});
-      this.fetchEmployees();})
+      {if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
+       { this.setState({carryForward:this.state.existingLeaveTypes[i].carryForward,leaveCount:this.state.existingLeaveTypes[i].leaveCount});
+         if(this.state.existingLeaveTypes[i].carryForward)
+         this.setState({maxLeaveCount:this.state.existingLeaveTypes[i].maxLeaveCount,CFLcFromLastYear:true})
+      }
+
+      }
+            this.fetchEmployees();})
 
 }
   getExistingLeaveTypes() {
@@ -105,16 +107,14 @@ leaveChangeHandler(e)
 
     this.setState({
       modalSuccess: !this.state.modalSuccess,
-
+CFLcFromLastYear:false,
       modelMessage: "",
-showApplyLeave:false,
 selectedEmp:"",
 selectedLeaveType:"",
-leavesAvailable:"",
-selectedLeaveCount:"",
-dof:"",
-dot:"",
-remarks:""
+leaveCount:"",
+forAllEmp:false,
+CFLC:"",
+maxLeaveCount:""
 
 
     });
@@ -183,7 +183,7 @@ remarks:""
       axios
         .post("http://localhost:8001/api/assignLeave", {
           "selectedEmp": this.state.selectedEmp, "leaveType": this.state.selectedLeaveType,
-         "leaveCount":this.state.leaveCount,"carryForward":!this.state.leaveCountDisabled}
+         "leaveCount":this.state.leaveCount,"carryForward":this.state.carryForward, "maxLeaveCount":this.state.maxLeaveCount,"CFLC":this.state.CFLC}
         )
         .then(result => {
           console.log("result.data ApplyLeave " + JSON.stringify(result.data));
@@ -259,7 +259,8 @@ remarks:""
                           <br/>
 
                    
-                          <div> <font color="red"> <h5>Note: Leaves should be assigned/reset only once every year.</h5> </font></div>
+                          <div> <h5><font color="blue">NOTE:</font></h5> <font color="red"> <h5> Leaves should be assigned/reset only once every year.</h5> </font></div>
+                          <div> <font color="red"> <h5> Carry Forwarded LC's value should be provided only for the 1st year. System will automatically manages this value, hence forth. </h5> </font></div>
 
 <InputGroup className="mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -290,7 +291,7 @@ remarks:""
                 </font>
               )}
 
-{ !this.state.selectAllEmp &&<p>
+{ !this.state.forAllEmp &&<p>
 
 <InputGroupAddon addonType="prepend">
                                 <InputGroupText >
@@ -336,14 +337,14 @@ remarks:""
                                             console.log("forAllEmp true: " + e.target.checked);
                                             this.setState({
                                            
-                                             selectAllEmp:true,
+                                             forAllEmp:true,
                                              selectedEmp:this.state.existingEmp
                                             });
                                           } else if (e.target.checked === false) {
                                             console.log("forAllEmp false: " + e.target.checked);
                                             this.setState({
                                                
-                                                selectAllEmp:false,
+                                                forAllEmp:false,
                                                 selectedEmp:[]
                                                
                                             });
@@ -361,11 +362,11 @@ remarks:""
                                   </FormGroup>
 
 <br/>
-{ this.state.showLeaveCount &&
+
 <InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
-                        <b>Leave Count<i>(optional)</i></b>
+                        <b>Leave Count/Year</b>
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input
@@ -374,12 +375,31 @@ remarks:""
                       name="leaveCount"
                       id="leaveCount"
                       value={this.state.leaveCount}
-                     onChange={e=>{this.setState({leaveCount:e.target.value})}}
-disabled={this.state.leaveCountDisabled}
+                    
+disabled
 
                     />
                   </InputGroup>
-}
+
+{this.state.CFLcFromLastYear &&
+                  <InputGroup className="mb-3">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText >
+                        <b>Carry Forwarded LC from last year<i>(Optional)</i></b>
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <Input
+                      type="number"
+                      size="lg"
+                      name="leaveCount"
+                      id="leaveCount"
+                      value={this.state.CFLC}
+                    
+onChange={e=>{this.setState({CFLC:e.target.value})}}
+
+                    />
+</InputGroup>     }
+
 {this.state.error &&
   <font color="red">
     {" "}
