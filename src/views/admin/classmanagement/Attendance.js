@@ -466,6 +466,9 @@ class Attendance extends Component {
     this.setState({
       studentsView: true,
       markAttendanceView: true
+    }, () => {
+
+      this.fetchAttendanceOnDate();
     });
   }
 
