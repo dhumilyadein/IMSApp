@@ -208,6 +208,11 @@ class ScheduleExam extends Component {
           this.setState({ examDetailsArray: result.data }, () => {
 
             console.log('ScheduleExam - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
+
+            //Message if exam is not created in the DB
+            if(this.state.examDetailsArray.length < 1) {
+              alert('Please create Exam first!');
+            }
           });
 
         }
@@ -442,6 +447,11 @@ class ScheduleExam extends Component {
 
   sectionChangeHandler = (newValue, actionMeta) => {
 
+    //Message if exam is not created in the DB
+    if(this.state.examDetailsArray.length < 1) {
+      alert('Please create Exam first!');
+    }
+
     this.setState({
       showTabsFlag: false,
       showExamNamesFlag: false,
@@ -535,6 +545,7 @@ class ScheduleExam extends Component {
     var examName = e.currentTarget.value;
 
     var isExamNameValid = false;
+
     this.state.examDetailsArray.forEach(element => {
 
       var selectedExamDetails = {};
@@ -803,7 +814,7 @@ class ScheduleExam extends Component {
 
             if (result.data.errors) {
 
-              console.log("ScheduleExam - scheduleExamSubmitHandler - ERROR in inserting exam details - ERRORS - " + result.data.errors);
+              console.log("ScheduleExam - scheduleExamSubmitHandler - ERROR in inserting exam details - ERRORS - " + JSON.stringify(result.data.errors));
               return this.setState({ insertExamDetailsErrorMessage: result.data.errors });
 
             } else {
