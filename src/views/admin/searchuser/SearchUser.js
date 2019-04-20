@@ -41,8 +41,10 @@ function UserRow(props) {
   // console.log("Sending sending studentDetails - " + studentDetails);
   // console.log("Sending sending studentDetails - " + JSON.stringify(studentDetails));
 
-  const userLink = `#/admin/userDetails/${user.username}`
-  const addFeeLink = `#/admin/finance/AddFees/${user.username}`
+  const userLink = `#/admin/userDetails/${user.username}`;
+  const addFeeLink = `#/admin/finance/AddFees/${user.username}`;
+
+  console.log("Users - UserRow - userId - " + userLink); 
   
   const getBadge = (status) => {
     return status === 'Active' ? 'success' :
