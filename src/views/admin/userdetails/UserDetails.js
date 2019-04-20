@@ -1221,7 +1221,9 @@ class UserDetails extends Component {
                                 <Card className="mb-3">
                                   <CardBody className="p-2">
                                     {imgSource && (
-                                      <img id="displayImage" alt="User" src={imgSource} />
+                                      <center>
+                                      <img id="displayImage" alt="User" src={imgSource} align="middle" widht="200px" height="200px"/>
+                                      </center>
                                     )}
                                     {/* <img id="displayImage1" src={require('../../../photoTemp/kapil.jpg')} widht="200px" height="200px"/> */}
 
