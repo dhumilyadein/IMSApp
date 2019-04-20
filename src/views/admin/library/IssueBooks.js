@@ -1786,6 +1786,8 @@ this.setState({rows:temp})}
 
 
 </CardBody></Card>
+              
+              
               </Col>
             </Row>
 

@@ -546,7 +546,7 @@ this.setState({
                                       onClick={ () => this.nameBtnClicked( studentsData.username) }
                                       size="lg"
                                       disabled={this.state.viewAttendanceView}
-                                      style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'grey'), 
+                                      style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'green'), 
                                       color: 'white',
                                       outline:0,
                                       cursor: 'pointer'

@@ -54,7 +54,7 @@ export default {
 
 
     {
-      
+
       name: 'Manage Fees',
       url: '/finance',
       icon: 'fa fa-money',
@@ -79,7 +79,7 @@ export default {
           icon: 'fa fa-money',
           variant: 'success',
         },
-       
+
     ]},
 
 
@@ -268,7 +268,7 @@ export default {
               name: 'Manage Transport',
               url: '/exams',
               icon: 'fa fa-bus',
-  
+
               children: [
                 {
                   name: 'Manage Vehicles',
@@ -314,7 +314,7 @@ export default {
                     variant: 'success',
                   },
 
-              
+
                   {
                     name: 'Pay Salary',
                     url: '/admin/payroll/PaySalary',
@@ -327,17 +327,67 @@ export default {
                     icon: 'fa fa-money',
                     variant: 'success',
                   },
-              
+
                   {
                     name: 'Staff Attendance',
                     url: '/admin/payroll/StaffAttendance',
                     icon: 'icon-bag',
                     variant: 'success',
                   },
-                 
-                  
+
+
               ]},
 
+              {
+                name: 'Manage Emp Leaves',
+                url: '/leaves',
+                icon: 'icon-drop',
+                children: [
+                  {
+                    name: 'Add Leave Types',
+                    url: '/admin/leaves/AddLeaveTypes',
+                    icon: 'icon-drop',
+                    variant: 'success',
+                  },
+                  {
+                    name: 'Assign/Reset Leaves',
+                    url: '/admin/leaves/AssignLeaves',
+                    icon: 'icon-drop',
+                    variant: 'success',
+                  },
+
+
+
+                  {
+                    name: 'Apply Leaves',
+                    url: '/admin/leaves/ApplyLeave',
+                    icon: 'icon-drop',
+                    variant: 'success',
+                  },
+
+                  {
+                    name: 'Approve Leaves',
+                    url: '/admin/leaves/ApproveLeave',
+                    icon: 'icon-drop',
+                    variant: 'success',
+                  },
+
+
+                  {
+                    name: 'View Leaves',
+                    url: '/admin/leaves/ViewLeave',
+                    icon: 'icon-drop',
+                    variant: 'success',
+                  },
+
+                  {
+                    name: 'Add Holidays',
+                    url: '/admin/leaves/AddHoliday',
+                    icon: 'icon-drop',
+                    variant: 'success',
+                  },
+
+              ]},
 
 
     {

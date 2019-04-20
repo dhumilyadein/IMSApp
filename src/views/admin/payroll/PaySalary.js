@@ -456,7 +456,13 @@ var height = pdf.internal.pageSize.getHeight();
                       id="month"
                       type="select"
                       value={this.state.month}
-                      onChange={e => { this.setState({ month: e.target.value }) }}
+                      onChange={e => { this.setState({ month: e.target.value },()=>
+                      
+                      {
+                        
+
+
+                      }) }}
                     >
                       <option value="">Select Month</option>
                       <option value="January">January</option>

@@ -23,6 +23,7 @@ const examsDAO = require("./src/admin/examsDAO");
 const login = require("./src/login");
 const sendmail = require("./src/admin/sendmail/sendmail");
 const payroll = require("./src/admin/payroll");
+const leaves = require("./src/admin/leaves");
 
 
 const app = express();
@@ -69,6 +70,7 @@ examsDAO(app);
 sendmail(app);
 transport(app);
 payroll(app);
+leaves(app);
 
 var port=process.env.PORT|| 8001;
 app.listen(port, () => console.log('Listening...on port: '+port));
