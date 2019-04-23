@@ -42,8 +42,9 @@ function UserRow(props) {
           )}
           
         </th>
-        <td>{user.firstname + " " + user.lastname}</td>
-        <td>{user.createdAt}</td>
+        <td>{capitalizeFirstLetter(user.firstname) + " " + capitalizeFirstLetter(user.lastname)}</td>
+        {/* <td>{user.createdAt}</td> */}
+        <td>{new Date(user.createdAt).toLocaleDateString('en-GB')}</td>
         {/* <td>{user.role}</td> */}
         <td>
         {user.role.map((role, index) =>
@@ -81,7 +82,8 @@ class Users extends Component {
           <Col xl={6}>
             <Card>
               <CardHeader>
-                <i className="fa fa-align-justify"></i> Users <small className="text-muted">example</small>
+                <i className="fa fa-align-justify"></i> Users 
+                {/* <small className="text-muted">example</small> */}
               </CardHeader>
               <CardBody>
                 <Table responsive hover>

@@ -37,6 +37,37 @@ const whiteTextFieldStyle = {
   background: "white"
 }
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function UserRow(props) {
+
+  const studentData = props.user;
+
+  const userLink = `#/admin/userDetails/${studentData.username}`;
+
+  console.log("ClassDetails - UserRow - userId - " + userLink); 
+  
+  const getBadge = (status) => {
+    return status === 'Active' ? 'success' :
+      status === 'Inactive' ? 'secondary' :
+        status === 'Pending' ? 'warning' :
+          status === 'Banned' ? 'danger' :
+            'primary'
+  }
+  return (
+
+    <tr key={studentData.username}>
+    <td>{studentData.rollno}</td>
+    <td>{capitalizeFirstLetter(studentData.firstname) + " " + capitalizeFirstLetter(studentData.lastname)}</td>
+    <th scope="row">
+      <a href={userLink}>{studentData.username}</a>
+    </th>
+    </tr>
+  )
+}
+
 class ClassDetails extends Component {
 
   constructor(props) {
@@ -337,9 +368,12 @@ class ClassDetails extends Component {
 
                           {/* {students} */}
 
-                          {
+{this.state.studentsDataArray.map((user, index) =>
+  <UserRow key={index} user={user}/>
+)}
+
+                          {/* {
                             this.state.studentsDataArray.map(studentData =>
-                              //this.state.tempArray.map(item => 
                               <tr key={studentData.username}>
 
                                 <td>{studentData.rollno}</td>
@@ -349,10 +383,9 @@ class ClassDetails extends Component {
                                   <a href="#">{studentData.username}</a>
 
                                 </th>
-                                {/* <td>{user.role}</td> */}
                               </tr>
                             )
-                          }
+                          } */}
 
                         </tbody>
                       </Table>

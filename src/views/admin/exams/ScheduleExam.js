@@ -395,12 +395,23 @@ class ScheduleExam extends Component {
 
     var sectionArrayTemp = [];
     var sectionLabelValueArray = [];
+
     this.state.classesAndSections.forEach(element => {
       if (element["class"] === selectedClass) {
 
+        var section = element["section"];
+        sectionArrayTemp.push(section);
+      }
+    });
+
+    // First sorting array alphabetically
+    sectionArrayTemp.sort();
+
+    // Setting alphabetically sorted sections in dropdown
+    sectionArrayTemp.forEach(section => {
+
         var sectionLabelValue = {};
 
-        var section = element["section"];
         sectionArrayTemp.push(section);
 
         sectionLabelValue.value = section;
@@ -408,11 +419,7 @@ class ScheduleExam extends Component {
 
         sectionLabelValueArray.push(sectionLabelValue);
 
-      }
     });
-
-    // Sorting array alphabetically
-    sectionArrayTemp.sort();
 
     this.setState({
       sectionArray: sectionArrayTemp,
