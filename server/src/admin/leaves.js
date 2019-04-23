@@ -217,7 +217,7 @@ async function assignLeave(req,res)
 
 if(req.body.carryForward)
 {var recordsUpdated=0;
-for(var i=0;i<req.body.selectedEmp.length;i++,recordsUpdated++)
+for(var i=0;i<req.body.selectedEmp.length;i++)
 
 {  await EmpLeaveStatus.findOne({empName:req.body.selectedEmp[i].label
   //leaveDetails: {$elemMatch: {leaveType:req.body.leaveType}}
@@ -232,9 +232,9 @@ for(var i=0;i<req.body.selectedEmp.length;i++,recordsUpdated++)
           if(data.leaveDetails[j].leaveType===req.body.leaveType)
           {  leaveTypeFound=true;
 
-            if(parseInt(data.leaveDetails[j].total)+parseInt(data.leaveDetails[j].remaining)>req.body.maxLeaveCount)
-
-            EmpLeaveStatus.findOneAndUpdate({empName:data.leaveDetails[j].empName,
+            if((parseInt(data.leaveDetails[j].total)+parseInt(data.leaveDetails[j].remaining))>req.body.maxLeaveCount)
+{ console.log("In IF "+data.empName);
+            EmpLeaveStatus.findOneAndUpdate({empName:data.empName,
               'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
                 'leaveDetails.$.total': req.body.maxLeaveCount,
                 'leaveDetails.$.used':0,
@@ -243,10 +243,10 @@ for(var i=0;i<req.body.selectedEmp.length;i++,recordsUpdated++)
                 'leaveDetails.$.maxLeaveCount':req.body.maxLeaveCount,
 
 
-            }},{new: true});
+            }},{new: true}).then(data=>{recordsUpdated++;})}
             else
-
-           EmpLeaveStatus.findOneAndUpdate({empName:req.body.selectedEmp[i].label,
+{ console.log("In ELSE");
+           EmpLeaveStatus.findOneAndUpdate({empName:data.empName,
             'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
               'leaveDetails.$.total': req.body.leaveCount+data.leaveDetails[j].remaining,
               'leaveDetails.$.used':0,
@@ -254,7 +254,7 @@ for(var i=0;i<req.body.selectedEmp.length;i++,recordsUpdated++)
               'leaveDetails.$.carryForward':req.body.carryForward,
               'leaveDetails.$.maxLeaveCount':req.body.maxLeaveCount,
 
-          }}, {new: true})
+          }}, {new: true}).then(data=>{recordsUpdated++;})}
 
 
 
@@ -278,7 +278,7 @@ for(var i=0;i<req.body.selectedEmp.length;i++,recordsUpdated++)
 
 
 
-              }},{new: true})
+              }},{new: true}).then(data=>{recordsUpdated++;})
 
 
               })
@@ -300,7 +300,7 @@ for(var i=0;i<req.body.selectedEmp.length;i++,recordsUpdated++)
      }
   })
   .catch(err => {
-    return res.send({error:err});
+    return res.send({error:JSON.stringify(err)});
     });
 
 
