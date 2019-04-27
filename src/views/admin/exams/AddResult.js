@@ -56,7 +56,7 @@ class AddResult extends Component {
 
       classesView: true,
       sectionView: false,
-      showTabsFlag: false,
+      showResultsTableFlag: false,
       showExamNamesFlag: false,
 
       classesAndSections: [],
@@ -67,7 +67,7 @@ class AddResult extends Component {
       sectionArray: [],
       sectionLabelValueArray: [],
       selectedSection: "",
-      selectedSectionsLabelValue: [],
+      selectedSectionLabelValue: [],
       disableSectionsFlag: false,
       allSectionCheck: false,
 
@@ -92,6 +92,8 @@ class AddResult extends Component {
       examDetailsArray: [],
       selectedExamDetails: {},
 
+      results: {},
+
       // venueLabelValueArray: [
       //   { label: "Hall 1", value: "Hall 1" },
       //   { label: "Hall 2", value: "Hall 2" },
@@ -110,12 +112,12 @@ class AddResult extends Component {
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
     this.examNameChangeHandler = this.examNameChangeHandler.bind(this);
-    this.changeHandler = this.changeHandler.bind(this);
     this.toggleTabs = this.toggleTabs.bind(this);
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
     this.fetchClassWiseExamDetails = this.fetchClassWiseExamDetails.bind(this);
     this.resetStudentsMarksArray = this.resetStudentsMarksArray.bind(this);
-    this.AddResultSubmitHandler = this.AddResultSubmitHandler.bind(this);
+    this.addResultSubmitHandler = this.addResultSubmitHandler.bind(this);
+    this.fetchResultOnExamName = this.fetchResultOnExamName.bind(this);
 
     // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
@@ -371,7 +373,10 @@ class AddResult extends Component {
     this.setState({
       class: selectedClass,
       showExamNamesFlag: false,
-      selectedExamDetails: [],
+      selectedExamDetails: {},
+      showResultsTableFlag: false,
+      selectedSection: "",
+      selectedSectionLabelValue: []
     });
 
     var sectionArrayTemp = [];
@@ -400,7 +405,7 @@ class AddResult extends Component {
       sectionLabelValueArray: sectionLabelValueArrayTemp,
       sectionView: true,
       selectedSection: "",
-      selectedSectionLabelValue: {},
+      selectedSectionLabelValue: [],
       disableSectionsFlag: false,
     }, () => {
 
@@ -416,7 +421,8 @@ class AddResult extends Component {
 
     this.setState({
       showExamNamesFlag: true,
-      selectedExamDetails: []
+      selectedExamDetails: { examName:"" },
+      showResultsTableFlag: false
     });
 
     console.log("AddResult - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
@@ -437,7 +443,7 @@ class AddResult extends Component {
   examNameChangeHandler(e) {
 
     this.setState({
-      selectedExamDetails: [],
+      selectedExamDetails: {},
     });
 
     var examName = e.currentTarget.value;
@@ -464,6 +470,8 @@ class AddResult extends Component {
           //Fetching class wise exam details on examName selection
 
           this.fetchClassWiseExamDetails();
+
+          this.fetchResultOnExamName();
         });
 
         console.log("Foreach setting exam details");
@@ -475,7 +483,7 @@ class AddResult extends Component {
     if (isExamNameValid) {
       console.log("Foreach setting exam details after loop");
       this.setState({
-        showTabsFlag: true
+        showResultsTableFlag: true
       });
     }
 
@@ -516,23 +524,41 @@ class AddResult extends Component {
       
   }
 
-  /**
-   * @description Called when the change event is triggered.
-   * @param {*} e
-   */
-  changeHandler(e) {
+  async fetchResultOnExamName() {
 
-    // console.log("Name: "+e.target.name +" Value: "+ e.target.value);
-
-    var selectedExamDetails = this.state.selectedExamDetails;
-
-    selectedExamDetails[e.target.name] = e.target.value;
-
+    // Resetting studentsDataArray to clear the previous date so that only the selected records are present on the page
     this.setState({
-      selectedExamDetails: selectedExamDetails
+      studentsDataArray: []
+    });
+
+    var fetchResultOnExamNameRequest = {
+      "class": this.state.class,
+      "section": this.state.selectedSection,
+      "examName": this.state.selectedExamDetails.examName
+    }
+
+    console.log("AddResult - fetchResultOnExamName - fetchResultOnExamNameRequest - "
+      + JSON.stringify(fetchResultOnExamNameRequest));
+
+    await axios.post("http://localhost:8001/api/fetchResultOnExamName", fetchResultOnExamNameRequest).then(resultsRes => {
+
+      if (resultsRes.data.errors) {
+        return this.setState({ errors: resultsRes.data.errors });
+      } else {
+
+        // Setting studentsDataArray from Class.attendance.studentsInfo which was earlier set from Class.studentsData table
+        if(resultsRes.data.response && resultsRes.data.response.results 
+          && resultsRes.data.response.results[0] && resultsRes.data.response.results[0].studentsResult) {
+
+            // Setting students data for the selected date
+          this.setState({
+            studentsMarksArray: resultsRes.data.response.results[0].studentsResult
+          });
+        }
+        
+      }
     });
   }
-
 
   async toggleModalSuccess() {
 
@@ -594,8 +620,11 @@ class AddResult extends Component {
     var i=100;
     this.state.subjectArrayFromClass.forEach(element => {
 
+      // var item = {};
+      // item[element] = i++;
+
       var item = {};
-      item[element] = i++;
+      item[element] = null;
 
       subjectMarksArrayTemp.push(item);
 
@@ -604,10 +633,11 @@ class AddResult extends Component {
     // Setting dummy daata in studentsMarksArray for all students
     this.state.studentsData.forEach(element => {
 
-      const item = {
+      var item = {
         username: element.username,
         firstname: element.firstname,
         lastname: element.lastname,
+        fullName: element.firstname + " " + element.lastname,
         subjectMarksArray: subjectMarksArrayTemp
       };
 
@@ -625,9 +655,47 @@ class AddResult extends Component {
     });
   }
 
-  AddResultSubmitHandler() {
+  addResultSubmitHandler() {
 
-    console.log("AddResult AddResultSubmitHandler this.state.studentsMarksArray - " + JSON.stringify(this.state.studentsMarksArray));
+    console.log("AddResult addResultSubmitHandler this.state.studentsMarksArray - " + JSON.stringify(this.state.studentsMarksArray));
+
+    var results = {};
+
+    results.examName = this.state.selectedExamDetails.examName;
+    results.studentsResult = this.state.studentsMarksArray;
+
+    this.setState({
+      results: results
+    }, () => {
+
+      this.updateStudentsResults();
+    });
+  }
+
+  async updateStudentsResults(classStr, sectionStr) {
+
+    var updateStudentsResultsRequest = {
+      "class": this.state.class,
+      "section": this.state.selectedSection,
+      "results": this.state.results
+    }
+
+    console.log("Attendance - updateStudentsResults - updateStudentsResultsRequest - "
+      + JSON.stringify(updateStudentsResultsRequest));
+
+    await axios.post("http://localhost:8001/api/updateStudentsResults", updateStudentsResultsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          modalSuccess: true,
+          modalColor: "modal-success",
+          modalMessage: "Marks Added Successully!"
+        });
+      }
+    });
   }
 
   render() {
@@ -692,10 +760,10 @@ class AddResult extends Component {
                     id="section"
                     name="section"
                     // isMulti={true}
-                    placeholder="Select Single or Multiple Section(s)"
+                    placeholder="Select Section"
                     options={this.state.sectionLabelValueArray}
                     closeMenuOnSelect={true}
-                    value={this.state.selectedSectionsLabelValueArray}
+                    value={this.state.selectedSectionLabelValue}
                     isDisabled={this.state.disableSectionsFlag}
                     isSearchable={true}
                     onChange={this.sectionChangeHandler}
@@ -742,7 +810,7 @@ class AddResult extends Component {
                 </div>
               }
 
-              {this.state.showTabsFlag && (
+              {this.state.showResultsTableFlag && this.state.selectedExamDetails && this.state.selectedExamDetails.examName && (
                 <div>
                   <br />
                   <h3 align="center">{this.state.selectedExamDetails.examName.charAt(0).toUpperCase() + this.state.selectedExamDetails.examName.slice(1)}</h3>
@@ -908,7 +976,7 @@ class AddResult extends Component {
                   <Row>
                     <Col>
                       {!this.state.loader && <Button
-                        onClick={this.AddResultSubmitHandler}
+                        onClick={this.addResultSubmitHandler}
                         size="lg"
                         color="success"
                         block

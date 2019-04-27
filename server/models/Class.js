@@ -137,6 +137,43 @@ var ClassSchema = new Schema({
       }
     }
     
+  },
+
+  results: {
+    type: Array,
+
+    examName: {
+      type: Date,
+      required: true,
+      unique: true
+    },
+    studentsResult: {
+      type: Array,
+      required: true,
+
+      username: {
+        type: String,
+        required: true
+      },
+      firstname: {
+        type: String,
+        required: true
+      },
+      lastname: {
+        type: String,
+        required: true
+      },
+      fullName: {
+        type: String,
+        required: true
+      },
+      subjectMarksArray: {
+        type: Array,
+        required: true
+
+      }
+    }
+    
   }
 },  { collection: 'Class' });
 
