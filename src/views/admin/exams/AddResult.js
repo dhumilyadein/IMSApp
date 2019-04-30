@@ -421,7 +421,7 @@ class AddResult extends Component {
 
     this.setState({
       showExamNamesFlag: true,
-      selectedExamDetails: { examName:"" },
+      selectedExamDetails: { examName: "" },
       showResultsTableFlag: false
     });
 
@@ -501,8 +501,8 @@ class AddResult extends Component {
   }
 
   // marksChangeHandler = idx => subjectId => subjectName => e => {
-    // marksChangeHandler = idx => e => {
-      marksChangeHandler = (idx, subjectId, subjectName) => e => {
+  // marksChangeHandler = idx => e => {
+  marksChangeHandler = (idx, subjectId, subjectName) => e => {
 
     // console.log("e.target.value - " + JSON.stringify(e.target.value) + " idx - " + idx);
 
@@ -521,7 +521,7 @@ class AddResult extends Component {
       () => {
         console.log("AFTER this.state.studentsMarksArray" + JSON.stringify(this.state.studentsMarksArray) + " idx - " + idx + " INDIVIDUAL MARKS - " + this.state.studentsMarksArray[idx].subjectMarksArray[subjectId][subjectName]);
       });
-      
+
   }
 
   async fetchResultOnExamName() {
@@ -547,15 +547,15 @@ class AddResult extends Component {
       } else {
 
         // Setting studentsDataArray from Class.attendance.studentsInfo which was earlier set from Class.studentsData table
-        if(resultsRes.data.response && resultsRes.data.response.results 
+        if (resultsRes.data.response && resultsRes.data.response.results
           && resultsRes.data.response.results[0] && resultsRes.data.response.results[0].studentsResult) {
 
-            // Setting students data for the selected date
+          // Setting students data for the selected date
           this.setState({
             studentsMarksArray: resultsRes.data.response.results[0].studentsResult
           });
         }
-        
+
       }
     });
   }
@@ -613,25 +613,25 @@ class AddResult extends Component {
 
   resetStudentsMarksArray() {
 
-    var subjectMarksArrayTemp = [];
     var studentsMarksArrayTemp = [];
-
-    // Setting dummy marks in subjectMarks array for all students
-    var i=100;
-    this.state.subjectArrayFromClass.forEach(element => {
-
-      // var item = {};
-      // item[element] = i++;
-
-      var item = {};
-      item[element] = null;
-
-      subjectMarksArrayTemp.push(item);
-
-    });
 
     // Setting dummy daata in studentsMarksArray for all students
     this.state.studentsData.forEach(element => {
+
+      // Setting dummy marks in subjectMarks array for all students
+      var subjectMarksArrayTemp = [];
+      this.state.subjectArrayFromClass.forEach(element => {
+
+        // var item = {};
+        // item[element] = i++;
+
+        var item = {};
+        item[element] = null;
+
+        subjectMarksArrayTemp.push(item);
+
+      });
+      //Setting dummy marks over
 
       var item = {
         username: element.username,
@@ -650,7 +650,7 @@ class AddResult extends Component {
 
     this.setState({
       studentsMarksArray: studentsMarksArrayTemp
-    }, () =>{
+    }, () => {
       console.log('AddResult - resetStudentsMarksArray - studentsMarksArray - ' + JSON.stringify(this.state.studentsMarksArray));
     });
   }
