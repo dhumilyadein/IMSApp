@@ -770,6 +770,8 @@ class ScheduleExam extends Component {
       examDetailsArrayTemp.push(temp[i]);
     }
 
+    console.log("BEFORE - allExamDetailsFilledFlag - " + allExamDetailsFilledFlag);
+
     if (allExamDetailsFilledFlag) {
 
       temp.class = this.state.class;
@@ -777,7 +779,7 @@ class ScheduleExam extends Component {
 
       this.setState({
         inputExamDataArray: temp
-      }, console.log("AFTER - " + JSON.stringify(this.state.inputExamDataArray)));
+      }, console.log("ScheduleExam - scheduleExamSubmitHandler - " + JSON.stringify(this.state.inputExamDataArray)));
 
       this.state.selectedSectionsArray.forEach(element => {
 
@@ -803,7 +805,7 @@ class ScheduleExam extends Component {
 
             if (result.data.errors) {
 
-              console.log("ScheduleExam - scheduleExamSubmitHandler - ERROR in inserting exam details - ERRORS - " + result.data.errors);
+              console.log("ScheduleExam - scheduleExamSubmitHandler - ERROR in inserting exam details - ERRORS - " + JSON.stringify(result.data.errors));
               return this.setState({ insertExamDetailsErrorMessage: result.data.errors });
 
             } else {
