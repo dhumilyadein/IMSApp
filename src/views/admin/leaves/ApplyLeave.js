@@ -86,6 +86,18 @@ this.leaveChangeHandler=this.leaveChangeHandler.bind(this);
           },()=>{ console.log("Existing RESULT.data " + JSON.stringify(this.state.existingLeaveTypes));});
         }
       });
+
+      axios
+      .post("http://localhost:8001/api/getEmployeeLeaveDetails",{"empName": this.state.selectedEmp.label.toLowerCase()})
+      .then(result => {
+
+        if (result.data) {
+          this.setState({
+            employeeLeaveDetails: result.data
+          },()=>{ console.log("employeeLeaveDetails RESULT.data " + JSON.stringify(this.state.employeeLeaveDetails));});
+        }
+      });
+
   }
 
   toggleSuccess() {
@@ -259,7 +271,11 @@ remarks:""
 
         if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
        return(this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"}));
-        axios
+       
+       for()
+       
+       
+       axios
           .post("http://localhost:8001/api/getAvailableLeaveCount",
           {
             "leaveType":this.state.selectedLeaveType,
