@@ -24,6 +24,19 @@ module.exports = function (app) {
       .withMessage("Please Enter Subjects")
   ];
 
+  const updateResultsValidation = [
+    check("class")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter class"),
+
+    check("section")
+      .not()
+      .isEmpty()
+      .withMessage("Please Enter section"),
+
+  ];
+
   const updateClassValidation = oneOf([
     check("class")
       .not()
@@ -182,6 +195,9 @@ module.exports = function (app) {
       }
       if(request.studentsData) {
         fetchClassSpecificDetailsResponseJSON.studentsData = 1
+      }
+      if(request.results) {
+        fetchClassSpecificDetailsResponseJSON.results = 1
       }
 
       console.log("classDAO - fetchClassSpecificDetails - fetchClassSpecificDetailsJSON - " + JSON.stringify(fetchClassSpecificDetailsJSON) 
@@ -639,6 +655,102 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
     });
   }
 
+  async function updateStudentsResults(req, res) {
+
+    await console.log("updateStudentsResults");
+
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      console.log("ClassDAO - updateStudentsResults - Errors in classDAO - THROWING VALIDATOIN ERROR");
+      response = { errors: errors.mapped() };
+      console.log("server final response - " + JSON.stringify(response));
+      return res.send(response);
+    }
+
+    var request = req.body;
+
+console.log("\n\nclass - " + request.class + " section - " + request.section + " examName - " + request.results.examName);
+
+     Class.findOneAndUpdate(
+      // Class.findOne(
+      {"class": request.class, 
+      "section": request.section 
+      ,"results.examName": request.results.examName
+    } 
+      ,{
+        // $addToSet: {'attendance': attendance}
+
+        $unset: {"results.$.studentsResult": 1},
+        
+        // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
+      },
+      // {upsert: true}
+    )
+
+    .then(function (classData) {
+
+      response = { response: classData, message: "Class details updated successfully" };
+      console.log("ClassDAO - updateStudentsResults - Class details udpated successfully - server final response - " + JSON.stringify(classData));
+
+      if(null === classData) {
+        
+        console.log("No record for exam found so ADDING the record - eexamName - " + request.results.examName);
+
+        Class.findOneAndUpdate(
+          {"class": request.class, 
+          "section": request.section 
+        } ,
+          {
+            $addToSet: {'results': request.results}
+          },
+        ).then(function (classData) {
+    
+          response = { response: classData, message: "Class details updated successfully - EXAM ADDED" };
+          console.log("ClassDAO - server response while setting Exam - " + JSON.stringify(classData));
+        }).catch(function (err) {
+          console.log("Catching server ERROR while setting Exam - " + err);
+          response = { errors: err };
+          console.log("ClassDAO - updateStudentsResults - ERRORS in classDAO - ERR while setting Exam - " + JSON.stringify(err));
+          return res.send(response);
+        });
+
+      } else {
+
+        console.log("ClassDAO - updateStudentsResults - Exam record found - so MODIFYING data");
+
+        Class.findOneAndUpdate(
+          {"class": request.class, 
+          "section": request.section
+          ,"results.examName": request.results.examName
+        } ,
+          {
+            $set: {'results.$.studentsResult': request.results.studentsResult}
+          },
+        ).then(function (classData) {
+    
+          response = { response: classData, message: "Class details updated successfully - EXAM MODIFIED" };
+          console.log("ClassDAO - server response while setting Exam details - " + JSON.stringify(classData));
+        }).catch(function (err) {
+          console.log("Catching server ERROR while setting Exam details - " + err);
+          response = { errors: err };
+          console.log("ClassDAO - updateStudentsResults - ERRORS in classDAO - ERR while set Exam details - " + JSON.stringify(err));
+          return res.send(response);
+        });
+      }
+
+      return res.send(response);
+
+
+    }).catch(function (err) {
+      console.log("Catching server err while unset - " + err);
+      response = { errors: err };
+      console.log("ClassDAO - updateStudentsResults - ERRORS in classDAO - server final ERR for unset - " + JSON.stringify(err));
+      return res.send(response);
+    });
+  }
+
   async function fetchAttendanceOnDate(req, res) {
 
     await console.log("fetchAttendanceOnDate");
@@ -682,6 +794,50 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
       console.log("Catching server ERROR while set attendance studentInfo - " + err);
       response = { errors: err };
       console.log("ClassDAO - fetchAttendanceOnDate - ERRORS in classDAO - ERR while fetching attendance - " + JSON.stringify(err));
+      return res.send(response);
+    });
+  }
+
+  async function fetchResultOnExamName(req, res) {
+
+    await console.log("fetchResultOnExamName");
+
+    var errors = validationResult(req);
+
+    //Mapping the value to the same object
+    if (!errors.isEmpty()) {
+      console.log("ClassDAO - fetchResultOnExamName - Errors in classDAO - THROWING VALIDATION ERROR");
+      response = { errors: errors.mapped() };
+      console.log("ClassDAO - fetchResultOnExamName - server final response - " + JSON.stringify(response));
+      return res.send(response);
+    }
+
+    var request = req.body;
+
+    console.log("\n\nfetchResultOnExamName - class - " + request.class
+    + " section - " + request.section
+    + " \exam name - " + request.examName);
+
+    Class.findOne(
+      {"class": request.class, 
+      "section": request.section
+      ,"results" : { $elemMatch : { examName : request.examName } },
+    },
+    {
+      "class":1, 
+      "section":1,
+      "results.examName":1,
+      "results.$.studentsResult":1
+    }
+    ).then(function (classData) {
+
+      response = { response: classData, message: "Exam details fetched successfully" };
+      console.log("ClassDAO - fetchResultOnExamName - Exam details fetched successfull - " + JSON.stringify(classData));
+      return res.send(response);
+    }).catch(function (err) {
+      console.log("Catching server ERROR while set Exam studentInfo - " + err);
+      response = { errors: err };
+      console.log("ClassDAO - fetchResultOnExamName - ERRORS in classDAO - ERR while fetching Exam - " + JSON.stringify(err));
       return res.send(response);
     });
   }
@@ -804,6 +960,16 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
   app.post("/api/fetchAttendanceOnDate", updateClassValidation, fetchAttendanceOnDate, (req, res) => {
     console.log("ClassDAO - fetchAttendanceOnDate post method call");
+
+  });
+
+  app.post("/api/fetchResultOnExamName", updateResultsValidation, fetchResultOnExamName, (req, res) => {
+    console.log("ClassDAO - fetchResultOnExamName post method call");
+
+  });
+
+  app.post("/api/updateStudentsResults", updateResultsValidation, updateStudentsResults, (req, res) => {
+    console.log("ClassDAO - updateStudentsResults post method call");
 
   });
 

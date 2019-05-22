@@ -345,8 +345,8 @@ const AddResult = Loadable({
   loading: Loading
 });
 
-const ViewResults = Loadable({
-  loader: () => import("./views/admin/exams/ViewResults"),
+const ReportCard = Loadable({
+  loader: () => import("./views/admin/exams/ReportCard"),
   loading: Loading
 });
 
@@ -500,9 +500,9 @@ const routes = [
   },
 
   {
-    path: "/admin/exams/ViewResults",
-    name: "View Results",
-    component: ViewResults
+    path: "/admin/exams/ReportCard",
+    name: "Report Card",
+    component: ReportCard
   },
 
 
