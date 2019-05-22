@@ -258,8 +258,8 @@ export default {
                 variant: 'success',
               },
               {
-                name: 'View Results',
-                url: '/admin/exams/ViewResults',
+                name: 'Report Card',
+                url: '/admin/exams/ReportCard',
                 icon: 'icon-basket-loaded',
                 variant: 'success',
               }

@@ -44,9 +44,11 @@ import {
 import axios, { post } from "axios";
 import { stat } from 'fs';
 
+const whiteTextFieldStyle = {
+  background: "white"
+}
 
-
-class AddResult extends Component {
+class ReportCard extends Component {
 
   constructor(props) {
 
@@ -56,8 +58,8 @@ class AddResult extends Component {
 
       classesView: true,
       sectionView: false,
-      showResultsTableFlag: false,
-      showExamNamesFlag: false,
+      showReportCardFlag: false,
+      showStudentNamesFlag: false,
 
       classesAndSections: [],
       classDetails: {},
@@ -66,10 +68,14 @@ class AddResult extends Component {
 
       sectionArray: [],
       sectionLabelValueArray: [],
+      studentLabelValueArray: [],
       selectedSection: "",
       selectedSectionLabelValue: [],
-      disableSectionsFlag: false,
+      selectedStudentUsername: "",
       allSectionCheck: false,
+      editMode: "disabled",
+
+      results: [],
 
 
       // To make tab 1 on focus
@@ -88,7 +94,7 @@ class AddResult extends Component {
       defaultExamDuration: 0,
 
       examName: "",
-      examNameError: "",
+      studentNameError: "",
       examDetailsArray: [],
       selectedExamDetails: {},
 
@@ -116,8 +122,10 @@ class AddResult extends Component {
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
     this.fetchClassWiseExamDetails = this.fetchClassWiseExamDetails.bind(this);
     this.resetStudentsMarksArray = this.resetStudentsMarksArray.bind(this);
-    this.addResultSubmitHandler = this.addResultSubmitHandler.bind(this);
+    this.reportCardSubmitHandler = this.reportCardSubmitHandler.bind(this);
     this.fetchResultOnExamName = this.fetchResultOnExamName.bind(this);
+    this.setStudentsDropDownLabelValue = this.setStudentsDropDownLabelValue.bind(this);
+    this.studentChangeHandler = this.studentChangeHandler.bind(this);
 
     // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
@@ -160,30 +168,14 @@ class AddResult extends Component {
               selectedExamDetailsTemp.percentageShareInFinalResult = percentageShareInFinalResult;
               selectedExamDetailsTemp.isMandatryToAttendForFinalResult = isMandatryToAttendForFinalResult;
 
-              //Finding exam Finish Date
-
-              console.log('AddResult - fetchClassWiseExamDetails - maxDate - ' + JSON.stringify(element.examDetails[0].endMoment) + ' examDetails - ' + JSON.stringify(element.examDetails));
-
-              var maxDate = element.examDetails[0].endMoment;
-              for(var i = 0; i<element.examDetails.length-1; i++) {
-                if(element.examDetails[i+1].endMoment > element.examDetails[i].endMoment) {
-                  maxDate = element.examDetails[i+1].endMoment;
-
-                  console.log('AddResult - fetchClassWiseExamDetails - new maxDate - ' + JSON.stringify(maxDate));
-                }
-              }
-
-              console.log('AddResult - fetchClassWiseExamDetails - FINAL maxDate - ' + JSON.stringify(maxDate));
-
               this.setState({
                 inputExamDataArray: element.examDetails,
-                selectedExamFinishDate: maxDate,
-                selectedExamDetails: selectedExamDetailsTemp
+                selectedExamDetails: selectedExamDetailsTemp,
               });
             }
           });
 
-          console.log('AddResult - fetchClassWiseExamDetails - classWiseExamDetailsArray - ' + JSON.stringify(classWiseExamDetailsArray) + " sectionWiseExamDetailsArray - " + JSON.stringify(sectionWiseExamDetailsArray));
+          console.log('ReportCard - fetchClassWiseExamDetails - classWiseExamDetailsArray - ' + JSON.stringify(classWiseExamDetailsArray) + " sectionWiseExamDetailsArray - " + JSON.stringify(sectionWiseExamDetailsArray));
         }
 
       });
@@ -210,7 +202,7 @@ class AddResult extends Component {
 
           this.setState({ examDetailsArray: result.data }, () => {
 
-            console.log('AddResult - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
+            console.log('ReportCard - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
           });
 
         }
@@ -235,7 +227,7 @@ class AddResult extends Component {
 
         this.setState({ classesAndSections: cRes.data }, () => {
 
-          console.log('AddResult - fetchAllClassesAndSections - All class details - ' + JSON.stringify(this.state.classesAndSections));
+          console.log('ReportCard - fetchAllClassesAndSections - All class details - ' + JSON.stringify(this.state.classesAndSections));
 
           // Fetching unique classes from the classesAndSections 
           this.fetchClasses();
@@ -258,14 +250,14 @@ class AddResult extends Component {
   //     "subjects": 1,
   //   }
 
-  //   console.log("AddResult - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
+  //   console.log("ReportCard - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
   //     + JSON.stringify(fetchClassSpecificDetailsRequest));
 
   //   await axios.post("http://localhost:8001/api/fetchClassSpecificDetails", fetchClassSpecificDetailsRequest).then(res => {
 
   //     if (res.data.errors) {
 
-  //       console.log('AddResult - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
+  //       console.log('ReportCard - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
   //       return this.setState({ errors: res.data.errors });
 
   //     } else {
@@ -274,7 +266,7 @@ class AddResult extends Component {
   //         classDetails: res.data,
   //       }, () => {
 
-  //         console.log('AddResult - fetchClassSpecificDetails - All class details classDetails - '
+  //         console.log('ReportCard - fetchClassSpecificDetails - All class details classDetails - '
   //           + JSON.stringify(this.state.classDetails)
   //           + " subjectArray - " + this.state.subjectArray);
 
@@ -289,7 +281,7 @@ class AddResult extends Component {
   //           var arr1 = this.state.classDetails[i].subjects.sort();
   //           var arr2 = this.state.classDetails[i + 1].subjects.sort();
 
-  //           console.log('AddResult - fetchClassSpecificDetails - arr1 - '
+  //           console.log('ReportCard - fetchClassSpecificDetails - arr1 - '
   //             + arr1
   //             + " \narr2 - " + arr2);
 
@@ -310,7 +302,6 @@ class AddResult extends Component {
   //           this.setState({
   //             selectedSection: "",
   //             selectedSectionLabelValue: {},
-  //             disableSectionsFlag: false,
   //             allSectionCheck: false
   //           });
 
@@ -321,7 +312,7 @@ class AddResult extends Component {
 
   //         } else {
 
-  //           console.log("AddResult - fetchClassSpecificDetails - this.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
+  //           console.log("ReportCard - fetchClassSpecificDetails - this.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
 
   //           /*
   //             Setting temporary inputExamDataArray for each subject
@@ -356,7 +347,7 @@ class AddResult extends Component {
   //             subjectArray: this.state.classDetails[0].subjects,
   //           });
 
-  //           console.log("1 AddResult - fetchClassSpecificDetails - subjectArray - " + this.state.subjectArray
+  //           console.log("1 ReportCard - fetchClassSpecificDetails - subjectArray - " + this.state.subjectArray
   //             + " \nthis.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
   //         }
   //       });
@@ -388,9 +379,9 @@ class AddResult extends Component {
 
     this.setState({
       class: selectedClass,
-      showExamNamesFlag: false,
+      showStudentNamesFlag: false,
       selectedExamDetails: {},
-      showResultsTableFlag: false,
+      showReportCardFlag: false,
       selectedSection: "",
       selectedSectionLabelValue: []
     });
@@ -422,7 +413,6 @@ class AddResult extends Component {
       sectionView: true,
       selectedSection: "",
       selectedSectionLabelValue: [],
-      disableSectionsFlag: false,
     }, () => {
 
 
@@ -436,22 +426,72 @@ class AddResult extends Component {
   sectionChangeHandler = (newValue, actionMeta) => {
 
     this.setState({
-      showExamNamesFlag: true,
+      showStudentNamesFlag: true,
       selectedExamDetails: { examName: "" },
-      showResultsTableFlag: false
+      showReportCardFlag: false
     });
 
-    console.log("AddResult - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+    console.log("ReportCard - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
 
     this.setState({
       selectedSection: newValue.value,
       selectedSectionLabelValue: newValue,
     }, () => {
-      console.log("AddResult - sectionChangeHandler - selectedSectionLabelValue - " + JSON.stringify(this.state.selectedSectionLabelValue));
-      console.log("\nAddResult - sectionChangeHandler - selected class - " + JSON.stringify(this.state.class)
+      console.log("ReportCard - sectionChangeHandler - selectedSectionLabelValue - " + JSON.stringify(this.state.selectedSectionLabelValue));
+      console.log("\nReportCard - sectionChangeHandler - selected class - " + JSON.stringify(this.state.class)
         + " selected section - " + this.state.selectedSection);
 
       this.fetchClassSpecificDetails();
+    });
+
+  };
+
+  studentChangeHandler = (newValue, actionMeta) => {
+
+    this.setState({
+      selectedExamDetails: { examName: "" },
+      showReportCardFlag: true
+    });
+
+    console.log("ReportCard - studentChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+
+    var username = newValue.value.split("(")[1].split(")")[0];
+
+    // Fetching students marks for all the exams from the complete results object as we need to display selected studnets data only
+    var completeResults = this.state.results;
+    var studentsExamDataArray = [];
+    
+    for(var i=0;i<completeResults.length;i++) {
+
+      var studentsExamData = {};
+
+      studentsExamData.examName = completeResults[i].examName;
+      studentsExamData.examFinishDate = completeResults[i].examFinishDate;
+
+      var studentsResult = completeResults[i].studentsResult;
+      for(var j=0; j<studentsResult.length; j++) {
+
+        if(username === studentsResult[j].username) {
+          studentsExamData.username = studentsResult[j].username;
+          studentsExamData.firstname = studentsResult[j].firstname;
+          studentsExamData.lastname = studentsResult[j].lastname;
+          studentsExamData.fullName = studentsResult[j].fullName;
+          studentsExamData.subjectMarksArray = studentsResult[j].subjectMarksArray;
+        }
+      }
+      
+      studentsExamDataArray.push(studentsExamData);
+    }
+
+    this.setState({
+      selectedStudent: newValue.value,
+      selectedStudentLabelValue: newValue,
+      selectedStudentUsername : username
+    }, () => {
+      console.log("ReportCard - studentChangeHandler - selectedStudentUsername - " + this.state.selectedStudentUsername + " selectedStudentLabelValue - " + JSON.stringify(this.state.selectedStudentLabelValue));
+      console.log("\nReportCard - studentChangeHandler - selected class - " + JSON.stringify(this.state.class)
+        + " selected section - " + this.state.selectedSection);
+
     });
 
   };
@@ -499,7 +539,7 @@ class AddResult extends Component {
     if (isExamNameValid) {
       console.log("Foreach setting exam details after loop");
       this.setState({
-        showResultsTableFlag: true
+        showReportCardFlag: true
       });
     }
 
@@ -553,7 +593,7 @@ class AddResult extends Component {
       "examName": this.state.selectedExamDetails.examName
     }
 
-    console.log("AddResult - fetchResultOnExamName - fetchResultOnExamNameRequest - "
+    console.log("ReportCard - fetchResultOnExamName - fetchResultOnExamNameRequest - "
       + JSON.stringify(fetchResultOnExamNameRequest));
 
     await axios.post("http://localhost:8001/api/fetchResultOnExamName", fetchResultOnExamNameRequest).then(resultsRes => {
@@ -597,34 +637,55 @@ class AddResult extends Component {
       "class": this.state.class,
       "section": this.state.selectedSection,
       "subjects": 1,
-      "studentsData": 1
+      "studentsData": 1,
+      "results": 1
     }
 
-    console.log("AddResult - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
+    console.log("ReportCard - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
       + JSON.stringify(fetchClassSpecificDetailsRequest));
 
     await axios.post("http://localhost:8001/api/fetchClassSpecificDetails", fetchClassSpecificDetailsRequest).then(res => {
 
       if (res.data.errors) {
 
-        console.log('AddResult - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
+        console.log('ReportCard - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
         return this.setState({ errors: res.data.errors });
       } else {
 
         var response = res.data[0];
-        console.log('AddResult - fetchClassSpecificDetails - res.data - ' + JSON.stringify(res.data));
+        console.log('ReportCard - fetchClassSpecificDetails - res.data - ' + JSON.stringify(res.data));
 
         this.setState({
           subjectArrayFromClass: response.subjects,
-          studentsData: response.studentsData
+          studentsData: response.studentsData,
+          results: response.results
         }, () => {
 
-          console.log('AddResult - fetchClassSpecificDetails - SubectsArrayFromClass - ' + JSON.stringify(this.state.subjectArrayFromClass) + ' studentsData - ' + JSON.stringify(this.state.studentsData));
+          console.log('ReportCard - fetchClassSpecificDetails - SubectsArrayFromClass - ' + JSON.stringify(this.state.subjectArrayFromClass) + ' studentsData - ' + JSON.stringify(this.state.studentsData) + ' results - ' + this.state.results);
 
-          this.resetStudentsMarksArray();
+          this.setStudentsDropDownLabelValue();
         });
       }
     });
+  }
+
+  setStudentsDropDownLabelValue() {
+
+    var studentLabelValueArrayTemp = [];
+    this.state.studentsData.forEach(element => {
+
+      var studentLabelValueTemp = {};
+      studentLabelValueTemp.label = element.firstname.charAt(0).toUpperCase() + element.firstname.slice(1) + " " + element.lastname.charAt(0).toUpperCase() + element.lastname.slice(1) + " (" + element.username + ")";
+      studentLabelValueTemp.value = element.firstname.charAt(0).toUpperCase() + element.firstname.slice(1) + " " + element.lastname.charAt(0).toUpperCase() + element.lastname.slice(1) + " (" + element.username + ")";
+
+      studentLabelValueArrayTemp.push(studentLabelValueTemp);
+    });
+
+    this.setState({
+      studentLabelValueArray : studentLabelValueArrayTemp
+    });
+
+    console.log('ReportCard - setStudentsDropDownLabelValue - studentLabelValueArray - ' + JSON.stringify(this.state.studentLabelValueArray));
   }
 
   resetStudentsMarksArray() {
@@ -667,18 +728,17 @@ class AddResult extends Component {
     this.setState({
       studentsMarksArray: studentsMarksArrayTemp
     }, () => {
-      console.log('AddResult - resetStudentsMarksArray - studentsMarksArray - ' + JSON.stringify(this.state.studentsMarksArray));
+      console.log('ReportCard - resetStudentsMarksArray - studentsMarksArray - ' + JSON.stringify(this.state.studentsMarksArray));
     });
   }
 
-  addResultSubmitHandler() {
+  reportCardSubmitHandler() {
 
-    console.log("AddResult addResultSubmitHandler this.state.studentsMarksArray - " + JSON.stringify(this.state.studentsMarksArray));
+    console.log("ReportCard reportCardSubmitHandler this.state.studentsMarksArray - " + JSON.stringify(this.state.studentsMarksArray));
 
     var results = {};
 
     results.examName = this.state.selectedExamDetails.examName;
-    results.examFinishDate = this.state.selectedExamFinishDate;
     results.studentsResult = this.state.studentsMarksArray;
 
     this.setState({
@@ -715,6 +775,11 @@ class AddResult extends Component {
     });
   }
 
+  studentNameChangeHandler() {
+
+
+  }
+
   render() {
 
     return (
@@ -735,7 +800,7 @@ class AddResult extends Component {
                 </Modal>
               )}
 
-              <h3 align="center">Add Result For Class</h3>
+              <h3 align="center">Report Card</h3>
               <br />
 
               <InputGroup className="mb-3">
@@ -781,7 +846,6 @@ class AddResult extends Component {
                     options={this.state.sectionLabelValueArray}
                     closeMenuOnSelect={true}
                     value={this.state.selectedSectionLabelValue}
-                    isDisabled={this.state.disableSectionsFlag}
                     isSearchable={true}
                     onChange={this.sectionChangeHandler} />
 
@@ -795,60 +859,169 @@ class AddResult extends Component {
                 </div>
               }
 
-              {this.state.showExamNamesFlag &&
+              {this.state.showStudentNamesFlag &&
                 <div>
-                  <InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
-                        <b>Exam Name</b>
+                        <b>Student</b>
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input
-                      name="examName"
-                      id="examName"
-                      type="select"
-                      value={this.state.selectedExamDetails.examName}
-                      onChange={this.examNameChangeHandler}
-                    >
-                      <option value="">Select</option>
-                      {this.state.examDetailsArray.map(element => {
-                        return (<option key={element.examName} value={element.examName}>{element.examName}</option>);
-                      }
-                      )}
-                    </Input>
-                  </InputGroup>
-                  {this.state.examNameError && (
+                    <Select
+                    id="section"
+                    name="section"
+                    // isMulti={true}
+                    placeholder="Select Student"
+                    options={this.state.studentLabelValueArray}
+                    closeMenuOnSelect={true}
+                    value={this.state.selectedStudentLabelValue}
+                    isSearchable={true}
+                    onChange={this.studentChangeHandler} />
+                  {this.state.studentNameError && (
                     <font color="red">
                       {" "}
-                      <p>{this.state.examNameError}</p>
+                      <p>{this.state.studentNameError}</p>
                     </font>
                   )}
                 </div>
               }
 
-              {this.state.showResultsTableFlag && this.state.selectedExamDetails && this.state.selectedExamDetails.examName && (
+              {this.state.showReportCardFlag &&
+              // this.state.selectedExamDetails && this.state.selectedExamDetails.examName && 
+              (
                 <div>
-                  <br />
-                  <h3 align="center">{this.state.selectedExamDetails.examName.charAt(0).toUpperCase() + this.state.selectedExamDetails.examName.slice(1)}</h3>
-                  <br />
+
+<br/><br/>
+
+<h3 align="center">{"Class - " + this.state.class + " " + this.state.selectedSection}</h3>
+
+<br/>
+
+<Row lg="2">
+                              <Col>
+                                {/* <Card className="mx-1">
+                                  <CardBody className="p-2"> */}
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Full Name
+                                </InputGroupText>
+                                      </InputGroupAddon>
+                                      <Input
+                                        type="text"
+                                        name="fullName"
+                                        id="fullName"
+                                        value={this.state.fullName}
+                                        autoComplete="fullName"
+                                        onChange={this.changeHandler}
+                                        disabled={this.state.editMode}
+                                        style={whiteTextFieldStyle}
+                                      />
+                                    </InputGroup>
+                                    {this.state.errors && this.state.errors.fullName && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.fullName.msg}</p>
+                                      </font>
+                                    )}
+
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Parent's Name
+                                </InputGroupText>
+                                      </InputGroupAddon>
+                                      <Input
+                                        type="text"
+                                        name="parentFullName"
+                                        id="parentFullName"
+                                        value={this.state.parentFullName}
+                                        autoComplete="parentFullName"
+                                        onChange={this.changeHandler}
+                                        disabled={this.state.editMode}
+                                        style={whiteTextFieldStyle}
+                                      />
+                                    </InputGroup>
+                                    {this.state.errors && this.state.errors.parentFullName && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.parentFullName.msg}</p>
+                                      </font>
+                                    )}
+
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Date of Birth
+                                </InputGroupText>
+                                      </InputGroupAddon>
+
+                                      <DatePicker
+
+                                        name="dob"
+                                        id="dob"
+                                        value={this.state.dob}
+                                        onChange={date=>{this.setState({dob:date})}}
+                                        disabled={this.state.editMode}
+                                        style={whiteTextFieldStyle}
+                                      />
+                                    </InputGroup>
+
+                                    {this.state.errors && this.state.errors.dob && (
+                                      <font color="red">
+                                        {" "}
+                                        <p>{this.state.errors.dob.msg}</p>
+                                      </font>
+                                    )}
+
+                                    <InputGroup className="mb-3">
+                                      <InputGroupAddon addonType="prepend">
+                                        <InputGroupText style={{ width: "120px" }}>
+                                          Address
+                                </InputGroupText>
+                                      </InputGroupAddon>
+                                          <Input
+                                            type="text"
+                                            id="street"
+                                            name="address"
+                                            value={this.state.address}
+                                            onChange={this.changeHandler}
+                                            disabled={this.state.editMode}
+                                            style={whiteTextFieldStyle}
+                                          />
+                                        </InputGroup>
+                                        {this.state.errors &&
+                                          this.state.errors.address && (
+                                            <font color="red">
+                                              {" "}
+                                              <p>{this.state.errors.address.msg}</p>
+                                            </font>
+                                          )}
+
+                                    {/* </CardBody>
+                                    </Card> */}
+                                    </Col>
+
+                                    <Col></Col>
+                                    </Row>
 
                   <div class="table-responsive" >
                     <Table bordered hover size="sm">
                       <thead>
                         <tr>
-                          <th><h5>Students/Subjects</h5></th>
+                          <th><h5>Subjects/Exams</h5></th>
                           {this.state.subjectArrayFromClass.map((item, idx) => (
                             <th className="text-center"> <h5>{item.charAt(0).toUpperCase() + item.slice(1)}</h5></th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {this.state.studentsData.map((item, idx) => (
-                          <tr id="addr0" key={idx}>
-                            <th>{item.firstname.charAt(0).toUpperCase() + item.firstname.slice(1) + " " + item.lastname.charAt(0).toUpperCase() + item.lastname.slice(1)}</th>
+                        {/* {this.state.studentsData.map((item, idx) => ( */}
+                          {this.state.subjectArrayFromClass.map((subjectName, subjectId) => (
+                          <tr id="addr0" key={subjectId}>
+                            <th>{subjectName.charAt(0).toUpperCase() + subjectName.slice(1)}</th>
 
 
-                            {this.state.subjectArrayFromClass.map((subjectName, subjectId) => (
+                            {this.state.subjectArrayFromClass.map((subjectName, idx) => (
                               <td id="col0" key={subjectId} align="center" style={{ "vertical-align": "middle" }}>
                                 <InputGroup >
                                   <Input
@@ -866,106 +1039,6 @@ class AddResult extends Component {
                                 </InputGroup>
                               </td>
                             ))}
-                            {/* <td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td>
-            <td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td><td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td><td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td><td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td><td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td><td>
-            <InputGroup >
-                                    <Input
-                                      name="examDuration"
-                                      type="text"
-                                      className="form-control"
-                                      // value={this.setExamDuration(idx)}
-                                      value="kapil"
-                                      // disabled={false}
-                                      style={{ textAlign: 'center' }}
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-            </td> */}
                           </tr>
                         ))}
                       </tbody>
@@ -980,19 +1053,16 @@ class AddResult extends Component {
                     </font>
                   )}
 
-
-                  <br />
-
-                  {this.state.insertExamDetailsErrorMessage && (
+                  {/* {this.state.insertExamDetailsErrorMessage && (
                     <font color="red">
                       {" "}
                       <p>{this.state.insertExamDetailsErrorMessage}</p>
                     </font>
-                  )}
+                  )} */}
                   <Row>
                     <Col>
                       {!this.state.loader && <Button
-                        onClick={this.addResultSubmitHandler}
+                        onClick={this.reportCardSubmitHandler}
                         size="lg"
                         color="success"
                         block
@@ -1035,5 +1105,5 @@ class AddResult extends Component {
   }
 }
 
-export default AddResult;
+export default ReportCard;
 
