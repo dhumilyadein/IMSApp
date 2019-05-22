@@ -181,6 +181,45 @@ class ScheduleExam extends Component {
           //   console.log('ScheduleExam - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
           // });
 
+        } else {
+
+          //No data present for the selected exam name so resetting the previously selected exam data
+          /*
+          Setting temporary inputExamDataArray for each subject
+          */
+          var startMoment = new Date(new Date().setHours(12, 0, 0, 0));
+          var endMoment = new Date(new Date().setHours(12, 0, 0, 0));
+          var examDate = new Date(new Date().setHours(5, 30, 0, 0));
+
+          var inputExamDataArrayTemp = [];
+          this.state.classDetails[0].subjects.forEach(element => {
+
+            const item = {
+              subject: element,
+              totalMarks: "",
+              passingMarks: "",
+              includeInResultFlag: true,
+              examDate: examDate,
+              startMoment: startMoment,
+              endMoment: endMoment,
+              examDuration: 0,
+              // venueLabelValue: [],
+              // venue: "",
+            };
+
+            inputExamDataArrayTemp.push(item);
+
+          });
+
+          console.log("exam details array - " + JSON.stringify(inputExamDataArrayTemp));
+          this.setState({
+            inputExamDataArray: inputExamDataArrayTemp,
+
+            selectedExamDetails: [],
+            copyTotalMarksToAllRowsFlag: false,
+            copyPassingMarksToAllRowsFlag: false,
+            copyExamTimeToAllRowsFlag: false
+          });
         }
 
       });
@@ -410,14 +449,14 @@ class ScheduleExam extends Component {
     // Setting alphabetically sorted sections in dropdown
     sectionArrayTemp.forEach(section => {
 
-        var sectionLabelValue = {};
+      var sectionLabelValue = {};
 
-        sectionArrayTemp.push(section);
+      sectionArrayTemp.push(section);
 
-        sectionLabelValue.value = section;
-        sectionLabelValue.label = section;
+      sectionLabelValue.value = section;
+      sectionLabelValue.label = section;
 
-        sectionLabelValueArray.push(sectionLabelValue);
+      sectionLabelValueArray.push(sectionLabelValue);
 
     });
 
