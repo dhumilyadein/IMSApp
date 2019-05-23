@@ -225,6 +225,7 @@ module.exports = function (app) {
     console.log("In assignLeave for: " + JSON.stringify(req.body));
 
     if (req.body.carryForward) {
+      console.log("Carry Forwarded");
       var recordsUpdated = 0;
       for (var i = 0; i < req.body.selectedEmp.length; i++) {
         var empDataFound = null;
@@ -361,10 +362,10 @@ module.exports = function (app) {
               else{
               var addLeaveDetails = new EmpLeaveStatus({
                 "empName": req.body.selectedEmp[i].label,
-                leaveDetails: [{ "leaveType": req.body.leaveType, "total": parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "used": 0, remaining: parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "carryForward": req.body.carryForward, maxLeaveCount: data.leaveDetails.maxLeaveCount }]
+                leaveDetails: [{ "leaveType": req.body.leaveType, "total": parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "used": 0, remaining: parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "carryForward": req.body.carryForward, maxLeaveCount: req.body.maxLeaveCount }]
               });
 
-              addLeaveDetails
+             await addLeaveDetails
                 .save()
                 .then(user => { recordsUpdated=recordsUpdated+1;
 
@@ -388,6 +389,7 @@ module.exports = function (app) {
         }
 
         else {
+          console.log("No Carry Forwarded");
           var recordsUpdated = 0;
           for (var i = 0; i < req.body.selectedEmp.length; i++) {
             var empDataFound = null;
