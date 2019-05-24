@@ -283,7 +283,7 @@ remarks:""
             "empName":this.state.selectedEmp.label
           })
           .then(result => {
-            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data.data));
+            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data));
 
             if (result.data.error) {
 

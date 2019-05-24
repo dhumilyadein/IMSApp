@@ -181,15 +181,18 @@ module.exports = function (app) {
 
 
 
-    AppliedLeaves
+   await EmpLeaveStatus
       .find({
-        leaveType: req.body.leaveType, empName: req.body.empName, year: req.body.year,
-        $or: [{ status: "Approved" }, { status: "Applied" }]
-      })
+        empName: req.body.empName})
 
-      .then(data => {
+      .then(data => { console.log("empp Leave Data: "+ data);
+      var remaining=0;
+          for(var i=0;i<data.leaveDetails.length;i++)
+         { if(data.leaveDetails[i].leaveType===req.body.leaveType)
+remaining=data.leaveDetails[i].remaining;}
 
-        return res.send({ data });
+console.log("remaining: "+ remaining)
+        return res.send( remaining );
       })
       .catch(err => {
         return res.send({ error: err });
@@ -250,8 +253,8 @@ module.exports = function (app) {
             if (empDataFound.leaveDetails[j].leaveType === req.body.leaveType) {
               leaveTypeFound = true;
 
-              if ((parseInt(empDataFound.leaveDetails[j].total) + parseInt(empDataFound.leaveDetails[j].remaining)) > req.body.maxLeaveCount) {
-                console.log("MAX Count crossed " + empDataFound.empName);
+              if ((parseInt(req.body.leaveCount) + parseInt(empDataFound.leaveDetails[j].remaining)) > req.body.maxLeaveCount) {
+                console.log("MAX Count crossed " + (parseInt(empDataFound.leaveDetails[j].total) + parseInt(empDataFound.leaveDetails[j].remaining)));
                 await EmpLeaveStatus.findOneAndUpdate({
                   empName: req.body.selectedEmp[i].label.toLowerCase(),
                   'leaveDetails.leaveType': req.body.leaveType
@@ -353,7 +356,7 @@ module.exports = function (app) {
                   });
 
             }}}
-            
+
 
      else {
               console.log("Emp data not found.. creating new entry")
@@ -406,8 +409,8 @@ module.exports = function (app) {
               .catch(err => {
                 return res.send({ error: JSON.stringify(err) });
               });
-    
-    
+
+
             if (empDataFound) {
               var leaveTypeFound = false;
               for (var j = 0; j < empDataFound.leaveDetails.length; j++)
@@ -422,8 +425,8 @@ module.exports = function (app) {
                         'leaveDetails.$.used': 0,
                         'leaveDetails.$.remaining': req.body.leaveCount,
                         'leaveDetails.$.carryForward': req.body.carryForward,
-                       
-    
+
+
                       }
                       }, { new: true }).then(data => {
                         console.log("ESLE data: " + JSON.stringify(data));
@@ -432,14 +435,14 @@ module.exports = function (app) {
                       .catch(err => {
                         return res.send({ error: JSON.stringify(err) });
                       });
-                  
-    
-    
+
+
+
                 }
-    
-    
+
+
               if (!leaveTypeFound) {
-             
+
                         await EmpLeaveStatus.findOneAndUpdate(
                       { empName: req.body.selectedEmp[i].label.toLowerCase() },
                       {
@@ -454,14 +457,14 @@ module.exports = function (app) {
                       }, { new: true })
                       .then(data => {
                         if (data != null) {
-    
+
                           recordsUpdated=recordsUpdated+1;
                         }
                       })
                       .catch(err => {
                         return res.send({ error: JSON.stringify(err) });
                       });
-    
+
                 }}
          else {
                   console.log("Emp data not found.. creating new entry")
@@ -469,25 +472,25 @@ module.exports = function (app) {
                     "empName": req.body.selectedEmp[i].label,
                     leaveDetails: [{ "leaveType": req.body.leaveType, "total": parseInt(req.body.leaveCount) , "used": 0, remaining: parseInt(req.body.leaveCount) , "carryForward": req.body.carryForward }]
                   });
-    
+
                 await  addLeaveDetails
                     .save()
-                    .then(user => { recordsUpdated=recordsUpdated+1; 
+                    .then(user => { recordsUpdated=recordsUpdated+1;
                       console.log("recordUpdated+ "+recordsUpdated)
 
-    
+
                     })
                     .catch(err => {
                       return res.send({ error: JSON.stringify(err) });
                     });
-    
+
                 }
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
               } console.log("recordUpdate: " + recordsUpdated);
               if (recordsUpdated === req.body.selectedEmp.length)
                 res.send({ msg: "Leave Assigned" });
@@ -509,25 +512,25 @@ module.exports = function (app) {
 
       async function getEmployeeLeaveDetails(req, res) {
         console.log("In getEmployeeLeaveDetails for: " + JSON.stringify(req.body));
-    
-    
-    
-    
+
+
+
+
         EmpLeaveStatus
           .find({
             empName: req.body.empName})
-    
+
           .then(data => {
-    
+
             return res.send({ data });
           })
           .catch(err => {
             return res.send({ error: err });
           });
-    
-    
+
+
       }
-    
+
 
 
 
@@ -542,7 +545,7 @@ module.exports = function (app) {
       app.post("/api/rejectLeave", rejectLeave);
       app.post("/api/assignLeave", assignLeave);
       app.post("/api/getEmployeeLeaveDetails", getEmployeeLeaveDetails);
-      
+
       app.post("/api/getEmpAllLeaveDetails", getEmpAllLeaveDetails);
 
 

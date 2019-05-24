@@ -148,18 +148,18 @@ this.getExistingLeaveTypes();
         if (!this.state.leaveName) {
           this.setState({ leaveNameError: "Please Enter Leave Name" });
           submit = false;}
-  
+
           if (!this.state.leaveCount) {
               this.setState({ leaveCountError: "Please Enter Leave Count" });
               submit = false;}
-  
-  
-  
+
+
+
           if (this.state.carryForward&&!this.state.maxLeaveCount) {
             this.setState({ maxLeaveCountError: "Please Enter Max Leave Count" });
             submit = false;}
-  
-  
+
+
         if (submit === true) {
         console.log("Updating Leave: "+ JSON.stringify(this.state));
         axios
@@ -178,7 +178,7 @@ this.getExistingLeaveTypes();
                 success: true,
                 modalSuccess: true,
                 showEditLeave:false,
-                modalMessage:this.state.leaveName+" Leave"+  " Updated Successfully!"
+                modalMessage:this.state.leaveName.charAt(0).toUpperCase() + this.state.leaveName.slice(1)+" Leave"+  " Updated Successfully!"
               },()=>{this.getExistingLeaveTypes()});
 
           });
@@ -255,8 +255,8 @@ deleteSpecificItem= idx => () => {
                       toggle={this.toggleSuccess}
                     >
                       <ModalHeader toggle={this.toggleSuccess}>
-                     
-                     {this.state.modalMessage} 
+
+                     {this.state.modalMessage}
                       </ModalHeader>
                     </Modal>
                   )}
@@ -364,13 +364,13 @@ deleteSpecificItem= idx => () => {
                                         if (e.target.checked === true) {
                                             console.log("carryForward true: " + e.target.checked);
                                             this.setState({
-                                           
+
                                              carryForward:true
                                             });
                                           } else if (e.target.checked === false) {
                                             console.log("carryForward false: " + e.target.checked);
                                             this.setState({
-                                               
+
                                                 carryForward:false,
                                                 maxLeaveCount:""
                                             });
