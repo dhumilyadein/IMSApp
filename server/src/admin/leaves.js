@@ -182,7 +182,7 @@ module.exports = function (app) {
 
 
    await EmpLeaveStatus
-      .find({
+      .findOne({
         empName: req.body.empName})
 
       .then(data => { console.log("empp Leave Data: "+ data);
@@ -192,7 +192,7 @@ module.exports = function (app) {
 remaining=data.leaveDetails[i].remaining;}
 
 console.log("remaining: "+ remaining)
-        return res.send( remaining );
+        return res.send( {remaining});
       })
       .catch(err => {
         return res.send({ error: err });

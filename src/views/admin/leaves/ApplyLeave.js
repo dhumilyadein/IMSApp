@@ -266,7 +266,7 @@ remarks:""
       console.log("In leave change " + (e.target.value));
 
 
-      this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:""}, () => {
+      this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:"",leavesAvailable:""}, () => {
        var  years = this.state.year.split("-")
 
         if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
@@ -279,36 +279,26 @@ remarks:""
           .post("http://localhost:8001/api/getAvailableLeaveCount",
           {
             "leaveType":this.state.selectedLeaveType,
-            "year":this.state.year,
             "empName":this.state.selectedEmp.label
           })
           .then(result => {
             console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data));
 
-            if (result.data.error) {
-
+            if (result.data.error)
              return( this.setState({ error: result.data.error.message }));
 
-                      }
-var totalAppliedLeaveCount=0;
-                      for(var i=0;i<result.data.data.length;i++)
-totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveCount;
+        else
+        {
 
-         for(var i=0;i<this.state.existingLeaveTypes.length;i++)
-         if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
-         { if((this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount)>=0)
-           this.setState({leavesAvailable: this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount})
-           else
-           this.setState({leavesAvailable: 0})
-           if(this.state.leavesAvailable>0)
-           this.setState({showApplyLeave:true})
+           if(parseInt(result.data.remaining)>0)
+           this.setState({showApplyLeave:true,leavesAvailable:result.data.remaining})
            else
 
-           this.setState({error:"No "+this.state.selectedLeaveType+" Leaves Avalable!"})
-         }
+           this.setState({error:"No "+this.state.selectedLeaveType+" leaves Avalable!"})
 
 
 
+        }
 
 
 
