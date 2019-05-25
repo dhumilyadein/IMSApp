@@ -267,7 +267,7 @@ remarks:""
 
 
       this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:"",leavesAvailable:""}, () => {
-      
+
        axios
           .post("http://localhost:8001/api/getAvailableLeaveCount",
           {
@@ -308,7 +308,7 @@ remarks:""
     }
 
   }
- 
+
   render() {
 
     return (
@@ -428,7 +428,7 @@ remarks:""
                                 name="dof"
                                 id="dof"
                                 value={this.state.dof}
-                                onChange={date=>{this.setState({dof:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dof)})}}
+                                onChange={date=>{if (date){this.setState({dof:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dof)})}}}
                               />
 &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
 <InputGroupAddon addonType="prepend">
@@ -442,7 +442,8 @@ remarks:""
                                 name="dot"
                                 id="dot"
                                 value={this.state.dot}
-                                onChange={date=>{this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
+                                onChange={date=>{
+                                  if(date){this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
 
 if(!this.state.dof) this.setState({dateError:"Please Select From Date First!",dot:"",submitDisabled:true});
 else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
@@ -455,7 +456,7 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
   else
   this.setState({selectedLeaveCount:moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')+1})
 
-  })
+  })}
 
 
   }}

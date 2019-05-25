@@ -82,7 +82,7 @@ leaveChangeHandler(e)
       {if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
        { this.setState({carryForward:this.state.existingLeaveTypes[i].carryForward,leaveCount:this.state.existingLeaveTypes[i].leaveCount});
          if(this.state.existingLeaveTypes[i].carryForward)
-         this.setState({maxLeaveCount:this.state.existingLeaveTypes[i].maxLeaveCount,CFLcFromLastYear:true})
+         this.setState({maxLeaveCount:this.state.existingLeaveTypes[i].maxLeaveCount})
       }
 
       }
@@ -198,9 +198,9 @@ maxLeaveCount:""
 
             });
 
-          else if (result.data.error) {
+          else if (result.data.CFLCError) {
 
-            return this.setState({ error: result.data.error });
+            return this.setState({ error: result.data.CFLCError, CFLcFromLastYear:true });
           }
 
 
@@ -258,9 +258,6 @@ maxLeaveCount:""
                           <h3 align="center"> Assign Leaves to Employee</h3>
                           <br/>
 
-
-                          <div> <h5><font color="blue">NOTE:</font></h5> <font color="red"> <h5> Leaves should be assigned/reset only once every year.</h5> </font></div>
-                          <div> <font color="red"> <h5> Carry Forwarded LC's value should be provided only for the 1st year. System will automatically manages this value, hence forth. </h5> </font></div>
 
 <InputGroup className="mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -385,7 +382,7 @@ disabled
                   <InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
-                        <b>Carry Forwarded LC from last year<i>(Optional)</i></b>
+                        <b>Carry Forwarded LC from last year</b>
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input

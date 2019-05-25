@@ -74,30 +74,10 @@ class ViewLeave extends Component {
     this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.fetchEmployees = this.fetchEmployees.bind(this);
-    this.getExistingLeaveTypes = this.getExistingLeaveTypes.bind(this);
+
     this.leaveChangeHandler = this.leaveChangeHandler.bind(this);
   }
 
-  getExistingLeaveTypes() {
-    axios
-      .get("http://localhost:8001/api/getExistingLeaveTypes")
-      .then(result => {
-        if (result.data) {
-          this.setState(
-            {
-              existingLeaveTypes: result.data
-            },
-            () => {
-              console.log(
-                "existingLeaveTypes: " +
-                  JSON.stringify(this.state.existingLeaveTypes)
-              );
-              this.getEmpAllLeaveDetails();
-            }
-          );
-        }
-      });
-  }
 
   getEmpAllLeaveDetails() {
     axios
@@ -106,27 +86,37 @@ class ViewLeave extends Component {
         year: this.state.year
       })
       .then(result => {
+        console.log("Result Data: " + JSON.stringify(result.data));
         if (result.data) {
           this.setState(
             {
-              empAllLeaveDetails: result.data.data
+              empAllLeaveDetails: result.data.empLeaveDetails,
+
             },
             () => {
               console.log(
                 "empAllLeaveDetails: " +
                   JSON.stringify(this.state.empAllLeaveDetails)
               );
-              var temp = [];
-              for (var i = 0; i < this.state.existingLeaveTypes.length; i++) {
-                var count=0;
-                for (var j = 0; j < this.state.empAllLeaveDetails.length; j++) {
+              var temp1 = [], temp2=[];
 
-                  if (this.state.existingLeaveTypes[i].leaveName ===this.state.empAllLeaveDetails[j].leaveType)
-                         count=count+this.state.empAllLeaveDetails[j].selectedLeaveCount; console.log("count: "+count);
+                for (var j = 0; j < this.state.empAllLeaveDetails.leaveDetails.length; j++) {
+
+
+                temp1.push({"leaveType":this.state.empAllLeaveDetails.leaveDetails[j].leaveType,"total":this.state.empAllLeaveDetails.leaveDetails[j].total,"used":this.state.empAllLeaveDetails.leaveDetails[j].used,"balance":this.state.empAllLeaveDetails.leaveDetails[j].remaining})
                 }
-                temp.push({"leaveType":this.state.existingLeaveTypes[i].leaveName,"total":this.state.existingLeaveTypes[i].leaveCount,"used":count,"balance":this.state.existingLeaveTypes[i].leaveCount-count})
-              }
-                this.setState({leaveDetails:temp, showEmpLeaveDetails:true});
+for(var i=0;i<result.data.leaveHistory.length;i++)
+{
+
+  temp2.push({"leaveType":result.data.leaveHistory[i].leaveType,"appliedOn":result.data.leaveHistory[i].doa.substring(0,10),"period":result.data.leaveHistory[i].dof.substring(0,10)+"   To   "+result.data.leaveHistory[i].dot.substring(0,10)+"   ("+result.data.leaveHistory[i].selectedLeaveCount+" days)","status":result.data.leaveHistory[i].status});
+
+
+}
+
+
+
+
+                this.setState({leaveDetails:temp1, leaveHistory:temp2, showEmpLeaveDetails:true});
 
             }
           );
@@ -397,14 +387,8 @@ class ViewLeave extends Component {
                           this.setState(
                             {
                               selectedEmp: selected,
-                              showApplyLeave: false,
-                              selectedLeaveType: "",
-                              leavesAvailable: "",
-                              error: ""
-                            },
-                            () => {
-                              this.getExistingLeaveTypes();
-                            }
+
+                            },()=>{this.getEmpAllLeaveDetails();}
                           );
                         }}
                       />
@@ -501,6 +485,84 @@ class ViewLeave extends Component {
                               ))}
                             </tbody>
                           </Table>
+
+                          <br />
+                          <h4 align="center">Leaves History</h4>
+                          <h6 >Showing upto Last 10 records  </h6>
+
+<Table bordered hover>
+  <thead>
+    <tr style={{ backgroundColor: "lightgreen" }}>
+      <th className="text-center">
+        <h4> S.No.</h4>{" "}
+      </th>
+      <th className="text-center">
+        {" "}
+        <h4>Leave Type </h4>
+      </th>
+
+      <th className="text-center">
+        {" "}
+        <h4>Applied On</h4>
+      </th>
+      <th className="text-center">
+        {" "}
+        <h4>Leave Period</h4>
+      </th>
+
+      <th className="text-center">
+        {" "}
+        <h4>Status</h4>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {this.state.leaveHistory.map((item, idx) => (
+      <tr id="addr0" key={idx}>
+        <td align="center">
+          <h5>{idx + 1}</h5>
+        </td>
+        <td align="center">
+          <h5>
+            {" "}
+            {this.state.leaveHistory[idx].leaveType
+              .charAt(0)
+              .toUpperCase() +
+              this.state.leaveHistory[idx].leaveType.slice(1)}
+          </h5>
+        </td>
+        <td align="center">
+          <h5>
+            {" "}
+            {this.state.leaveHistory[idx].appliedOn}
+          </h5>
+        </td>
+
+        <td align="center">
+          <h5>
+            {" "}
+            {this.state.leaveHistory[idx].period}
+          </h5>
+        </td>
+
+        <td align="center">
+          <h5>
+            {" "}
+            {
+              this.state.leaveHistory[idx].status
+            }
+          </h5>
+        </td>
+
+
+
+
+
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
                         </p>
                       )}
 

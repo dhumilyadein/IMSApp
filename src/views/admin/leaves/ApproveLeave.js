@@ -114,7 +114,7 @@ approveHandler= idx => () => {
             this.setState({showDetails:false,
                 success: true,
                 modalSuccess: true,
-                modalMessage:"Leaves Request Approved"
+                modalMessage:"Leave Request Approved"
 
             },()=>{this.getPendingLeaves();});
 
@@ -135,14 +135,14 @@ rejectHandler= idx => () => {
 
   confirmAlert({
     title: 'Confirm to Remove',
-    message: 'Are you sure to Approve this Leave Request?',
+    message: 'Are you sure to Reject this Leave Request?',
     buttons: [
       {
         label: 'Yes',
         onClick: () =>
 
         axios
-        .post("http://localhost:8001/api/rejectLeave",{"_id":this.state.pendingLeaves[idx]._id,
+        .post("http://localhost:8001/api/rejectLeave",{"_id":this.state.pendingLeaves[idx]._id,"leaveType":this.state.leaveType, "leaveCount":this.state.totalLeaveCount, "empName":this.state.empName,
         "dateOfApproveOrReject": new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000))})
         .then(result => {
           console.log("Existing RESULT.data " + JSON.stringify(result.data));
@@ -152,7 +152,7 @@ rejectHandler= idx => () => {
             this.setState({showDetails:false,
                 success: true,
                 modalSuccess: true,
-                modalMessage:"Leaves Request Rejected"
+                modalMessage:"Leave Request Rejected"
 
             },()=>{this.getPendingLeaves();});
 

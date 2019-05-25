@@ -645,8 +645,7 @@ req.body["fullName"]=req.body.firstname + " " + req.body.lastname;
     }
 
     if (req.body.role.indexOf("teacher") !== -1) {
-      user = new 
-      (req.body);
+      user = new Teacher (req.body);
       console.log("Teacher = " + user);
       user.password = user.hashPassword(user.password);
       user.photo.data = fs.readFileSync(photoPath);
