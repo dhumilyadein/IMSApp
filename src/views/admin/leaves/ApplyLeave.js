@@ -163,14 +163,14 @@ remarks:""
     })
 
     if (!this.state.year || this.state.year.length != 9) {
-      this.setState({ yearError: "Please Enter Year correctly (Eg. 2018-19)" });
+      this.setState({ yearError: "Please Enter Year correctly (Eg. 2018-2019)" });
       submit = false;
 
     }
 
      var  years = this.state.year.split("-")
     if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
-   {this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"});
+   {this.setState({yearError:"Year Format is not correct! Correct Format: 2018-2019"});
   submit=false}
 
     if (!this.state.selectedLeaveType) {
@@ -267,14 +267,7 @@ remarks:""
 
 
       this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:"",leavesAvailable:""}, () => {
-       var  years = this.state.year.split("-")
-
-        if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
-       return(this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"}));
-
-
-
-
+      
        axios
           .post("http://localhost:8001/api/getAvailableLeaveCount",
           {
@@ -294,7 +287,7 @@ remarks:""
            this.setState({showApplyLeave:true,leavesAvailable:result.data.remaining})
            else
 
-           this.setState({error:"No "+this.state.selectedLeaveType+" leaves Avalable!"})
+           this.setState({leavesAvailable:0, error:"No "+this.state.selectedLeaveType+" leaves Avalable!"})
 
 
 
@@ -315,12 +308,7 @@ remarks:""
     }
 
   }
-  /**
-   * @description Called when the role(s) are selected. To update role Array
-   * @param {*} e
-   */
-
-
+ 
   render() {
 
     return (

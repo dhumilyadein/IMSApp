@@ -12,14 +12,34 @@ module.exports = function (app) {
     req.body["status"] = "Applied";
     var applyLeave = new AppliedLeaves(req.body);
 
-    applyLeave
+   await  applyLeave
       .save()
       .then(user => {
-        return res.send({ msg: "Success" });
+        //return res.send({ msg: "Success" });
       })
       .catch(err => {
         return res.send(err);
       });
+
+      await EmpLeaveStatus.findOneAndUpdate({
+        empName: req.body.empName.toLowerCase(),
+        'leaveDetails.leaveType': req.body.leaveType
+      }, {
+        '$set': {
+          'leaveDetails.$.used': req.body.selectedLeaveCount,
+          'leaveDetails.$.remaining': req.body.maxLeaveCount,
+         
+
+
+        }
+        }, { new: true }).then(data => {
+          console.log("ESLE data: " + JSON.stringify(data));
+
+          recordsUpdated=recordsUpdated+1;
+        })
+        .catch(err => {
+          return res.send({ error: JSON.stringify(err) });
+        });
 
 
   }
