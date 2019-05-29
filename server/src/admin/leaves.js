@@ -313,7 +313,7 @@ var empLeaveDetails, leaveHistory;
                     'leaveDetails.$.total': parseInt(req.body.maxLeaveCount),
                     'leaveDetails.$.used': 0,
                     'leaveDetails.$.remaining': parseInt(req.body.maxLeaveCount),
-                    'leaveDetails.$.carryForward': parseInt(req.body.carryForward),
+                    'leaveDetails.$.carryForward': req.body.carryForward,
                     'leaveDetails.$.maxLeaveCount': parseInt(req.body.maxLeaveCount),
 
 
@@ -337,7 +337,7 @@ var empLeaveDetails, leaveHistory;
                     'leaveDetails.$.total':parseInt(req.body.leaveCount + empDataFound.leaveDetails[j].remaining),
                     'leaveDetails.$.used': 0,
                     'leaveDetails.$.remaining': parseInt(req.body.leaveCount + empDataFound.leaveDetails[j].remaining),
-                    'leaveDetails.$.carryForward': parseInt(req.body.carryForward),
+                    'leaveDetails.$.carryForward': req.body.carryForward,
                     'leaveDetails.$.maxLeaveCount': parseInt(req.body.maxLeaveCount),
 
                   }
@@ -474,7 +474,7 @@ var empLeaveDetails, leaveHistory;
                         'leaveDetails.$.total': parseInt(req.body.leaveCount),
                         'leaveDetails.$.used': 0,
                         'leaveDetails.$.remaining': parseInt(req.body.leaveCount),
-                        'leaveDetails.$.carryForward': parseInt(req.body.carryForward),
+                        'leaveDetails.$.carryForward': req.body.carryForward,
 
 
                       }
