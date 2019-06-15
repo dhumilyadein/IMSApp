@@ -370,7 +370,7 @@ function updateBook(req,res)
   .updateOne({bookName:req.body.selectedBook.value},
     {$set: {bookId:req.body.bookId, bookName:req.body.bookName, category:req.body.category.label,author:req.body.author,
     publisher:req.body.publisher , quantity:req.body.quantity, cost:req.body.cost,   doa:req.body.doa, location:req.body.location,
-     description:req.body.description,uniqueBookIds : req.body.uniqueBookIds 
+     description:req.body.description,uniqueBookIds : req.body.uniqueBookIds
 
 
     }})
@@ -442,7 +442,7 @@ return res.send({msg:"Success"});
 }
 
 function gettingStaff(req, res) {
-  console.log("in gettingBooks ");
+  console.log("in gettingStaff ");
 
   Users
     .find({ $or:[ {role:"admin"}, {role:"teacher"} ],status: "Active"})
@@ -528,7 +528,7 @@ function getReturnedBooks(req,res)
 
 if(req.body.class&&req.body.section)
  { IssuedBooks
-.find({ $and: [ { "issuedBookDetails.actualReturnedDate": { $gte : new Date(req.body.dos) } }, 
+.find({ $and: [ { "issuedBookDetails.actualReturnedDate": { $gte : new Date(req.body.dos) } },
 { "issuedBookDetails.actualReturnedDate": { $lte : new Date(req.body.doe) } },
   {class:req.body.class},{section:req.body.section},{ "issuedBookDetails.isReturned":true}] })
 
@@ -566,12 +566,12 @@ return res.send({error:err});
 
 
 
-/* .find({ $and: [ { "issuedBookDetails":{"actualReturnedDate": { $gte : new Date(req.body.dos) } }}, 
-{ "issuedBookDetails":{"actualReturnedDate": { $lte : new Date(req.body.doe) } }}, 
+/* .find({ $and: [ { "issuedBookDetails":{"actualReturnedDate": { $gte : new Date(req.body.dos) } }},
+{ "issuedBookDetails":{"actualReturnedDate": { $lte : new Date(req.body.doe) } }},
    { "issuedBookDetails.isReturned":true}
     ] }) */
 
-.then(data => { 
+.then(data => {
 console.log("Data"+ JSON.stringify(data))
 return res.send({data});
 })
@@ -593,7 +593,7 @@ function getBookDefaulters(req,res)
   IssuedBooks
 .find(
    { "issuedBookDetails.isReturned":false})
-    
+
 
 .then(data => {
   console.log("In Data for: "+JSON.stringify(data));
@@ -602,7 +602,7 @@ return res.send({data});
 .catch(err => {
 return res.send({error:err});
 });
- 
+
 
 
 
@@ -628,7 +628,7 @@ return res.send({error:err});
 
         'issuedBookDetails.$.isReturned': true,
         'issuedBookDetails.$.actualReturnedDate': new Date(req.body.dor),
-      
+
 
     }})
 
@@ -671,7 +671,7 @@ return res.send({error:err});
 
   }
 
-  
+
   app.post("/api/getBookDefaulters", getBookDefaulters);
 
   app.post("/api/importBooks", importBooks);

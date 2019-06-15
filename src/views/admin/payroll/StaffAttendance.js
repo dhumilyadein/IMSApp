@@ -58,23 +58,23 @@ class StaffAttendance extends Component {
       sectionView: false,
       empView: false,
       markAttendanceView: false,
-   
+
      empType:"",
      empDetails:[],
       studentsDataArray: [],
-     
+
 
       tempArray: ["kapil", "mayank"],
 
-    
-     
+
+
       nameBtnColorFlag: false, // false means grey color, change color to green when button is clicked (true - green)
       nameBtnColor: 'grey',
 
       attendance: [],
 
       isOpen: false,
-      
+
       attendanceDate: new Date(new Date(moment().startOf('day')).getTime()-(new Date(moment().startOf('day')).getTimezoneOffset() * 60000)),
       // attendanceDate: new Date(moment().startOf('day')),
 
@@ -88,8 +88,8 @@ class StaffAttendance extends Component {
 
     };
 
-  
-   
+
+
     this.nameBtnClicked = this.nameBtnClicked.bind(this);
     this.updateStudentsAttendance = this.updateStudentsAttendance.bind(this);
     this.submitAttendance = this.submitAttendance.bind(this);
@@ -102,10 +102,10 @@ class StaffAttendance extends Component {
     this.fetchEmployeesWithoutEvent = this.fetchEmployeesWithoutEvent.bind(this);
     this.reset = this.reset.bind(this);
 
-    
 
-    
-  
+
+
+
 
   }
 
@@ -119,19 +119,19 @@ class StaffAttendance extends Component {
      empType:"",
      empDetails:[],
       studentsDataArray: [],
-     
+
 
       tempArray: ["kapil", "mayank"],
 
-    
-     
+
+
       nameBtnColorFlag: false, // false means grey color, change color to green when button is clicked (true - green)
       nameBtnColor: 'grey',
 
       attendance: [],
 
       isOpen: false,
-      
+
       attendanceDate: new Date(new Date(moment().startOf('day')).getTime()-(new Date(moment().startOf('day')).getTimezoneOffset() * 60000)),
       // attendanceDate: new Date(moment().startOf('day')),
 
@@ -167,12 +167,12 @@ console.log(" dateChangeCounter: "+this.state.dateChangeCounter)
        this.setState( {displayDate : moment(this.state.attendanceDate).format('LL') } );
 
        this.fetchEmployeesWithoutEvent();
-       
+
      });
 
- 
+
    }
-   
+
    this.toggleCalendar();
 
      }
@@ -184,7 +184,7 @@ console.log(" dateChangeCounter: "+this.state.dateChangeCounter)
 
 
 
- 
+
 
   submitAttendance() {
 
@@ -192,16 +192,16 @@ console.log(" dateChangeCounter: "+this.state.dateChangeCounter)
     submitBtn.blur();
 
     console.log("this.state.studentsDataArray - " + JSON.stringify(this.state.empDetails));
-  
+
       var attendance = {};
       var empInfoArray = [];
-  
+
       attendance.date = this.state.attendanceDate;
-  
+
       this.state.empDetails.forEach(student => {
-  
+
         var empInfo = {};
-  
+
         empInfo.username = student.username;
         empInfo.firstname = student.firstname;
         empInfo.lastname = student.lastname;
@@ -217,17 +217,17 @@ console.log(" dateChangeCounter: "+this.state.dateChangeCounter)
           empInfo.attendanceStatus = "present";
           empInfo.attendanceColor = "green";
         }
-  
+
         empInfoArray.push(empInfo);
       })
-  
+
       attendance.empInfo = empInfoArray;
-  
+
       this.setState({
         attendance: attendance, error:""
       }, () => {
         console.log(" attendance array - " + JSON.stringify(this.state.attendance));
-  
+
           this.updateStudentsAttendance(this.state.empType);
       });
 
@@ -245,16 +245,16 @@ console.log(" dateChangeCounter: "+this.state.dateChangeCounter)
 
         return this.setState({ error: cRes.data.errors });
 
-      } 
+      }
 else{  var empArray = [];
   cRes.data.forEach(element => {
-   
+
     if(this.state.empType==="Admin" && element.role.indexOf("teacher")===-1)
-    
+
            empArray.push(element);
 
           else if(this.state.empType==="Staff")
-    
+
            empArray.push(element);
 
 
@@ -280,16 +280,16 @@ else{  var empArray = [];
 
         return this.setState({ error: cRes.data.errors });
 
-      } 
+      }
 else{  var empArray = [];
   cRes.data.forEach(element => {
-   
+
     if(this.state.empType==="Admin" && element.role.indexOf("teacher")===-1)
-    
+
            empArray.push(element);
 
           else if(this.state.empType==="Staff")
-    
+
            empArray.push(element);
 
 
@@ -308,28 +308,28 @@ else{  var empArray = [];
   nameBtnClicked( username) {
 
     var nameBtn = document.getElementById(username);
-   
+
 
     nameBtn.blur();
 
     if(nameBtn.style.backgroundColor === 'grey' ) {
 
       nameBtn.style.backgroundColor='green';
-     
+
 
       console.log("Attendance - present marked for username - " + username);
 
     } else {
 
       nameBtn.style.backgroundColor='grey';
-     
+
 
       console.log("Attendance - absent marked for username - " + username);
     }
 
   }
 
- 
+
 
   async fetchAttendanceOnDate() {
 
@@ -354,14 +354,14 @@ else{  var empArray = [];
       } else {
 
         // Setting studentsDataArray from Class.attendance.empInfo which was earlier set from Class.studentsData table
-        if(attendanceRes.data.response ) 
+        if(attendanceRes.data.response )
           if(attendanceRes.data.response.empInfo)
             // Setting students data for the selected date
           this.setState({
             empDetails: attendanceRes.data.response.empInfo
           });
-        
-        
+
+
       }
     });
   }
@@ -370,7 +370,7 @@ else{  var empArray = [];
 
     var updateStudentsAttendanceRequest = {
       "empType": empType,
-  
+
       "attendance": this.state.attendance
     }
 
@@ -384,7 +384,7 @@ if(res.data.msg==="Success")
 this.setState({
   modalSuccess: true
 });
-  
+
       else if(res.data.err)
       {
         return this.setState({ error: res.data.err });
@@ -392,15 +392,15 @@ this.setState({
     });
   }
 
- 
 
- 
 
- 
+
+
+
 
   render() {
 
-   
+
     return (
       <div>
         <Container >
@@ -424,7 +424,7 @@ this.setState({
             <CardBody>
 
               <br />
-            
+
               <InputGroup className="mb-4">
                   <InputGroupAddon addonType="prepend">
                     <InputGroupText >
@@ -444,15 +444,15 @@ this.setState({
 
                   </Input>
                 </InputGroup>
-               
-            
+
+
 {this.state.error && (
   <font color="red">
     {" "}
     <p><b>{this.state.error}</b></p>
   </font>
 )}
-            
+
 
             </CardBody>
           </Card>
@@ -462,9 +462,9 @@ this.setState({
             <div>
 
             <div align="center">
-            
+
             { !this.state.isOpen && (
-         
+
 <div align="center">
 <Row>
 <Col className="col-md-4"/>
@@ -480,8 +480,8 @@ this.setState({
                                     type="button"
                                     id="attendanceDate"
                                     value={this.state.displayDate}
-                                    style={{ backgroundColor: this.state.nameBtnColor, 
-                                      // borderColor: 'black', 
+                                    style={{ backgroundColor: this.state.nameBtnColor,
+                                      // borderColor: 'black',
                                       color: 'white',
                                       cursor: 'pointer'
                                     }}
@@ -502,7 +502,7 @@ this.setState({
                                 isOpen={this.state.isOpen}
                               />
 )}
-             
+
             </div>
 
 <Row>
@@ -521,7 +521,7 @@ this.setState({
                     <CardBody align="center">
 <div align="center">
                       <Row align="center">
-                       
+
 
                         <Col align="center" className="col-md-10">
                         <Button block
@@ -538,7 +538,7 @@ this.setState({
 
 <Row key={studentsData.username}>
                   <Col className="col-md-10">
-             
+
                                     <Input
                                     block
                                     type="button"
@@ -546,7 +546,7 @@ this.setState({
                                       onClick={ () => this.nameBtnClicked( studentsData.username) }
                                       size="lg"
                                       disabled={this.state.viewAttendanceView}
-                                      style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'green'), 
+                                      style={{ backgroundColor: (studentsData.attendanceColor ? studentsData.attendanceColor : 'green'),
                                       color: 'white',
                                       outline:0,
                                       cursor: 'pointer'
@@ -554,17 +554,17 @@ this.setState({
                                       value={studentsData.firstname.toUpperCase() + " " + studentsData.lastname.toUpperCase() + " ( " + studentsData.username + " )"} >
                                       </Input>
                         </Col>
-  </Row> 
+  </Row>
 ))} </div>
 
-                     
+
                     </CardBody>
                   </Card>
 
                 </Col>
               </Row>
             </div>
-          
+
           )}
 
           { this.state.markAttendanceView && (
@@ -576,13 +576,14 @@ this.setState({
                                     id="submitAttendanceBtn"
                                       onClick={this.submitAttendance}
                                       size="lg"
-                                      style={{ backgroundColor: "blue", 
-                                      // borderColor: 'black', 
+                                      style={{ backgroundColor: "blue",
+                                      // borderColor: 'black',
                                       color: 'white',
                                       outline:0,
                                       cursor: 'pointer'
                                      }}
                                       value="SUBMIT ATTENDANCE" >
+
                                       </Input>
 
                                           </CardBody>

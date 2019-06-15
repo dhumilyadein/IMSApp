@@ -12,14 +12,34 @@ module.exports = function (app) {
     req.body["status"] = "Applied";
     var applyLeave = new AppliedLeaves(req.body);
 
-    applyLeave
+   await  applyLeave
       .save()
       .then(user => {
-        return res.send({ msg: "Success" });
+        //return res.send({ msg: "Success" });
       })
       .catch(err => {
         return res.send(err);
       });
+
+      await EmpLeaveStatus.findOneAndUpdate({
+        empName: req.body.empName.toLowerCase(),
+        'leaveDetails.leaveType': req.body.leaveType
+      }, {
+        '$inc': {
+          'leaveDetails.$.used': req.body.selectedLeaveCount,
+          'leaveDetails.$.remaining': -(req.body.selectedLeaveCount)
+
+        }
+        },
+         { new: true }).then(data => {
+          return res.send({ msg: "Success" });
+
+        })
+        .catch(err => {
+          return res.send({ error: JSON.stringify(err) });
+        });
+
+
 
 
   }
@@ -68,7 +88,7 @@ module.exports = function (app) {
   async function rejectLeave(req, res) {
     console.log("in rejectLeave Req.body: " + JSON.stringify(req.body))
 
-    AppliedLeaves
+   await AppliedLeaves
       .findOneAndUpdate({ _id: req.body._id },
         {
           status: "Rejected",
@@ -77,12 +97,29 @@ module.exports = function (app) {
       )
 
       .then(user => {
-        return res.send({ msg: "Leave Rejected" });
+
       })
       .catch(err => {
         return res.send(err);
       });
 
+      await EmpLeaveStatus.findOneAndUpdate({
+        empName: req.body.empName.toLowerCase(),
+        'leaveDetails.leaveType': req.body.leaveType
+      }, {
+        '$inc': {
+          'leaveDetails.$.used': -(req.body.leaveCount),
+          'leaveDetails.$.remaining': req.body.leaveCount
+
+        }
+        },
+         { new: true }).then(data => {
+          return res.send({ msg: "Leave Rejected" });
+
+        })
+        .catch(err => {
+          return res.send({ error: JSON.stringify(err) });
+        });
 
 
 
@@ -115,15 +152,6 @@ module.exports = function (app) {
         return res.send({ error: err });
       });
 
-//             if((parseInt(empDataFound.leaveDetails[j].total)+parseInt(empDataFound.leaveDetails[j].remaining))>req.body.maxLeaveCount)
-// { console.log("MAX Count crossed "+empDataFound.empName);
-//           await  EmpLeaveStatus.findOneAndUpdate({empName:req.body.selectedEmp[i].label.toLowerCase(),
-//               'leaveDetails.leaveType': req.body.leaveType}, {'$set': {
-//                 'leaveDetails.$.total': req.body.maxLeaveCount,
-//                 'leaveDetails.$.used':0,
-//                 'leaveDetails.$.remaining': req.body.maxLeaveCount,
-//                 'leaveDetails.$.carryForward':req.body.carryForward,
-//                 'leaveDetails.$.maxLeaveCount':req.body.maxLeaveCount,
 
   }
 
@@ -131,9 +159,6 @@ module.exports = function (app) {
     console.log("In editLeave for: " + JSON.stringify(req.body));
 
 
-//           }}, {new: true}).then(data=>{
-//              console.log("ESLE data: "+ JSON.stringify(data));
-//             recordsUpdated++;})}
 
     LeaveTypes
       .findOneAndUpdate({ leaveName: req.body.existingLeaveTypes[req.body.leaveNo].leaveName },
@@ -158,8 +183,6 @@ module.exports = function (app) {
 
 
 
-
-//               }},{new: true}).then(data=>{recordsUpdated++;})
 
 
   }
@@ -187,7 +210,6 @@ module.exports = function (app) {
 
   }
 
-//           }}, {new: true})
 
   async function getAvailableLeaveCount(req, res) {
     console.log("In getAvailableLeaveCount for: " + JSON.stringify(req.body));
@@ -195,15 +217,18 @@ module.exports = function (app) {
 
 
 
-    AppliedLeaves
-      .find({
-        leaveType: req.body.leaveType, empName: req.body.empName, year: req.body.year,
-        $or: [{ status: "Approved" }, { status: "Applied" }]
-      })
+   await EmpLeaveStatus
+      .findOne({
+        empName: req.body.empName})
 
-      .then(data => {
+      .then(data => { console.log("empp Leave Data: "+ data);
+      var remaining=0;
+          for(var i=0;i<data.leaveDetails.length;i++)
+         { if(data.leaveDetails[i].leaveType===req.body.leaveType)
+remaining=data.leaveDetails[i].remaining;}
 
-        return res.send({ data });
+console.log("remaining: "+ remaining)
+        return res.send( {remaining});
       })
       .catch(err => {
         return res.send({ error: err });
@@ -215,24 +240,34 @@ module.exports = function (app) {
   async function getEmpAllLeaveDetails(req, res) {
     console.log("In getEmpAllLeaveDetails for: " + JSON.stringify(req.body));
 
-
-//        addLeaveDetails
-//       .save()
-
-
-    AppliedLeaves
-      .find({
-        empName: req.body.empName, year: req.body.year,
-        $or: [{ status: "Approved" }, { status: "Applied" }]
+var empLeaveDetails, leaveHistory;
+   await EmpLeaveStatus
+      .findOne({
+        empName: req.body.empName
       })
 
-      .then(data => {
+      .then(data => { empLeaveDetails=data
 
-        return res.send({ data });
+
       })
       .catch(err => {
         return res.send({ error: err });
       });
+
+
+      await  AppliedLeaves
+      .find({
+        empName: req.body.empName,year:req.body.year
+      }).sort({doa:-1}).limit(10)
+
+      .then(data => { leaveHistory=data
+
+          })
+      .catch(err => {
+        return res.send({ error: err });
+      });
+
+      return res.send({ empLeaveDetails:empLeaveDetails,leaveHistory:leaveHistory });
 
 
   }
@@ -241,6 +276,7 @@ module.exports = function (app) {
     console.log("In assignLeave for: " + JSON.stringify(req.body));
 
     if (req.body.carryForward) {
+      console.log("Carry Forwarded");
       var recordsUpdated = 0;
       for (var i = 0; i < req.body.selectedEmp.length; i++) {
         var empDataFound = null;
@@ -265,18 +301,18 @@ module.exports = function (app) {
             if (empDataFound.leaveDetails[j].leaveType === req.body.leaveType) {
               leaveTypeFound = true;
 
-              if ((parseInt(empDataFound.leaveDetails[j].total) + parseInt(empDataFound.leaveDetails[j].remaining)) > req.body.maxLeaveCount) {
-                console.log("MAX Count crossed " + empDataFound.empName);
+              if ((parseInt(req.body.leaveCount) + parseInt(empDataFound.leaveDetails[j].remaining)) > req.body.maxLeaveCount) {
+                console.log("MAX Count crossed " + (parseInt(empDataFound.leaveDetails[j].total) + parseInt(empDataFound.leaveDetails[j].remaining)));
                 await EmpLeaveStatus.findOneAndUpdate({
                   empName: req.body.selectedEmp[i].label.toLowerCase(),
                   'leaveDetails.leaveType': req.body.leaveType
                 }, {
                   '$set': {
-                    'leaveDetails.$.total': req.body.maxLeaveCount,
+                    'leaveDetails.$.total': parseInt(req.body.maxLeaveCount),
                     'leaveDetails.$.used': 0,
-                    'leaveDetails.$.remaining': req.body.maxLeaveCount,
+                    'leaveDetails.$.remaining': parseInt(req.body.maxLeaveCount),
                     'leaveDetails.$.carryForward': req.body.carryForward,
-                    'leaveDetails.$.maxLeaveCount': req.body.maxLeaveCount,
+                    'leaveDetails.$.maxLeaveCount': parseInt(req.body.maxLeaveCount),
 
 
                   }
@@ -296,11 +332,11 @@ module.exports = function (app) {
                   'leaveDetails.leaveType': req.body.leaveType
                 }, {
                   '$set': {
-                    'leaveDetails.$.total': req.body.leaveCount + empDataFound.leaveDetails[j].remaining,
+                    'leaveDetails.$.total':parseInt(req.body.leaveCount + empDataFound.leaveDetails[j].remaining),
                     'leaveDetails.$.used': 0,
-                    'leaveDetails.$.remaining': req.body.leaveCount + empDataFound.leaveDetails[j].remaining,
+                    'leaveDetails.$.remaining': parseInt(req.body.leaveCount + empDataFound.leaveDetails[j].remaining),
                     'leaveDetails.$.carryForward': req.body.carryForward,
-                    'leaveDetails.$.maxLeaveCount': req.body.maxLeaveCount,
+                    'leaveDetails.$.maxLeaveCount': parseInt(req.body.maxLeaveCount),
 
                   }
                   }, { new: true }).then(data => {
@@ -318,7 +354,7 @@ module.exports = function (app) {
 
           if (!leaveTypeFound) {
             if (!req.body.CFLC)
-              return res.send({ error: "Please Enter Carry Forwarded Leave Count from Last Year. Carry Forwarded Count is required for the first time only!" });
+              return res.send({ CFLCError: "Please Enter Carry Forwarded Leave Count from Last Year. Carry Forwarded Count is required for the first time only!" });
 
             else {
               if ((parseInt(req.body.leaveCount) + parseInt(req.body.CFLC)) > req.body.maxLeaveCount)
@@ -327,8 +363,8 @@ module.exports = function (app) {
                   {
                     $push: {
                       leaveDetails: {
-                        "leaveType": req.body.leaveType, "total": req.body.maxLeaveCount, "used": 0, remaining: req.body.maxLeaveCount, carryForward: req.body.carryForward,
-                        maxLeaveCount: req.body.maxLeaveCount
+                        "leaveType": req.body.leaveType, "total": parseInt(req.body.maxLeaveCount), "used": 0, remaining: parseInt(req.body.maxLeaveCount), carryForward: req.body.carryForward,
+                        maxLeaveCount: parseInt(req.body.maxLeaveCount)
                       }
                     }
                   }, { new: true })
@@ -353,7 +389,7 @@ module.exports = function (app) {
                         "total": parseInt(req.body.leaveCount) + parseInt(req.body.CFLC),
                         "used": 0, "remaining": parseInt(req.body.leaveCount) + parseInt(req.body.CFLC),
                         "carryForward": req.body.carryForward,
-                        "maxLeaveCount": req.body.maxLeaveCount
+                        "maxLeaveCount": parseInt(req.body.maxLeaveCount)
                       }
                     }
                   }, { new: true })
@@ -368,17 +404,19 @@ module.exports = function (app) {
                   });
 
             }}}
+
+
      else {
               console.log("Emp data not found.. creating new entry")
               if (!req.body.CFLC)
-              return res.send({ error: "Please Enter Carry Forwarded Leave Count from Last Year. Carry Forwarded Count is required for the first time only!" });
+              return res.send({ CFLCError: "Please Enter Carry Forwarded Leave Count from Last Year. Carry Forwarded Count is required for the first time only!" });
               else{
               var addLeaveDetails = new EmpLeaveStatus({
                 "empName": req.body.selectedEmp[i].label,
-                leaveDetails: [{ "leaveType": req.body.leaveType, "total": parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "used": 0, remaining: parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "carryForward": req.body.carryForward, maxLeaveCount: data.leaveDetails.maxLeaveCount }]
+                leaveDetails: [{ "leaveType": req.body.leaveType, "total": parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "used": 0, remaining: parseInt(req.body.leaveCount) + parseInt(req.body.CFLC), "carryForward": req.body.carryForward, maxLeaveCount: parseInt(req.body.maxLeaveCount) }]
               });
 
-              addLeaveDetails
+             await addLeaveDetails
                 .save()
                 .then(user => { recordsUpdated=recordsUpdated+1;
 
@@ -402,6 +440,7 @@ module.exports = function (app) {
         }
 
         else {
+          console.log("No Carry Forwarded");
           var recordsUpdated = 0;
           for (var i = 0; i < req.body.selectedEmp.length; i++) {
             var empDataFound = null;
@@ -418,8 +457,8 @@ module.exports = function (app) {
               .catch(err => {
                 return res.send({ error: JSON.stringify(err) });
               });
-    
-    
+
+
             if (empDataFound) {
               var leaveTypeFound = false;
               for (var j = 0; j < empDataFound.leaveDetails.length; j++)
@@ -430,12 +469,12 @@ module.exports = function (app) {
                       'leaveDetails.leaveType': req.body.leaveType
                     }, {
                       '$set': {
-                        'leaveDetails.$.total': req.body.leaveCount,
+                        'leaveDetails.$.total': parseInt(req.body.leaveCount),
                         'leaveDetails.$.used': 0,
-                        'leaveDetails.$.remaining': req.body.leaveCount,
+                        'leaveDetails.$.remaining': parseInt(req.body.leaveCount),
                         'leaveDetails.$.carryForward': req.body.carryForward,
-                       
-    
+
+
                       }
                       }, { new: true }).then(data => {
                         console.log("ESLE data: " + JSON.stringify(data));
@@ -444,14 +483,14 @@ module.exports = function (app) {
                       .catch(err => {
                         return res.send({ error: JSON.stringify(err) });
                       });
-                  
-    
-    
+
+
+
                 }
-    
-    
+
+
               if (!leaveTypeFound) {
-             
+
                         await EmpLeaveStatus.findOneAndUpdate(
                       { empName: req.body.selectedEmp[i].label.toLowerCase() },
                       {
@@ -466,14 +505,14 @@ module.exports = function (app) {
                       }, { new: true })
                       .then(data => {
                         if (data != null) {
-    
+
                           recordsUpdated=recordsUpdated+1;
                         }
                       })
                       .catch(err => {
                         return res.send({ error: JSON.stringify(err) });
                       });
-    
+
                 }}
          else {
                   console.log("Emp data not found.. creating new entry")
@@ -481,25 +520,25 @@ module.exports = function (app) {
                     "empName": req.body.selectedEmp[i].label,
                     leaveDetails: [{ "leaveType": req.body.leaveType, "total": parseInt(req.body.leaveCount) , "used": 0, remaining: parseInt(req.body.leaveCount) , "carryForward": req.body.carryForward }]
                   });
-    
+
                 await  addLeaveDetails
                     .save()
-                    .then(user => { recordsUpdated=recordsUpdated+1; 
+                    .then(user => { recordsUpdated=recordsUpdated+1;
                       console.log("recordUpdated+ "+recordsUpdated)
 
-    
+
                     })
                     .catch(err => {
                       return res.send({ error: JSON.stringify(err) });
                     });
-    
+
                 }
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
               } console.log("recordUpdate: " + recordsUpdated);
               if (recordsUpdated === req.body.selectedEmp.length)
                 res.send({ msg: "Leave Assigned" });
@@ -516,30 +555,29 @@ module.exports = function (app) {
 
 
 
-
       }
 
       async function getEmployeeLeaveDetails(req, res) {
         console.log("In getEmployeeLeaveDetails for: " + JSON.stringify(req.body));
-    
-    
-    
-    
+
+
+
+
         EmpLeaveStatus
           .find({
             empName: req.body.empName})
-    
+
           .then(data => {
-    
+
             return res.send({ data });
           })
           .catch(err => {
             return res.send({ error: err });
           });
-    
-    
+
+
       }
-    
+
 
 
 
@@ -554,7 +592,7 @@ module.exports = function (app) {
       app.post("/api/rejectLeave", rejectLeave);
       app.post("/api/assignLeave", assignLeave);
       app.post("/api/getEmployeeLeaveDetails", getEmployeeLeaveDetails);
-      
+
       app.post("/api/getEmpAllLeaveDetails", getEmpAllLeaveDetails);
 
 

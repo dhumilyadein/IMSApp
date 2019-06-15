@@ -71,64 +71,65 @@ class ViewLeave extends Component {
     };
 
     this.getEmpAllLeaveDetails = this.getEmpAllLeaveDetails.bind(this);
-    this.submitHandler = this.submitHandler.bind(this);
+
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.fetchEmployees = this.fetchEmployees.bind(this);
-    this.getExistingLeaveTypes = this.getExistingLeaveTypes.bind(this);
-    this.leaveChangeHandler = this.leaveChangeHandler.bind(this);
+
+
   }
 
-  getExistingLeaveTypes() {
-    axios
-      .get("http://localhost:8001/api/getExistingLeaveTypes")
-      .then(result => {
-        if (result.data) {
-          this.setState(
-            {
-              existingLeaveTypes: result.data
-            },
-            () => {
-              console.log(
-                "existingLeaveTypes: " +
-                  JSON.stringify(this.state.existingLeaveTypes)
-              );
-              this.getEmpAllLeaveDetails();
-            }
-          );
-        }
-      });
-  }
 
   getEmpAllLeaveDetails() {
+
+    this.setState({error:"", showApplyLeave:false,showEmpLeaveDetails:false})
     axios
       .post("http://localhost:8001/api/getEmpAllLeaveDetails", {
         empName: this.state.selectedEmp.label,
         year: this.state.year
       })
       .then(result => {
+        console.log("Result Data: " + JSON.stringify(result.data));
         if (result.data) {
           this.setState(
             {
-              empAllLeaveDetails: result.data.data
+              empAllLeaveDetails: result.data.empLeaveDetails,
+
             },
             () => {
               console.log(
                 "empAllLeaveDetails: " +
                   JSON.stringify(this.state.empAllLeaveDetails)
               );
-              var temp = [];
-              for (var i = 0; i < this.state.existingLeaveTypes.length; i++) {
-                var count=0;
-                for (var j = 0; j < this.state.empAllLeaveDetails.length; j++) {
+              var temp1 = [], temp2=[];
 
-                  if (this.state.existingLeaveTypes[i].leaveName ===this.state.empAllLeaveDetails[j].leaveType)
-                         count=count+this.state.empAllLeaveDetails[j].selectedLeaveCount; console.log("count: "+count);
+              if(this.state.empAllLeaveDetails)
+{
+                for (var j = 0; j < this.state.empAllLeaveDetails.leaveDetails.length; j++) {
+
+
+                temp1.push({"leaveType":this.state.empAllLeaveDetails.leaveDetails[j].leaveType,"total":this.state.empAllLeaveDetails.leaveDetails[j].total,"used":this.state.empAllLeaveDetails.leaveDetails[j].used,"balance":this.state.empAllLeaveDetails.leaveDetails[j].remaining})
                 }
-                temp.push({"leaveType":this.state.existingLeaveTypes[i].leaveName,"total":this.state.existingLeaveTypes[i].leaveCount,"used":count,"balance":this.state.existingLeaveTypes[i].leaveCount-count})
-              }
-                this.setState({leaveDetails:temp, showEmpLeaveDetails:true});
+for(var i=0;i<result.data.leaveHistory.length;i++)
+{
+
+  temp2.push({"leaveType":result.data.leaveHistory[i].leaveType,"appliedOn":result.data.leaveHistory[i].doa.substring(0,10),"period":result.data.leaveHistory[i].dof.substring(0,10)+"   To   "+result.data.leaveHistory[i].dot.substring(0,10)+"   ("+result.data.leaveHistory[i].selectedLeaveCount+" days)","status":result.data.leaveHistory[i].status});
+
+
+}
+
+
+
+
+                this.setState({leaveDetails:temp1, leaveHistory:temp2, showEmpLeaveDetails:true});
 
             }
+          else
+          {
+            this.setState({error:"No Leaves Assigned!"});
+          }
+          }
+
+
           );
         }
       });
@@ -185,167 +186,7 @@ class ViewLeave extends Component {
    * @description - fetches unique classes from the class detail from DB
    */
 
-  submitHandler(e) {
-    e.preventDefault();
-    console.log("In ApplyLeaveSubmit:" + JSON.stringify(this.state));
-    var submit = true;
 
-    this.setState({
-      monthError: "",
-      doaError: "",
-      error: "",
-      success: false,
-      modalSuccess: false,
-      leaveTypeError: "",
-      yearError: "",
-      dateError: ""
-    });
-
-    if (!this.state.year || this.state.year.length != 9) {
-      this.setState({ yearError: "Please Enter Year correctly (Eg. 2018-19)" });
-      submit = false;
-    }
-
-    var years = this.state.year.split("-");
-    if (parseInt(years[0]) !== parseInt(years[1]) - 1) {
-      this.setState({
-        yearError:
-          "Year Format is not correct! It should be in format like- 2018-2019"
-      });
-      submit = false;
-    }
-
-    if (!this.state.selectedLeaveType) {
-      this.setState({ leaveTypeError: "Please Select Leave Type" });
-      submit = false;
-    }
-    if (!this.state.doa) {
-      this.setState({ doaError: "Please Select Date of Apply" });
-      submit = false;
-    }
-
-    if (!this.state.dof) {
-      this.setState({ dateError: "Please Select From Date" });
-      submit = false;
-    }
-
-    if (!this.state.dot) {
-      this.setState({ dateError: "Please Select To Date" });
-      submit = false;
-    }
-
-    if (!this.state.selectedEmp.value) {
-      this.setState({ empError: "Please Select Employee" });
-      submit = false;
-    }
-
-    if (this.state.leavesAvailable === 0) {
-      this.setState({ error: "No Leaves Available!" });
-      submit = false;
-    }
-
-    if (submit) {
-      axios
-        .post("http://localhost:8001/api/applyLeave", {
-          empName: this.state.selectedEmp.label,
-          leaveType: this.state.selectedLeaveType,
-          year: this.state.year,
-          doa: this.state.doa,
-          remarks: this.state.remarks,
-          dof: this.state.dof,
-          dot: this.state.dot,
-          selectedLeaveCount: this.state.selectedLeaveCount
-        })
-        .then(result => {
-          console.log("result.data ApplyLeave " + JSON.stringify(result.data));
-
-          if (result.data.msg === "Success")
-            this.setState({
-              success: true,
-              modalSuccess: true,
-              modelMessage:
-                this.state.selectedLeaveCount +
-                " Leaves applied for " +
-                this.state.selectedEmp.label
-            });
-          else if (result.data.error) {
-            return this.setState({ error: result.data.error });
-          }
-        });
-    }
-  }
-
-  leaveChangeHandler(e) {
-    if (e) {
-      console.log("In leave change " + e.target.value);
-
-      this.setState(
-        {
-          error: "",
-          showApplyLeave: false,
-          selectedLeaveType: e.target.value,
-          yearError: ""
-        },
-        () => {
-          var years = this.state.year.split("-");
-
-          if (parseInt(years[0]) !== parseInt(years[1]) - 1)
-            return this.setState({
-              yearError:
-                "Year Format is not correct! It should be in format like- 2018-2019"
-            });
-          axios
-            .post("http://localhost:8001/api/getAvailableLeaveCount", {
-              leaveType: this.state.selectedLeaveType,
-              year: this.state.year,
-              empName: this.state.selectedEmp.label
-            })
-            .then(result => {
-              console.log(
-                "getAvailableLeaveCount.data " +
-                  JSON.stringify(result.data.data)
-              );
-
-              if (result.data.error) {
-                return this.setState({ error: result.data.error.message });
-              }
-              var totalAppliedLeaveCount = 0;
-              for (var i = 0; i < result.data.data.length; i++)
-                totalAppliedLeaveCount =
-                  totalAppliedLeaveCount +
-                  result.data.data[i].selectedLeaveCount;
-
-              for (var i = 0; i < this.state.existingLeaveTypes.length; i++)
-                if (
-                  this.state.existingLeaveTypes[i].leaveName ===
-                  this.state.selectedLeaveType
-                ) {
-                  if (
-                    this.state.existingLeaveTypes[i].leaveCount -
-                      totalAppliedLeaveCount >=
-                    0
-                  )
-                    this.setState({
-                      leavesAvailable:
-                        this.state.existingLeaveTypes[i].leaveCount -
-                        totalAppliedLeaveCount
-                    });
-                  else this.setState({ leavesAvailable: 0 });
-                  if (this.state.leavesAvailable > 0)
-                    this.setState({ showApplyLeave: true });
-                  else
-                    this.setState({
-                      error:
-                        "No " +
-                        this.state.selectedLeaveType +
-                        " Leaves Avalable!"
-                    });
-                }
-            });
-        }
-      );
-    }
-  }
   /**
    * @description Called when the role(s) are selected. To update role Array
    * @param {*} e
@@ -397,14 +238,8 @@ class ViewLeave extends Component {
                           this.setState(
                             {
                               selectedEmp: selected,
-                              showApplyLeave: false,
-                              selectedLeaveType: "",
-                              leavesAvailable: "",
-                              error: ""
-                            },
-                            () => {
-                              this.getExistingLeaveTypes();
-                            }
+
+                            },()=>{this.getEmpAllLeaveDetails();}
                           );
                         }}
                       />
@@ -501,6 +336,84 @@ class ViewLeave extends Component {
                               ))}
                             </tbody>
                           </Table>
+
+                          <br />
+                          <h4 align="center">Leaves History</h4>
+                          <h6 >Showing upto Last 10 records  </h6>
+
+<Table bordered hover>
+  <thead>
+    <tr style={{ backgroundColor: "lightgreen" }}>
+      <th className="text-center">
+        <h4> S.No.</h4>{" "}
+      </th>
+      <th className="text-center">
+        {" "}
+        <h4>Leave Type </h4>
+      </th>
+
+      <th className="text-center">
+        {" "}
+        <h4>Applied On</h4>
+      </th>
+      <th className="text-center">
+        {" "}
+        <h4>Leave Period</h4>
+      </th>
+
+      <th className="text-center">
+        {" "}
+        <h4>Status</h4>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {this.state.leaveHistory.map((item, idx) => (
+      <tr id="addr0" key={idx}>
+        <td align="center">
+          <h5>{idx + 1}</h5>
+        </td>
+        <td align="center">
+          <h5>
+            {" "}
+            {this.state.leaveHistory[idx].leaveType
+              .charAt(0)
+              .toUpperCase() +
+              this.state.leaveHistory[idx].leaveType.slice(1)}
+          </h5>
+        </td>
+        <td align="center">
+          <h5>
+            {" "}
+            {this.state.leaveHistory[idx].appliedOn}
+          </h5>
+        </td>
+
+        <td align="center">
+          <h5>
+            {" "}
+            {this.state.leaveHistory[idx].period}
+          </h5>
+        </td>
+
+        <td align="center">
+          <h5>
+            {" "}
+            {
+              this.state.leaveHistory[idx].status
+            }
+          </h5>
+        </td>
+
+
+
+
+
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
                         </p>
                       )}
 

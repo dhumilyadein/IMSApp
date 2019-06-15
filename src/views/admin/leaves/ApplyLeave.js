@@ -163,14 +163,14 @@ remarks:""
     })
 
     if (!this.state.year || this.state.year.length != 9) {
-      this.setState({ yearError: "Please Enter Year correctly (Eg. 2018-19)" });
+      this.setState({ yearError: "Please Enter Year correctly (Eg. 2018-2019)" });
       submit = false;
 
     }
 
      var  years = this.state.year.split("-")
     if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
-   {this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"});
+   {this.setState({yearError:"Year Format is not correct! Correct Format: 2018-2019"});
   submit=false}
 
     if (!this.state.selectedLeaveType) {
@@ -266,49 +266,32 @@ remarks:""
       console.log("In leave change " + (e.target.value));
 
 
-      this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:""}, () => {
-       var  years = this.state.year.split("-")
+      this.setState({error:"", showApplyLeave:false, selectedLeaveType: e.target.value , yearError:"",leavesAvailable:""}, () => {
 
-        if( parseInt(years[0]) !== (parseInt(years[1]) - 1))
-       return(this.setState({yearError:"Year Format is not correct! It should be in format like- 2018-2019"}));
-       
-//       for()
-       
-       
        axios
           .post("http://localhost:8001/api/getAvailableLeaveCount",
           {
             "leaveType":this.state.selectedLeaveType,
-            "year":this.state.year,
             "empName":this.state.selectedEmp.label
           })
           .then(result => {
-            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data.data));
+            console.log("getAvailableLeaveCount.data " + JSON.stringify(result.data));
 
-            if (result.data.error) {
-
+            if (result.data.error)
              return( this.setState({ error: result.data.error.message }));
 
-                      }
-var totalAppliedLeaveCount=0;
-                      for(var i=0;i<result.data.data.length;i++)
-totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveCount;
+        else
+        {
 
-         for(var i=0;i<this.state.existingLeaveTypes.length;i++)
-         if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
-         { if((this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount)>=0)
-           this.setState({leavesAvailable: this.state.existingLeaveTypes[i].leaveCount-totalAppliedLeaveCount})
-           else
-           this.setState({leavesAvailable: 0})
-           if(this.state.leavesAvailable>0)
-           this.setState({showApplyLeave:true})
+           if(parseInt(result.data.remaining)>0)
+           this.setState({showApplyLeave:true,leavesAvailable:result.data.remaining})
            else
 
-           this.setState({error:"No "+this.state.selectedLeaveType+" Leaves Avalable!"})
-         }
+           this.setState({leavesAvailable:0, error:"No "+this.state.selectedLeaveType+" leaves Avalable!"})
 
 
 
+        }
 
 
 
@@ -325,11 +308,6 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
     }
 
   }
-  /**
-   * @description Called when the role(s) are selected. To update role Array
-   * @param {*} e
-   */
-
 
   render() {
 
@@ -450,7 +428,7 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                                 name="dof"
                                 id="dof"
                                 value={this.state.dof}
-                                onChange={date=>{this.setState({dof:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dof)})}}
+                                onChange={date=>{if (date){this.setState({dof:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{console.log("DOS: "+this.state.dof)})}}}
                               />
 &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
 <InputGroupAddon addonType="prepend">
@@ -464,7 +442,8 @@ totalAppliedLeaveCount=totalAppliedLeaveCount+result.data.data[i].selectedLeaveC
                                 name="dot"
                                 id="dot"
                                 value={this.state.dot}
-                                onChange={date=>{this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
+                                onChange={date=>{
+                                  if(date){this.setState({dateError:"",submitDisabled:false,selectedLeaveCount :"",dot:new Date(date.getTime()-(date.getTimezoneOffset() * 60000))},()=>{
 
 if(!this.state.dof) this.setState({dateError:"Please Select From Date First!",dot:"",submitDisabled:true});
 else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
@@ -477,7 +456,7 @@ else   if(new Date(this.state.dof).getTime()>new Date(this.state.dot).getTime())
   else
   this.setState({selectedLeaveCount:moment(new Date(this.state.dot)).diff(new Date(this.state.dof), 'days')+1})
 
-  })
+  })}
 
 
   }}

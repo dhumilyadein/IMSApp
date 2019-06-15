@@ -49,7 +49,7 @@ class AssignLeaves extends Component {
     this.state = {
 
       error: "",
-      
+
       doa:  new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)),
       year: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
 forAllEmp:false,
@@ -74,7 +74,7 @@ maxLeaveCount:"",
   }
 
 leaveChangeHandler(e)
-{ 
+{
   this.setState({  selectedLeaveType: e.target.value,leaveCount:"",CFLcFromLastYear:false},
     ()=>{
 
@@ -82,7 +82,7 @@ leaveChangeHandler(e)
       {if(this.state.existingLeaveTypes[i].leaveName===this.state.selectedLeaveType)
        { this.setState({carryForward:this.state.existingLeaveTypes[i].carryForward,leaveCount:this.state.existingLeaveTypes[i].leaveCount});
          if(this.state.existingLeaveTypes[i].carryForward)
-         this.setState({maxLeaveCount:this.state.existingLeaveTypes[i].maxLeaveCount,CFLcFromLastYear:true})
+         this.setState({maxLeaveCount:this.state.existingLeaveTypes[i].maxLeaveCount})
       }
 
       }
@@ -162,7 +162,7 @@ maxLeaveCount:""
       leaveTypeError: "", empError: "", error: "", success: false,
       modalSuccess: false})
 
-   
+
 
     if (!this.state.selectedLeaveType) {
       this.setState({ leaveTypeError: "Please Select Leave Type" });
@@ -175,7 +175,7 @@ maxLeaveCount:""
 
     }
 
-   
+
 
 
     if (submit) {
@@ -192,15 +192,15 @@ maxLeaveCount:""
             this.setState({
               success: true,
               modalSuccess: true,
-              modelMessage: "Leave Assgined succesfully"
+              modelMessage: this.state.selectedLeaveType.charAt(0).toUpperCase() + this.state.selectedLeaveType.slice(1)+ " Leave Assgined succesfully!"
 
 
 
             });
 
-          else if (result.data.error) {
+          else if (result.data.CFLCError) {
 
-            return this.setState({ error: result.data.error });
+            return this.setState({ error: result.data.CFLCError, CFLcFromLastYear:true });
           }
 
 
@@ -225,7 +225,7 @@ maxLeaveCount:""
 
 
 
-  
+
   /**
    * @description Called when the role(s) are selected. To update role Array
    * @param {*} e
@@ -258,9 +258,6 @@ maxLeaveCount:""
                           <h3 align="center"> Assign Leaves to Employee</h3>
                           <br/>
 
-                   
-                          <div> <h5><font color="blue">NOTE:</font></h5> <font color="red"> <h5> Leaves should be assigned/reset only once every year.</h5> </font></div>
-                          <div> <font color="red"> <h5> Carry Forwarded LC's value should be provided only for the 1st year. System will automatically manages this value, hence forth. </h5> </font></div>
 
 <InputGroup className="mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -313,7 +310,7 @@ maxLeaveCount:""
                             isMulti={true}
 
                             onChange={selected=>{this.setState({selectedEmp:selected},()=>{
-                             
+
                             });}}
                             />
    {this.state.empError && (
@@ -336,17 +333,17 @@ maxLeaveCount:""
                                         if (e.target.checked === true) {
                                             console.log("forAllEmp true: " + e.target.checked);
                                             this.setState({
-                                           
+
                                              forAllEmp:true,
                                              selectedEmp:this.state.existingEmp
                                             });
                                           } else if (e.target.checked === false) {
                                             console.log("forAllEmp false: " + e.target.checked);
                                             this.setState({
-                                               
+
                                                 forAllEmp:false,
                                                 selectedEmp:[]
-                                               
+
                                             });
                                           }
 
@@ -375,7 +372,7 @@ maxLeaveCount:""
                       name="leaveCount"
                       id="leaveCount"
                       value={this.state.leaveCount}
-                    
+
 disabled
 
                     />
@@ -385,7 +382,7 @@ disabled
                   <InputGroup className="mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText >
-                        <b>Carry Forwarded LC from last year<i>(Optional)</i></b>
+                        <b>Carry Forwarded LC from last year</b>
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input
@@ -394,7 +391,7 @@ disabled
                       name="leaveCount"
                       id="leaveCount"
                       value={this.state.CFLC}
-                    
+
 onChange={e=>{this.setState({CFLC:e.target.value})}}
 
                     />
