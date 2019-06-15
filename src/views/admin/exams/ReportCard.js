@@ -1009,17 +1009,17 @@ class ReportCard extends Component {
                       <thead>
                         <tr>
                           <th><h5>Subjects/Exams</h5></th>
-                          {this.state.subjectArrayFromClass.map((item, idx) => (
-                            <th className="text-center"> <h5>{item.charAt(0).toUpperCase() + item.slice(1)}</h5></th>
+                          {this.state.results.map((item, idx) => (
+                            <th className="text-center"> <h5>{item.examName.charAt(0).toUpperCase() + item.examName.slice(1)}</h5></th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {/* {this.state.studentsData.map((item, idx) => ( */}
                           {this.state.subjectArrayFromClass.map((subjectName, subjectId) => (
-                          <tr id="addr0" key={subjectId}>
-                            <th>{subjectName.charAt(0).toUpperCase() + subjectName.slice(1)}</th>
 
+                          <tr id="addr0" key={subjectId}>
+
+                              <th className="text-center"> <h5>{subjectName.charAt(0).toUpperCase() + subjectName.slice(1)}</h5></th>
 
                             {this.state.subjectArrayFromClass.map((subjectName, idx) => (
                               <td id="col0" key={subjectId} align="center" style={{ "vertical-align": "middle" }}>
@@ -1028,10 +1028,8 @@ class ReportCard extends Component {
                                     name="examDuration"
                                     type="text"
                                     className="form-control"
-                                    // value={item.username}
-                                    value={this.state.studentsMarksArray[idx].subjectMarksArray[subjectId][subjectName]}
+                                    value={subjectName}
                                     onChange={this.marksChangeHandler(idx, subjectId, subjectName)}
-                                    // onChange={this.marksChangeHandler(idx)}
                                     style={{ textAlign: 'center' }}
                                     id="examDuration"
                                   // size="lg"

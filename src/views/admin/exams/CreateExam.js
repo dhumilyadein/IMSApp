@@ -237,7 +237,18 @@ class CreateExam extends Component {
       if (eRes.data.errors) {
 
         console.log("CreateExam - insertExam - ERRORS - " + eRes.data.errors);
-        return this.setState({ insertExamErrorMessage: eRes.data.errors });
+        this.setState(
+          {
+            modalSuccess: true,
+            modalColor: "modal-danger",
+            modalMessage: "Error - " + JSON.stringify(eRes.data.errors)
+          }, () => {
+
+            // Fetching the exam details so that add the recently added exam to the existing exams table
+            this.fetchExamDetails();
+          }
+        );
+        //return this.setState({ insertExamErrorMessage: eRes.data.errors });
 
       } else {
 

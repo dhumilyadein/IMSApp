@@ -134,7 +134,7 @@ module.exports = function (app) {
       })
       .catch(err => {
         console.log("ExamsDAO - insertExam - ERROR - " + err);
-        return res.send(err);
+        return res.send({ errors: err });
       });
 
   }
