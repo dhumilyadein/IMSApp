@@ -239,7 +239,7 @@ module.exports = function (app) {
   async function insertClassAndSectionInExams(req, res) {
 
     var request = req.body;
-    console.log("examsDAO - insertClassAndSectionInExams - request - " + JSON.stringify(request))
+    console.log("examsDAO - insertClassAndSectionInExams - request - " + JSON.stringify(request));
 
     var date = new Date();
 
@@ -252,12 +252,12 @@ module.exports = function (app) {
         'classWiseExamDetailsArray.$.class': 1
       }
     ).then(function (availableExamClassData) {
-      console.log("examsDAO - insertClassAndSectionInExams - Fetched Class and section array details - EXAM MODIFIED - " + JSON.stringify(availableExamClassData));
+      console.log("ExamsDAO - insertClassAndSectionInExams - Fetched already present Class and section array details from Exams collection - availableExamClassData - " + JSON.stringify(availableExamClassData));
 
       // If availableExamClassData is null, it means the class is not present in the collection and so inserting it for the first time
       if (availableExamClassData.length === 0) {
 
-        console.log("Inserting class first and then section will be inserted");
+        console.log("ExamsDAO - insertClassAndSectionInExams - Inserting class first and then section will be inserted");
 
         /*
         Inserting class details first
@@ -276,7 +276,7 @@ module.exports = function (app) {
           }
         ).then(function (examclassData) {
 
-          console.log("examsDAO - insertClassAndSectionInExams - ONLY CLASS array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examclassData));
+          console.log("ExamsDAO - insertClassAndSectionInExams - ONLY CLASS array details updated successfully - EXAM MODIFIED - examclassData - " + JSON.stringify(examclassData));
 
           /**
            * Second, Before updating the new section wise details, deleting the previous section wise details

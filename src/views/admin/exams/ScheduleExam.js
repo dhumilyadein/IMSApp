@@ -100,7 +100,9 @@ class ScheduleExam extends Component {
       // ],
 
       insertExamDetailsErrorMessage: "",
-      copyTotalMarksToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false,
+
+      isMandatryToAttendForFinalResult: false
 
     };
 
@@ -135,6 +137,8 @@ class ScheduleExam extends Component {
    */
   fetchClassWiseExamDetails() {
 
+    console.log("ScheduleExam - fetchClassWiseExamDetails selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails));
+
     var fetchExamDetailsOnInputRequest = {
       "examName": this.state.selectedExamDetails.examName,
       "className": this.state.class
@@ -147,9 +151,14 @@ class ScheduleExam extends Component {
         // console.log("CreateExam - fetchExamDetails - exam details - " + JSON.stringify(result.data));
 
         if (result.errors) {
+
+          console.log("ScheduleExam - fetchClassWiseExamDetails ERROR occurred - " + JSON.stringify(result.errors));
+
           return this.setState({ errors: result.errors });
 
         } else if (!(typeof (result.data[0]) === 'undefined' || result.data[0] === null)) {
+
+          console.log("ScheduleExam - fetchClassWiseExamDetails - Setting details in state");
 
           var classWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0];
           var sectionWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray;
@@ -171,6 +180,8 @@ class ScheduleExam extends Component {
                 inputExamDataArray: element.examDetails,
                 selectedExamDetails: selectedExamDetailsTemp
               });
+
+              console.log("TEMP 2 selectedExamDetails - " + this.state.selectedExamDetails);
             }
           });
 
@@ -182,6 +193,8 @@ class ScheduleExam extends Component {
           // });
 
         } else {
+
+          console.log("ScheduleExam - fetchClassWiseExamDetails - result.data[0] undefined or null");
 
           //No data present for the selected exam name so resetting the previously selected exam data
           /*
@@ -246,7 +259,7 @@ class ScheduleExam extends Component {
 
           this.setState({ examDetailsArray: result.data }, () => {
 
-            console.log('ScheduleExam - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
+            console.log('ScheduleExam - fetchExamDetailsOnInput - exam details for class - ' + this.state.class+ ' are \n' + JSON.stringify(this.state.examDetailsArray));
 
             //Message if exam is not created in the DB
             if(this.state.examDetailsArray.length < 1) {
@@ -573,6 +586,8 @@ class ScheduleExam extends Component {
 
   examNameChangeHandler(e) {
 
+    console.log("TEMP 1 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + " e.currentTarget.value - " + e.currentTarget.value + "this.state.examDetailsArray - " + JSON.stringify(this.state.examDetailsArray));
+
     this.setState({
       showTabsFlag: false,
       selectedExamDetails: [],
@@ -600,12 +615,14 @@ class ScheduleExam extends Component {
         selectedExamDetails.isMandatryToAttendForFinalResult = element.isMandatryToAttendForFinalResult;
 
         this.setState({
-          selectedExamDetails: selectedExamDetails
+          selectedExamDetails: selectedExamDetails,
+          isMandatryToAttendForFinalResult: element.isMandatryToAttendForFinalResult
         }, () => {
 
           //Fetching class wise exam details on examName selection
-
           this.fetchClassWiseExamDetails();
+
+          console.log("TEMP 2 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails));
         });
 
         console.log("Foreach setting exam details");
@@ -820,7 +837,7 @@ class ScheduleExam extends Component {
       examDetailsArrayTemp.push(temp[i]);
     }
 
-    console.log("BEFORE - allExamDetailsFilledFlag - " + allExamDetailsFilledFlag);
+    console.log("BEFORE - allExamDetailsFilledFlag - " + allExamDetailsFilledFlag + " this.state.selectedExamDetails - " + this.state.selectedExamDetails);
 
     if (allExamDetailsFilledFlag) {
 
@@ -1214,7 +1231,7 @@ class ScheduleExam extends Component {
                       size={"sm"}
                       onChange={this.isMandatryToAttendForFinalResultChangeHandler}
                       disabled={this.state.disabled}
-                      checked={this.state.selectedExamDetails.isMandatryToAttendForFinalResult}
+                      checked={this.state.isMandatryToAttendForFinalResult}
                     />
                   </InputGroup>
 

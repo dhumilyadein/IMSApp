@@ -829,7 +829,7 @@ class AddResult extends Component {
               {this.state.showResultsTableFlag && this.state.selectedExamDetails && this.state.selectedExamDetails.examName && (
                 <div>
                   <br />
-                  <h3 align="center">{this.state.selectedExamDetails.examName.charAt(0).toUpperCase() + this.state.selectedExamDetails.examName.slice(1)}</h3>
+                  <h3 align="center">{this.state.selectedExamDetails.examName}</h3>
                   <br />
 
                   <div class="table-responsive" >

@@ -646,7 +646,6 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
       return res.send(response);
 
-
     }).catch(function (err) {
       console.log("Catching server err while unset - " + err);
       response = { errors: err };

@@ -49,10 +49,7 @@ class CreateExam extends Component {
       examDescription:"",
 
       examName: "",
-      examNameError: "",
 
-      examDescription: "",
-      examDescriptionError: "",
       percentageShareInFinalResult:null,
       percentageShareInFinalResultError:"",
       shareInFinalResult: null,
@@ -71,6 +68,8 @@ class CreateExam extends Component {
       modalSuccess: false,
       showExistingExams:true,
 
+      examCreatedFlag: false
+
     };
 
     this.toggleSuccess = this.toggleSuccess.bind(this);
@@ -87,6 +86,7 @@ class CreateExam extends Component {
     this.createExamBtnHandler = this.createExamBtnHandler.bind(this);
     this.insertExam = this.insertExam.bind(this);
     this.isMandatryToAttendForFinalResultChangeHandler = this.isMandatryToAttendForFinalResultChangeHandler.bind(this);
+    this.resetCreateExamForm = this.resetCreateExamForm.bind(this);
 
     // Fetching all classes to display in the classes dropdown on page load
     this.fetchAllClassesAndSections();
@@ -116,6 +116,56 @@ class CreateExam extends Component {
     this.setState({
       [e.target.name]: e.target.value
     });
+  }
+
+  resetCreateExamForm() {
+
+    console.log("resetCreateExamForm resetCreateExamForm");
+
+    this.state = {
+      showCreateExam: false,
+      status: "Active",
+      erorrs: null,
+      success: null,
+      userdata: null,
+      
+      // existingRows: [{ examName: "" }],
+      existingRows: [],
+      
+      showCreateButton: true,
+      rowError: false,
+      examNameError: "",
+      success: false,
+      modalSuccess: false,
+      visible: false,
+      showEditExam: false,
+      examNo: "",
+      examDescriptionError:"",
+      examDescription:"",
+
+      examName: "",
+
+      percentageShareInFinalResult:null,
+      percentageShareInFinalResultError:"",
+      shareInFinalResult: null,
+      isMandatryToAttendForFinalResult: false,
+      classesAndSections: [],
+      classes: [],
+
+      // Contains both label and value the class value (eg - [{value='I', label='I'}])
+      selectClasses: [],
+
+      // Contains only the class value (eg - [I, II, III] etc)
+      applicableForClasses: [],
+
+      insertExamErrorMessage: "",
+
+      modalSuccess: false,
+      showExistingExams:true,
+
+      examCreatedFlag: false
+
+    };
   }
 
   /**
@@ -221,6 +271,8 @@ class CreateExam extends Component {
 
   insertExam(){
 
+    console.log("CreateExam - insertExam start - this.state.examName- " + this.state.examName);
+
     var insertExamRequest = {};
     insertExamRequest.examName = this.state.examName;
     insertExamRequest.examDescription = this.state.examDescription;
@@ -256,7 +308,8 @@ class CreateExam extends Component {
           {
             modalSuccess: true,
             modalColor: "modal-success",
-            modalMessage: "Exam created successfully!"
+            modalMessage: "Exam created successfully!",
+            examCreatedFlag: true
           }, () => {
 
             // Fetching the exam details so that add the recently added exam to the existing exams table
@@ -297,9 +350,17 @@ class CreateExam extends Component {
    */
 
   toggleSuccess() {
+
+    console.log("CreateExam - toggleSuccess - Entry");
+
     this.setState({
       modalSuccess: !this.state.modalSuccess
     });
+
+    if (this.state.examCreatedFlag) {
+      console.log("CreateExam - toggleSuccess - Calling resetCreateExamForm");
+      this.resetCreateExamForm();
+    }
   }
 
   /**
@@ -325,7 +386,7 @@ class CreateExam extends Component {
       if (submit === true) {
 
         var udpateExamRequest = {
-          "examName": this.state.examName.toLowerCase(),
+          "examName": this.state.examName,
           "examDescription":this.state.examDescription,
       "applicableForClasses": this.state.applicableForClasses,
       "percentageShareInFinalResult": this.state.percentageShareInFinalResult,
@@ -346,7 +407,8 @@ class CreateExam extends Component {
                 modalColor: "modal-success",
                 examNameError:"",
                 examDescriptionError:"",
-                rowError:""
+                rowError:"",
+                examCreatedFlag: true
 
               });
 
@@ -467,10 +529,10 @@ class CreateExam extends Component {
                               label="Exam Name"
                               name="examName"
                               id="examName"
-                              value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
+                              value={this.state.examName}
                               onChange={e => {
                                 this.setState(
-                                  { examName: e.target.value },
+                                  { examName: e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1) },
                                   () => {
                                     console.log(
                                       "Exam name: " +
@@ -655,6 +717,7 @@ class CreateExam extends Component {
                             <Col>
                               <Button
                                 onClick={() => {
+                                  this.resetCreateExamForm();
                                   this.setState({
                                     showCreateExam: false,
                                     showCreateButton: true,
@@ -682,7 +745,7 @@ class CreateExam extends Component {
                       <Card className="mx-1">
                         <CardBody className="p-2">
                           <h2 align="center"> Edit Exam :  <font color="blue">
-                           {this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}</font> </h2>
+                           {this.state.examName}</font> </h2>
                           <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText style={{ width: "120px" }}>
@@ -696,10 +759,10 @@ class CreateExam extends Component {
                               name="examName"
                               disabled={true}
                               id="examName"
-                              value={this.state.examName.charAt(0).toUpperCase() + this.state.examName.slice(1)}
+                              value={this.state.examName}
                               onChange={e => {
                                 this.setState(
-                                  { examName: e.target.value },
+                                  { examName: e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1) },
                                   () => {
                                     console.log(
                                       "Exam name: " +
@@ -905,8 +968,7 @@ class CreateExam extends Component {
                                     <h5>{idx + 1}</h5>
                                   </td>
                                   <td align="center">
-                                    <h5> {this.state.existingRows[idx].examName.charAt(0).toUpperCase() +
-                                      this.state.existingRows[idx].examName.slice(1)}</h5>
+                                    <h5> {this.state.existingRows[idx].examName}</h5>
                                   </td>
 
                                   <td align="center">
