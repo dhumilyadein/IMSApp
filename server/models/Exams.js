@@ -78,8 +78,9 @@ var ExamsSchema = new Schema({
 
   classWiseExamDetailsArray: {
     type: Array,
-    required: true,
+    // required: true,
     unique: true,
+    sparse: true, 
 
     class: {
       type: String,

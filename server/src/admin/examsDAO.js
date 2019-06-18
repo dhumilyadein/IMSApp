@@ -113,7 +113,8 @@ module.exports = function (app) {
     //   classWiseExamDetailsArray.push(json);
     // });
 
-
+    // var tempJSON = {};
+    // tempJSON.tempExamName = request.examn;
 
     var examRequest = {
       "examName": request.examName,
@@ -121,7 +122,7 @@ module.exports = function (app) {
       "applicableForClasses": request.applicableForClasses,
       "percentageShareInFinalResult": request.percentageShareInFinalResult,
       "isMandatryToAttendForFinalResult": request.isMandatryToAttendForFinalResult,
-      // "classWiseExamDetailsArray": classWiseExamDetailsArray,
+      // "classWiseExamDetailsArray": tempJSON,
       "createdAt": new Date(date.getTime() - (date.getTimezoneOffset() * 60000)),
       "updatedAt": new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
     };

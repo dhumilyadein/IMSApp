@@ -428,7 +428,8 @@ class ReportCard extends Component {
     this.setState({
       showStudentNamesFlag: true,
       selectedExamDetails: { examName: "" },
-      showReportCardFlag: false
+      showReportCardFlag: false,
+      selectedStudentLabelValue: {}
     });
 
     console.log("ReportCard - sectionChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
@@ -457,7 +458,7 @@ class ReportCard extends Component {
 
     var username = newValue.value.split("(")[1].split(")")[0];
 
-    // Fetching students marks for all the exams from the complete results object as we need to display selected studnets data only
+    // Fetching students marks for all the exams from the complete results object as we need to display selected students data only
     var completeResults = this.state.results;
     var studentsExamDataArray = [];
     

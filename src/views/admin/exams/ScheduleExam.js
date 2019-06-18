@@ -91,6 +91,7 @@ class ScheduleExam extends Component {
       examNameError: "",
       examDetailsArray: [],
       selectedExamDetails: {},
+      selectedExamName: "",
 
       // venueLabelValueArray: [
       //   { label: "Hall 1", value: "Hall 1" },
@@ -156,7 +157,9 @@ class ScheduleExam extends Component {
 
           return this.setState({ errors: result.errors });
 
-        } else if (!(typeof (result.data[0]) === 'undefined' || result.data[0] === null)) {
+        } else if (!(typeof (result.data[0]) === 'undefined' || result.data[0] === null) && 
+        !(typeof (result.data[0].classWiseExamDetailsArray) === 'undefined' || result.data[0].classWiseExamDetailsArray === null) && result.data[0].classWiseExamDetailsArray.length > 0 && 
+        !(typeof (result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray) === 'undefined' || result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray === null) && result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray.length > 0) {
 
           console.log("ScheduleExam - fetchClassWiseExamDetails - Setting details in state");
 
@@ -228,7 +231,7 @@ class ScheduleExam extends Component {
           this.setState({
             inputExamDataArray: inputExamDataArrayTemp,
 
-            selectedExamDetails: [],
+            // selectedExamDetails: [],
             copyTotalMarksToAllRowsFlag: false,
             copyPassingMarksToAllRowsFlag: false,
             copyExamTimeToAllRowsFlag: false
@@ -616,6 +619,7 @@ class ScheduleExam extends Component {
 
         this.setState({
           selectedExamDetails: selectedExamDetails,
+          // selectedExamName: element.examName,
           isMandatryToAttendForFinalResult: element.isMandatryToAttendForFinalResult
         }, () => {
 
