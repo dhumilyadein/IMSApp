@@ -237,124 +237,6 @@ class ReportCard extends Component {
     });
   }
 
-  // async fetchClassSpecificDetails() {
-
-  //   this.setState({
-  //     subjectArray: [],
-  //     emailArray: []
-  //   });
-
-  //   var fetchClassSpecificDetailsRequest = {
-  //     "class": this.state.class,
-  //     "sectionArray": this.state.selectedSection,
-  //     "subjects": 1,
-  //   }
-
-  //   console.log("ReportCard - fetchClassSpecificDetails - fetchClassSpecificDetailsRequest - "
-  //     + JSON.stringify(fetchClassSpecificDetailsRequest));
-
-  //   await axios.post("http://localhost:8001/api/fetchClassSpecificDetails", fetchClassSpecificDetailsRequest).then(res => {
-
-  //     if (res.data.errors) {
-
-  //       console.log('ReportCard - fetchClassSpecificDetails - ERROR - ' + JSON.stringify(res.data.errors));
-  //       return this.setState({ errors: res.data.errors });
-
-  //     } else {
-
-  //       this.setState({
-  //         classDetails: res.data,
-  //       }, () => {
-
-  //         console.log('ReportCard - fetchClassSpecificDetails - All class details classDetails - '
-  //           + JSON.stringify(this.state.classDetails)
-  //           + " subjectArray - " + this.state.subjectArray);
-
-  //         var subjectSameForAllSectionsFlag = true;
-  //         var comparingSection1;
-  //         var comparingSection2;
-  //         for (var i = 0; i < (this.state.classDetails.length - 1) && subjectSameForAllSectionsFlag; i++) {
-
-  //           comparingSection1 = this.state.classDetails[i].section;
-  //           comparingSection2 = this.state.classDetails[i + 1].section;
-
-  //           var arr1 = this.state.classDetails[i].subjects.sort();
-  //           var arr2 = this.state.classDetails[i + 1].subjects.sort();
-
-  //           console.log('ReportCard - fetchClassSpecificDetails - arr1 - '
-  //             + arr1
-  //             + " \narr2 - " + arr2);
-
-  //           if (arr1.length !== arr2.length) subjectSameForAllSectionsFlag = false;
-
-  //           for (var j = 0; j < arr1.length && subjectSameForAllSectionsFlag; j++) {
-
-  //             if (arr1[j] !== arr2[j]) {
-  //               subjectSameForAllSectionsFlag = false;
-  //               break;
-  //             }
-  //           }
-  //           //subjectSameForAllSectionsFlag = true;
-  //         }
-
-  //         if (!subjectSameForAllSectionsFlag) {
-
-  //           this.setState({
-  //             selectedSection: "",
-  //             selectedSectionLabelValue: {},
-  //             allSectionCheck: false
-  //           });
-
-  //           alert("Subjects are not same for all the sections!"
-  //             + "\nFYI, section " + comparingSection1 + " and " + comparingSection2 + " have different subjects."
-  //             + "\nPlease schedule exam at once, only for the sections which have same subjects."
-  //             + "\nSchedule separately for rest sections.");
-
-  //         } else {
-
-  //           console.log("ReportCard - fetchClassSpecificDetails - this.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
-
-  //           /*
-  //             Setting temporary inputExamDataArray for each subject
-  //             */
-  //           var startMoment = new Date(new Date().setHours(12, 0, 0, 0));
-  //           var endMoment = new Date(new Date().setHours(12, 0, 0, 0));
-  //           var examDate = new Date(new Date().setHours(5, 30, 0, 0));
-
-  //           var inputExamDataArrayTemp = [];
-  //           this.state.classDetails[0].subjects.forEach(element => {
-
-  //             const item = {
-  //               subject: element,
-  //               totalMarks: "",
-  //               passingMarks: "",
-  //               includeInResultFlag: true,
-  //               examDate: examDate,
-  //               startMoment: startMoment,
-  //               endMoment: endMoment,
-  //               examDuration: 0,
-  //               // venueLabelValue: [],
-  //               // venue: "",
-  //             };
-
-  //             inputExamDataArrayTemp.push(item);
-
-  //           });
-
-  //           console.log("exam details array - " + JSON.stringify(inputExamDataArrayTemp));
-  //           this.setState({
-  //             inputExamDataArray: inputExamDataArrayTemp,
-  //             subjectArray: this.state.classDetails[0].subjects,
-  //           });
-
-  //           console.log("1 ReportCard - fetchClassSpecificDetails - subjectArray - " + this.state.subjectArray
-  //             + " \nthis.state.classDetails[0].subjects - " + JSON.stringify(this.state.classDetails[0].subjects));
-  //         }
-  //       });
-  //     }
-  //   });
-  // }
-
   /**
    * @description - fetches unique classes from the class detail from DB
    */
@@ -407,6 +289,22 @@ class ReportCard extends Component {
     // Sorting array alphabetically
     sectionArrayTemp.sort();
 
+    sectionLabelValueArrayTemp.sort((a, b) => {
+      if (a.value < b.value)
+        return -1;
+      if (a.value > b.value)
+        return 1;
+      return 0;
+    });
+
+    sectionLabelValueArrayTemp.sort((a, b) => {
+      if (a.label < b.label)
+        return -1;
+      if (a.label > b.label)
+        return 1;
+      return 0;
+    });
+
     this.setState({
       sectionArray: sectionArrayTemp,
       sectionLabelValueArray: sectionLabelValueArrayTemp,
@@ -458,38 +356,35 @@ class ReportCard extends Component {
 
     var username = newValue.value.split("(")[1].split(")")[0];
 
-    // Fetching students marks for all the exams from the complete results object as we need to display selected students data only
-    var completeResults = this.state.results;
-    var studentsExamDataArray = [];
+    var selectedStudentsExamDetails = {};
+    this.state.results.forEach(res => {
+
+      if (res.examName === element.examName) {
+
+        res.studentsResult.forEach(element => {
+
+          if (element.username === username) {
+            res.studentsResult.length = 0;
     
-    for(var i=0;i<completeResults.length;i++) {
+            res.studentsResult.push(element);
+    
+            console.log("ReportCard - studentChangeHandler - Removed all elements from studentsResult and pushed details only for the selected student" - + element);
+          }
+        });
 
-      var studentsExamData = {};
-
-      studentsExamData.examName = completeResults[i].examName;
-      studentsExamData.examFinishDate = completeResults[i].examFinishDate;
-
-      var studentsResult = completeResults[i].studentsResult;
-      for(var j=0; j<studentsResult.length; j++) {
-
-        if(username === studentsResult[j].username) {
-          studentsExamData.username = studentsResult[j].username;
-          studentsExamData.firstname = studentsResult[j].firstname;
-          studentsExamData.lastname = studentsResult[j].lastname;
-          studentsExamData.fullName = studentsResult[j].fullName;
-          studentsExamData.subjectMarksArray = studentsResult[j].subjectMarksArray;
-        }
+        selectedStudentsExamDetails.examName = res.examName;
+        selectedStudentsExamDetails.examFinishDate = res.examFinishDate;
+        selectedStudentsExamDetails.studentsResult = res.studentsResult;
       }
-      
-      studentsExamDataArray.push(studentsExamData);
-    }
+    });
 
     this.setState({
       selectedStudent: newValue.value,
       selectedStudentLabelValue: newValue,
-      selectedStudentUsername : username
+      selectedStudentUsername: username,
+      selectedStudentsExamDetails: selectedStudentsExamDetails
     }, () => {
-      console.log("ReportCard - studentChangeHandler - selectedStudentUsername - " + this.state.selectedStudentUsername + " selectedStudentLabelValue - " + JSON.stringify(this.state.selectedStudentLabelValue));
+      console.log("ReportCard - studentChangeHandler - selectedStudentUsername - " + this.state.selectedStudentUsername + "\nselectedStudentLabelValue - " + JSON.stringify(this.state.selectedStudentLabelValue) + "\nselectedStudentsExamDetails" - + this.state.selectedStudentsExamDetails);
       console.log("\nReportCard - studentChangeHandler - selected class - " + JSON.stringify(this.state.class)
         + " selected section - " + this.state.selectedSection);
 
@@ -506,6 +401,9 @@ class ReportCard extends Component {
     var examName = e.currentTarget.value;
 
     var isExamNameValid = false;
+
+    console.log("ReportCard - examNameChangeHandler - 1 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + "\nexamName - " + examName);
+
     this.state.examDetailsArray.forEach(element => {
 
       var selectedExamDetails = {};
@@ -520,15 +418,29 @@ class ReportCard extends Component {
         selectedExamDetails.applicableForClasses = element.applicableForClasses;
         selectedExamDetails.isMandatryToAttendForFinalResult = element.isMandatryToAttendForFinalResult;
 
+        this.state.results.forEach(res => {
+
+          if (res.examName === element.examName) {
+
+            selectedExamDetails.examName = res.examName;
+            selectedExamDetails.examFinishDate = res.examFinishDate;
+            selectedExamDetails.studentsResult = res.studentsResult;
+          }
+        });
+
         this.setState({
           selectedExamDetails: selectedExamDetails
         }, () => {
 
           //Fetching class wise exam details on examName selection
 
+          console.log("ReportCard - examNameChangeHandler - 1 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + "\nexamName - " + examName);
+
           this.fetchClassWiseExamDetails();
 
           this.fetchResultOnExamName();
+
+          console.log("ReportCard - examNameChangeHandler - 2 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + "\nexamName - " + examName);
         });
 
         console.log("Foreach setting exam details");
@@ -657,7 +569,7 @@ class ReportCard extends Component {
         console.log('ReportCard - fetchClassSpecificDetails - res.data - ' + JSON.stringify(res.data));
 
         this.setState({
-          subjectArrayFromClass: response.subjects,
+          subjectArrayFromClass: response.subjects.sort(),
           studentsData: response.studentsData,
           results: response.results
         }, () => {
@@ -683,7 +595,7 @@ class ReportCard extends Component {
     });
 
     this.setState({
-      studentLabelValueArray : studentLabelValueArrayTemp
+      studentLabelValueArray: studentLabelValueArrayTemp
     });
 
     console.log('ReportCard - setStudentsDropDownLabelValue - studentLabelValueArray - ' + JSON.stringify(this.state.studentLabelValueArray));
@@ -776,11 +688,6 @@ class ReportCard extends Component {
     });
   }
 
-  studentNameChangeHandler() {
-
-
-  }
-
   render() {
 
     return (
@@ -862,12 +769,12 @@ class ReportCard extends Component {
 
               {this.state.showStudentNamesFlag &&
                 <div>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText >
-                        <b>Student</b>
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Select
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText >
+                      <b>Student</b>
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <Select
                     id="section"
                     name="section"
                     // isMulti={true}
@@ -887,157 +794,158 @@ class ReportCard extends Component {
               }
 
               {this.state.showReportCardFlag &&
-              // this.state.selectedExamDetails && this.state.selectedExamDetails.examName && 
-              (
-                <div>
+                // this.state.selectedExamDetails && this.state.selectedExamDetails.examName && 
+                (
+                  <div>
 
-<br/><br/>
+                    <br /><br />
 
-<h3 align="center">{"Class - " + this.state.class + " " + this.state.selectedSection}</h3>
+                    <h3 align="center">{"Class - " + this.state.class + " " + this.state.selectedSection}</h3>
 
-<br/>
+                    <br />
 
-<Row lg="2">
-                              <Col>
-                                {/* <Card className="mx-1">
+                    <Row lg="2">
+                      <Col>
+                        {/* <Card className="mx-1">
                                   <CardBody className="p-2"> */}
-                                    <InputGroup className="mb-3">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "120px" }}>
-                                          Full Name
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText style={{ width: "120px" }}>
+                              Full Name
                                 </InputGroupText>
-                                      </InputGroupAddon>
-                                      <Input
-                                        type="text"
-                                        name="fullName"
-                                        id="fullName"
-                                        value={this.state.fullName}
-                                        autoComplete="fullName"
-                                        onChange={this.changeHandler}
-                                        disabled={this.state.editMode}
-                                        style={whiteTextFieldStyle}
-                                      />
-                                    </InputGroup>
-                                    {this.state.errors && this.state.errors.fullName && (
-                                      <font color="red">
-                                        {" "}
-                                        <p>{this.state.errors.fullName.msg}</p>
-                                      </font>
-                                    )}
+                          </InputGroupAddon>
+                          <Input
+                            type="text"
+                            name="fullName"
+                            id="fullName"
+                            value={this.state.fullName}
+                            autoComplete="fullName"
+                            onChange={this.changeHandler}
+                            disabled={this.state.editMode}
+                            style={whiteTextFieldStyle}
+                          />
+                        </InputGroup>
+                        {this.state.errors && this.state.errors.fullName && (
+                          <font color="red">
+                            {" "}
+                            <p>{this.state.errors.fullName.msg}</p>
+                          </font>
+                        )}
 
-                                    <InputGroup className="mb-3">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "120px" }}>
-                                          Parent's Name
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText style={{ width: "120px" }}>
+                              Parent's Name
                                 </InputGroupText>
-                                      </InputGroupAddon>
-                                      <Input
-                                        type="text"
-                                        name="parentFullName"
-                                        id="parentFullName"
-                                        value={this.state.parentFullName}
-                                        autoComplete="parentFullName"
-                                        onChange={this.changeHandler}
-                                        disabled={this.state.editMode}
-                                        style={whiteTextFieldStyle}
-                                      />
-                                    </InputGroup>
-                                    {this.state.errors && this.state.errors.parentFullName && (
-                                      <font color="red">
-                                        {" "}
-                                        <p>{this.state.errors.parentFullName.msg}</p>
-                                      </font>
-                                    )}
+                          </InputGroupAddon>
+                          <Input
+                            type="text"
+                            name="parentFullName"
+                            id="parentFullName"
+                            value={this.state.parentFullName}
+                            autoComplete="parentFullName"
+                            onChange={this.changeHandler}
+                            disabled={this.state.editMode}
+                            style={whiteTextFieldStyle}
+                          />
+                        </InputGroup>
+                        {this.state.errors && this.state.errors.parentFullName && (
+                          <font color="red">
+                            {" "}
+                            <p>{this.state.errors.parentFullName.msg}</p>
+                          </font>
+                        )}
 
-                                    <InputGroup className="mb-3">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "120px" }}>
-                                          Date of Birth
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText style={{ width: "120px" }}>
+                              Date of Birth
                                 </InputGroupText>
-                                      </InputGroupAddon>
+                          </InputGroupAddon>
 
-                                      <DatePicker
+                          <DatePicker
 
-                                        name="dob"
-                                        id="dob"
-                                        value={this.state.dob}
-                                        onChange={date=>{this.setState({dob:date})}}
-                                        disabled={this.state.editMode}
-                                        style={whiteTextFieldStyle}
-                                      />
-                                    </InputGroup>
+                            name="dob"
+                            id="dob"
+                            value={this.state.dob}
+                            onChange={date => { this.setState({ dob: date }) }}
+                            disabled={this.state.editMode}
+                            style={whiteTextFieldStyle}
+                          />
+                        </InputGroup>
 
-                                    {this.state.errors && this.state.errors.dob && (
-                                      <font color="red">
-                                        {" "}
-                                        <p>{this.state.errors.dob.msg}</p>
-                                      </font>
-                                    )}
+                        {this.state.errors && this.state.errors.dob && (
+                          <font color="red">
+                            {" "}
+                            <p>{this.state.errors.dob.msg}</p>
+                          </font>
+                        )}
 
-                                    <InputGroup className="mb-3">
-                                      <InputGroupAddon addonType="prepend">
-                                        <InputGroupText style={{ width: "120px" }}>
-                                          Address
+                        <InputGroup className="mb-3">
+                          <InputGroupAddon addonType="prepend">
+                            <InputGroupText style={{ width: "120px" }}>
+                              Address
                                 </InputGroupText>
-                                      </InputGroupAddon>
-                                          <Input
-                                            type="text"
-                                            id="street"
-                                            name="address"
-                                            value={this.state.address}
-                                            onChange={this.changeHandler}
-                                            disabled={this.state.editMode}
-                                            style={whiteTextFieldStyle}
-                                          />
-                                        </InputGroup>
-                                        {this.state.errors &&
-                                          this.state.errors.address && (
-                                            <font color="red">
-                                              {" "}
-                                              <p>{this.state.errors.address.msg}</p>
-                                            </font>
-                                          )}
+                          </InputGroupAddon>
+                          <Input
+                            type="text"
+                            id="street"
+                            name="address"
+                            value={this.state.address}
+                            onChange={this.changeHandler}
+                            disabled={this.state.editMode}
+                            style={whiteTextFieldStyle}
+                          />
+                        </InputGroup>
+                        {this.state.errors &&
+                          this.state.errors.address && (
+                            <font color="red">
+                              {" "}
+                              <p>{this.state.errors.address.msg}</p>
+                            </font>
+                          )}
 
-                                    {/* </CardBody>
+                        {/* </CardBody>
                                     </Card> */}
-                                    </Col>
+                      </Col>
 
-                                    <Col></Col>
-                                    </Row>
+                      <Col></Col>
+                    </Row>
 
-                  <div class="table-responsive" >
-                    <Table bordered hover size="sm">
-                      <thead>
-                        <tr>
-                          <th><h5>Subjects/Exams</h5></th>
-                          {this.state.results.map((item, idx) => (
-                            <th className="text-center"> <h5>{item.examName.charAt(0).toUpperCase() + item.examName.slice(1)}</h5></th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <div class="table-responsive" >
+                      <Table bordered hover size="sm">
+                        <thead>
+                          <tr>
+                            <th><h5>Subjects/Exams</h5></th>
+                            {this.state.results.map((item, idx) => (
+                              <th className="text-center"> <h5>{item.examName.charAt(0).toUpperCase() + item.examName.slice(1)}</h5></th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
                           {this.state.subjectArrayFromClass.map((subjectName, subjectId) => (
 
-                          <tr id="addr0" key={subjectId}>
+                            <tr id="addr0" key={subjectId}>
 
                               <th className="text-center"> <h5>{subjectName.charAt(0).toUpperCase() + subjectName.slice(1)}</h5></th>
 
-                            {this.state.subjectArrayFromClass.map((subjectName, idx) => (
-                              <td id="col0" key={subjectId} align="center" style={{ "vertical-align": "middle" }}>
+                              {this.state.subjectArrayFromClass.map((subjectName, idx) => (
+                                // {/* {this.state.results.map((subjectName, idx) => ( */ }
+                                < td id = "col0" key = { subjectId } align = "center" style = {{ "vertical-align": "middle" }}>
                                 <InputGroup >
-                                  <Input
-                                    name="examDuration"
-                                    type="text"
-                                    className="form-control"
-                                    value={subjectName}
-                                    onChange={this.marksChangeHandler(idx, subjectId, subjectName)}
-                                    style={{ textAlign: 'center' }}
-                                    id="examDuration"
-                                  // size="lg"
-                                  />
-                                </InputGroup>
+                                <Input
+                                  name="examDuration"
+                                  type="text"
+                                  className="form-control"
+                                  value={subjectName}
+                                  onChange={this.marksChangeHandler(idx, subjectId, subjectName)}
+                                  style={{ textAlign: 'center' }}
+                                  id="examDuration"
+                                // size="lg"
+                                />
+                              </InputGroup>
                               </td>
-                            ))}
+                          ))}
                           </tr>
                         ))}
                       </tbody>
@@ -1045,12 +953,12 @@ class ReportCard extends Component {
                   </div>
                   {this.state.rowError && (
                     <font color="red">
-                      <h6>
-                        {" "}
-                        <p>{this.state.rowError} </p>
-                      </h6>{" "}
-                    </font>
-                  )}
+                <h6>
+                  {" "}
+                  <p>{this.state.rowError} </p>
+                </h6>{" "}
+              </font>
+              )}
 
                   {/* {this.state.insertExamDetailsErrorMessage && (
                     <font color="red">
@@ -1058,48 +966,48 @@ class ReportCard extends Component {
                       <p>{this.state.insertExamDetailsErrorMessage}</p>
                     </font>
                   )} */}
-                  <Row>
-                    <Col>
-                      {!this.state.loader && <Button
-                        onClick={this.reportCardSubmitHandler}
-                        size="lg"
-                        color="success"
-                        block
-                      >
-                        Submit
+              <Row>
+                <Col>
+                  {!this.state.loader && <Button
+                    onClick={this.reportCardSubmitHandler}
+                    size="lg"
+                    color="success"
+                    block
+                  >
+                    Submit
                 </Button>}
 
-                      {this.state.loader &&
-                        <div align="center"><ReactLoading type="spin"
-                          color="	#006400"
-                          height='2%' width='10%' />
-                          <br />
+                  {this.state.loader &&
+                    <div align="center"><ReactLoading type="spin"
+                      color="	#006400"
+                      height='2%' width='10%' />
+                      <br />
 
-                          <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
+                      <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
 
-                    </Col>
+                </Col>
 
-                    <Col>
-                      <Button
-                        onClick={this.resetExamDetails}
-                        size="lg"
-                        color="secondary"
-                        block
-                      >
-                        Reset
+                <Col>
+                  <Button
+                    onClick={this.resetExamDetails}
+                    size="lg"
+                    color="secondary"
+                    block
+                  >
+                    Reset
                 </Button>
-                    </Col>
-                  </Row>
+                </Col>
+              </Row>
 
                 </div>
 
 
-              )}
+            )}
 
             </Col>
           </Row>
         </Container>
-      </div>
+      </div >
     );
   }
 }

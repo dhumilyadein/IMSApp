@@ -179,6 +179,9 @@ var ClassSchema = new Schema({
 
 // Composite primary key (class + section)
 ClassSchema.index({class: 1, section: 1}, {unique: true});
+
+// ClassSchema.index({"results.studentsResult.subjectMarksArray":1}, {collation: { locale: 'en', strength: 2}});
+
 // ClassSchema.index({"attendance.date": 1}, {unique: true});
 // ClassSchema.ensureIndex({"attendance.date": 1}, {unique: true});
 

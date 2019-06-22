@@ -294,7 +294,7 @@ module.exports = function (app) {
         var classData = {
           "class": element.class,
           "section": element.section,
-          "subjects": element.subjects,
+          "subjects": element.subjects.sort(),
           "studentsData": element.studentsData,
           "createdAt": currentTime,
           "updatedAt": currentTime
@@ -340,7 +340,7 @@ module.exports = function (app) {
       var classData = {
         "class": request.class,
         "section": request.section,
-        "subjects": request.subjects,
+        "subjects": request.subjects.sort(),
         "studentsData": request.studentsData,
         "createdAt": currentTime,
         "updatedAt": currentTime
@@ -428,7 +428,7 @@ module.exports = function (app) {
     var studentsDataJSON = {};
     if (request.studentsData) studentsDataJSON.studentsData = request.studentsData;
 
-    if (request.subjects) objForUpdate.subjects = request.subjects;
+    if (request.subjects) objForUpdate.subjects = request.subjects.sort();
     // if (request.timeTable) objForUpdate.timeTable = request.timeTable;
     
     // Storing date as date (converting string date to date type)

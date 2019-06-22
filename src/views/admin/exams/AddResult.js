@@ -615,7 +615,7 @@ class AddResult extends Component {
         console.log('AddResult - fetchClassSpecificDetails - res.data - ' + JSON.stringify(res.data));
 
         this.setState({
-          subjectArrayFromClass: response.subjects,
+          subjectArrayFromClass: response.subjects.sort(),
           studentsData: response.studentsData
         }, () => {
 
