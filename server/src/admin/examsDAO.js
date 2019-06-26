@@ -509,6 +509,25 @@ module.exports = function (app) {
         // "classWiseExamDetailsArray.$.percentageShareInFinalResult": 1,
         // "classWiseExamDetailsArray.$.isMandatryToAttendForFinalResult": 1
       }
+    } else if (!(typeof (request.examNameArray) === 'undefined' || request.examNameArray === null) && !(typeof (request.className) === 'undefined' || request.className === null)) {
+
+      //For fetching class subject details to show on ScheduleExam view on page load
+
+      examRequest = {
+        "examName": { $in: request.examNameArray },
+        "classWiseExamDetailsArray.class": request.className,
+      };
+      examResponse = {
+        "examName": 1,
+        "examDescription": 1,
+        "percentageShareInFinalResult": 1,
+        "applicableForClasses": 1,
+        "isMandatryToAttendForFinalResult": 1,
+        "classWiseExamDetailsArray.$.sectionWiseExamDetailsArray": 1,
+        // "classWiseExamDetailsArray.$.class": 1,
+        // "classWiseExamDetailsArray.$.percentageShareInFinalResult": 1,
+        // "classWiseExamDetailsArray.$.isMandatryToAttendForFinalResult": 1
+      }
     }
 
     console.log("ExamsDAO - fetchExamDetailsOnInput - searchString - examRequest - " + JSON.stringify(examRequest) + " examResponse - " + JSON.stringify(examResponse));

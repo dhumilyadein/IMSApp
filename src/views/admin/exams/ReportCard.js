@@ -75,9 +75,6 @@ class ReportCard extends Component {
       allSectionCheck: false,
       editMode: "disabled",
 
-      results: [],
-
-
       // To make tab 1 on focus
       activeTab: 'EXAM_DETAILS',
 
@@ -98,7 +95,9 @@ class ReportCard extends Component {
       examDetailsArray: [],
       selectedExamDetails: {},
 
-      results: {},
+      results: [],
+      examDetails: [],
+      reportCardData: {},
 
       // venueLabelValueArray: [
       //   { label: "Hall 1", value: "Hall 1" },
@@ -117,15 +116,15 @@ class ReportCard extends Component {
     this.fetchClassSpecificDetails = this.fetchClassSpecificDetails.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
-    this.examNameChangeHandler = this.examNameChangeHandler.bind(this);
     this.toggleTabs = this.toggleTabs.bind(this);
     this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
-    this.fetchClassWiseExamDetails = this.fetchClassWiseExamDetails.bind(this);
+    this.fetchAllExamDetailsForSelectedSection = this.fetchAllExamDetailsForSelectedSection.bind(this);
     this.resetStudentsMarksArray = this.resetStudentsMarksArray.bind(this);
     this.reportCardSubmitHandler = this.reportCardSubmitHandler.bind(this);
     this.fetchResultOnExamName = this.fetchResultOnExamName.bind(this);
     this.setStudentsDropDownLabelValue = this.setStudentsDropDownLabelValue.bind(this);
     this.studentChangeHandler = this.studentChangeHandler.bind(this);
+    this.organizeFinalDataFromExamDetailsAndResults = this.organizeFinalDataFromExamDetailsAndResults.bind(this);
 
     // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
@@ -134,10 +133,10 @@ class ReportCard extends Component {
   /**
    * Fetching exam details
    */
-  fetchClassWiseExamDetails() {
+  fetchAllExamDetailsForSelectedSection() {
 
     var fetchExamDetailsOnInputRequest = {
-      "examName": this.state.selectedExamDetails.examName,
+      "examNameArray": this.state.examsAssignedToThisClass,
       "className": this.state.class
     }
 
@@ -145,37 +144,51 @@ class ReportCard extends Component {
       .post("http://localhost:8001/api/fetchExamDetailsOnInput", fetchExamDetailsOnInputRequest)
       .then(result => {
 
-        // console.log("CreateExam - fetchExamDetails - exam details - " + JSON.stringify(result.data));
+        console.log("ReportCard - fetchAllExamDetailsForSelectedSection - fetchExamDetailsOnInput exam details - " + JSON.stringify(result.data));
 
         if (result.errors) {
           return this.setState({ errors: result.errors });
 
-        } else if (!(typeof (result.data[0]) === 'undefined' || result.data[0] === null)) {
+        } else if (!(typeof (result.data) === 'undefined' || result.data === null)) {
 
-          var classWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0];
-          var sectionWiseExamDetailsArray = result.data[0].classWiseExamDetailsArray[0].sectionWiseExamDetailsArray;
+          var examDetailsArr = [];
 
-          sectionWiseExamDetailsArray.forEach(element => {
+          result.data.forEach(ed => {
 
-            // Comparing with selected section
-            if (element.section === this.state.selectedSection) {
+            //classWiseExamDetailsArray[0] is used as we are passing class in input so the result will only be returned for this particular class, which means the length will always be 1.
 
-              var percentageShareInFinalResult = result.data[0].classWiseExamDetailsArray[0].percentageShareInFinalResult;
-              var isMandatryToAttendForFinalResult = result.data[0].classWiseExamDetailsArray[0].isMandatryToAttendForFinalResult;
+            var classWiseExamDetailsArray = ed.classWiseExamDetailsArray[0];
+            var sectionWiseExamDetailsArray = classWiseExamDetailsArray.sectionWiseExamDetailsArray;
 
-              var selectedExamDetailsTemp = this.state.selectedExamDetails;
+            if (!(typeof (sectionWiseExamDetailsArray) === 'undefined' || sectionWiseExamDetailsArray === null)) {
 
-              selectedExamDetailsTemp.percentageShareInFinalResult = percentageShareInFinalResult;
-              selectedExamDetailsTemp.isMandatryToAttendForFinalResult = isMandatryToAttendForFinalResult;
+              sectionWiseExamDetailsArray.forEach(element => {
 
-              this.setState({
-                inputExamDataArray: element.examDetails,
-                selectedExamDetails: selectedExamDetailsTemp,
+                // Comparing with selected section
+                if (element.section === this.state.selectedSection) {
+
+                  var examDetails = {};
+
+                  examDetails.examName = ed.examName;
+                  examDetails.examDescription = ed.examDescription;
+                  examDetails.percentageShareInFinalResult = classWiseExamDetailsArray.percentageShareInFinalResult;
+                  examDetails.isMandatryToAttendForFinalResult = classWiseExamDetailsArray.isMandatryToAttendForFinalResult;
+                  examDetails.examDetails = element.examDetails;
+
+                  examDetailsArr.push(examDetails);
+
+                }
               });
             }
+
           });
 
-          console.log('ReportCard - fetchClassWiseExamDetails - classWiseExamDetailsArray - ' + JSON.stringify(classWiseExamDetailsArray) + " sectionWiseExamDetailsArray - " + JSON.stringify(sectionWiseExamDetailsArray));
+          this.setState({
+            examDetails: examDetailsArr
+          }, () => {
+            console.log('ReportCard - fetchAllExamDetailsForSelectedSection - examDetails - ' + JSON.stringify(this.state.examDetails));
+          });
+
         }
 
       });
@@ -200,9 +213,18 @@ class ReportCard extends Component {
           return this.setState({ errors: result.errors });
         } else {
 
-          this.setState({ examDetailsArray: result.data }, () => {
+          var examsAssignedToThisClass = [];
+          result.data.forEach(examDetail => {
 
-            console.log('ReportCard - fetchExamDetailsOnInput - exam details for class - ' + this.state.selectedClass + ' are \n' + JSON.stringify(this.state.examDetailsArray));
+            examsAssignedToThisClass.push(examDetail.examName);
+          });
+
+          this.setState({
+            examDetailsArray: result.data,
+            examsAssignedToThisClass: examsAssignedToThisClass
+          }, () => {
+
+            console.log('ReportCard - fetchExamDetailsOnInput - examDetailsArray for class - ' + this.state.class + ' are \n' + JSON.stringify(this.state.examDetailsArray) + "\nexamsAssignedToThisClass - " + this.state.examsAssignedToThisClass);
           });
 
         }
@@ -341,6 +363,8 @@ class ReportCard extends Component {
         + " selected section - " + this.state.selectedSection);
 
       this.fetchClassSpecificDetails();
+
+      this.fetchAllExamDetailsForSelectedSection();
     });
 
   };
@@ -353,110 +377,56 @@ class ReportCard extends Component {
     });
 
     console.log("ReportCard - studentChangeHandler - newValue - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
+    console.log("ReportCard - studentChangeHandler - results before modification - " + JSON.stringify(this.state.results));
 
     var username = newValue.value.split("(")[1].split(")")[0];
 
-    var selectedStudentsExamDetails = {};
-    this.state.results.forEach(res => {
+    var resultsTemp = this.state.results;
 
-      if (res.examName === element.examName) {
+    // var sdTemp = this.state.results[0].studentsResult[0];
+    // resultsTemp.username = sdTemp.username;
+    // resultsTemp.firstname = sdTemp.firstname;
+    // resultsTemp.lastname = sdTemp.lastname;
+    // resultsTemp.fullName = sdTemp.fullName;
 
-        res.studentsResult.forEach(element => {
+    console.log("ReportCard - studentChangeHandler - resultTemp - " + JSON.stringify(resultsTemp));
 
-          if (element.username === username) {
-            res.studentsResult.length = 0;
-    
-            res.studentsResult.push(element);
-    
-            console.log("ReportCard - studentChangeHandler - Removed all elements from studentsResult and pushed details only for the selected student" - + element);
-          }
-        });
+    resultsTemp.forEach(res => {
 
-        selectedStudentsExamDetails.examName = res.examName;
-        selectedStudentsExamDetails.examFinishDate = res.examFinishDate;
-        selectedStudentsExamDetails.studentsResult = res.studentsResult;
-      }
+      res.studentsResult.forEach(sr => {
+
+        if (sr.username === username) {
+          res.studentsResult.length = 0;
+
+          // delete sr["username"];
+          // delete sr["firstname"];
+          // delete sr["lastname"];
+          // delete sr["fullName"];
+
+          res.studentsResult.push(sr);
+
+          console.log("ReportCard - studentChangeHandler - Removed all elements from studentsResult and pushed details only for the selected student - " + JSON.stringify(sr));
+        }
+      });
     });
 
     this.setState({
+      results: resultsTemp,
       selectedStudent: newValue.value,
       selectedStudentLabelValue: newValue,
       selectedStudentUsername: username,
-      selectedStudentsExamDetails: selectedStudentsExamDetails
     }, () => {
-      console.log("ReportCard - studentChangeHandler - selectedStudentUsername - " + this.state.selectedStudentUsername + "\nselectedStudentLabelValue - " + JSON.stringify(this.state.selectedStudentLabelValue) + "\nselectedStudentsExamDetails" - + this.state.selectedStudentsExamDetails);
+      console.log("ReportCard - studentChangeHandler - selectedStudentUsername - " + this.state.selectedStudentUsername + "\nselectedStudentLabelValue - " + JSON.stringify(this.state.selectedStudentLabelValue));
       console.log("\nReportCard - studentChangeHandler - selected class - " + JSON.stringify(this.state.class)
         + " selected section - " + this.state.selectedSection);
+      console.log("ReportCard - studentChangeHandler - results AFTER modification - " + JSON.stringify(this.state.results));
+
+      // Merging examDetails and results data to have all the results data in one variable
+      this.organizeFinalDataFromExamDetailsAndResults();
 
     });
 
   };
-
-  examNameChangeHandler(e) {
-
-    this.setState({
-      selectedExamDetails: {},
-    });
-
-    var examName = e.currentTarget.value;
-
-    var isExamNameValid = false;
-
-    console.log("ReportCard - examNameChangeHandler - 1 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + "\nexamName - " + examName);
-
-    this.state.examDetailsArray.forEach(element => {
-
-      var selectedExamDetails = {};
-
-      if (examName === element.examName) {
-
-        isExamNameValid = true;
-
-        selectedExamDetails.examName = element.examName;
-        selectedExamDetails.examDescription = element.examDescription;
-        selectedExamDetails.percentageShareInFinalResult = element.percentageShareInFinalResult;
-        selectedExamDetails.applicableForClasses = element.applicableForClasses;
-        selectedExamDetails.isMandatryToAttendForFinalResult = element.isMandatryToAttendForFinalResult;
-
-        this.state.results.forEach(res => {
-
-          if (res.examName === element.examName) {
-
-            selectedExamDetails.examName = res.examName;
-            selectedExamDetails.examFinishDate = res.examFinishDate;
-            selectedExamDetails.studentsResult = res.studentsResult;
-          }
-        });
-
-        this.setState({
-          selectedExamDetails: selectedExamDetails
-        }, () => {
-
-          //Fetching class wise exam details on examName selection
-
-          console.log("ReportCard - examNameChangeHandler - 1 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + "\nexamName - " + examName);
-
-          this.fetchClassWiseExamDetails();
-
-          this.fetchResultOnExamName();
-
-          console.log("ReportCard - examNameChangeHandler - 2 selectedExamDetails - " + JSON.stringify(this.state.selectedExamDetails) + "\nexamName - " + examName);
-        });
-
-        console.log("Foreach setting exam details");
-        return true;
-      }
-
-    });
-
-    if (isExamNameValid) {
-      console.log("Foreach setting exam details after loop");
-      this.setState({
-        showReportCardFlag: true
-      });
-    }
-
-  }
 
   /**
    * For tab toggle
@@ -688,6 +658,101 @@ class ReportCard extends Component {
     });
   }
 
+  organizeFinalDataFromExamDetailsAndResults() {
+
+    var reportCardData = {};
+
+    console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - examDetails - " + JSON.stringify(this.state.examDetails) + "\nresults - " + JSON.stringify(this.state.results));
+
+    var sdTemp = this.state.results[0].studentsResult[0];
+
+    reportCardData.username = sdTemp.username;
+    reportCardData.firstname = sdTemp.firstname;
+    reportCardData.lastname = sdTemp.lastname;
+    reportCardData.fullName = sdTemp.fullName;
+    reportCardData.className = this.state.class;
+    reportCardData.section = this.state.selectedSection;
+
+    var r = this.state.results;
+    var ed = this.state.examDetails;
+
+    var examDetailsArr = [];
+    for (var i = 0; i < r.length; i++) {
+
+      for (var j = 0; j < ed.length; j++) {
+
+        if (r[i].examName === ed[j].examName) {
+
+          console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - r[i] - " + JSON.stringify(r[i]) + "ed[j] - " + JSON.stringify(ed[j]));
+
+          var examDetailsTemp = {};
+          var subjectDetailsArr = [];
+
+          examDetailsTemp.examName = ed[j].examName;
+          examDetailsTemp.examDescription = ed[j].examDescription;
+          examDetailsTemp.examDescription = ed[j].examDescription;
+          examDetailsTemp.isMandatryToAttendForFinalResult = ed[j].isMandatryToAttendForFinalResult;
+          examDetailsTemp.examFinishDate = r[i].examFinishDate;
+
+          // ed[j].examDetails.forEach(details => {
+            for(var k = 0; k<ed[j].examDetails.length ; k++) {
+
+            var subejctDetailsTemp = {};
+
+            subejctDetailsTemp.subjectName = ed[j].examDetails[k].subject;
+            subejctDetailsTemp.totalMarks = ed[j].examDetails[k].totalMarks;
+            subejctDetailsTemp.passingMarks = ed[j].examDetails[k].passingMarks;
+            subejctDetailsTemp.includeInResultFlag = ed[j].examDetails[k].includeInResultFlag;
+            subejctDetailsTemp.examDate = ed[j].examDetails[k].examDate;
+            subejctDetailsTemp.startMoment = ed[j].examDetails[k].startMoment;
+            subejctDetailsTemp.endMoment = ed[j].examDetails[k].endMoment;
+            subejctDetailsTemp.examDuration = ed[j].examDetails[k].examDuration;
+
+            var count = 1;
+            // r[i].studentsResult[0].subjectMarksArray.forEach(e => {
+            for(var l=0;l<r[i].studentsResult[0].subjectMarksArray.length; l++) {
+
+              console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - all keys - " + JSON.stringify(r[i].studentsResult[0].subjectMarksArray[l]) + " count - " + count++);
+
+              var keys = Object.keys(r[i].studentsResult[0].subjectMarksArray[l]);
+
+              console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - 1 subject from key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys] + " details.subject - " + ed[j].examDetails[k].subject);
+              
+              if(keys[0] === ed[j].examDetails[k].subject) {
+                console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - subject from key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys] + " details.subject - " + ed[j].examDetails[k].subject);
+
+                subejctDetailsTemp.obtainedMarks = r[i].studentsResult[0].subjectMarksArray[l][keys];
+                break;
+              }              
+              console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys]);
+
+            }
+
+            console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - subjectMarksArray obtainedMarks - " + JSON.stringify(r[i].studentsResult[0].subjectMarksArray) + "\nsubejctDetailsTemp.subjectName - " + subejctDetailsTemp.subjectName + "\ned[j].examName - " + ed[j].examName);
+
+            subjectDetailsArr.push(subejctDetailsTemp);
+          }
+
+          examDetailsTemp.subejctDetailsArr = subjectDetailsArr;
+          examDetailsArr.push(examDetailsTemp);
+
+          break;
+
+        }
+      }
+    }
+
+    reportCardData.examDetailArr = examDetailsArr;
+
+    this.setState({
+      reportCardData: reportCardData
+    }, () => {
+
+      console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - reportCardData - " + JSON.stringify(this.state.reportCardData));
+    });
+
+  }
+
   render() {
 
     return (
@@ -912,97 +977,100 @@ class ReportCard extends Component {
                       <Col></Col>
                     </Row>
 
+{this.state.reportCardData && this.state.reportCardData.examDetailArr && (
                     <div class="table-responsive" >
                       <Table bordered hover size="sm">
                         <thead>
                           <tr>
                             <th><h5>Subjects/Exams</h5></th>
-                            {this.state.results.map((item, idx) => (
-                              <th className="text-center"> <h5>{item.examName.charAt(0).toUpperCase() + item.examName.slice(1)}</h5></th>
+                            {this.state.reportCardData.examDetailArr.map((examdetail, examdetailId) => (
+                              <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1)}</h5></th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
-                          {this.state.subjectArrayFromClass.map((subjectName, subjectId) => (
+                          {this.state.reportCardData.examDetailArr[0].subejctDetailsArr.map((subject, subjectId) => (
 
                             <tr id="addr0" key={subjectId}>
 
-                              <th className="text-center"> <h5>{subjectName.charAt(0).toUpperCase() + subjectName.slice(1)}</h5></th>
+                              <th className="text-center"> <h5>{subject.subjectName.charAt(0).toUpperCase() + subject.subjectName.slice(1)}</h5></th>
 
-                              {this.state.subjectArrayFromClass.map((subjectName, idx) => (
+                              {this.state.reportCardData.examDetailArr.map((examColumn, examColumnId) => (
                                 // {/* {this.state.results.map((subjectName, idx) => ( */ }
-                                < td id = "col0" key = { subjectId } align = "center" style = {{ "vertical-align": "middle" }}>
-                                <InputGroup >
-                                <Input
-                                  name="examDuration"
-                                  type="text"
-                                  className="form-control"
-                                  value={subjectName}
-                                  onChange={this.marksChangeHandler(idx, subjectId, subjectName)}
-                                  style={{ textAlign: 'center' }}
-                                  id="examDuration"
-                                // size="lg"
-                                />
-                              </InputGroup>
-                              </td>
+                                < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                  <InputGroup >
+                                    <Input
+                                      name="examDuration"
+                                      type="text"
+                                      className="form-control"
+                                      // value={parseInt(subject.obtainedMarks)-parseInt(subject.totalMarks)<0?(subject.obtainedMarks + " / " + subject.totalMarks + " " + subject.subjectName) : (subject.obtainedMarks + " / " + subject.totalMarks) + " (FAIL)"}
+                                      value={parseInt(examColumn.subejctDetailsArr[subjectId].obtainedMarks)-parseInt(examColumn.subejctDetailsArr[subjectId].totalMarks)<0?(examColumn.subejctDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subejctDetailsArr[subjectId].totalMarks + " " + examColumn.subejctDetailsArr[subjectId].subjectName) : (examColumn.subejctDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subejctDetailsArr[subjectId].totalMarks) + " (FAIL)"}
+                                      onChange={this.marksChangeHandler(examColumnId, subjectId, subject.subjectName)}
+                                      style={{ textAlign: 'center' }}
+                                      id="examDuration"
+                                    // size="lg"
+                                    />
+                                  </InputGroup>
+                                </td>
+                              ))}
+                            </tr>
                           ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                  {this.state.rowError && (
-                    <font color="red">
-                <h6>
-                  {" "}
-                  <p>{this.state.rowError} </p>
-                </h6>{" "}
-              </font>
-              )}
+                        </tbody>
+                      </Table>
+                    </div>
+)}
+                    {this.state.rowError && (
+                      <font color="red">
+                        <h6>
+                          {" "}
+                          <p>{this.state.rowError} </p>
+                        </h6>{" "}
+                      </font>
+                    )}
 
-                  {/* {this.state.insertExamDetailsErrorMessage && (
+                    {/* {this.state.insertExamDetailsErrorMessage && (
                     <font color="red">
                       {" "}
                       <p>{this.state.insertExamDetailsErrorMessage}</p>
                     </font>
                   )} */}
-              <Row>
-                <Col>
-                  {!this.state.loader && <Button
-                    onClick={this.reportCardSubmitHandler}
-                    size="lg"
-                    color="success"
-                    block
-                  >
-                    Submit
+                    <Row>
+                      <Col>
+                        {!this.state.loader && <Button
+                          onClick={this.reportCardSubmitHandler}
+                          size="lg"
+                          color="success"
+                          block
+                        >
+                          Submit
                 </Button>}
 
-                  {this.state.loader &&
-                    <div align="center"><ReactLoading type="spin"
-                      color="	#006400"
-                      height='2%' width='10%' />
-                      <br />
+                        {this.state.loader &&
+                          <div align="center"><ReactLoading type="spin"
+                            color="	#006400"
+                            height='2%' width='10%' />
+                            <br />
 
-                      <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
+                            <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
 
-                </Col>
+                      </Col>
 
-                <Col>
-                  <Button
-                    onClick={this.resetExamDetails}
-                    size="lg"
-                    color="secondary"
-                    block
-                  >
-                    Reset
+                      <Col>
+                        <Button
+                          onClick={this.resetExamDetails}
+                          size="lg"
+                          color="secondary"
+                          block
+                        >
+                          Reset
                 </Button>
-                </Col>
-              </Row>
+                      </Col>
+                    </Row>
 
-                </div>
+                  </div>
 
 
-            )}
+                )}
 
             </Col>
           </Row>
