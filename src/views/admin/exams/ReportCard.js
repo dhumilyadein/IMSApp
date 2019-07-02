@@ -694,8 +694,12 @@ class ReportCard extends Component {
           examDetailsTemp.isMandatryToAttendForFinalResult = ed[j].isMandatryToAttendForFinalResult;
           examDetailsTemp.examFinishDate = r[i].examFinishDate;
 
+          var totalObtainedMarks = 0;
+          var totalMarks = 0;
+          var examResultFlag = true;
+
           // ed[j].examDetails.forEach(details => {
-            for(var k = 0; k<ed[j].examDetails.length ; k++) {
+          for (var k = 0; k < ed[j].examDetails.length; k++) {
 
             var subejctDetailsTemp = {};
 
@@ -709,21 +713,39 @@ class ReportCard extends Component {
             subejctDetailsTemp.examDuration = ed[j].examDetails[k].examDuration;
 
             var count = 1;
+
             // r[i].studentsResult[0].subjectMarksArray.forEach(e => {
-            for(var l=0;l<r[i].studentsResult[0].subjectMarksArray.length; l++) {
+            // Loop for fetching obtained marks from results array.. loop will end as soon as the data is fetched.. it will not continue after that.
+            for (var l = 0; l < r[i].studentsResult[0].subjectMarksArray.length; l++) {
 
               console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - all keys - " + JSON.stringify(r[i].studentsResult[0].subjectMarksArray[l]) + " count - " + count++);
 
               var keys = Object.keys(r[i].studentsResult[0].subjectMarksArray[l]);
 
               console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - 1 subject from key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys] + " details.subject - " + ed[j].examDetails[k].subject);
-              
-              if(keys[0] === ed[j].examDetails[k].subject) {
-                console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - subject from key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys] + " details.subject - " + ed[j].examDetails[k].subject);
+
+              if (keys[0] === ed[j].examDetails[k].subject) {
 
                 subejctDetailsTemp.obtainedMarks = r[i].studentsResult[0].subjectMarksArray[l][keys];
+
+                // Setting subject result based on obtained marks and passing marks
+                if ((parseInt(subejctDetailsTemp.obtainedMarks) - parseInt(subejctDetailsTemp.passingMarks)) >= 0) {
+                  subejctDetailsTemp.subjectResult = "PASS";
+                } else {
+                  subejctDetailsTemp.subjectResult = "FAIL";
+                  examResultFlag = false;
+                }
+
+                // Setting total marks obtained and total passing marks
+                if (subejctDetailsTemp.includeInResultFlag) {
+                  totalObtainedMarks = totalObtainedMarks + parseInt(subejctDetailsTemp.obtainedMarks);
+                  totalMarks = totalMarks + parseInt(subejctDetailsTemp.totalMarks);
+                }
+
+                console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - subject from key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys] + " details.subject - " + ed[j].examDetails[k].subject + "\ntotalObtainedMarks - " + totalObtainedMarks + "\ntotalMarks - " + totalMarks + "\nsubejctDetailsTemp.includeInResultFlag - " + subejctDetailsTemp.includeInResultFlag);
+
                 break;
-              }              
+              }
               console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - key - " + keys + " value - " + r[i].studentsResult[0].subjectMarksArray[l][keys]);
 
             }
@@ -733,7 +755,11 @@ class ReportCard extends Component {
             subjectDetailsArr.push(subejctDetailsTemp);
           }
 
-          examDetailsTemp.subejctDetailsArr = subjectDetailsArr;
+          examDetailsTemp.subjectDetailsArr = subjectDetailsArr;
+          examDetailsTemp.totalObtainedMarks = totalObtainedMarks;
+          examDetailsTemp.totalMarks = totalMarks;
+          examDetailsTemp.examResultFlag = examResultFlag;
+
           examDetailsArr.push(examDetailsTemp);
 
           break;
@@ -749,6 +775,31 @@ class ReportCard extends Component {
     }, () => {
 
       console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - reportCardData - " + JSON.stringify(this.state.reportCardData));
+
+      /*
+       * Checking if the subjects are same for all the exams so that the result can be guaranteed to be proper, without discrepencies. 
+       */
+      var edArr = this.state.reportCardData.examDetailArr;
+
+      // First loop for comparing consecutive exams for no of subject and order of subjects
+      for (var i = 0; i < edArr.length - 1; i++) {
+
+        var sdArr1 = edArr[i].subjectDetailsArr;
+        var sdArr2 = edArr[i + 1].subjectDetailsArr;
+
+        // Loop for comparing subjects.
+        if (sdArr1.length === sdArr2.length) {
+          for (var j = 0; j < sdArr1.length; j++) {
+
+            if (sdArr1[j].subjectName !== sdArr2[j].subjectName) {
+
+              alert("Order of subject is not same in the reportCardData array, result can not be correct, please check DB for details.");
+            }
+          }
+        } else {
+          alert("Number of subject are not same for all the exams! Result is not correct, please check DB for details.");
+        }
+      }
     });
 
   }
@@ -977,36 +1028,76 @@ class ReportCard extends Component {
                       <Col></Col>
                     </Row>
 
-{this.state.reportCardData && this.state.reportCardData.examDetailArr && (
-                    <div class="table-responsive" >
-                      <Table bordered hover size="sm">
-                        <thead>
-                          <tr>
-                            <th><h5>Subjects/Exams</h5></th>
-                            {this.state.reportCardData.examDetailArr.map((examdetail, examdetailId) => (
-                              <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1)}</h5></th>
+                    {this.state.reportCardData && this.state.reportCardData.examDetailArr && (
+                      <div class="table-responsive" >
+                        <Table bordered hover size="sm">
+                          <thead>
+                            <tr>
+                              <th><h5>Subjects/Exams</h5></th>
+                              {this.state.reportCardData.examDetailArr.map((examdetail, examdetailId) => (
+                                <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1)}</h5></th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.reportCardData.examDetailArr[0].subjectDetailsArr.map((subject, subjectId) => (
+
+                              <tr id="addr0" key={subjectId}>
+
+                                <th className="text-center"> <h5>{subject.subjectName.charAt(0).toUpperCase() + subject.subjectName.slice(1)}</h5></th>
+
+                                {this.state.reportCardData.examDetailArr.map((examColumn, examColumnId) => (
+                                  // {/* {this.state.results.map((subjectName, idx) => ( */ }
+                                  // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
+
+                                  < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                    <InputGroup >
+                                      <Input
+                                        name="examDuration"
+                                        type="text"
+                                        className="form-control"
+                                        // value={parseInt(subject.obtainedMarks)-parseInt(subject.totalMarks)<0?(subject.obtainedMarks + " / " + subject.totalMarks + " " + subject.subjectName) : (subject.obtainedMarks + " / " + subject.totalMarks) + " (FAIL)"}
+
+                                        value={examColumn.subjectDetailsArr[subjectId].subjectResult === "PASS" ? (examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName) : (examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " (FAIL - " + examColumn.subjectDetailsArr[subjectId].passingMarks + ")")}
+
+                                        // value={(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " " + examColumn.subjectDetailsArr[subjectId].subjectResult) }
+
+                                        // onChange={this.marksChangeHandler(examColumnId, subjectId, subject.subjectName)}
+                                        style={{ textAlign: 'center' }}
+                                        id="examDuration"
+                                        disabled="disabled"
+                                      // size="lg"
+                                      />
+                                    </InputGroup>
+                                  </td>
+                                ))}
+                              </tr>
                             ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {this.state.reportCardData.examDetailArr[0].subejctDetailsArr.map((subject, subjectId) => (
 
-                            <tr id="addr0" key={subjectId}>
+                            <tr>
 
-                              <th className="text-center"> <h5>{subject.subjectName.charAt(0).toUpperCase() + subject.subjectName.slice(1)}</h5></th>
+                              <th className="text-center"> <h5>Total</h5></th>
 
                               {this.state.reportCardData.examDetailArr.map((examColumn, examColumnId) => (
                                 // {/* {this.state.results.map((subjectName, idx) => ( */ }
+                                // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
+
                                 < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                {/* {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")} */}
                                   <InputGroup >
                                     <Input
-                                      name="examDuration"
+                                      name="totalObtainedMarks"
                                       type="text"
                                       className="form-control"
                                       // value={parseInt(subject.obtainedMarks)-parseInt(subject.totalMarks)<0?(subject.obtainedMarks + " / " + subject.totalMarks + " " + subject.subjectName) : (subject.obtainedMarks + " / " + subject.totalMarks) + " (FAIL)"}
-                                      value={parseInt(examColumn.subejctDetailsArr[subjectId].obtainedMarks)-parseInt(examColumn.subejctDetailsArr[subjectId].totalMarks)<0?(examColumn.subejctDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subejctDetailsArr[subjectId].totalMarks + " " + examColumn.subejctDetailsArr[subjectId].subjectName) : (examColumn.subejctDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subejctDetailsArr[subjectId].totalMarks) + " (FAIL)"}
-                                      onChange={this.marksChangeHandler(examColumnId, subjectId, subject.subjectName)}
+
+                                      value={examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")}
+
+                                      // value={(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " " + examColumn.subjectDetailsArr[subjectId].subjectResult) }
+
+                                      // onChange={this.marksChangeHandler(examColumnId, subjectId, subject.subjectName)}
                                       style={{ textAlign: 'center' }}
+                                      disabled="disabled"
                                       id="examDuration"
                                     // size="lg"
                                     />
@@ -1014,11 +1105,10 @@ class ReportCard extends Component {
                                 </td>
                               ))}
                             </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
-)}
+                          </tbody>
+                        </Table>
+                      </div>
+                    )}
                     {this.state.rowError && (
                       <font color="red">
                         <h6>
