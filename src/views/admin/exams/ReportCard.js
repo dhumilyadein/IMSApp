@@ -692,6 +692,8 @@ class ReportCard extends Component {
           examDetailsTemp.examDescription = ed[j].examDescription;
           examDetailsTemp.examDescription = ed[j].examDescription;
           examDetailsTemp.isMandatryToAttendForFinalResult = ed[j].isMandatryToAttendForFinalResult;
+          examDetailsTemp.percentageShareInFinalResult = ed[j].percentageShareInFinalResult;
+
           examDetailsTemp.examFinishDate = r[i].examFinishDate;
 
           var totalObtainedMarks = 0;
@@ -758,6 +760,7 @@ class ReportCard extends Component {
           examDetailsTemp.subjectDetailsArr = subjectDetailsArr;
           examDetailsTemp.totalObtainedMarks = totalObtainedMarks;
           examDetailsTemp.totalMarks = totalMarks;
+          examDetailsTemp.examResultPercentage = (parseFloat(totalObtainedMarks) / parseFloat(totalMarks)) * 100;
           examDetailsTemp.examResultFlag = examResultFlag;
 
           examDetailsArr.push(examDetailsTemp);
@@ -768,7 +771,34 @@ class ReportCard extends Component {
       }
     }
 
+    var netObtainedPercentage = 0.0;
+    var netTotalPercentage = 0.0;
+    for (var i = 0; i < examDetailsArr.length; i++) {
+
+      var ed = examDetailsArr[i];
+
+      console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - ed - " + JSON.stringify(ed));
+
+      if (ed.isMandatryToAttendForFinalResult) {
+
+        examDetailsArr[i].obtainedPercentageForExam = (parseFloat(ed.examResultPercentage) * parseFloat(ed.percentageShareInFinalResult)) / 100;
+
+        // As we are operating on percentage we don't need to calculate total percentage. it will always be 100% of ed.percentageShareInFinalResult (which means whatever is the value of ed.percentageShareInFinalResult).
+        examDetailsArr[i].totalPercentageForExam = parseFloat(ed.percentageShareInFinalResult);
+
+        console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - examDetailsArr[i].obtainedPercentageForExam - " + examDetailsArr[i].obtainedPercentageForExam + "\nexamDetailsArr[i].totalPercentageForExam - " + examDetailsArr[i].totalPercentageForExam);
+
+        netObtainedPercentage = netObtainedPercentage + examDetailsArr[i].obtainedPercentageForExam;
+        netTotalPercentage = netTotalPercentage + examDetailsArr[i].totalPercentageForExam;
+
+        console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - netObtainedPercentage - " + netObtainedPercentage + "\nnetTotalPercentage - " + netTotalPercentage);
+      }
+    }
+
+    var netPercentage = (netObtainedPercentage / netTotalPercentage) * 100;
+
     reportCardData.examDetailArr = examDetailsArr;
+    reportCardData.netPercentage = netPercentage;
 
     this.setState({
       reportCardData: reportCardData
@@ -1035,7 +1065,7 @@ class ReportCard extends Component {
                             <tr>
                               <th><h5>Subjects/Exams</h5></th>
                               {this.state.reportCardData.examDetailArr.map((examdetail, examdetailId) => (
-                                <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1)}</h5></th>
+                                <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1)+ " (" + examdetail.percentageShareInFinalResult + ")"}</h5></th>
                               ))}
                             </tr>
                           </thead>
@@ -1050,31 +1080,22 @@ class ReportCard extends Component {
                                   // {/* {this.state.results.map((subjectName, idx) => ( */ }
                                   // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
 
-                                  < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
-                                    <InputGroup >
-                                      <Input
-                                        name="examDuration"
-                                        type="text"
-                                        className="form-control"
-                                        // value={parseInt(subject.obtainedMarks)-parseInt(subject.totalMarks)<0?(subject.obtainedMarks + " / " + subject.totalMarks + " " + subject.subjectName) : (subject.obtainedMarks + " / " + subject.totalMarks) + " (FAIL)"}
+                                  examColumn.subjectDetailsArr[subjectId].subjectResult === "PASS" ? (
+                                    < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                      {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName)}
+                                    </td>
+                                  ) : (
+                                      < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "red" }}>
+                                        {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " (FAIL - " + examColumn.subjectDetailsArr[subjectId].passingMarks + ")")}
+                                      </td>
+                                    )
 
-                                        value={examColumn.subjectDetailsArr[subjectId].subjectResult === "PASS" ? (examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName) : (examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " (FAIL - " + examColumn.subjectDetailsArr[subjectId].passingMarks + ")")}
-
-                                        // value={(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " " + examColumn.subjectDetailsArr[subjectId].subjectResult) }
-
-                                        // onChange={this.marksChangeHandler(examColumnId, subjectId, subject.subjectName)}
-                                        style={{ textAlign: 'center' }}
-                                        id="examDuration"
-                                        disabled="disabled"
-                                      // size="lg"
-                                      />
-                                    </InputGroup>
-                                  </td>
                                 ))}
                               </tr>
                             ))}
 
-                            <tr>
+                            {/* For Total Marks */}
+                            <tr style={{ backgroundColor: "#f2f2f2" }}>
 
                               <th className="text-center"> <h5>Total</h5></th>
 
@@ -1082,27 +1103,40 @@ class ReportCard extends Component {
                                 // {/* {this.state.results.map((subjectName, idx) => ( */ }
                                 // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
 
-                                < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
-                                {/* {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")} */}
-                                  <InputGroup >
-                                    <Input
-                                      name="totalObtainedMarks"
-                                      type="text"
-                                      className="form-control"
-                                      // value={parseInt(subject.obtainedMarks)-parseInt(subject.totalMarks)<0?(subject.obtainedMarks + " / " + subject.totalMarks + " " + subject.subjectName) : (subject.obtainedMarks + " / " + subject.totalMarks) + " (FAIL)"}
+                                examColumn.examResultFlag ? (
+                                  <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                    {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")}
+                                  </td>
+                                ) : (
+                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "red" }}><b>
+                                      {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")}
+                                    </b></td>
+                                  )
+                              ))}
+                            </tr>
+                            {/* For Blank row */}
+                            <tr style={{ backgroundColor: "white" }}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
+                              </td>
+                            </tr>
 
-                                      value={examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")}
+                            <tr style={{ backgroundColor: "yellow" }}>
+                              {/* For percentage */}
+                              <th className="text-center"> <h5>Percentage</h5></th>
 
-                                      // value={(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " " + examColumn.subjectDetailsArr[subjectId].subjectResult) }
+                              {this.state.reportCardData.examDetailArr.map((examColumn, examColumnId) => (
+                                // {/* {this.state.results.map((subjectName, idx) => ( */ }
+                                // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
 
-                                      // onChange={this.marksChangeHandler(examColumnId, subjectId, subject.subjectName)}
-                                      style={{ textAlign: 'center' }}
-                                      disabled="disabled"
-                                      id="examDuration"
-                                    // size="lg"
-                                    />
-                                  </InputGroup>
-                                </td>
+                                examColumn.isMandatryToAttendForFinalResult ? (
+                                  <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                    {examColumn.examResultPercentage + " ( " + examColumn.obtainedPercentageForExam + " ) "}
+                                  </td>
+                                ) : (
+                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "grey" }}><b>
+                                      {examColumn.examResultPercentage + " (" + examColumn.obtainedPercentageForExam + ")"}
+                                    </b></td>
+                                  )
                               ))}
                             </tr>
                           </tbody>
