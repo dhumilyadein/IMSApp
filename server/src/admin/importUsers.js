@@ -422,14 +422,14 @@ valError["ClassError"] =
                 return res.json({ error_code: 1, err_desc: err, data: null });
               }
 
-              // console.log("Total records: " + Object.keys(result).length);
+               console.log("Total records: " + Object.keys(result).length);
               var importErrors = {};
               for (let i = 0; i < result.length; i++) {
-                //console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
-                //console.log("record length: "+Object.keys(result[i]).length);
+                console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
+                console.log("record length: "+Object.keys(result[i]).length);
                 var counter = 0;
                 for (var key in result[i]) {
-                  //console.log("key "+  result[i][key]  );
+                  console.log("key "+  result[i][key]  );
                   if (result[i][key] === "") counter++;
                 }
                 console.log(
@@ -664,21 +664,21 @@ console.log("Role: "+result[i].role);
 
 
 
-  function photoZipUploading(req, res) {
-    console.log("in Photo ZipUpload");
+  async function photoZipUploading(req, res) {
+    console.log("in Photo ZipUpload "+ JSON.stringify(req.file));
 
-    rimraf("./ZipUploads/*.*", function(e) {
+    await  rimraf("./ZipUploads/*.*", function(e) {
       console.log(e);
       console.log("Deleted Photos");
 
-      zipUpload(req, res, function(err) {
+        zipUpload(req, res, function(err) {
         if (err) {
           res.json({ error_code: 1, err_desc: err });
         } else if (!req.file)
         /** Multer gives us file info in req.file object */
           res.json({ error_code: 1, err_desc: "No file passed" });
         else {
-          console.log(req.file.path);
+         // console.log(" req.file.path "+req.file.path);
           zipPath = req.file.path;
 
           fs.createReadStream(zipPath).pipe(
@@ -692,6 +692,8 @@ console.log("Role: "+result[i].role);
         }
       });
     });
+
+    
   }
 
 

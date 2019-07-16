@@ -147,6 +147,8 @@ class ImportUser extends Component {
 
       zip.append('file', this.state.zipFile, this.state.zipFilename);
 
+      console.log("ZIP details "+ JSON.stringify( this.state.zipFilename));
+
       axios
         .post("http://localhost:8001/api/photoZipUploading", zip)
         .then(res => {

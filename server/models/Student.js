@@ -53,7 +53,8 @@ var StudentSchema = new Schema({
 
   dob: {
     type: Date,
-    required: true
+    required: true,
+    trim:true
   },
 
   gender: {
