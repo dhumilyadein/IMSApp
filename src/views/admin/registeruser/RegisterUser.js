@@ -148,6 +148,7 @@ class RegisterUser extends Component {
     this.fetchClasses = this.fetchClasses.bind(this);
     this.classChangeHandler = this.classChangeHandler.bind(this);
 
+    this.WarnToggleSuccess = this.WarnToggleSuccess.bind(this);
     this.updateClassDetails = this.updateClassDetails.bind(this);
 
     // Fetching class details on page load for class drop down
@@ -185,8 +186,14 @@ class RegisterUser extends Component {
   toggleSuccess() {
     this.setState({
       modalSuccess: !this.state.modalSuccess
+    }); this.resetForm();
+
+  }
+
+  WarnToggleSuccess() {
+    this.setState({
+      modalSuccess: !this.state.modalSuccess
     });
-    this.resetForm();
   }
 
   /**
@@ -213,9 +220,9 @@ class RegisterUser extends Component {
       class: "",
       section: "",
 
-      classes: [],
-      classDetails: {},
-      sectionArray: [],
+
+
+
       classDetailsUpdatedFlag: false,
       studentsDataArray: [],
 
@@ -225,9 +232,9 @@ class RegisterUser extends Component {
       photoerror: null,
       loader: false,
       admintype: "Office Admin",
-      selectedFeeTemplate: [],
-      selectedFeeTemplateValue: [],
-      feeTemplate: [],
+
+
+
       empRegSuccess: false,
       modalSuccess: true,
       parentpassword_con: "",
@@ -345,7 +352,7 @@ class RegisterUser extends Component {
                       return this.setState(result.data);
                     }
 
-                   
+
 
                     return this.setState({
                       userdata: result.data.data,
@@ -355,10 +362,11 @@ class RegisterUser extends Component {
                       loader: false
 
 
-                    },()=>{ this.updateClassDetails();});
+                    },()=>{ this.updateClassDetails();
+                     });
                   });
 
-             
+
 
               } else if (this.state.role.indexOf("admin") !== -1 || this.state.role.indexOf("teacher") !== -1) {
                 this.setState({ roleerror: false, errors: null });
@@ -370,7 +378,7 @@ class RegisterUser extends Component {
                       this.setState({ loader: false });
                       return this.setState(result.data);
                     }
-                    this.resetForm();
+
                     return this.setState({
                       userdata: result.data.data,
                       errors: null,
@@ -679,6 +687,18 @@ class RegisterUser extends Component {
                       </Modal>
                     )}
 
+{(this.state.feeTemplate.length===0||this.state.classes.length===0) && (
+                      <Modal
+                        isOpen={this.state.modalSuccess}
+                        className={"modal-danger " + this.props.className}
+                        toggle={this.WarnToggleSuccess}
+                      >
+                        <ModalHeader toggle={this.WarnToggleSuccess}>
+                         WARNING: Please Make sure Classes and Fee Templates are created before Registering Students!
+                        </ModalHeader>
+                      </Modal>
+                    )}
+
 
 
 
@@ -689,7 +709,7 @@ class RegisterUser extends Component {
                         toggle={this.toggleSuccess}
                       >
                         <ModalHeader toggle={this.toggleSuccess}>
-                          {this.state.userdata.firstname}{" "}
+                        Employee {this.state.userdata.firstname}{" "}
                           {this.state.userdata.lastname}{" "}
                           Registered Successfully!
                         </ModalHeader>
@@ -861,7 +881,7 @@ class RegisterUser extends Component {
                                 name="dob"
                                 id="dob"
                                 value={this.state.dob}
-                                onChange={date => { this.setState({ dob: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }) }}
+                                onChange={date => { if(date){this.setState({ dob: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }) }}}
                               />
                             </InputGroup>
 
@@ -1222,7 +1242,11 @@ class RegisterUser extends Component {
                                         return (<option key={element} value={element}>{element}</option>);
                                       }
                                       )}
-                                    </Input>
+                                    </Input> &nbsp;
+                                    <a href='#/admin/classmanagement/CreateClass'
+                  >
+                  <b>Create Class</b>
+                </a>
                                   </InputGroup>
                                   {this.state.errors && this.state.errors.class && (
                                     <font color="red">
@@ -1299,6 +1323,10 @@ class RegisterUser extends Component {
 
 
                                         } />
+                                                    <a href='#/admin/finance/FeeTemplates'
+                  >
+                  <b>Create Fee Template</b>
+                </a>
 
 
 
@@ -1332,7 +1360,7 @@ class RegisterUser extends Component {
                                 name="doj"
                                 id="doj"
                                 value={this.state.doj}
-                                onChange={date => { this.setState({ doj: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }) }}
+                                onChange={date => { if (date)this.setState({ doj: new Date(date.getTime()-(date.getTimezoneOffset() * 60000)) }) }}
                               />
                             </InputGroup>
                             {this.state.errors && this.state.errors.doj && (

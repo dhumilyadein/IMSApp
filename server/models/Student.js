@@ -129,7 +129,7 @@ var StudentSchema = new Schema({
 
   parentphone2: {
     type: String,
-    required: true
+
   },
   address: {
     type: String,
