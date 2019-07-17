@@ -116,7 +116,7 @@ console.log( "Update Class: "+JSON.stringify(request));
     if(request.subjects) objForUpdate.subjects = request.subjects;
     objForUpdate.updatedAt = currentTime;
 
-    console.log("ImportUsers - UpdateClassDetails - request.class - " + request.class + " request.section - " + request.section 
+    console.log("ImportUsers - UpdateClassDetails - request.class - " + request.class + " request.section - " + request.section
     + " objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
 
@@ -262,7 +262,7 @@ if (!ClassCheck)
     else
 {console.log("in Class Update Else")
 const studentCheck = await User.findOne({
- 
+
 username:request.username
 });
 if (!studentCheck)
@@ -429,7 +429,7 @@ valError["ClassError"] =
                 console.log("record length: "+Object.keys(result[i]).length);
                 var counter = 0;
                 for (var key in result[i]) {
-                  console.log("key "+  result[i][key]  );
+                  //console.log("key "+  result[i][key]  );
                   if (result[i][key] === "") counter++;
                 }
                 console.log(
@@ -665,7 +665,7 @@ console.log("Role: "+result[i].role);
 
 
   async function photoZipUploading(req, res) {
-    console.log("in Photo ZipUpload "+ JSON.stringify(req.file));
+    console.log("in Photo ZipUpload ");
 
     await  rimraf("./ZipUploads/*.*", function(e) {
       console.log(e);
@@ -674,26 +674,29 @@ console.log("Role: "+result[i].role);
         zipUpload(req, res, function(err) {
         if (err) {
           res.json({ error_code: 1, err_desc: err });
-        } else if (!req.file)
+          return;
+        } else if (!req.file){
         /** Multer gives us file info in req.file object */
-          res.json({ error_code: 1, err_desc: "No file passed" });
+          res.json({ error_code: 1, err_desc: "No file passed" }); return;}
         else {
          // console.log(" req.file.path "+req.file.path);
           zipPath = req.file.path;
 
           fs.createReadStream(zipPath).pipe(
             unzipper.Extract({ path: "ZipUploads" })
-          );
-
-          res.json({
+          ).on('finish', function(){
+            console.log("File unzipped!");
+            res.json({
             success: true,
             message: "zip " + req.file.originalname + " uploaded to " + zipPath
-          });
+          });})
+
+
         }
       });
     });
 
-    
+
   }
 
 
