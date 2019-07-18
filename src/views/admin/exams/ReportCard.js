@@ -677,6 +677,9 @@ class ReportCard extends Component {
     var ed = this.state.examDetails;
 
     var examDetailsArr = [];
+
+    // Specify the result of last exam.. pass or fail.. to be shown as the final result
+    var netResultFlag = true;
     for (var i = 0; i < r.length; i++) {
 
       for (var j = 0; j < ed.length; j++) {
@@ -763,6 +766,9 @@ class ReportCard extends Component {
           examDetailsTemp.examResultPercentage = (parseFloat(totalObtainedMarks) / parseFloat(totalMarks)) * 100;
           examDetailsTemp.examResultFlag = examResultFlag;
 
+          // To capture the result of last exam.. pass or fail (in any exam).. to be shown as the final result
+          netResultFlag = examResultFlag;
+
           examDetailsArr.push(examDetailsTemp);
 
           break;
@@ -799,6 +805,7 @@ class ReportCard extends Component {
 
     reportCardData.examDetailArr = examDetailsArr;
     reportCardData.netPercentage = netPercentage;
+    reportCardData.netResultFlag = netResultFlag;
 
     this.setState({
       reportCardData: reportCardData
@@ -1065,7 +1072,11 @@ class ReportCard extends Component {
                             <tr>
                               <th><h5>Subjects/Exams</h5></th>
                               {this.state.reportCardData.examDetailArr.map((examdetail, examdetailId) => (
-                                <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1)+ " (" + examdetail.percentageShareInFinalResult + ")"}</h5></th>
+
+                                examdetail.isMandatryToAttendForFinalResult ? (
+                                <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1) + " (" + examdetail.percentageShareInFinalResult + ")"}</h5></th>
+                                ):
+                                (<th className="text-center"style={{ "vertical-align": "middle", backgroundColor: "grey" }}> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1) + " (" + examdetail.percentageShareInFinalResult + ")"}</h5></th>)
                               ))}
                             </tr>
                           </thead>
@@ -1080,15 +1091,22 @@ class ReportCard extends Component {
                                   // {/* {this.state.results.map((subjectName, idx) => ( */ }
                                   // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
 
-                                  examColumn.subjectDetailsArr[subjectId].subjectResult === "PASS" ? (
-                                    < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
-                                      {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName)}
-                                    </td>
-                                  ) : (
-                                      < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "red" }}>
-                                        {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " (FAIL - " + examColumn.subjectDetailsArr[subjectId].passingMarks + ")")}
+                                  examColumn.isMandatryToAttendForFinalResult ? (
+                                    examColumn.subjectDetailsArr[subjectId].subjectResult === "PASS" ? (
+                                      < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                        {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName)}
                                       </td>
-                                    )
+                                    ) : (
+                                        < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "red" }}>
+                                          {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " (FAIL - " + examColumn.subjectDetailsArr[subjectId].passingMarks + ")")}
+                                        </td>
+                                      )
+                                  ):(
+                                    < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                        {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName)}
+                                      </td>
+                                  )
+                                  
 
                                 ))}
                               </tr>
@@ -1105,10 +1123,10 @@ class ReportCard extends Component {
 
                                 examColumn.examResultFlag ? (
                                   <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
-                                    {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")}
+                                    {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (PASS)")}
                                   </td>
                                 ) : (
-                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "red" }}><b>
+                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "BLACK" }}><b>
                                       {examColumn.examResultFlag ? (examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) : ((examColumn.totalObtainedMarks + " / " + examColumn.totalMarks) + " (FAIL)")}
                                     </b></td>
                                   )
@@ -1116,28 +1134,75 @@ class ReportCard extends Component {
                             </tr>
                             {/* For Blank row */}
                             <tr style={{ backgroundColor: "white" }}>
-                              <td id="col0" align="center" style={{ "vertical-align": "middle" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
                               </td>
                             </tr>
-
-                            <tr style={{ backgroundColor: "yellow" }}>
+  
+  {/* For percentage row */}
+                            <tr style={{ backgroundColor: "#f2f2f2" }}>
                               {/* For percentage */}
-                              <th className="text-center"> <h5>Percentage</h5></th>
+                              <th className="text-center"> <b><h5>Percentage</h5></b></th>
 
                               {this.state.reportCardData.examDetailArr.map((examColumn, examColumnId) => (
                                 // {/* {this.state.results.map((subjectName, idx) => ( */ }
                                 // examColumn.subjectDetailsArr[subjectId].subjectName!==subject.subjectName?alert("Data mismatch - in examDetails and results are not same or are not in the same order.Please check the logs."):null
 
                                 examColumn.isMandatryToAttendForFinalResult ? (
-                                  <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
-                                    {examColumn.examResultPercentage + " ( " + examColumn.obtainedPercentageForExam + " ) "}
-                                  </td>
+                                  examColumn.examResultFlag ? (<td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}><b>
+                                  {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"}
+                                  </b></td>
+                                  ):(
+                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "BLACK"}}><b>
+                                    {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"  + " (FAIL)"}
+                                    </b></td>
+                                  )
+                                  
                                 ) : (
-                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "grey" }}><b>
-                                      {examColumn.examResultPercentage + " (" + examColumn.obtainedPercentageForExam + ")"}
+                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", backgroundColor: "grey" }}><b>
+                                      {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"}
                                     </b></td>
                                   )
                               ))}
+                            </tr>
+
+                            {/* For Blank row */}
+                            <tr style={{ backgroundColor: "white" }}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
+                              </td>
+                            </tr>
+
+                            {/* For Result percentage row */}
+                            <tr >
+
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
+                              </td>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2"}}>
+                                <b><h3>Percentage</h3></b>
+                              </td>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2" }}>
+                                <b><h3>{this.state.reportCardData.netPercentage + " %"}</h3></b>
+                              </td>
+                            </tr>
+
+                            {/* For Result PASS/FAIL row */}
+                            <tr style={{ backgroundColor: "white" }}>
+
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
+                              </td>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2"}}>
+                                <b><h3>Result</h3></b>
+                              </td>
+                              {/* GREEEN COLOR */}
+                              {this.state.reportCardData.netResultFlag && (
+                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#009900" }}>
+                                <b><h2>PASS</h2></b>
+                              </td>
+                              )}
+                              {!this.state.reportCardData.netResultFlag && (
+                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
+                                <b><h2>FAIL</h2></b>
+                              </td>
+                              )}
                             </tr>
                           </tbody>
                         </Table>
