@@ -2,6 +2,7 @@
  * For Pop up Modal UI
  */
 import React, { Component } from 'react';
+import Select from 'react-select';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import {guid , getUnique , getLast , getFirst } from './helpers.js';
@@ -30,7 +31,7 @@ import {
   TabPane
 
 } from "reactstrap";
-import { Creatable } from "react-select";
+
 
 var now = new Date();
 
@@ -39,11 +40,11 @@ const whiteTextFieldStyle = {
 }
 
 export default class ReactAgendaCtrl extends Component {
-  
+
   constructor() {
-  
+
     super();
-  
+
     this.state = {
       editMode: false,
       showCtrl: false,
@@ -98,7 +99,7 @@ export default class ReactAgendaCtrl extends Component {
     }, () => {
       // console.log("ReactAgendaCtrl defaultSubjects - " + JSON.stringify(defaultSubjectsTemp));
   });
- 
+
 }
 
 setDefaultTeachers() {
@@ -111,7 +112,7 @@ setDefaultTeachers() {
     var teachersJSON= {};
     if (element) {
       teachersJSON.value = element.username;
-      teachersJSON.label = element.firstname.charAt(0).toUpperCase() + element.firstname.slice(1) 
+      teachersJSON.label = element.firstname.charAt(0).toUpperCase() + element.firstname.slice(1)
       + " " + element.lastname.charAt(0).toUpperCase() + element.lastname.slice(1);
     }
     if(teachersJSON) {
@@ -178,16 +179,16 @@ setDefaultTeachers() {
 
       if(element.username === teacherLabel) {
 
-        teacherLabel = element.firstname.charAt(0).toUpperCase() + element.firstname.slice(1) 
+        teacherLabel = element.firstname.charAt(0).toUpperCase() + element.firstname.slice(1)
         + " " + element.lastname.charAt(0).toUpperCase() + element.lastname.slice(1);
       }
     });
   }
 
-    return this.setState({editMode: true, 
-      selectedSubject: {"value": this.props.selectedCells[0].name, "label": this.props.selectedCells[0].name} , 
-      selectedTeacher: {"value": this.props.selectedCells[0].teacher, "label": teacherLabel} , 
-    name: this.props.selectedCells[0].name, teacher: this.props.selectedCells[0].teacher, 
+    return this.setState({editMode: true,
+      selectedSubject: {"value": this.props.selectedCells[0].name, "label": this.props.selectedCells[0].name} ,
+      selectedTeacher: {"value": this.props.selectedCells[0].teacher, "label": teacherLabel} ,
+    name: this.props.selectedCells[0].name, teacher: this.props.selectedCells[0].teacher,
     classes: this.props.selectedCells[0].classes, startDateTime: start, endDateTime: endT});
 
   }
@@ -316,7 +317,7 @@ addEvent(e) {
 updateEvent(e) {
 
   console.log("reactAgendaCtrl - updateEvent - this.state.teacher- " + this.state.teacher);
-  
+
   if (this.props.selectedCells[0]._id && this.props.items) {
 
     var newObj = {
@@ -367,10 +368,10 @@ repeatScheduleEveryWeekChange(e) {
 }
 
 handleSubjectChange = (newValue, actionMeta) => {
-  
+
   // console.log("reactAgendaCtrl - handleSubjectChange - selected value - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
-  
-  this.setState({ 
+
+  this.setState({
     name: newValue.value,
     selectedSubject: newValue
    }, () => {
@@ -380,10 +381,10 @@ handleSubjectChange = (newValue, actionMeta) => {
 };
 
 handleTeacherChange = (newValue, actionMeta) => {
-  
+
   console.log("reactAgendaCtrl - handleTeacherChange - selected value - " + JSON.stringify(newValue) + " action - " + actionMeta.action);
-  
-  this.setState({ 
+
+  this.setState({
     teacher: newValue.value,
     selectedTeacher: newValue
    }, () => {
@@ -450,7 +451,7 @@ handleTeacherCreate = (createdTeacher) => {
 
     createdOption = { "label": createdTeacher, "value": createdTeacher };
   }
-  
+
   console.log("ReactAgendaCtrl - handleTeacherCreate -  createdOption - " + createdOption );
 
   this.setState({
@@ -461,7 +462,7 @@ handleTeacherCreate = (createdTeacher) => {
     console.log("ReactAgendaCtrl - handleTeacherCreate -  teacher - " + JSON.stringify(this.state.teacher )
   + " selectedTeacher - " + JSON.stringify(this.state.selectedTeacher));
   });
-  
+
 
 };
 
@@ -472,8 +473,8 @@ render() {
     return <div style={{
       background: this.props.itemColors[item]
     }} className="agendCtrls-radio-buttons" key={item}>
-      <button name="classes"  value={item} 
-      className={this.state.classes === item?'agendCtrls-radio-button--checked':'agendCtrls-radio-button'} 
+      <button name="classes"  value={item}
+      className={this.state.classes === item?'agendCtrls-radio-button--checked':'agendCtrls-radio-button'}
       onClick={this.handleChange.bind(this)}/>
     </div>
   }.bind(this))
@@ -496,7 +497,7 @@ render() {
                                 </InputGroupText>
               {/* <label>Teacher</label> */}
 
-              <Creatable
+              <Select.Creatable
                 simpleValue
                 name="teacher"
                 value={this.state.selectedTeacher}
@@ -509,7 +510,7 @@ render() {
                 options={this.state.defaultTeachers}
               />
 
-              {/* <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
+              {/* <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input"
               value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/> */}
             </div>
             <div className="agendCtrls-label-inline">
@@ -517,10 +518,10 @@ render() {
                       Subject
                                 </InputGroupText>
               {/* <label>Subject name edit</label> */}
-              {/* <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input" 
+              {/* <input type="text" name="name" autoFocus ref="eventName" className="agendCtrls-event-input"
               value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/> */}
-              
-              <Creatable
+
+              <Select.Creatable
                 simpleValue
                 name="name"
                 value={this.state.selectedSubject}
@@ -547,7 +548,7 @@ render() {
 <br/>
 
           <div className="agendCtrls-label-wrapper">
-            
+
             <div className="agendCtrls-label-inline ">
             <InputGroupText>
                       Color
@@ -557,7 +558,7 @@ render() {
                 {colors}</div>
             </div>
           </div>
-          
+
           <br/>
 
 <Card>
@@ -596,7 +597,7 @@ render() {
                                               >
                                                 Repeat Schedule Every week
                                     </Label>
-          
+
 <br /> <br />
           <input type="submit" value="Save"/>
 </CardBody>
@@ -611,7 +612,7 @@ render() {
   return (
     <div className="agendCtrls-wrapper" style={divStyle}>
       <form onSubmit={this.handleSubmit}>
-        
+
         <div className="agendCtrls-label-wrapper">
             <div className="agendCtrls-label-inline">
             <InputGroupText className="font-weight-bold">
@@ -619,7 +620,7 @@ render() {
                                 </InputGroupText>
                                 {/* <label>Teacher</label> */}
 
-              <Creatable
+              <Select.Creatable
                 simpleValue
                 name="teacher"
                 value={this.state.selectedTeacher}
@@ -632,7 +633,7 @@ render() {
                 options={this.state.defaultTeachers}
               />
 
-              {/* <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input" 
+              {/* <input type="text" name="teacher" autoFocus ref="teacher" className="agendCtrls-event-input"
               value={this.state.teacher} onChange={this.handleChange.bind(this)} placeholder="Teacher Name"/> */}
             </div>
 
@@ -641,10 +642,10 @@ render() {
           Subject
                                 </InputGroupText>
             {/* <label>Subject name</label> */}
-            {/* <input type="text" ref="eventName" autoFocus name="name" className="agendCtrls-event-input" 
+            {/* <input type="text" ref="eventName" autoFocus name="name" className="agendCtrls-event-input"
             value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Event Name"/> */}
 
-<Creatable
+<Select.Creatable
                 simpleValue
                 name="name"
                 value={this.state.selectedSubject}
@@ -662,7 +663,7 @@ render() {
 <br/>
 
           <div className="agendCtrls-label-wrapper">
-          
+
           <div className="agendCtrls-label-inline">
           <InputGroupText>
           Color

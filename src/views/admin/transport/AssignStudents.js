@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import 'react-confirm-alert/src/react-confirm-alert.css'
 import Select from 'react-select';
-import { Creatable } from "react-select";
+
 import {
   Button,
   Card,
@@ -68,9 +68,9 @@ this.fetchClassDetails();
     this.onDismiss = this.onDismiss.bind(this);
 
     this.getExistingStops = this.getExistingStops.bind(this);
-   
+
     this.getExistingVehicles = this.getExistingVehicles.bind(this);
-    
+
     this.classChangeHandler = this.classChangeHandler.bind(this);
          this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
          this.fetchClassDetails=this.fetchClassDetails.bind(this);
@@ -83,21 +83,21 @@ this.fetchClassDetails();
   }
 
   addStudents()
-  { 
-    
+  {
+
 
    this.setState({seatError:""});
 
     if(parseInt(this.state.seats)===0)
    { this.setState({seatError:"No Seats left on the Vehicle!",selectedStudent:[]});
 return;
-   }   
+   }
 
    else if(this.state.selectedStudent.length===0)
 
    { this.setState({seatError:"Please select atleast 1 Student!"});
    return;
-      }  
+      }
 
 else if(this.state.selectedStudent.length>parseInt(this.state.seats)){
   this.setState({seatError:"You can only add "+this.state.seats+" more Students!",selectedStudent:[]}); return;
@@ -117,14 +117,14 @@ console.log("In Else Selected Student: "+JSON.stringify(this.state.selectedStude
   {for(var j=0;j<tempCount;j++)
 {
 if(JSON.stringify(selected[i])===JSON.stringify(temp[j]))
-{add=false; 
-  this.setState({seatError:"Student: "+JSON.stringify(selected[i].value)+" added already!"}); return; } 
+{add=false;
+  this.setState({seatError:"Student: "+JSON.stringify(selected[i].value)+" added already!"}); return; }
 } if(add)  temp.push(selected[i]);}
 
  console.log("Temp: "+JSON.stringify(temp));
   this.setState({allStudentsOfSelectedStop:temp, seats:this.state.seats-(count),selectedStudent:[]});
 }
-  
+
    }
 
 
@@ -133,7 +133,7 @@ if(JSON.stringify(selected[i])===JSON.stringify(temp[j]))
       modalSuccess: !this.state.modalSuccess,
        selectedStudent:[], allStudentsOfSelectedStop:[],
        selectedStops:"", studentsDataArray:[], section:"",vehicleNo:"",seats:"",class:""
-     
+
     });
 
     this.getExistingVehicles();this.fetchClassDetails();
@@ -165,12 +165,12 @@ if(JSON.stringify(selected[i])===JSON.stringify(temp[j]))
             this.setState({ stopError: "Please Select Stop" });
             submit = false;}
 
-            
+
         if (this.state.allStudentsOfSelectedStop.length===0) {
             this.setState({ studentError: "Please Select Atleast 1 Student" });
             submit = false;}
-        
-           
+
+
 
 
 
@@ -184,7 +184,7 @@ if(JSON.stringify(selected[i])===JSON.stringify(temp[j]))
 
             if(result.data.errors)
             {
-           
+
               this.setState({
                 errors:result.data.errors
               });}
@@ -195,7 +195,7 @@ if(JSON.stringify(selected[i])===JSON.stringify(temp[j]))
                 modalSuccess: true,
                 modalMessage:this.state.allStudentsOfSelectedStop.length + " Students added to Stop: "+this.state.selectedStops+
                 " for VehicleNo: "+this.state.vehicleNo+ " successfully!"
-               
+
 
               });
 
@@ -204,7 +204,7 @@ if(JSON.stringify(selected[i])===JSON.stringify(temp[j]))
     });
   }
 
- 
+
   fetchClassDetails() {
 
     axios.get("http://localhost:8001/api/fetchAllClassDetails").then(cRes => {
@@ -275,7 +275,7 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
   sectionChangeHandler(e) {
 
 
-    
+
 
       this.state.classDetails.forEach(element => {
 
@@ -289,23 +289,23 @@ console.log("Class Details: "+JSON.stringify(cRes.data))
           "label":element.studentsData[i].firstname.charAt(0).toUpperCase()+element.studentsData[i].firstname.slice(1)+" "
           +element.studentsData[i].lastname.charAt(0).toUpperCase()+element.studentsData[i].lastname.slice(1)+
           " ("+element.studentsData[i].username+")"})
-            
-            
-            for(var i=0;i<this.state.allAssignedStudents.length;i++){ 
+
+
+            for(var i=0;i<this.state.allAssignedStudents.length;i++){
               for(var j=0;j<tempStudents.length;j++)
             if(JSON.stringify(this.state.allAssignedStudents[i])===
               JSON.stringify(tempStudents[j]))
               tempStudents.splice(j,1);                            }
               tempStudents.sort();
                         this.setState({studentsDataArray:tempStudents,section: e.currentTarget.value,selectedStudent:[]},()=>{console.log("Updated Student: "+ JSON.stringify(this.state.studentsDataArray));});
-          
+
         }
       });
 
 
 
 
-  
+
 
 
 
@@ -326,10 +326,10 @@ this.setState({selectedStudent:e});
 
 }
 
-  
+
   getExistingStops() {
 
-   
+
             var temp=[];
             for(var i=0;i<this.state.existingRoutes.length;i++)
             if(this.state.existingRoutes[i].vehicleNo===this.state.vehicleNo)
@@ -341,8 +341,8 @@ this.setState({selectedStudent:e});
             existingStops: temp
           });
         }
-      
-  
+
+
 
   getExistingVehicles() {
 
@@ -350,7 +350,7 @@ this.setState({selectedStudent:e});
       .get("http://localhost:8001/api/existingVehicles")
       .then(result => {
         console.log("Existing RESULT.data " + JSON.stringify(result.data));
-        
+
         if (result.data) { var temp1=[];var temp2=[]; var allAssigned=[];
             for(var i=0;i<result.data.length;i++)
            { temp1.push(result.data[i].vehicleNo)
@@ -360,10 +360,10 @@ this.setState({selectedStudent:e});
 
             for(var j=0;j<result.data[i].studentDetails.length;j++)
             for(var k =0; k<result.data[i].studentDetails[j].students.length;k++)
-            allAssigned.push({"value":result.data[i].studentDetails[j].students[k], 
+            allAssigned.push({"value":result.data[i].studentDetails[j].students[k],
             "label":result.data[i].studentDetails[j].students[k]
           })
-          
+
           }
 
           this.setState({
@@ -408,14 +408,14 @@ this.setState({selectedStudent:e});
 
 
 
-               
+
 
                       <Card className="mx-1">
                         <CardBody className="p-2">
                         <Card>
                           <h3 align="center">Add Students Assignment</h3>
                           <br />
-                         
+
                           <InputGroup className="mb-4">
                                     <InputGroupAddon addonType="prepend">
                                       <InputGroupText style={{ width: "120px" }}>
@@ -432,14 +432,14 @@ this.setState({selectedStudent:e});
                                         {if(this.state.allVehicleDetails[i].vehicleNo===e.target.value)
 
                                           {  capacity= this.state.allVehicleDetails[i].capacity;
-                                          
+
                                             for(var j=0;j<this.state.allVehicleDetails[i].studentDetails.length;j++){
                                              // temp.push(this.state.allVehicleDetails[i].studentDetails[i].)
                                             count=count +this.state.allVehicleDetails[i].studentDetails[j].students.length}
                                           }
-                
+
                                         }
-                                        
+
                                         this.setState({vehicleNo:e.target.value, studentsDataArray:[], selectedStudent:[],section:"",
                                            seats: capacity-count,selectedStops:"", allStudentsOfSelectedStop:[]},()=>{this.getExistingStops();})}}
                                     >
@@ -497,7 +497,7 @@ this.setState({selectedStudent:e});
                                     </Input>
                                   </InputGroup>
 
-                                 
+
                                   {this.state.stopError && (
                                     <font color="red">
                                       {" "}
@@ -520,10 +520,10 @@ this.setState({selectedStudent:e});
                                       value={this.state.seats}
                                      disabled
                                     >
-                                     
+
                                     </Input>
                                   </InputGroup>
-                             
+
 
 <InputGroup className="mb-4">
                                     <InputGroupAddon addonType="prepend">
@@ -574,7 +574,7 @@ this.setState({selectedStudent:e});
                                       </Input>
                                     </InputGroup>
 
-                                 
+
 
 
                    <Select
@@ -583,14 +583,14 @@ this.setState({selectedStudent:e});
 isMulti={true}
                           placeholder="Select Students or Type to search"
                             options={this.state.studentsDataArray}
-                          
+
                          value={this.state.selectedStudent}
                          isClearable={true}
                          closeMenuOnSelect={false}
                             isSearchable={true}
 
                             onChange={this.studentSelectedHandler}
-                            />   
+                            />
  <br/>
 
 
@@ -609,24 +609,24 @@ isMulti={true}
                                       {" "}
                                       <p>{this.state.seatError}</p>
                                     </font>
-                                  )} 
+                                  )}
 
-<br/> 
-<Creatable
+<br/>
+<Select.Creatable
 placeholder="All Selected/Existing Students"
                             id="allStudentSelect"
                             name="allStudentSelect"
 isMulti={true}
-                        
-                           
-                          
+
+
+
                          value={this.state.allStudentsOfSelectedStop}
                          //isClearable={true}
-                        
+
                          autosize
 
                            disabled
-                            />  
+                            />
                               {this.state.studentError && (
                                     <font color="red">
                                       {" "}
@@ -634,7 +634,7 @@ isMulti={true}
                                     </font>
                                   )}
   <br/>
-                        
+
 
 <Row align="center">
                             <Col>
@@ -655,12 +655,12 @@ isMulti={true}
                                     modalSuccess: !this.state.modalSuccess,
                                      selectedStudent:[], allStudentsOfSelectedStop:[],
                                      selectedStops:"", studentsDataArray:[], section:"",vehicleNo:"",seats:"",class:""
-                                   
+
                                   });
-                              
+
                                   this.getExistingVehicles();this.fetchClassDetails();
-                              
-                              
+
+
                                 }}
                                 size="lg"
                                 color="secondary" block
@@ -672,13 +672,13 @@ isMulti={true}
                           </Row> <br />
                        </Card>    <br /><br />
 
-                     
+
 
                         </CardBody>
 
                       </Card>
 
-                   
+
 
 
 

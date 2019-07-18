@@ -97,7 +97,7 @@ class ClassDetails extends Component {
       selectedOptions: newValue,
       sectionArray: sectionsTemp,
     }, () => {
-      console.log("Available Sections - " + JSON.stringify(this.state.sectionArray) 
+      console.log("Available Sections - " + JSON.stringify(this.state.sectionArray)
       + " selectedOptions - " + JSON.stringify(this.state.selectedOptions));
     });
 
@@ -224,7 +224,7 @@ class ClassDetails extends Component {
       if (res.data.errmsg) {
 
         var errMsg = res.data.errmsg;
-        
+
         console.log("ERROR in insert class details - " + JSON.stringify(errMsg));
 
           console.log("Mongo DB error- " + JSON.stringify(errMsg));
@@ -391,7 +391,7 @@ class ClassDetails extends Component {
                   <b>Section</b>
                 </InputGroupText>
               </InputGroupAddon>
-              <Creatable
+              <Select.Creatable
                 simpleValue
                 value={this.state.selectedOptions}
                 onChange={this.handleSectionChange}
@@ -420,7 +420,7 @@ class ClassDetails extends Component {
                   <b>Subjects</b>
                 </InputGroupText>
               </InputGroupAddon>
-              <Creatable
+              <Select.Creatable
                 simpleValue
                 value={this.state.selectedSubjects}
                 onChange={this.handleSubjectChange}

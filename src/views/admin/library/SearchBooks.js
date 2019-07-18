@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert';
-import { Creatable } from "react-select";
+//import { Creatable } from "react-select";
 
 
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -397,7 +397,7 @@ temp=this.state.allBooksData[i];break}
                         }var tempIds=[];
 for(var j=0;j<temp.uniqueBookIds.length;j++)
 tempIds.push({"value":temp.uniqueBookIds[j].value,"label":(temp.uniqueBookIds[j].value+" Issued: "+temp.uniqueBookIds[j].isIssued)})
-                        
+
 
                                     this.setState({showEdit:true, showOptions:false,bookName: temp.bookName,
                                         bookId:temp.bookId,
@@ -491,7 +491,7 @@ tempIds.push({"value":temp.uniqueBookIds[j].value,"label":(temp.uniqueBookIds[j]
 
 
 
-                          <Row><Col>      <Creatable
+                          <Row><Col>      <Select.Creatable
 
                 value={this.state.category}
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
