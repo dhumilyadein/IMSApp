@@ -9,6 +9,21 @@ export default {
     },
 
     {
+      name: 'Manage Institute',
+      url: '/manageInstitute',
+      icon: 'fa fa-building',
+      children: [
+        {
+          name: 'Add Institute',
+          url: '/admin/InstituteDetails/AddInstitute',
+          icon: 'fa fa-building-o',
+          variant: 'success',
+        },
+
+
+    ]},
+
+    {
       name: 'Manage Users',
       url: '/manageUsers',
       icon: 'icon-people',
