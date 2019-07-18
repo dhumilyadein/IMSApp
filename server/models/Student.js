@@ -53,7 +53,8 @@ var StudentSchema = new Schema({
 
   dob: {
     type: Date,
-    required: true
+    required: true,
+    trim:true
   },
 
   gender: {
@@ -128,7 +129,7 @@ var StudentSchema = new Schema({
 
   parentphone2: {
     type: String,
-    required: true
+
   },
   address: {
     type: String,

@@ -116,7 +116,7 @@ console.log( "Update Class: "+JSON.stringify(request));
     if(request.subjects) objForUpdate.subjects = request.subjects;
     objForUpdate.updatedAt = currentTime;
 
-    console.log("ImportUsers - UpdateClassDetails - request.class - " + request.class + " request.section - " + request.section 
+    console.log("ImportUsers - UpdateClassDetails - request.class - " + request.class + " request.section - " + request.section
     + " objForUpdate - " + JSON.stringify(objForUpdate) + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
 
@@ -262,7 +262,7 @@ if (!ClassCheck)
     else
 {console.log("in Class Update Else")
 const studentCheck = await User.findOne({
- 
+
 username:request.username
 });
 if (!studentCheck)
@@ -422,11 +422,11 @@ valError["ClassError"] =
                 return res.json({ error_code: 1, err_desc: err, data: null });
               }
 
-              // console.log("Total records: " + Object.keys(result).length);
+               console.log("Total records: " + Object.keys(result).length);
               var importErrors = {};
               for (let i = 0; i < result.length; i++) {
-                //console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
-                //console.log("record length: "+Object.keys(result[i]).length);
+                console.log("Result: "+i+ " "+ JSON.stringify(result[i]));
+                console.log("record length: "+Object.keys(result[i]).length);
                 var counter = 0;
                 for (var key in result[i]) {
                   //console.log("key "+  result[i][key]  );
@@ -664,34 +664,39 @@ console.log("Role: "+result[i].role);
 
 
 
-  function photoZipUploading(req, res) {
-    console.log("in Photo ZipUpload");
+  async function photoZipUploading(req, res) {
+    console.log("in Photo ZipUpload ");
 
-    rimraf("./ZipUploads/*.*", function(e) {
+    await  rimraf("./ZipUploads/*.*", function(e) {
       console.log(e);
       console.log("Deleted Photos");
 
-      zipUpload(req, res, function(err) {
+        zipUpload(req, res, function(err) {
         if (err) {
           res.json({ error_code: 1, err_desc: err });
-        } else if (!req.file)
+          return;
+        } else if (!req.file){
         /** Multer gives us file info in req.file object */
-          res.json({ error_code: 1, err_desc: "No file passed" });
+          res.json({ error_code: 1, err_desc: "No file passed" }); return;}
         else {
-          console.log(req.file.path);
+         // console.log(" req.file.path "+req.file.path);
           zipPath = req.file.path;
 
           fs.createReadStream(zipPath).pipe(
             unzipper.Extract({ path: "ZipUploads" })
-          );
-
-          res.json({
+          ).on('finish', function(){
+            console.log("File unzipped!");
+            res.json({
             success: true,
             message: "zip " + req.file.originalname + " uploaded to " + zipPath
-          });
+          });})
+
+
         }
       });
     });
+
+
   }
 
 

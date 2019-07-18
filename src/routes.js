@@ -217,6 +217,12 @@ const RegisterUser = Loadable({
   loading: Loading
 });
 
+const AddInstitute = Loadable({
+  loader: () => import("./views/admin/InstituteDetails/AddInstitute"),
+  loading: Loading
+});
+
+
 const UserDetails = Loadable({
   loader: () => import("./views/admin/userdetails/UserDetails"),
   loading: Loading
@@ -416,6 +422,7 @@ const routes = [
   { path: "/admin/library/ReturnBooks", exact: true, name: "Return Books", component: ReturnBooks },
   { path: "/admin/library/SearchBooks", exact: true, name: "Search/Edit Books", component: SearchBooks },
   { path: "/admin/library/EditCategory", exact: true, name: "EditCategory", component: EditCategory },
+  { path: "/admin/InstituteDetails/AddInstitute", exact: true, name: "AddInstitute", component: AddInstitute },
 
 
   {
