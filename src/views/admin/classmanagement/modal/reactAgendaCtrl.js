@@ -30,7 +30,7 @@ import {
   TabPane
 
 } from "reactstrap";
-import { Select } from "react-select";
+import  Select  from "react-select";
 
 var now = new Date();
 

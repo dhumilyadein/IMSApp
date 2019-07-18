@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
-import { Creatable } from "react-select";
+import  Select  from "react-select";
 
 import {
   Button,

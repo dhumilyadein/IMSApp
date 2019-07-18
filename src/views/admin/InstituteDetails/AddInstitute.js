@@ -635,7 +635,7 @@ deleteSpecificItem= idx => () => {
                         console.error(err);
                     }
                 }}
-                label="Upload multiple images"
+                label="Upload Logo"
                 />
 
 
