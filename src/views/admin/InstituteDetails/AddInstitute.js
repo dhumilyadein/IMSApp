@@ -112,31 +112,31 @@ this.getExistingVehicles();
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      driverNameError: "", driverPhoneError: "", vehicleNoError:"", vehicleRegNoError: false,
+      instituteNameError: "", driverPhoneError: "", vehicleNoError:"", vehicleRegNoError: false,
       modalSuccess: false, vendorNameError:"", vendorPhoneError:""
     }, () => {
-      if (!this.state.vehicleNo) {
-        this.setState({ vehicleNoError: "Please Enter Vehicle No" });
+      if (!this.state.instituteName) {
+        this.setState({ instituteNameError: "Please Enter Institute Name" });
         submit = false;}
 
-        if (!this.state.vehicleRegNo) {
-          this.setState({ vehicleRegNoError: "Please Enter Registration No" });
+        if (!this.state.address) {
+          this.setState({ address: "Please Enter Address" });
           submit = false;}
 
-          if (!this.state.driverName) {
-            this.setState({ driverNameError: "Please Enter Driver Name" });
+          if (!this.state.city) {
+            this.setState({ cityError: "Please Enter City name" });
             submit = false;}
 
-            if (!this.state.driverPhone) {
-              this.setState({ driverPhoneError: "Please Enter Driver Phone No" });
+            if (!this.state.state) {
+              this.setState({ stateError: "Please Enter State name" });
               submit = false;}
 
-              if (!this.state.vendorName) {
-                this.setState({ vendorNameError: "Please Enter Vendor Name" });
+              if (!this.state.pinCode) {
+                this.setState({ pinCodeError: "Please Enter Pincode" });
                 submit = false;}
 
-                if (!this.state.vendorPhone) {
-                  this.setState({ vendorPhoneError: "Please Enter Vendor Phone No" });
+                if (!this.state.telephone) {
+                  this.setState({ telephoneError: "Please Enter Telephone Number" });
                   submit = false;}
 
 
@@ -436,7 +436,14 @@ this.getExistingVehicles();
                               />
                             </InputGroup>
 
-
+{this.state.stateError && (
+  <font color="red">
+    <h6>
+      {" "}
+      <p>{this.state.stateError} </p>
+    </h6>{" "}
+  </font>
+)}
 
       <InputGroup className="mb-3">
                               <InputGroupAddon addonType="prepend">
@@ -602,7 +609,7 @@ this.getExistingVehicles();
         />
       </InputGroup>
 
-    <InputGroup className="mb-3">
+   <Card> <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend" />
                       <h4>Upload Logo</h4>
                       <Input
@@ -630,7 +637,7 @@ this.getExistingVehicles();
 
 <img style={{ width: "50%" }} src={this.state.file} />
 
-
+</Card>
 
 
 <br/>
