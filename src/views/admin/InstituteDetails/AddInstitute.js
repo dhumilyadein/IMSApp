@@ -112,15 +112,15 @@ this.getExistingVehicles();
     console.log("in Submit State: " + JSON.stringify(this.state));
 
     this.setState({
-      instituteNameError: "", driverPhoneError: "", vehicleNoError:"", vehicleRegNoError: false,
-      modalSuccess: false, vendorNameError:"", vendorPhoneError:""
+      instituteNameError: "", addressError: "", cityError:"", stateError: false,
+      pinCodeError: false, telephoneError:"", vendorPhoneError:""
     }, () => {
       if (!this.state.instituteName) {
         this.setState({ instituteNameError: "Please Enter Institute Name" });
         submit = false;}
 
         if (!this.state.address) {
-          this.setState({ address: "Please Enter Address" });
+          this.setState({ addressError: "Please Enter Address" });
           submit = false;}
 
           if (!this.state.city) {
@@ -135,17 +135,24 @@ this.getExistingVehicles();
                 this.setState({ pinCodeError: "Please Enter Pincode" });
                 submit = false;}
 
-                if (!this.state.telephone) {
-                  this.setState({ telephoneError: "Please Enter Telephone Number" });
+                if (!this.state.telephone && !this.state.mobile) {
+                  this.setState({ telephoneError: "Please Enter Telephone or Mobile Number" });
                   submit = false;}
 
+                  if (!this.state.email) {
+                    this.setState({ emailError: "Please Enter Email" });
+                    submit = false;}
+
+                    if (!this.state.file) {
+                      this.setState({ noFile: true });
+                      submit = false;}
 
 
 
       if (submit === true) {
-        console.log("Adding Bus : ");
+        console.log("Adding Institute : ");
         axios
-          .post("http://localhost:8001/api/addVehicle", this.state)
+          .post("http://localhost:8001/api/addInstitute", this.state)
           .then(result => {
             console.log("RESULT.data " + JSON.stringify(result.data));
 
@@ -260,23 +267,58 @@ this.getExistingVehicles();
   }
 
   fileChange = event => {
+    if(document.getElementById('logo').value)
     try {
-      const file = URL.createObjectURL(event.target.files[0])
-      if (event.target.name === "logo")
-        this.setState(
-          {
-            file: file,
-            noFile: false,
-            corruptFile: false,
-            filename: file.name,
 
-          },
-          () => console.log("file:  " + this.state.file.name)
-        );
+      this.setState(
+        {
 
-    } catch (err) {
+          noFile: false,
+          corruptFile: false,
+
+        });
+
+      var allowedExtension = ['jpeg', 'jpg', 'png', 'bmp'];
+      var fileExtension = document.getElementById('logo').value.split('.').pop().toLowerCase();
+      var isValidFile = false;
+
+          for(var index in allowedExtension) {
+
+              if(fileExtension === allowedExtension[index]) {
+                  isValidFile = true;
+                  break;
+              }
+          }
+
+          if(!isValidFile) {document.getElementById('logo').value=null;
+              this.setState({ corruptFile: true,file:null})
+                  }
+else
+
+{const file = URL.createObjectURL(event.target.files[0])
+  this.setState(
+    {
+      file: file,
+      noFile: false,
+      corruptFile: false,
+      filename: file.name,
+
+    },
+    () => console.log("file:  " + this.state.file.name)
+  );
+  }
+
+
+
+
+
+
+    }
+
+
+    catch (err) {
       console.log(
-        "File Upload error: No file selected: " + JSON.stringify(err)
+        "File Upload error: " + JSON.stringify(err)
       );
     }
   };
@@ -486,7 +528,7 @@ this.getExistingVehicles();
 
                               </InputGroupAddon>
                               <Input
-                                type="text"
+                                type="number"
                                 size="lg"
 
                                 name="telephone"
@@ -500,14 +542,7 @@ this.getExistingVehicles();
                                 }}
                               />
                             </InputGroup>
-                            {this.state.telephoneError && (
-                              <font color="red">
-                                <h6>
-                                  {" "}
-                                  <p>{this.state.telephoneError} </p>
-                                </h6>{" "}
-                              </font>
-                            )}
+
 
 
 <InputGroup className="mb-3">
@@ -528,7 +563,14 @@ this.getExistingVehicles();
                                   }}
                                 /> </InputGroupAddon>
                             </InputGroup>
-
+                            {this.state.telephoneError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.telephoneError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
 
                         </CardBody>
 
@@ -588,6 +630,15 @@ this.getExistingVehicles();
         />
       </InputGroup>
 
+      {this.state.emailError && (
+                              <font color="red">
+                                <h6>
+                                  {" "}
+                                  <p>{this.state.emailError} </p>
+                                </h6>{" "}
+                              </font>
+                            )}
+
       <InputGroup className="mb-3">
         <InputGroupAddon addonType="prepend">
           <InputGroupText >
@@ -623,14 +674,14 @@ this.getExistingVehicles();
                     {this.state.noFile && (
                       <font color="red">
                         {" "}
-                        <h5>Please select the logo file</h5>
+                        <h6>Please select the logo file</h6>
                       </font>
                     )}
 
                     {this.state.corruptFile && (
                       <font color="red">
                         {" "}
-                        <h5>Please select a valid JPG file only.</h5>
+                        <h6> Only 'jpeg', 'jpg', 'png', 'bmp' files are supported!</h6>
                       </font>
                     )}
 

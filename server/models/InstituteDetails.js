@@ -47,7 +47,7 @@ var InstituteDetailsSchema = new Schema({
   telephone:{
     type: String,
     trim:true,
-   required:true
+
 
   },
 
@@ -75,7 +75,12 @@ var InstituteDetailsSchema = new Schema({
     type: String,
     trim:true
 },
+logo: {
+  data: Buffer,
+  contentType: String,
 
+
+ },
   createdAt: {
     type: Date,
     required: true,

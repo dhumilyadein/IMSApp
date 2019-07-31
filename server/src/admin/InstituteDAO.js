@@ -4,12 +4,13 @@ const InstituteDetails = require("../../models/InstituteDetails");
 module.exports = function (app) {
 
 
-async function addItems(req, res) {
-console.log("in addItems Req.body: "+JSON.stringify(req.body))
+async function addInstitute(req, res) {
+console.log("in addInstitute Req.body: "+JSON.stringify(req.body))
 
 var template = {
-  "listName": req.body.listName, "dos": req.body.dos, "itemRows": req.body.rows,
-  "grandTotal":req.body.grandTotal, "remarks":req.body.remarks
+  "instituteName": req.body.instituteName, "address": req.body.address, "city": req.body.city,
+  "pinCode":req.body.pinCode, "telephone":req.body.telephone, "mobile":req.body.mobile, "fax":req.body.faxNo,
+  "email":req.body.email, "website":req.body.website,
 
 };
 var addItem = new PurchaseItems(template);
@@ -209,7 +210,7 @@ return res.send({error:err});
 
 
 
-  app.post("/api/addItems", addItems);
+  app.post("/api/addInstitute", addInstitute);
   app.post("/api/createItem", createItem);
   app.get("/api/existingItems", existingItems);
   app.post("/api/deleteItem", deleteItem);
