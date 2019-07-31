@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
-import  Select  from "react-select";
+import Creatable from 'react-select/creatable';
 
 import {
   Button,
@@ -391,7 +391,7 @@ class ClassDetails extends Component {
                   <b>Section</b>
                 </InputGroupText>
               </InputGroupAddon>
-              <Select.Creatable
+              <Creatable
                 simpleValue
                 value={this.state.selectedOptions}
                 onChange={this.handleSectionChange}
@@ -420,7 +420,7 @@ class ClassDetails extends Component {
                   <b>Subjects</b>
                 </InputGroupText>
               </InputGroupAddon>
-              <Select.Creatable
+              <Creatable
                 simpleValue
                 value={this.state.selectedSubjects}
                 onChange={this.handleSubjectChange}

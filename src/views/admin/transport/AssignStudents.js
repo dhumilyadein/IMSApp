@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import 'react-confirm-alert/src/react-confirm-alert.css'
-import Select from 'react-select';
+import Creatable from 'react-select/creatable';
 
 import {
   Button,
@@ -577,7 +577,7 @@ this.setState({selectedStudent:e});
 
 
 
-                   <Select
+                   <Creatable
                             id="studentSelect"
                             name="studentSelect"
 isMulti={true}
@@ -612,7 +612,7 @@ isMulti={true}
                                   )}
 
 <br/>
-<Select.Creatable
+<Creatable
 placeholder="All Selected/Existing Students"
                             id="allStudentSelect"
                             name="allStudentSelect"

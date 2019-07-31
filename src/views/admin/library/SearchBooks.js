@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert';
-//import { Creatable } from "react-select";
+import Creatable from 'react-select/creatable';
 
 
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -491,7 +491,7 @@ tempIds.push({"value":temp.uniqueBookIds[j].value,"label":(temp.uniqueBookIds[j]
 
 
 
-                          <Row><Col>      <Select.Creatable
+                          <Row><Col>      <Creatable
 
                 value={this.state.category}
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));

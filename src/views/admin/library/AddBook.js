@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import DatePicker from 'react-date-picker';
 import Select from 'react-select';
 import { confirmAlert } from 'react-confirm-alert';
-//import { Creatable } from 'react-select/creatable';
+import Creatable from 'react-select/creatable';
 
 
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -358,7 +358,7 @@ uniqueBookIdsError:"",
 
 
 
-                          <Row><Col>      <Select.Creatable
+                          <Row><Col>      <Creatable
 
                 value={this.state.category}
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
@@ -579,7 +579,7 @@ if(this.state.bookId){ var temp=[];
                                 <b>Unique Book Ids</b>
                               </InputGroupText>
                             </InputGroupAddon>
-                            <Select.Creatable
+                            <Creatable
 
                 value={this.state.uniqueBookIds}
                 onChange={selected=>{  console.log("category: "+JSON.stringify(selected));
