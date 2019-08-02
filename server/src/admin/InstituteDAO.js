@@ -8,35 +8,13 @@ async function addInstitute(req, res) {
 console.log("in addInstitute Req.body: "+JSON.stringify(req.body))
 
 var template = {
-  "instituteName": req.body.instituteName, "address": req.body.address, "city": req.body.city,
-  "pinCode":req.body.pinCode, "telephone":req.body.telephone, "mobile":req.body.mobile, "fax":req.body.faxNo,
-  "email":req.body.email, "website":req.body.website,
+  "instituteName": req.body.instituteName, "address": req.body.address, "city": req.body.city, "state":req.body.state,
+  "pincode":req.body.pinCode, "telephone":req.body.telephone, "mobile":req.body.mobile, "fax":req.body.faxNo,
+  "email":req.body.email, "website":req.body.website, "logo":req.body.file
 
 };
-var addItem = new PurchaseItems(template);
+var addItem = new InstituteDetails(template);
 
-
-for(var i=0;i<req.body.rows.length;i++)
-{
-
-  await Items
-  .updateOne({itemName:req.body.rows[i].itemName.value},
-    {$inc: {quantity:req.body.rows[i].quantity
-
-             }}
-    )
-  .then(data => {
-
-
-
-  })
-  .catch(err => {
-  return res.send({error:err});
-  });
-
-
-
-}
 
 addItem
 .save()

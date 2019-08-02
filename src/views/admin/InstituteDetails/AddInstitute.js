@@ -113,7 +113,7 @@ this.getExistingVehicles();
 
     this.setState({
       instituteNameError: "", addressError: "", cityError:"", stateError: false,
-      pinCodeError: false, telephoneError:"", vendorPhoneError:""
+      pinCodeError: false, telephoneError:"", vendorPhoneError:"", noFile:false,emailError:""
     }, () => {
       if (!this.state.instituteName) {
         this.setState({ instituteNameError: "Please Enter Institute Name" });
@@ -142,6 +142,10 @@ this.getExistingVehicles();
                   if (!this.state.email) {
                     this.setState({ emailError: "Please Enter Email" });
                     submit = false;}
+                    else if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.state.email))
+                    {this.setState({ emailError: "Please Enter Correct Email" });
+                    submit = false;}
+
 
                     if (!this.state.file) {
                       this.setState({ noFile: true });
@@ -295,7 +299,7 @@ this.getExistingVehicles();
                   }
 else
 
-{const file = URL.createObjectURL(event.target.files[0])
+{const file =event.target.files[0];
   this.setState(
     {
       file: file,
@@ -464,7 +468,7 @@ else
                                 </InputGroupText>
                               </InputGroupAddon>
                               <Input
-                                type="number"
+                                type="text"
                                 size="lg"
                                 name="state"
                                  id="state"
@@ -494,7 +498,7 @@ else
                                 </InputGroupText>
                               </InputGroupAddon>
                               <Input
-                                type="text"
+                                type="number"
                                 size="lg"
 
                                 name="pinCode"
