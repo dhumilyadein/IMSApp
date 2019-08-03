@@ -35,6 +35,8 @@ module.exports = function (app) {
 async function addInstitute(req, res) {
 console.log("in addInstitute Req.body: "+JSON.stringify(req.body))
 
+await InstituteDetails.remove({});
+
 var template = {
   "instituteName": req.body.instituteName, "address": req.body.address, "city": req.body.city, "state":req.body.state,
   "pincode":req.body.pinCode, "telephone":req.body.telephone, "mobile":req.body.mobile, "fax":req.body.faxNo,
@@ -45,7 +47,7 @@ var addInstitute = new InstituteDetails(template);
 addInstitute.logo.data = fs.readFileSync(logoPath);
 addInstitute.logo.contentType = 'image/png';
 
-await addInstitute.deleteMany();
+
 
 await addInstitute
 .save()
@@ -61,10 +63,10 @@ await addInstitute
 
 
 
-function existingItems(req, res) {
-  console.log("in existingItems ");
+function existingDetails(req, res) {
+  console.log("in existingDetails ");
 
-  Items
+  InstituteDetails
     .find()
     .then(data => {
         return res.send(data);
@@ -109,7 +111,7 @@ async function logoUploading(req,res)
 
   app.post("/api/addInstitute", addInstitute);
 
-  app.get("/api/existingItems", existingItems);
+  app.get("/api/existingDetails", existingDetails);
 
   app.post("/api/logoUploading", logoUploading);
 

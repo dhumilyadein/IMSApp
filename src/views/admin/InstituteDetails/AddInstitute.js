@@ -24,7 +24,7 @@ import axios from "axios";
 class AddInstitute extends Component {
   constructor(props) {
     super(props);
-this.getExistingVehicles();
+this.getExistingDetails();
     this.state = {
 
       erorrs: null,
@@ -47,7 +47,7 @@ this.getExistingVehicles();
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
-    this.getExistingVehicles = this.getExistingVehicles.bind(this);
+    this.getExistingDetails = this.getExistingDetails.bind(this);
 
 
 
@@ -184,7 +184,7 @@ this.getExistingVehicles();
                               if (result.data) {
 
                                                  if (result.data.msg==="Success")
-                                                return this.setState({ modalSuccess: true, modalMessage:"Details Added Successfully!"});
+                                                return this.setState({  success: true, modalSuccess: true, modalMessage:"Details Updated Successfully!"});
                               }
 
 
@@ -208,15 +208,25 @@ this.getExistingVehicles();
   }
 
 
-  getExistingVehicles() {
+  getExistingDetails() {
 
     axios
-      .get("http://localhost:8001/api/existingVehicles")
+      .get("http://localhost:8001/api/existingDetails")
       .then(result => {
         console.log("Existing RESULT.data " + JSON.stringify(result.data));
         if (result.data) {
           this.setState({
-            existingVehicles: result.data
+           instituteName:result.data[0].instituteName,
+           address:result.data[0].address,
+             city:result.data[0].city,
+             state:result.data[0].state,
+             pinCode:result.data[0].pincode,
+             telephone:result.data[0].telephone,
+             mobile:result.data[0].mobile,
+             faxNo:result.data[0].fax,
+             email:result.data[0].email,
+             website:result.data[0].website,
+
           });
         }
       });
@@ -315,7 +325,7 @@ else
 
                   {!this.state.showEditVehicle &&  <p>
                     <Card>
-                    <h3 align="center"> Add Institute Details</h3>
+                    <h3 align="center"> Update Institute Details</h3>
                      <Row lg="2">
 
                      <Col>

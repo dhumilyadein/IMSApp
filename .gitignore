@@ -6,6 +6,7 @@
 /server/ExcelUploads
 /server/PhotoUploads
 /server/ZipUploads
+/server/logoUploads
 package-lock.json
 /src/photoTemp
 /.vscode
