@@ -183,7 +183,7 @@ this.getExistingDetails();
       .get("http://localhost:8001/api/existingDetails")
       .then(result => {
         console.log("Existing RESULT.data " + JSON.stringify(result.data));
-        if (result.data) {
+        if (result.data.length===1) {
           this.setState({
            instituteName:result.data[0].instituteName,
            address:result.data[0].address,
