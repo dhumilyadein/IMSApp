@@ -46,7 +46,7 @@ this.getExistingDetails();
     this.submitHandler = this.submitHandler.bind(this);
     this.toggleSuccess = this.toggleSuccess.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
-    this.reset = this.reset.bind(this);
+
     this.getExistingDetails = this.getExistingDetails.bind(this);
 
 
@@ -67,37 +67,6 @@ this.getExistingDetails();
 
   }
 
-  reset(){
-
-    this.setState({
-      erorrs: null,
-      success: null,
-      vNo:"",
-      vehicleNo: "",
-      vehicleNoError: "",
-      vehicleRegNo:"",
-      vehicleRegNoError:"",
-  vehicleMake: "",
-      success: false,
-      modalSuccess: false,
-      visible: false,
-      capacity:"",
-      driverName:"",
-      driverNameError:"",
-
-      driverPhone:"",
-      driverPhoneError:"",
-      conductorName:"",
-      showEditVehicle:false,
-      conductorPhone:"",
-      vendorName:"",
-      vendorNameError:"",
-      vendorPhone:"",
-      vendorPhoneError:"",
-      vendorAddress:""
-
-    });
-  }
 
   /**
    * @description Dismisses the alert
@@ -226,6 +195,7 @@ this.getExistingDetails();
              faxNo:result.data[0].fax,
              email:result.data[0].email,
              website:result.data[0].website,
+             file: URL.createObjectURL(result.data[0].logo)
 
           });
         }
