@@ -1,4 +1,4 @@
-var { check, validationResult } = require("express-validator/check");
+var { check, validationResult } = require("express-validator/");
 
 const User = require("../models/User");
 module.exports = function(app) {
@@ -87,7 +87,7 @@ const logValidation = [
         });
     }
   }
- 
+
 
   //----------------------------------------------------
   function isLoggedIn(req, res, next) {

@@ -1,5 +1,33 @@
 const InstituteDetails = require("../../models/InstituteDetails");
+var multer = require("multer");
+let logoPath=null;
+const rimraf = require("rimraf");
+var fs = require('fs');
 
+var logoStorage = multer.diskStorage({
+  //multers disk storage settings
+  destination: function(req, file, cb) {
+    cb(null, "./logoUploads/");
+  },
+  filename: function(req, file, cb) {
+    var date = Date.now();
+    cb(
+      null,
+
+      file.originalname
+    );
+  }
+});
+
+
+var logoUpload = multer({
+  //multer settings
+  storage: logoStorage,
+  fileFilter: function(req, file, callback) {
+
+    callback(null, true);
+  }
+}).single("file");
 
 module.exports = function (app) {
 
@@ -10,74 +38,27 @@ console.log("in addInstitute Req.body: "+JSON.stringify(req.body))
 var template = {
   "instituteName": req.body.instituteName, "address": req.body.address, "city": req.body.city, "state":req.body.state,
   "pincode":req.body.pinCode, "telephone":req.body.telephone, "mobile":req.body.mobile, "fax":req.body.faxNo,
-  "email":req.body.email, "website":req.body.website, "logo":req.body.file
+  "email":req.body.email, "website":req.body.website, "logo":req.body.logo
 
 };
-var addItem = new InstituteDetails(template);
+var addInstitute = new InstituteDetails(template);
+addInstitute.logo.data = fs.readFileSync(logoPath);
+addInstitute.logo.contentType = 'image/png';
 
+await addInstitute.deleteMany();
 
-addItem
+await addInstitute
 .save()
 .then(user => {
-    return res.send({msg:"Success"});
+  return res.send({msg:"Success"});
 })
 .catch(err => {
-  return res.send(err);
+  return res.send({error:err});
 });
 
 
 }
 
-async function createItem(req, res) {
-  console.log("in createItem Req.body: "+JSON.stringify(req.body))
-
-  var template = {
-    "itemName": req.body.itemName, "unit": req.body.unit, "quantity": 0,
-
-  };
-  var createItem = new Items(template);
-
-
-
-
-
-  await createItem
-    .save()
-    .then(user => {
-        return res.send({msg:"Success"});
-    })
-    .catch(err => {
-      return res.send(err);
-    });
-
-  }
-
-  async function consumeItem(req, res) {
-    console.log("in consumeItem Req.body: "+JSON.stringify(req.body))
-
-    Items
-    .updateOne({itemName:req.body.itemName},
-      {$inc: {quantity:-1*parseInt(req.body.consumedQuantity)
-
-               }}
-      )
-    .then(data => {
-     var consumeItems = new ConsumedItems(req.body);
-     consumeItems.save()
-     .then(user => {
-         return res.send({msg:"Success"});
-     })
-     .catch(err => {
-       return res.send(err);
-     });
-
-
-    })
-    .catch(err => {
-    return res.send({error:err});
-    });
-
-    }
 
 
 function existingItems(req, res) {
@@ -94,108 +75,43 @@ function existingItems(req, res) {
 
   }
 
-  function deleteItem(req,res)
-  {console.log("In deleteItem: "+ JSON.stringify(req.body.itemName));
 
-Items
-.deleteOne({itemName:req.body.itemName})
-.then(data => {
-  return res.send({msg:"Item Deleted"});
-})
-.catch(err => {
-return res.send({error:err});
+async function logoUploading(req,res)
+{
+ console.log("in Logo Upload ");
+
+ await rimraf('./logoUploads/*.*', function (e) {
+
+  console.log(e);
+  console.log('Add intitute - Deleted logo');
+  logoUpload(req, res, function (err) {
+    if (err) {
+       res.json({ error_code: 1, err_desc: err });
+    }
+    /** Multer gives us file info in req.file object */
+    else if (!req.file)
+       res.json({ error_code: 1, err_desc: "No file passed" });
+  else{
+    console.log(req.file.path);
+  logoPath = req.file.path;
+  res.json({message:"Logo uploaded to " +logoPath});
+  }
+
+
+
+  });
 });
 
 
-}
-
-async function editItem(req,res)
-{console.log("In editItem for: "+ JSON.stringify(req.body));
-
-
-
-  Items
-.updateOne({itemName:req.body.existingItems[req.body.itemNo].itemName},
-  {$set: {itemName:req.body.itemName,
-          unit:req.body.unit,
-           }}
-  )
-.then(data => {
-
-return res.send({msg:"Item Updated"});
-})
-.catch(err => {
-return res.send({error:err});
-});
-
-
-
-
-
-
-
-}
-async function getAddedItems(req,res)
-{console.log("In getAddedItems for: "+ JSON.stringify(req.body));
-
-
-
-  PurchaseItems
-.find({ $and: [ { dos: { $gte : new Date(req.body.dos) } }, { dos: { $lte : new Date(req.body.doe) } }] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
-
-
-
-
-
-
-
-}
-
-
-async function getConsumedItems(req,res)
-{console.log("In getConsumedItems for: "+ JSON.stringify(req.body));
-
-
-
-
-ConsumedItems
-.find({ $and: [ { doc: { $gte : new Date(req.body.dos) } }, { doc: { $lte : new Date(req.body.doe) } }] })
-
-.then(data => {
-
-return res.send({data});
-})
-.catch(err => {
-return res.send({error:err});
-});
-
-
-
-
-
-
-
-
-}
+  }
 
 
 
   app.post("/api/addInstitute", addInstitute);
-  app.post("/api/createItem", createItem);
+
   app.get("/api/existingItems", existingItems);
-  app.post("/api/deleteItem", deleteItem);
-  app.post("/api/editItem", editItem);
-  app.post("/api/consumeItem", consumeItem);
-  app.post("/api/getAddedItems", getAddedItems);
-  app.post("/api/getConsumedItems", getConsumedItems);
+
+  app.post("/api/logoUploading", logoUploading);
 
 
 

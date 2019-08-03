@@ -1,6 +1,6 @@
 var util = require('util');
 
-var { check, validationResult } = require("express-validator/check");
+var { check, validationResult } = require("express-validator/");
 const Student = require("../../models/Student");
 
 module.exports = function (app) {
@@ -67,11 +67,11 @@ module.exports = function (app) {
     function searchStudentsByUsernameArray(req, res) {
 
       console.log("StudentsDAO - searchStudentsByUsernameArray ENTRY");
-  
+
       var request = req.body;
-  
+
       Student.find({
-        "username": { $in : request.usernameArray} 
+        "username": { $in : request.usernameArray}
       }, {
           "username": 1,
           "email": 1,
@@ -83,25 +83,25 @@ module.exports = function (app) {
           "parentphone2": 1
         })
         .then(function (studentData) {
-  
-          console.log("StudentsDAO - searchStudentsByUsernameArray - " 
+
+          console.log("StudentsDAO - searchStudentsByUsernameArray - "
           + studentData + " studentData.length - " + studentData.length + " usernameArray - " + request.usernameArray);
-  
+
           if (null === studentData || (null !== studentData && studentData.length === 0) ) {
             response = { response: studentData, message: "No Data found for username - " + request.usernameArray };
           } else {
             response = { response: studentData, message: "Students details fetched successfully" };
           }
           return res.send(response);
-  
+
         })
         .catch(function (err) {
-  
+
           console.log("StudentsDAO - searchStudentsByUsernameArray - Catching server ERROR - " + err);
           response = { errors: err };
           return res.send(response);
         });
-  
+
     }
 
     function updateStudentDetails(req, res) {
@@ -165,8 +165,8 @@ module.exports = function (app) {
 
       var findBy = {};
 
-      
-      console.log("StudentsDAO - updateStudentDetails - \nfindBy - " + findBy + "\nupdateJSON - " 
+
+      console.log("StudentsDAO - updateStudentDetails - \nfindBy - " + findBy + "\nupdateJSON - "
       + JSON.stringify(updateJSON));
 
     Student.findOneAndUpdate(
@@ -251,8 +251,8 @@ module.exports = function (app) {
 
       var findBy = {};
 
-      
-      console.log("StudentsDAO - updateStudentDetailsByUsernameArray - \nfindBy - " + findBy + "\nupdateJSON - " 
+
+      console.log("StudentsDAO - updateStudentDetailsByUsernameArray - \nfindBy - " + findBy + "\nupdateJSON - "
       + JSON.stringify(updateJSON));
 
     Student.updateMany(

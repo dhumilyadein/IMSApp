@@ -1,4 +1,4 @@
-var { check, oneOf, validationResult } = require("express-validator/check");
+var { check, oneOf, validationResult } = require("express-validator");
 const exams = require("../../models/Exams");
 
 module.exports = function (app) {
@@ -370,9 +370,9 @@ module.exports = function (app) {
             }
           }
         ).then(function (examSectionData) {
-    
+
           console.log("examsDAO deleteSubjectWiseExamDetails - exam subject details updated successfully - " + JSON.stringify(examSectionData));
-          
+
           exams.findOneAndUpdate(
             {
               'examName': request.examName,
@@ -393,16 +393,16 @@ module.exports = function (app) {
               // $addToSet: { "classWiseExamDetailsArray.$": request.section }
             }
           ).then(function (examSectionData) {
-  
+
             console.log("examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED - " + JSON.stringify(examSectionData));
-  
+
             response = { response: examSectionData, message: "examsDAO - insertClassAndSectionInExams - Class and section array details updated successfully - EXAM MODIFIED" };
             return res.send(response);
-  
+
           }).catch(function (err) {
-  
+
             console.log("examsDAO - insertClassAndSectionInExams - Catching server ERROR while setting Exam SECTION array details - " + JSON.stringify(err));
-  
+
             response = { errors: err };
             return res.send(response);
           });
@@ -466,7 +466,7 @@ module.exports = function (app) {
     var request = req.body;
     console.log("in fetchExamDetailsOnInput request - " + JSON.stringify(request))
 
-    // KAPILTODO Commented to check later 
+    // KAPILTODO Commented to check later
     // //Initial validation like fields empty check
     // var errors = validationResult(req);
 

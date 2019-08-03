@@ -1,6 +1,6 @@
 var util = require('util');
 
-var { check } = require("express-validator/check");
+var { check } = require("express-validator/");
 
 const Parent = require("../../models/Parent");
 

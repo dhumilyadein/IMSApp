@@ -1,5 +1,5 @@
 var util = require('util');
-var { check, validationResult } = require("express-validator/check");
+var { check, validationResult } = require("express-validator/");
 
 const User = require("../../models/User");
 const Student = require("../../models/Student");
@@ -37,7 +37,7 @@ module.exports = function (app) {
         var currentTime = new Date();
         // console.log("current time - " + currentTime);
         console.log("updateUser - updateUserDetails - selectedFeeTemplate - " + req.selectedFeeTemplate);
-        
+
 
         var request = req.body;
 

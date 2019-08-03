@@ -48,7 +48,7 @@ this.getExistingVehicles();
     this.onDismiss = this.onDismiss.bind(this);
     this.reset = this.reset.bind(this);
     this.getExistingVehicles = this.getExistingVehicles.bind(this);
-    this.editHandler = this.editHandler.bind(this);
+
 
 
 
@@ -153,108 +153,60 @@ this.getExistingVehicles();
 
 
 
-      if (submit === true) {
-        console.log("Adding Institute : ");
-        axios
-          .post("http://localhost:8001/api/addInstitute", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
+                      if (submit === true) {
+                        console.log("Updating Vehicle: "+ JSON.stringify(this.state));
 
-            if(result.data.errors)
-            {
-            if(result.data.errors.vehicleNo)
-              this.setState({
-                vehicleNoError:result.data.errors.vehicleNo.message
-              });
+                        const data = new FormData();  //photo upload
+                        this.setState({ logoName: this.state.logo.name }, () => {
 
-            else  if(result.data.errors.vehicleRegNo)
-              this.setState({
-                vehicleRegNoError:result.data.errors.vehicleRegNo.message
-              });
+                          data.append('file', this.state.logo, this.state.logoName);
+                        axios
+                          .post("http://localhost:8001/api/logoUploading", data)
+                          .then(result => {
+                            console.log("in Logo Res " + JSON.stringify(result.data));
+                            if (result.data.error_code === 1) {
 
-            }
-             else if (result.data.msg === "Success")
-              this.setState({
+                              return this.setState({
+                                corruptFile: true,
 
-                success: true,
-                modalSuccess: true,
-                modalMessage:"Vehicle: "+ this.state.vehicleNo+" Saved Successfully!"
+                              });
 
-              },()=>{this.getExistingVehicles()});
+                            }
 
-          });
-      }
+                            else if(result.data.message)
+
+                            { console.log("Logo file uploaded to server!... Submitting other details");
+
+                            axios
+                            .post("http://localhost:8001/api/addInstitute", this.state)
+                            .then(result => {
+                              console.log("addInstitute.Result. data " + JSON.stringify(result.data));
+                              if (result.data) {
+
+                                                 if (result.data.msg==="Success")
+                                                return this.setState({ modalSuccess: true, modalMessage:"Details Added Successfully!"});
+                              }
+
+
+
+
+                            });
+
+
+
+                            }
+
+
+
+
+
+
+
+
+                  });});}
     });
   }
 
-  editHandler(e) {
-    var submit = true;
-    console.log("in Edit State: " + JSON.stringify(this.state));
-
-    this.setState({
-      driverNameError: "", driverPhoneError: "", vehicleNoError:"", vehicleRegNoError: false,
-      modalSuccess: false, vendorNameError:"", vendorPhoneError:""
-    }, () => {
-      if (!this.state.vehicleNo) {
-        this.setState({ vehicleNoError: "Please Enter Vehicle No" });
-        submit = false;}
-
-        if (!this.state.vehicleRegNo) {
-          this.setState({ vehicleRegNoError: "Please Enter Registration No" });
-          submit = false;}
-
-          if (!this.state.driverName) {
-            this.setState({ driverNameError: "Please Enter Driver Name" });
-            submit = false;}
-
-            if (!this.state.driverPhone) {
-              this.setState({ driverPhoneError: "Please Enter Driver Phone No" });
-              submit = false;}
-
-              if (!this.state.vendorName) {
-                this.setState({ vendorNameError: "Please Enter Vendor Name" });
-                submit = false;}
-
-                if (!this.state.vendorPhone) {
-                  this.setState({ vendorPhoneError: "Please Enter Vendor Phone No" });
-                  submit = false;}
-
-
-
-
-      if (submit === true) {
-        console.log("Updating Vehicle: "+ JSON.stringify(this.state));
-        axios
-          .post("http://localhost:8001/api/editVehicle", this.state)
-          .then(result => {
-            console.log("RESULT.data " + JSON.stringify(result.data));
-           if(result.data.error)
-          {  if(result.data.error.errmsg.indexOf("vehicleNo")!==-1)
-            this.setState({
-              vehicleNoError:"Vehicle No already in use"
-            });
-
-            else if(result.data.error.errmsg.indexOf("vehicleRegNo")!==-1)
-            this.setState({
-              vehicleRegNoError:"Vehicle Reg No already in use"
-            });
-
-
-          }
-           else  if (result.data.msg === "Vehicle Updated")
-              this.setState({
-
-                success: true,
-                modalSuccess: true,
-                showEditVehicle:false,
-                modalMessage:"Vehicle: "+ this.state.vehicleNo+" Updated Successfully!"
-
-              },()=>{this.getExistingVehicles()});
-
-          });
-      }
-    });
-  }
 
   getExistingVehicles() {
 
@@ -299,10 +251,11 @@ this.getExistingVehicles();
                   }
 else
 
-{const file =event.target.files[0];
+{const file = URL.createObjectURL(event.target.files[0])
   this.setState(
     {
       file: file,
+      logo: event.target.files[0],
       noFile: false,
       corruptFile: false,
       filename: file.name,
@@ -701,6 +654,12 @@ else
   </CardBody>
 
 </Card>
+{this.state.error && (
+                      <font color="red">
+                        {" "}
+                        <h6>this.state.error</h6>
+                      </font>
+                    )}
 </Col>
 
                        </Row>

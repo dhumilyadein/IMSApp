@@ -1,7 +1,7 @@
 var moment = require('moment');
 var util = require('util');
 
-var { check, oneOf, validationResult } = require("express-validator/check");
+var { check, oneOf, validationResult } = require("express-validator");
 var fs = require('fs');
 const Class = require("../../models/Class");
 
@@ -116,30 +116,30 @@ module.exports = function (app) {
     function fetchAllClassesAndSections(req, res) {
 
       console.log("ClassDAO - fetchAllClassesAndSections - ENTRY");
-  
+
       //Initial validation like fields empty check
       var errors = validationResult(req);
-  
+
       //Mapping the value to the same object
       if (!errors.isEmpty()) {
         return res.send({ errors: errors.mapped() });
       }
-  
+
       Class.find({},
         {
-        "class":1, 
+        "class":1,
         "section":1,
       })
         .then(function (classDetails) {
-  
+
           console.log("classDAO - fetchAllClassesAndSections - All Classes and Sections -  " + classDetails);
-  
+
           res.send(classDetails);
         })
         .catch(function (error) {
           console.log(error);
         });
-  
+
     }
 
     /**
@@ -148,17 +148,17 @@ module.exports = function (app) {
     function fetchClassSpecificDetails(req, res) {
 
       console.log("ClassDAO - fetchClassSpecificDetails - ENTRY");
-  
+
       //Initial validation like fields empty check
       var errors = validationResult(req);
-  
+
       //Mapping the value to the same object
       if (!errors.isEmpty()) {
 
         console.log("ClassDAO - fetchClassSpecificDetails - errors - " + JSON.stringify(errors.mapped));
         return res.send({ errors: errors.mapped() });
       }
-  
+
       var request = req.body;
 
       var fetchClassSpecificDetailsJSON = {};
@@ -200,8 +200,8 @@ module.exports = function (app) {
         fetchClassSpecificDetailsResponseJSON.results = 1
       }
 
-      console.log("classDAO - fetchClassSpecificDetails - fetchClassSpecificDetailsJSON - " + JSON.stringify(fetchClassSpecificDetailsJSON) 
-      + " fetchClassSpecificDetailsResponseJSON - " 
+      console.log("classDAO - fetchClassSpecificDetails - fetchClassSpecificDetailsJSON - " + JSON.stringify(fetchClassSpecificDetailsJSON)
+      + " fetchClassSpecificDetailsResponseJSON - "
       + JSON.stringify(fetchClassSpecificDetailsResponseJSON));
 
       Class.find(
@@ -209,7 +209,7 @@ module.exports = function (app) {
         fetchClassSpecificDetailsResponseJSON
         )
         .then(function (classDetails) {
-  
+
           console.log("classDAO - fetchClassSpecificDetails - All Classes and Sections -  " + classDetails);
           res.send(classDetails);
         })
@@ -219,7 +219,7 @@ module.exports = function (app) {
           return res.send({ "errors" : error});
 
         });
-  
+
     }
 
   /**
@@ -228,17 +228,17 @@ module.exports = function (app) {
     async function fetchSelectedClassStudentsData(req, res) {
 
       // console.log("fetchSelectedClassStudentsData ENTRY");
-  
+
       //var searchJSON = {};
-  
+
       //Initial validation like fields empty check
       var errors = validationResult(req);
-  
+
       //Mapping the value to the same object
       if (!errors.isEmpty()) {
         return res.send({ errors: errors.mapped() });
       }
-  
+
       var request = req.body;
       var className = request.class;
       var section = request.section;
@@ -248,12 +248,12 @@ module.exports = function (app) {
       await Class.findOne(
         { "class": className , "section": section },
         {
-          "class":1, 
+          "class":1,
           "section":1,
           "studentsData":1
         }
       ).then(function (classData) {
-  
+
         response = { response: classData, message: "Class details fetched successfully" };
         console.log("ClassDAO - fetchSelectedClassStudentsData - Class details fetched successfully.\nServer final response - " + JSON.stringify(response));
         return res.send(response);
@@ -265,7 +265,7 @@ module.exports = function (app) {
         console.log("ClassDAO - fetchSelectedClassStudentsData - Errors in classDAO.\nServer final response - " + JSON.stringify(response));
         return res.send(response);
       });
-  
+
     }
 
   async function insertClassDetails(req, res) {
@@ -412,7 +412,7 @@ module.exports = function (app) {
           $pull: { "studentsData" : { "username" : request.studentsData.username} }
         }
       ).then(function (classData) {
-  
+
         console.log("Class details udpated successfully");
         response = { reqbody: req.body, message: "Class details updated successfully" };
         console.log("ClassDAO - updateClassDetails - Class details udpated successfully - Server final response - " + JSON.stringify(response));
@@ -430,7 +430,7 @@ module.exports = function (app) {
 
     if (request.subjects) objForUpdate.subjects = request.subjects.sort();
     // if (request.timeTable) objForUpdate.timeTable = request.timeTable;
-    
+
     // Storing date as date (converting string date to date type)
     if (request.timeTable) {
 
@@ -439,7 +439,7 @@ module.exports = function (app) {
       request.timeTable.forEach(element => {
 
         var timeTableTemp = {};
-        
+
         timeTableTemp._id = element._id;
         timeTableTemp.name = element.name;
         timeTableTemp.teacher = element.teacher;
@@ -483,7 +483,7 @@ module.exports = function (app) {
       request.pTMeetSchedule.forEach(element => {
 
         var pTMeetScheduleTemp = {};
-        
+
         pTMeetScheduleTemp._id = element._id;
         pTMeetScheduleTemp.name = element.name;
         pTMeetScheduleTemp.teacher = element.teacher;
@@ -522,7 +522,7 @@ module.exports = function (app) {
 
     objForUpdate.updatedAt = currentTime;
 
-    console.log("objForUpdate - " + JSON.stringify(objForUpdate) 
+    console.log("objForUpdate - " + JSON.stringify(objForUpdate)
     + " studentsDataJSON - " + JSON.stringify(studentsDataJSON));
 
     var udpateJSON = {};
@@ -537,7 +537,7 @@ module.exports = function (app) {
       }
     }
 
-    
+
     console.log("udpateJSON - " + JSON.stringify(udpateJSON));
 
     await Class.findOneAndUpdate(
@@ -579,15 +579,15 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
      Class.findOneAndUpdate(
       // Class.findOne(
-      {"class": request.class, 
-      "section": request.section 
+      {"class": request.class,
+      "section": request.section
       ,"attendance.date": request.attendance.date
-    } 
+    }
       ,{
         // $addToSet: {'attendance': attendance}
 
         $unset: {"attendance.$.studentsInfo": 1},
-        
+
         // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
       },
       // {upsert: true}
@@ -599,18 +599,18 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
       console.log("ClassDAO - updateStudentsAttendance - Class details udpated successfully - server final response - " + JSON.stringify(classData));
 
       if(null === classData) {
-        
+
         console.log("No record for attendance found so ADDING the record");
 
         Class.findOneAndUpdate(
-          {"class": request.class, 
-          "section": request.section 
+          {"class": request.class,
+          "section": request.section
         } ,
           {
             $addToSet: {'attendance': request.attendance}
           },
         ).then(function (classData) {
-    
+
           response = { response: classData, message: "Class details updated successfully - ATTENDANCE ADDED" };
           console.log("ClassDAO - server response while set attendance - " + JSON.stringify(classData));
         }).catch(function (err) {
@@ -625,7 +625,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
         console.log("ClassDAO - updateStudentsAttendance - attendance record found - so MODIFYING data");
 
         Class.findOneAndUpdate(
-          {"class": request.class, 
+          {"class": request.class,
           "section": request.section
           ,"attendance.date": request.attendance.date
         } ,
@@ -633,7 +633,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
             $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
           },
         ).then(function (classData) {
-    
+
           response = { response: classData, message: "Class details updated successfully - ATTENDANCE MODIFIED" };
           console.log("ClassDAO - server response while set attendance studentInfo - " + JSON.stringify(classData));
         }).catch(function (err) {
@@ -674,15 +674,15 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
 
      Class.findOneAndUpdate(
       // Class.findOne(
-      {"class": request.class, 
-      "section": request.section 
+      {"class": request.class,
+      "section": request.section
       ,"results.examName": request.results.examName
-    } 
+    }
       ,{
         // $addToSet: {'attendance': attendance}
 
         $unset: {"results.$.studentsResult": 1},
-        
+
         // $set: {'attendance.$.studentsInfo': request.attendance.studentsInfo}
       },
       // {upsert: true}
@@ -694,18 +694,18 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
       console.log("ClassDAO - updateStudentsResults - Class details udpated successfully - server final response - " + JSON.stringify(classData));
 
       if(null === classData) {
-        
+
         console.log("No record for exam found so ADDING the record - eexamName - " + request.results.examName);
 
         Class.findOneAndUpdate(
-          {"class": request.class, 
-          "section": request.section 
+          {"class": request.class,
+          "section": request.section
         } ,
           {
             $addToSet: {'results': request.results}
           },
         ).then(function (classData) {
-    
+
           response = { response: classData, message: "Class details updated successfully - EXAM ADDED" };
           console.log("ClassDAO - server response while setting Exam - " + JSON.stringify(classData));
         }).catch(function (err) {
@@ -720,7 +720,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
         console.log("ClassDAO - updateStudentsResults - Exam record found - so MODIFYING data");
 
         Class.findOneAndUpdate(
-          {"class": request.class, 
+          {"class": request.class,
           "section": request.section
           ,"results.examName": request.results.examName
         } ,
@@ -728,7 +728,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
             $set: {'results.$.studentsResult': request.results.studentsResult}
           },
         ).then(function (classData) {
-    
+
           response = { response: classData, message: "Class details updated successfully - EXAM MODIFIED" };
           console.log("ClassDAO - server response while setting Exam details - " + JSON.stringify(classData));
         }).catch(function (err) {
@@ -773,13 +773,13 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
     + " \nattendance date - " + request.date);
 
     Class.findOne(
-      {"class": request.class, 
+      {"class": request.class,
       "section": request.section
       // ,"attendance.date": request.date
       ,"attendance" : { $elemMatch : { date : request.date } },
     },
     {
-      "class":1, 
+      "class":1,
       "section":1,
       "attendance.date":1,
       "attendance.$.studentsInfo":1
@@ -818,12 +818,12 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
     + " \exam name - " + request.examName);
 
     Class.findOne(
-      {"class": request.class, 
+      {"class": request.class,
       "section": request.section
       ,"results" : { $elemMatch : { examName : request.examName } },
     },
     {
-      "class":1, 
+      "class":1,
       "section":1,
       "results.examName":1,
       "results.$.studentsResult":1
@@ -870,7 +870,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
       console.log("\nClassDAO - removeSchedule - id BEFORE - " + Object.keys(id).length);
 
       var pullTimeTableJSON = {};
-      if (request.timeTable && request.timeTable._id) { 
+      if (request.timeTable && request.timeTable._id) {
         id._id = request.timeTable._id;
         if(id._id) pullTimeTableJSON.timeTable = id;
       }
@@ -894,7 +894,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
           $pull: pullPTMeetScheduleJSON
         }
       }
-      
+
       if(Object.keys(pullArrayUdpateClassJSON).length !== 0) {
 
       console.log("ClassDAO - removeSchedule - pullArrayUdpateClassJSON - " + JSON.stringify(pullArrayUdpateClassJSON));
@@ -903,7 +903,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
         { $and: [{ "class": request.class }, { "section": request.section }] },
         pullArrayUdpateClassJSON
       ).then(function (classData) {
-  
+
         response = { reqbody: req.body, message: "Class details updated successfully" };
         console.log("ClassDAO - removeSchedule - Class details udpated successfully - Server final response - " + JSON.stringify(response));
         return res.send(response);
@@ -929,7 +929,7 @@ console.log("\n\nclass - " + request.class + " section - " + request.section + "
     console.log("fetchAllClassesAndSections get service running");
   });
 
-  
+
   app.post("/api/fetchClassSpecificDetails", updateClassValidation, fetchClassSpecificDetails, (req, res) => {
     console.log("fetchClassSpecificDetails post service running");
   });

@@ -1,7 +1,7 @@
 var moment = require('moment');
 var util = require('util');
 
-var { check, validationResult } = require("express-validator/check");
+var { check, validationResult } = require("express-validator/");
 var fs = require('fs');
 const Teacher = require("../../models/Teacher");
 
@@ -20,17 +20,17 @@ module.exports = function (app) {
     function fetchTeachersSpecificDetails(req, res) {
 
       console.log("TeacherDAO - fetchTeachersSpecificDetails - ENTRY");
-  
+
       //Initial validation like fields empty check
       var errors = validationResult(req);
-  
+
       //Mapping the value to the same object
       if (!errors.isEmpty()) {
 
         console.log("TeacherDAO - fetchTeachersSpecificDetails - errors - " + JSON.stringify(errors.mapped));
         return res.send({ errors: errors.mapped() });
       }
-  
+
       var request = req.body;
 
       var fetchTeachersSpecificDetailsJSON = {};
@@ -57,7 +57,7 @@ module.exports = function (app) {
         fetchTeachersSpecificDetailsResponseJSON.userid = 1
       }
 
-      console.log("TeacherDAO - fetchTeachersSpecificDetails - fetchTeachersSpecificDetailsResponseJSON - " 
+      console.log("TeacherDAO - fetchTeachersSpecificDetails - fetchTeachersSpecificDetailsResponseJSON - "
       + JSON.stringify(fetchTeachersSpecificDetailsResponseJSON));
 
       Teacher.findOne(
@@ -65,15 +65,15 @@ module.exports = function (app) {
         fetchTeachersSpecificDetailsResponseJSON
         )
         .then(function (teacherDetails) {
-  
+
           console.log("TeacherDAO - fetchTeachersSpecificDetails - Teacher details -  " + teacherDetails);
-  
+
           res.send(teacherDetails);
         })
         .catch(function (error) {
           console.log(error);
         });
-  
+
     }
 
     /**
@@ -82,17 +82,17 @@ module.exports = function (app) {
     function fetchAllTeachersSpecificDetails(req, res) {
 
       console.log("TeacherDAO - fetchAllTeachersSpecificDetails - ENTRY");
-  
+
       //Initial validation like fields empty check
       var errors = validationResult(req);
-  
+
       //Mapping the value to the same object
       if (!errors.isEmpty()) {
 
         console.log("TeacherDAO - fetchAllTeachersSpecificDetails - errors - " + JSON.stringify(errors.mapped));
         return res.send({ errors: errors.mapped() });
       }
-  
+
       var request = req.body;
 
       var fetchTeachersSpecificDetailsResponseJSON = {};
@@ -113,7 +113,7 @@ module.exports = function (app) {
         fetchTeachersSpecificDetailsResponseJSON.userid = 1
       }
 
-      console.log("TeacherDAO - fetchTeachersSpecificDetails - fetchTeachersSpecificDetailsResponseJSON - " 
+      console.log("TeacherDAO - fetchTeachersSpecificDetails - fetchTeachersSpecificDetailsResponseJSON - "
       + JSON.stringify(fetchTeachersSpecificDetailsResponseJSON));
 
       Teacher.find(
@@ -121,16 +121,16 @@ module.exports = function (app) {
         fetchTeachersSpecificDetailsResponseJSON
         )
         .then(function (teacherDetailsArray) {
-  
+
           console.log("TeacherDAO - fetchTeachersSpecificDetails - Teacher details -  " + teacherDetailsArray);
-  
+
           res.send(teacherDetailsArray);
         })
         .catch(function (error) {
           console.log(error);
         });
-  
-    }    
+
+    }
 
   app.post("/api/fetchTeachersSpecificDetails", fetchTeacherValidation, fetchTeachersSpecificDetails, (req, res) => {
     console.log("TeacherDAO - fetchTeachersSpecificDetails post method call");

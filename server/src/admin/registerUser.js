@@ -1,7 +1,7 @@
 
 var fs = require('fs');
 const rimraf = require('rimraf');
-var { check, validationResult } = require("express-validator/check");
+var { check, validationResult } = require("express-validator/");
 let photoPath=null;
 const User = require("../../models/User");
 const Student = require("../../models/Student");
