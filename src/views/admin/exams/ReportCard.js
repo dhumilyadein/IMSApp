@@ -56,7 +56,7 @@ class ReportCard extends Component {
 
     this.state = {
 
-      classesView: true,
+      classView: true,
       sectionView: false,
       showReportCardFlag: false,
       showStudentNamesFlag: false,
@@ -107,7 +107,9 @@ class ReportCard extends Component {
       // ],
 
       insertExamDetailsErrorMessage: "",
-      copyTotalMarksToAllRowsFlag: false
+      copyTotalMarksToAllRowsFlag: false,
+
+      selectedStudentsDetails: {}
 
     };
 
@@ -117,14 +119,17 @@ class ReportCard extends Component {
     this.classChangeHandler = this.classChangeHandler.bind(this);
     this.sectionChangeHandler = this.sectionChangeHandler.bind(this);
     this.toggleTabs = this.toggleTabs.bind(this);
-    this.toggleModalSuccess = this.toggleModalSuccess.bind(this);
+    this.toggleModalFlag = this.toggleModalFlag.bind(this);
     this.fetchAllExamDetailsForSelectedSection = this.fetchAllExamDetailsForSelectedSection.bind(this);
     this.resetStudentsMarksArray = this.resetStudentsMarksArray.bind(this);
     this.reportCardSubmitHandler = this.reportCardSubmitHandler.bind(this);
     this.fetchResultOnExamName = this.fetchResultOnExamName.bind(this);
     this.setStudentsDropDownLabelValue = this.setStudentsDropDownLabelValue.bind(this);
     this.studentChangeHandler = this.studentChangeHandler.bind(this);
+    this.fetchSelectedStudentSDetailsFromStudentsCollection = this.fetchSelectedStudentSDetailsFromStudentsCollection.bind(this);
     this.organizeFinalDataFromExamDetailsAndResults = this.organizeFinalDataFromExamDetailsAndResults.bind(this);
+    this.finalResultFlagChangeHandler = this.finalResultFlagChangeHandler.bind(this);
+    this.backButtonHandler = this.backButtonHandler.bind(this);
 
     // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
@@ -373,6 +378,11 @@ class ReportCard extends Component {
 
     this.setState({
       selectedExamDetails: { examName: "" },
+
+      showStudentNamesFlag: false,
+      sectionView: false,
+      classView: false,
+
       showReportCardFlag: true
     });
 
@@ -425,6 +435,8 @@ class ReportCard extends Component {
       this.organizeFinalDataFromExamDetailsAndResults();
 
     });
+
+    console.log("\nReportCard - studentChangeHandler - STATE VALUES - " + JSON.stringify(this.state));
 
   };
 
@@ -499,11 +511,11 @@ class ReportCard extends Component {
     });
   }
 
-  async toggleModalSuccess() {
+  async toggleModalFlag() {
 
-    await console.log("CreateExam - toggleModalSuccess this.state.showModalFlag - " + this.state.showModalFlag);
+    await console.log("ReportCard - toggleModalFlag this.state.modalFlag - " + this.state.modalFlag);
     this.setState({
-      modalSuccess: !this.state.modalSuccess
+      modalFlag: !this.state.modalFlag
     });
   }
 
@@ -617,48 +629,42 @@ class ReportCard extends Component {
 
   reportCardSubmitHandler() {
 
-    console.log("ReportCard reportCardSubmitHandler this.state.studentsMarksArray - " + JSON.stringify(this.state.studentsMarksArray));
-
-    var results = {};
-
-    results.examName = this.state.selectedExamDetails.examName;
-    results.studentsResult = this.state.studentsMarksArray;
-
-    this.setState({
-      results: results
-    }, () => {
-
-      this.updateStudentsResults();
-    });
-  }
-
-  async updateStudentsResults(classStr, sectionStr) {
-
-    var updateStudentsResultsRequest = {
+    var updateStudentsFinalResultRequest = {
       "class": this.state.class,
       "section": this.state.selectedSection,
-      "results": this.state.results
+      "studentsFinalResult": {
+        "username": this.state.selectedStudentUsername,
+        "finalResultFlag": this.state.finalResultFlag
+      }
     }
 
-    console.log("Attendance - updateStudentsResults - updateStudentsResultsRequest - "
-      + JSON.stringify(updateStudentsResultsRequest));
+    console.log("ReportCard - reportCardSubmitHandler - updateStudentsFinalResultRequest - "
+      + JSON.stringify(updateStudentsFinalResultRequest));
 
-    await axios.post("http://localhost:8001/api/updateStudentsResults", updateStudentsResultsRequest).then(res => {
+    axios.post("http://localhost:8001/api/updateStudentsFinalResult", updateStudentsFinalResultRequest).then(res => {
 
       if (res.data.errors) {
+
+        console.log("ReportCard - reportCardSubmitHandler - ERROR in calling updateStudentsFinalResult - "
+          + JSON.stringify(res.data.errors));
+
         return this.setState({ errors: res.data.errors });
+
       } else {
 
         this.setState({
-          modalSuccess: true,
+          modalFlag: true,
           modalColor: "modal-success",
-          modalMessage: "Marks Added Successully!"
+          modalMessage: "Final Result Added Successully!"
         });
       }
     });
   }
 
-  organizeFinalDataFromExamDetailsAndResults() {
+  async organizeFinalDataFromExamDetailsAndResults() {
+
+    //Fetching selected students details to display on the Report card page
+    await this.fetchSelectedStudentSDetailsFromStudentsCollection();
 
     var reportCardData = {};
 
@@ -763,7 +769,7 @@ class ReportCard extends Component {
           examDetailsTemp.subjectDetailsArr = subjectDetailsArr;
           examDetailsTemp.totalObtainedMarks = totalObtainedMarks;
           examDetailsTemp.totalMarks = totalMarks;
-          examDetailsTemp.examResultPercentage = (parseFloat(totalObtainedMarks) / parseFloat(totalMarks)) * 100;
+          examDetailsTemp.examResultPercentage = ((parseFloat(totalObtainedMarks) / parseFloat(totalMarks)) * 100).toFixed(2);
           examDetailsTemp.examResultFlag = examResultFlag;
 
           // To capture the result of last exam.. pass or fail (in any exam).. to be shown as the final result
@@ -787,10 +793,10 @@ class ReportCard extends Component {
 
       if (ed.isMandatryToAttendForFinalResult) {
 
-        examDetailsArr[i].obtainedPercentageForExam = (parseFloat(ed.examResultPercentage) * parseFloat(ed.percentageShareInFinalResult)) / 100;
+        examDetailsArr[i].obtainedPercentageForExam = ((parseFloat(ed.examResultPercentage) * parseFloat(ed.percentageShareInFinalResult)) / 100).toFixed(2);
 
         // As we are operating on percentage we don't need to calculate total percentage. it will always be 100% of ed.percentageShareInFinalResult (which means whatever is the value of ed.percentageShareInFinalResult).
-        examDetailsArr[i].totalPercentageForExam = parseFloat(ed.percentageShareInFinalResult);
+        examDetailsArr[i].totalPercentageForExam = parseFloat(ed.percentageShareInFinalResult).toFixed(2);
 
         console.log("ReportCard - organizeFinalDataFromExamDetailsAndResults - examDetailsArr[i].obtainedPercentageForExam - " + examDetailsArr[i].obtainedPercentageForExam + "\nexamDetailsArr[i].totalPercentageForExam - " + examDetailsArr[i].totalPercentageForExam);
 
@@ -801,7 +807,7 @@ class ReportCard extends Component {
       }
     }
 
-    var netPercentage = (netObtainedPercentage / netTotalPercentage) * 100;
+    var netPercentage = ((parseFloat(netObtainedPercentage) / parseFloat(netTotalPercentage)) * 100).toFixed(2);
 
     reportCardData.examDetailArr = examDetailsArr;
     reportCardData.netPercentage = netPercentage;
@@ -841,54 +847,104 @@ class ReportCard extends Component {
 
   }
 
+  async fetchSelectedStudentSDetailsFromStudentsCollection() {
+
+    var searchStudentsRequest = {
+      "find": this.state.selectedStudentUsername,
+      "using": "username",
+      "searchCriteria": "equalsSearchCriteria"
+    }
+
+    console.log("\nReportCard - fetchSelectedStudentSDetailsFromStudentsCollection - searchStudentsRequest- " + JSON.stringify(this.state.searchStudentsRequest));
+
+    await axios.post("http://localhost:8001/api/searchStudents", searchStudentsRequest).then(res => {
+
+      if (res.data.errors) {
+        return this.setState({ errors: res.data.errors });
+      } else {
+
+        this.setState({
+          selectedStudentsDetails: res.data[0]
+        });
+
+        console.log("\nReportCard - fetchSelectedStudentSDetailsFromStudentsCollection - Selected Students Details - " + JSON.stringify(this.state.selectedStudentsDetails.fullName) + " " + JSON.stringify(this.state.selectedStudentsDetails.parentFullName) + " " + JSON.stringify(this.state.selectedStudentsDetails.dob));
+      }
+    });
+  }
+
+  finalResultFlagChangeHandler(e) {
+
+    this.setState({
+      finalResultFlag: e.target.value
+    }, () => {
+      console.log("ReportCard - finalResultFlagChangeHandler - finalResultFlag - " + this.state.finalResultFlag);
+    });
+  }
+
+  backButtonHandler() {
+
+    this.setState({
+      showStudentNamesFlag: true,
+      sectionView: true,
+      classView: true,
+
+      showReportCardFlag: false
+    });
+  }
+
   render() {
 
     return (
       <div>
         <Container >
 
+          {this.state.modalFlag && (
+            <Modal
+              isOpen={this.state.modalFlag}
+              className={this.state.modalColor}
+              toggle={this.toggleModalFlag}
+            >
+              <ModalHeader toggle={this.toggleModalFlag}>
+                {this.state.modalMessage}
+              </ModalHeader>
+            </Modal>
+          )}
+
           <Row>
             <Col sm="12">
-              {this.state.modalSuccess && (
-                <Modal
-                  isOpen={this.state.modalSuccess}
-                  className={this.state.modalColor}
-                  toggle={this.toggleModalSuccess}
-                >
-                  <ModalHeader toggle={this.toggleModalSuccess}>
-                    {this.state.modalMessage}
-                  </ModalHeader>
-                </Modal>
-              )}
 
-              <h3 align="center">Report Card</h3>
-              <br />
+              {this.state.classView && (
+                <div>
+                  <h3 align="center">Report Card</h3>
+                  <br />
 
-              <InputGroup className="mb-3">
-                <InputGroupAddon addonType="prepend">
-                  <InputGroupText >
-                    <b>Class</b>
-                  </InputGroupText>
-                </InputGroupAddon>
-                <Input
-                  name="class"
-                  id="class"
-                  type="select"
-                  value={this.state.class}
-                  onChange={this.classChangeHandler}
-                >
-                  <option value="">Select</option>
-                  {this.state.classes.map(element => {
-                    return (<option key={element} value={element}>{element}</option>);
-                  }
+                  <InputGroup className="mb-3">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText >
+                        <b>Class</b>
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <Input
+                      name="class"
+                      id="class"
+                      type="select"
+                      value={this.state.class}
+                      onChange={this.classChangeHandler}
+                    >
+                      <option value="">Select</option>
+                      {this.state.classes.map(element => {
+                        return (<option key={element} value={element}>{element}</option>);
+                      }
+                      )}
+                    </Input>
+                  </InputGroup>
+                  {this.state.classError && (
+                    <font color="red">
+                      {" "}
+                      <p>{this.state.classError}</p>
+                    </font>
                   )}
-                </Input>
-              </InputGroup>
-              {this.state.classError && (
-                <font color="red">
-                  {" "}
-                  <p>{this.state.classError}</p>
-                </font>
+                </div>
               )}
 
               {this.state.sectionView &&
@@ -951,39 +1007,46 @@ class ReportCard extends Component {
                 (
                   <div>
 
-                    <br /><br />
+                    <br />
 
+                    {this.state.selectedStudentsDetails.firstname && this.state.selectedStudentsDetails.lastname && (
+                      <font color="red"><h2 align="center">{this.state.selectedStudentsDetails.firstname.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.firstname.slice(1) + " " + this.state.selectedStudentsDetails.lastname.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.lastname.slice(1)}</h2></font>
+                    )}
                     <h3 align="center">{"Class - " + this.state.class + " " + this.state.selectedSection}</h3>
+                    <h4 align="left">{"Roll No. - " + this.state.selectedStudentsDetails.rollno}</h4>
+                    {this.state.selectedStudentsDetails.parentFullName && (
+                    <h4 align="left">{"Parent's Name - " + this.state.selectedStudentsDetails.parentFullName.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.parentFullName.slice(1)}</h4>
+                    )}
+                    
 
                     <br />
 
                     <Row lg="2">
                       <Col>
-                        {/* <Card className="mx-1">
-                                  <CardBody className="p-2"> */}
+
                         <InputGroup className="mb-3">
                           <InputGroupAddon addonType="prepend">
                             <InputGroupText style={{ width: "120px" }}>
-                              Full Name
+                              Roll No.
                                 </InputGroupText>
                           </InputGroupAddon>
                           <Input
                             type="text"
-                            name="fullName"
-                            id="fullName"
-                            value={this.state.fullName}
-                            autoComplete="fullName"
+                            id="street"
+                            name="address"
+                            value={this.state.selectedStudentsDetails.rollno}
                             onChange={this.changeHandler}
                             disabled={this.state.editMode}
                             style={whiteTextFieldStyle}
                           />
                         </InputGroup>
-                        {this.state.errors && this.state.errors.fullName && (
-                          <font color="red">
-                            {" "}
-                            <p>{this.state.errors.fullName.msg}</p>
-                          </font>
-                        )}
+                        {this.state.errors &&
+                          this.state.errors.address && (
+                            <font color="red">
+                              {" "}
+                              <p>{this.state.errors.address.msg}</p>
+                            </font>
+                          )}
 
                         <InputGroup className="mb-3">
                           <InputGroupAddon addonType="prepend">
@@ -995,7 +1058,7 @@ class ReportCard extends Component {
                             type="text"
                             name="parentFullName"
                             id="parentFullName"
-                            value={this.state.parentFullName}
+                            value={this.state.selectedStudentsDetails.parentFullName}
                             autoComplete="parentFullName"
                             onChange={this.changeHandler}
                             disabled={this.state.editMode}
@@ -1020,7 +1083,7 @@ class ReportCard extends Component {
 
                             name="dob"
                             id="dob"
-                            value={this.state.dob}
+                            value={this.state.selectedStudentsDetails.dob}
                             onChange={date => { this.setState({ dob: date }) }}
                             disabled={this.state.editMode}
                             style={whiteTextFieldStyle}
@@ -1034,30 +1097,6 @@ class ReportCard extends Component {
                           </font>
                         )}
 
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText style={{ width: "120px" }}>
-                              Address
-                                </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            id="street"
-                            name="address"
-                            value={this.state.address}
-                            onChange={this.changeHandler}
-                            disabled={this.state.editMode}
-                            style={whiteTextFieldStyle}
-                          />
-                        </InputGroup>
-                        {this.state.errors &&
-                          this.state.errors.address && (
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.errors.address.msg}</p>
-                            </font>
-                          )}
-
                         {/* </CardBody>
                                     </Card> */}
                       </Col>
@@ -1069,14 +1108,14 @@ class ReportCard extends Component {
                       <div class="table-responsive" >
                         <Table bordered hover size="sm">
                           <thead>
-                            <tr>
-                              <th><h5>Subjects/Exams</h5></th>
+                            <tr style={{ backgroundColor: "#b5c8f0" }}>
+                              <th className="text-center"><b><h3>Subjects/Exams</h3></b></th>
                               {this.state.reportCardData.examDetailArr.map((examdetail, examdetailId) => (
 
                                 examdetail.isMandatryToAttendForFinalResult ? (
-                                <th className="text-center"> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1) + " (" + examdetail.percentageShareInFinalResult + ")"}</h5></th>
-                                ):
-                                (<th className="text-center"style={{ "vertical-align": "middle", backgroundColor: "grey" }}> <h5>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1) + " (" + examdetail.percentageShareInFinalResult + ")"}</h5></th>)
+                                  <th className="text-center"> <h4>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1) + " (" + examdetail.percentageShareInFinalResult + ")"}</h4></th>
+                                ) :
+                                  (<th className="text-center" style={{ "vertical-align": "middle", backgroundColor: "grey" }}> <h4>{examdetail.examName.charAt(0).toUpperCase() + examdetail.examName.slice(1) + " (" + examdetail.percentageShareInFinalResult + ")"}</h4></th>)
                               ))}
                             </tr>
                           </thead>
@@ -1101,12 +1140,12 @@ class ReportCard extends Component {
                                           {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName + " (FAIL - " + examColumn.subjectDetailsArr[subjectId].passingMarks + ")")}
                                         </td>
                                       )
-                                  ):(
-                                    < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
+                                  ) : (
+                                      < td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}>
                                         {(examColumn.subjectDetailsArr[subjectId].obtainedMarks + " / " + examColumn.subjectDetailsArr[subjectId].totalMarks + " " + examColumn.subjectDetailsArr[subjectId].subjectName)}
                                       </td>
-                                  )
-                                  
+                                    )
+
 
                                 ))}
                               </tr>
@@ -1134,11 +1173,11 @@ class ReportCard extends Component {
                             </tr>
                             {/* For Blank row */}
                             <tr style={{ backgroundColor: "white" }}>
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border": "1px" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
                               </td>
                             </tr>
-  
-  {/* For percentage row */}
+
+                            {/* For percentage row */}
                             <tr style={{ backgroundColor: "#f2f2f2" }}>
                               {/* For percentage */}
                               <th className="text-center"> <b><h5>Percentage</h5></b></th>
@@ -1149,14 +1188,14 @@ class ReportCard extends Component {
 
                                 examColumn.isMandatryToAttendForFinalResult ? (
                                   examColumn.examResultFlag ? (<td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle" }}><b>
-                                  {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"}
+                                    {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"}
                                   </b></td>
-                                  ):(
-                                    <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "BLACK"}}><b>
-                                    {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"  + " (FAIL)"}
-                                    </b></td>
-                                  )
-                                  
+                                  ) : (
+                                      <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", color: "BLACK" }}><b>
+                                        {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")" + " (FAIL)"}
+                                      </b></td>
+                                    )
+
                                 ) : (
                                     <td id="col0" key={examColumnId} align="center" style={{ "vertical-align": "middle", backgroundColor: "grey" }}><b>
                                       {examColumn.examResultPercentage + "% (" + examColumn.obtainedPercentageForExam + ")"}
@@ -1167,16 +1206,16 @@ class ReportCard extends Component {
 
                             {/* For Blank row */}
                             <tr style={{ backgroundColor: "white" }}>
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border": "1px" }} colspan={this.state.reportCardData.examDetailArr.length + 1}>
                               </td>
                             </tr>
 
                             {/* For Result percentage row */}
                             <tr >
 
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border": "1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
                               </td>
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2"}}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2" }}>
                                 <b><h3>Percentage</h3></b>
                               </td>
                               <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2" }}>
@@ -1187,23 +1226,85 @@ class ReportCard extends Component {
                             {/* For Result PASS/FAIL row */}
                             <tr style={{ backgroundColor: "white" }}>
 
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border":"1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border": "1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
                               </td>
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2"}}>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#f2f2f2" }}>
                                 <b><h3>Result</h3></b>
                               </td>
                               {/* GREEEN COLOR */}
                               {this.state.reportCardData.netResultFlag && (
                                 <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#009900" }}>
-                                <b><h2>PASS</h2></b>
-                              </td>
+                                  <b><h2>PASS</h2></b>
+                                </td>
                               )}
                               {!this.state.reportCardData.netResultFlag && (
-                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
-                                <b><h2>FAIL</h2></b>
-                              </td>
+                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "WHITE" }}>
+                                  <b><h2>FAIL</h2></b>
+                                </td>
                               )}
                             </tr>
+
+                            {/* For Result PASS/FAIL row */}
+                            <tr style={{ backgroundColor: "white" }}>
+
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", "border": "1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
+                              </td>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
+                                <b><h3>Set Final Result (Pass/Fail)</h3></b>
+                              </td>
+                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
+                                <InputGroup className="mb-3">
+                                  <Col md="9">
+                                    <FormGroup check inline>
+                                      <Input
+                                        className="form-check-input"
+                                        type="radio"
+                                        id="finalResultFlag"
+                                        name="finalResultFlag"
+                                        value={true}
+                                        style={{ height: "35px", width: "25px" }}
+                                        onChange={this.finalResultFlagChangeHandler}
+                                      />
+                                      <Label
+                                        className="form-check-label"
+                                        check
+                                        htmlFor="inline-radio1"
+                                      >
+                                        Pass
+                                  </Label>
+                                    </FormGroup>
+                                    <FormGroup check inline>
+                                      <Input
+                                        className="form-check-input"
+                                        type="radio"
+                                        id="finalResultFlag"
+                                        name="finalResultFlag"
+                                        value={false}
+                                        style={{ height: "35px", width: "25px" }}
+                                        onChange={this.finalResultFlagChangeHandler}
+                                      />
+                                      <Label
+                                        className="form-check-label"
+                                        check
+                                        htmlFor="inline-radio1"
+                                      >
+                                        Fail
+                                  </Label>
+                                    </FormGroup>
+                                  </Col>
+                                </InputGroup>
+
+                                {this.state.errors && this.state.errors.finalResultFlag && (
+                                  <font color="red">
+                                    {" "}
+                                    <p>{this.state.errors.finalResultFlag.msg}</p>
+                                  </font>
+                                )}
+                              </td>
+
+                            </tr>
+
+
                           </tbody>
                         </Table>
                       </div>
@@ -1246,12 +1347,12 @@ class ReportCard extends Component {
 
                       <Col>
                         <Button
-                          onClick={this.resetExamDetails}
+                          onClick={this.backButtonHandler}
                           size="lg"
                           color="secondary"
                           block
                         >
-                          Reset
+                          Back
                 </Button>
                       </Col>
                     </Row>

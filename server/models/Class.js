@@ -174,6 +174,20 @@ var ClassSchema = new Schema({
       }
     }
     
+  },
+
+  studentsFinalResult: {
+    type: Array,
+
+    username: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    finalResultFlag: {
+      type: Boolean,
+      required: true
+    },
   }
 },  { collection: 'Class' });
 
