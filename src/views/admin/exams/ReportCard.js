@@ -9,6 +9,8 @@ import "bootstrap/dist/css/bootstrap.css";
 import "react-datetime/css/react-datetime.css";
 import TimeRange from 'react-time-range';
 import { AppSwitch } from "@coreui/react";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'
 import {
   Badge,
   Button,
@@ -43,6 +45,7 @@ import {
 
 import axios, { post } from "axios";
 import { stat } from 'fs';
+import { Result } from 'antd';
 
 const whiteTextFieldStyle = {
   background: "white"
@@ -99,17 +102,12 @@ class ReportCard extends Component {
       examDetails: [],
       reportCardData: {},
 
-      // venueLabelValueArray: [
-      //   { label: "Hall 1", value: "Hall 1" },
-      //   { label: "Hall 2", value: "Hall 2" },
-      //   { label: "Hall 3", value: "Hall 3" },
-      //   { label: "Hall 4", value: "Hall 4" }
-      // ],
-
       insertExamDetailsErrorMessage: "",
       copyTotalMarksToAllRowsFlag: false,
 
-      selectedStudentsDetails: {}
+      selectedStudentsDetails: {},
+      selectedStudentFinalResult: null,
+      setFinalResultFlag: false
 
     };
 
@@ -130,6 +128,8 @@ class ReportCard extends Component {
     this.organizeFinalDataFromExamDetailsAndResults = this.organizeFinalDataFromExamDetailsAndResults.bind(this);
     this.finalResultFlagChangeHandler = this.finalResultFlagChangeHandler.bind(this);
     this.backButtonHandler = this.backButtonHandler.bind(this);
+    this.resetState = this.resetState.bind(this);
+    this.setFinalResultHandler = this.setFinalResultHandler.bind(this);
 
     // Calling method on page load to load all classes and sections for the drop down
     this.fetchAllClassesAndSections();
@@ -420,6 +420,16 @@ class ReportCard extends Component {
       });
     });
 
+    if (!(typeof (this.state.studentsFinalResult) === 'undefined' || this.state.studentsFinalResult === null)) {
+      this.state.studentsFinalResult.forEach(finalResult => {
+        if (finalResult.username === username) {
+          this.setState({
+            selectedStudentFinalResult: finalResult.finalResultFlag,
+          });
+        }
+      })
+    }
+
     this.setState({
       results: resultsTemp,
       selectedStudent: newValue.value,
@@ -533,6 +543,7 @@ class ReportCard extends Component {
       "section": this.state.selectedSection,
       "subjects": 1,
       "studentsData": 1,
+      "studentsFinalResult": 1,
       "results": 1
     }
 
@@ -553,10 +564,12 @@ class ReportCard extends Component {
         this.setState({
           subjectArrayFromClass: response.subjects.sort(),
           studentsData: response.studentsData,
+          studentsFinalResult: response.studentsFinalResult,
           results: response.results
         }, () => {
 
-          console.log('ReportCard - fetchClassSpecificDetails - SubectsArrayFromClass - ' + JSON.stringify(this.state.subjectArrayFromClass) + ' studentsData - ' + JSON.stringify(this.state.studentsData) + ' results - ' + this.state.results);
+          console.log('ReportCard - fetchClassSpecificDetails - SubectsArrayFromClass - ' + JSON.stringify(this.state.subjectArrayFromClass) + '\nstudentsData - ' + JSON.stringify(this.state.studentsData) +
+            '\nstudentsFinalResult - ' + JSON.stringify(this.state.studentsFinalResult) + '\nresults - ' + this.state.results);
 
           this.setStudentsDropDownLabelValue();
         });
@@ -648,6 +661,12 @@ class ReportCard extends Component {
         console.log("ReportCard - reportCardSubmitHandler - ERROR in calling updateStudentsFinalResult - "
           + JSON.stringify(res.data.errors));
 
+          this.setState({
+            modalFlag: true,
+            modalColor: "modal-failure",
+            modalMessage: "Error in adding Final Result!",
+          });
+
         return this.setState({ errors: res.data.errors });
 
       } else {
@@ -655,8 +674,13 @@ class ReportCard extends Component {
         this.setState({
           modalFlag: true,
           modalColor: "modal-success",
-          modalMessage: "Final Result Added Successully!"
+          modalMessage: "Final Result Added Successully! Refreshing Page.",
+          setFinalResultFlag: false
         });
+
+        // alert("Refreshing the page to reflect the TimeTable changes in UI");
+
+      window.location.reload();
       }
     });
   }
@@ -685,7 +709,8 @@ class ReportCard extends Component {
     var examDetailsArr = [];
 
     // Specify the result of last exam.. pass or fail.. to be shown as the final result
-    var netResultFlag = true;
+    // var netResultFlag = true;
+
     for (var i = 0; i < r.length; i++) {
 
       for (var j = 0; j < ed.length; j++) {
@@ -744,7 +769,7 @@ class ReportCard extends Component {
                   subejctDetailsTemp.subjectResult = "PASS";
                 } else {
                   subejctDetailsTemp.subjectResult = "FAIL";
-                  examResultFlag = false;
+                  // examResultFlag = false;
                 }
 
                 // Setting total marks obtained and total passing marks
@@ -770,10 +795,10 @@ class ReportCard extends Component {
           examDetailsTemp.totalObtainedMarks = totalObtainedMarks;
           examDetailsTemp.totalMarks = totalMarks;
           examDetailsTemp.examResultPercentage = ((parseFloat(totalObtainedMarks) / parseFloat(totalMarks)) * 100).toFixed(2);
-          examDetailsTemp.examResultFlag = examResultFlag;
+          // examDetailsTemp.examResultFlag = examResultFlag;
 
           // To capture the result of last exam.. pass or fail (in any exam).. to be shown as the final result
-          netResultFlag = examResultFlag;
+          // netResultFlag = examResultFlag;
 
           examDetailsArr.push(examDetailsTemp);
 
@@ -811,7 +836,7 @@ class ReportCard extends Component {
 
     reportCardData.examDetailArr = examDetailsArr;
     reportCardData.netPercentage = netPercentage;
-    reportCardData.netResultFlag = netResultFlag;
+    // reportCardData.netResultFlag = netResultFlag;
 
     this.setState({
       reportCardData: reportCardData
@@ -889,7 +914,92 @@ class ReportCard extends Component {
       classView: true,
 
       showReportCardFlag: false
+    }, () => {
+      this.resetState();
     });
+  }
+
+  resetState() {
+
+    this.setState({
+
+      classView: true,
+      sectionView: false,
+      showReportCardFlag: false,
+      showStudentNamesFlag: false,
+
+      //classesAndSections: [], NOT TO BE RESET as it is fetched in constructor
+      classDetails: {},
+      // classes: [], NOT TO BE RESET as it is fetched in constructor
+      class: "",
+
+      sectionArray: [],
+      sectionLabelValueArray: [],
+      studentLabelValueArray: [],
+      selectedSection: "",
+      selectedSectionLabelValue: [],
+      selectedStudentUsername: "",
+      allSectionCheck: false,
+      editMode: "disabled",
+
+      // To make tab 1 on focus
+      activeTab: 'EXAM_DETAILS',
+
+      subjectArray: [],
+
+      inputExamDataArray: [{ examName: "" }],
+
+      includeInResultFlag: true,
+
+      disabled: false,
+
+      examDate: new Date(),
+
+      defaultExamDuration: 0,
+
+      examName: "",
+      studentNameError: "",
+      examDetailsArray: [],
+      selectedExamDetails: {},
+
+      results: [],
+      examDetails: [],
+      reportCardData: {},
+
+      insertExamDetailsErrorMessage: "",
+      copyTotalMarksToAllRowsFlag: false,
+
+      selectedStudentsDetails: {},
+      selectedStudentFinalResult: null,
+      setFinalResultFlag: false
+
+    });
+  }
+
+  setFinalResultHandler() {
+    
+    confirmAlert({
+      title: 'Confirm to change Final Result',
+      message: 'Are you sure to Change Final Result?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {
+            console.log("ReportCard - setFinalResultHandler - Confirmation to changes Final result - Yes");
+            this.setState({
+              setFinalResultFlag: true
+            });
+          }
+        },
+        {
+          label: 'No',
+          onClick: () =>  {  
+            console.log("ReportCard - setFinalResultHandler - Confirmation to changes Final result - No");
+            // Do nothing
+          }
+        }
+      ]
+    })
   }
 
   render() {
@@ -1012,97 +1122,17 @@ class ReportCard extends Component {
                     {this.state.selectedStudentsDetails.firstname && this.state.selectedStudentsDetails.lastname && (
                       <font color="red"><h2 align="center">{this.state.selectedStudentsDetails.firstname.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.firstname.slice(1) + " " + this.state.selectedStudentsDetails.lastname.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.lastname.slice(1)}</h2></font>
                     )}
-                    <h3 align="center">{"Class - " + this.state.class + " " + this.state.selectedSection}</h3>
-                    <h4 align="left">{"Roll No. - " + this.state.selectedStudentsDetails.rollno}</h4>
+                    {/* firstname added so that clasname fetchAllExamDetailsForSelectedSectiont appear before fetching the other details, as classname is fetched much earlier than other details */}
+                    {this.state.selectedStudentsDetails.firstname && this.state.class && this.state.selectedSection && (<h3 align="center">{"Class - " + this.state.class + " " + this.state.selectedSection}</h3>)}
+                    {this.state.selectedStudentsDetails.rollno && (<h5 align="center">{"Roll No. - " + this.state.selectedStudentsDetails.rollno}</h5>)}
                     {this.state.selectedStudentsDetails.parentFullName && (
-                    <h4 align="left">{"Parent's Name - " + this.state.selectedStudentsDetails.parentFullName.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.parentFullName.slice(1)}</h4>
+                      <h5 align="center">{"Parent's Name - " + this.state.selectedStudentsDetails.parentFullName.charAt(0).toUpperCase() + this.state.selectedStudentsDetails.parentFullName.slice(1)}</h5>
                     )}
-                    
+                    {this.state.selectedStudentsDetails.dob && (
+                      <h5 align="center">{"D.O.B - " + (new Date(this.state.selectedStudentsDetails.dob).getMonth() + 1) + '/' + new Date(this.state.selectedStudentsDetails.dob).getDate() + '/' + new Date(this.state.selectedStudentsDetails.dob).getFullYear()}</h5>
+                    )}
 
                     <br />
-
-                    <Row lg="2">
-                      <Col>
-
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText style={{ width: "120px" }}>
-                              Roll No.
-                                </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            id="street"
-                            name="address"
-                            value={this.state.selectedStudentsDetails.rollno}
-                            onChange={this.changeHandler}
-                            disabled={this.state.editMode}
-                            style={whiteTextFieldStyle}
-                          />
-                        </InputGroup>
-                        {this.state.errors &&
-                          this.state.errors.address && (
-                            <font color="red">
-                              {" "}
-                              <p>{this.state.errors.address.msg}</p>
-                            </font>
-                          )}
-
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText style={{ width: "120px" }}>
-                              Parent's Name
-                                </InputGroupText>
-                          </InputGroupAddon>
-                          <Input
-                            type="text"
-                            name="parentFullName"
-                            id="parentFullName"
-                            value={this.state.selectedStudentsDetails.parentFullName}
-                            autoComplete="parentFullName"
-                            onChange={this.changeHandler}
-                            disabled={this.state.editMode}
-                            style={whiteTextFieldStyle}
-                          />
-                        </InputGroup>
-                        {this.state.errors && this.state.errors.parentFullName && (
-                          <font color="red">
-                            {" "}
-                            <p>{this.state.errors.parentFullName.msg}</p>
-                          </font>
-                        )}
-
-                        <InputGroup className="mb-3">
-                          <InputGroupAddon addonType="prepend">
-                            <InputGroupText style={{ width: "120px" }}>
-                              Date of Birth
-                                </InputGroupText>
-                          </InputGroupAddon>
-
-                          <DatePicker
-
-                            name="dob"
-                            id="dob"
-                            value={this.state.selectedStudentsDetails.dob}
-                            onChange={date => { this.setState({ dob: date }) }}
-                            disabled={this.state.editMode}
-                            style={whiteTextFieldStyle}
-                          />
-                        </InputGroup>
-
-                        {this.state.errors && this.state.errors.dob && (
-                          <font color="red">
-                            {" "}
-                            <p>{this.state.errors.dob.msg}</p>
-                          </font>
-                        )}
-
-                        {/* </CardBody>
-                                    </Card> */}
-                      </Col>
-
-                      <Col></Col>
-                    </Row>
 
                     {this.state.reportCardData && this.state.reportCardData.examDetailArr && (
                       <div class="table-responsive" >
@@ -1232,27 +1262,33 @@ class ReportCard extends Component {
                                 <b><h3>Result</h3></b>
                               </td>
                               {/* GREEEN COLOR */}
-                              {this.state.reportCardData.netResultFlag && (
+                              {this.state.selectedStudentFinalResult && this.state.selectedStudentFinalResult === "pass" && (
                                 <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "#009900" }}>
                                   <b><h2>PASS</h2></b>
                                 </td>
                               )}
-                              {!this.state.reportCardData.netResultFlag && (
-                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "WHITE" }}>
+                              {this.state.selectedStudentFinalResult && this.state.selectedStudentFinalResult === "fail" && (
+                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
                                   <b><h2>FAIL</h2></b>
+                                </td>
+                              )}
+                              {this.state.selectedStudentFinalResult && this.state.selectedStudentFinalResult === "compartment" && (
+                                <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "BROWN" }}>
+                                  <b><h2>COMPARTMENT</h2></b>
                                 </td>
                               )}
                             </tr>
 
                             {/* For Result PASS/FAIL row */}
+                            {(this.state.selectedStudentFinalResult===null || this.state.setFinalResultFlag ) && (
                             <tr style={{ backgroundColor: "white" }}>
 
                               <td id="col0" align="center" style={{ "vertical-align": "middle", "border": "1px" }} colspan={this.state.reportCardData.examDetailArr.length - 1}>
                               </td>
                               <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
-                                <b><h3>Set Final Result (Pass/Fail)</h3></b>
+                                <b><h3>Set Final Result</h3></b>
                               </td>
-                              <td id="col0" align="center" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
+                              <td id="col0" align="left" style={{ "vertical-align": "middle", backgroundColor: "RED" }}>
                                 <InputGroup className="mb-3">
                                   <Col md="9">
                                     <FormGroup check inline>
@@ -1261,7 +1297,7 @@ class ReportCard extends Component {
                                         type="radio"
                                         id="finalResultFlag"
                                         name="finalResultFlag"
-                                        value={true}
+                                        value="pass"
                                         style={{ height: "35px", width: "25px" }}
                                         onChange={this.finalResultFlagChangeHandler}
                                       />
@@ -1273,13 +1309,14 @@ class ReportCard extends Component {
                                         Pass
                                   </Label>
                                     </FormGroup>
+                                    <br />
                                     <FormGroup check inline>
                                       <Input
                                         className="form-check-input"
                                         type="radio"
                                         id="finalResultFlag"
                                         name="finalResultFlag"
-                                        value={false}
+                                        value="fail"
                                         style={{ height: "35px", width: "25px" }}
                                         onChange={this.finalResultFlagChangeHandler}
                                       />
@@ -1289,6 +1326,25 @@ class ReportCard extends Component {
                                         htmlFor="inline-radio1"
                                       >
                                         Fail
+                                  </Label>
+                                    </FormGroup>
+                                    <br />
+                                    <FormGroup check inline>
+                                      <Input
+                                        className="form-check-input"
+                                        type="radio"
+                                        id="finalResultFlag"
+                                        name="finalResultFlag"
+                                        value="compartment"
+                                        style={{ height: "35px", width: "25px" }}
+                                        onChange={this.finalResultFlagChangeHandler}
+                                      />
+                                      <Label
+                                        className="form-check-label"
+                                        check
+                                        htmlFor="inline-radio1"
+                                      >
+                                        Compartment
                                   </Label>
                                     </FormGroup>
                                   </Col>
@@ -1303,62 +1359,69 @@ class ReportCard extends Component {
                               </td>
 
                             </tr>
-
+                            )}
 
                           </tbody>
                         </Table>
-                      </div>
-                    )}
-                    {this.state.rowError && (
-                      <font color="red">
-                        <h6>
-                          {" "}
-                          <p>{this.state.rowError} </p>
-                        </h6>{" "}
-                      </font>
-                    )}
+                        {this.state.rowError && (
+                          <font color="red">
+                            <h6>
+                              {" "}
+                              <p>{this.state.rowError} </p>
+                            </h6>{" "}
+                          </font>
+                        )}
 
-                    {/* {this.state.insertExamDetailsErrorMessage && (
-                    <font color="red">
-                      {" "}
-                      <p>{this.state.insertExamDetailsErrorMessage}</p>
-                    </font>
-                  )} */}
-                    <Row>
-                      <Col>
-                        {!this.state.loader && <Button
-                          onClick={this.reportCardSubmitHandler}
-                          size="lg"
-                          color="success"
-                          block
-                        >
-                          Submit
+                        {!(this.state.selectedStudentFinalResult===null || this.state.setFinalResultFlag ) && (
+                          <div>
+                        {/* <h5 align="right">{"Change Result"}</h5> */}
+                                                       <NavLink href="#"
+   id="classEmailLink"
+   align="right"
+   style={{ color: 'BLUE'}}
+ onClick={this.setFinalResultHandler} ><h5><b><u>Change Result</u></b></h5></NavLink>
+                        <br/>
+                        </div>
+                        )}
+
+                        <Row>
+                          <Col>
+                            {!this.state.loader && <Button
+                              onClick={this.reportCardSubmitHandler}
+                              size="lg"
+                              color="success"
+                              block
+                            >
+                              Submit
                 </Button>}
 
-                        {this.state.loader &&
-                          <div align="center"><ReactLoading type="spin"
-                            color="	#006400"
-                            height='2%' width='10%' />
-                            <br />
+                            {this.state.loader &&
+                              <div align="center"><ReactLoading type="spin"
+                                color="	#006400"
+                                height='2%' width='10%' />
+                                <br />
 
-                            <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
+                                <font color="DarkGreen">  <h4>Submitting...</h4></font></div>}
 
-                      </Col>
+                          </Col>
 
-                      <Col>
-                        <Button
-                          onClick={this.backButtonHandler}
-                          size="lg"
-                          color="secondary"
-                          block
-                        >
-                          Back
+                          <Col>
+                            <Button
+                              onClick={this.backButtonHandler}
+                              size="lg"
+                              color="secondary"
+                              block
+                            >
+                              Back
                 </Button>
-                      </Col>
-                    </Row>
+                          </Col>
+                        </Row>
+                        <br /><br />
+                      </div>
+
+                    )}
 
                   </div>
-
 
                 )}
 

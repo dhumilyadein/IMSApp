@@ -196,6 +196,9 @@ module.exports = function (app) {
     if (request.studentsData) {
       fetchClassSpecificDetailsResponseJSON.studentsData = 1
     }
+    if (request.studentsFinalResult) {
+      fetchClassSpecificDetailsResponseJSON.studentsFinalResult = 1
+    }
     if (request.results) {
       fetchClassSpecificDetailsResponseJSON.results = 1
     }

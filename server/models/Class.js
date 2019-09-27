@@ -185,7 +185,7 @@ var ClassSchema = new Schema({
       unique: true
     },
     finalResultFlag: {
-      type: Boolean,
+      type: String,
       required: true
     },
   }
