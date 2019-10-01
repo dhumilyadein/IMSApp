@@ -14,6 +14,7 @@ import {
   InputGroupText,
   Row
 } from "reactstrap";
+import { authenticationService } from '../../../auth';
 
 class Login extends Component {
   constructor(props) {
@@ -23,7 +24,8 @@ class Login extends Component {
       email: "",
       role: "admin",
       error: null,
-      valerrors: null
+      valerrors: null,
+      currentUserDetails: null
     };
     this.changeHandler = this.changeHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
@@ -33,46 +35,38 @@ class Login extends Component {
    * @description Handles the form submit request
    * @param {*} e
    */
-  submitHandler(e) {
+  async submitHandler(e) {
 
     console.log("submitHandler ENTER");
 
     e.preventDefault();
 
-    axios.post("http://localhost:8001/api/login", this.state).then(res => {
+    console.log("submitHandler Before");
+    var response = await authenticationService.login(this.state.username, this.state.password);
 
-      console.log("response - " + JSON.stringify(res.data));
-      console.log("response errors - " + res.data.errors);
-      console.log("response message - " + res.data.message);
 
-      if (res.data.error) {
-        return this.setState({ error: res.data.message });
-      }  if (res.data.errors) {
-        return this.setState({ valerrors: res.data.errors });
-      }
+    //   .then(
+    //     user => {
+    //       console.log("submitHandler In between user - " + user);
+    //         // const { from } = this.props.location.state || { from: { pathname: "/" } };
+    //         // this.props.history.push(from);
+    //     },
+    //     error => {
+    //       console.log("submitHandler In between error");
+    //         // setSubmitting(false);
+    //         // setStatus(error);
+    //     }
+    // );
 
-      console.log("Number of roles - " + res.data.userData.role.length + " Roles - " + res.data.userData.role);
+    console.log("submitHandler after - response - " + response);
 
-      if (res.data.userData.role.length === 1) {
+    // Display error message if login is unsuccessful else user will be redirected to correct page in authenticationService.js
+    if (response.error) {
+      return this.setState({ error: response.message });
+    } else if (response.errors) {
+      return this.setState({ error: response.errors });
+    }
 
-        if(res.data.userData.role == 'admin') {
-
-          console.log('redirecting to registeruser page');
-          return (window.location = "/#/admin/registeruser");
-        } else {
-          return (window.location = "/#/Dashboard");
-        }
-      } else if (res.data.userData.role.length > 1) {
-        return (window.location = "/#/Dashboard");
-      } else {
-        return (window.location = "/#/Dashboard");
-      }
-
-      res.data.userData.role.forEach(function (role) {
-        console.log(role);
-      });
-      //return (window.location = "/AdminPage");
-    });
   }
 
   /**
