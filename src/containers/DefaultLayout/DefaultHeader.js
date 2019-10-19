@@ -3,8 +3,9 @@ import { Badge, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLin
 import PropTypes from 'prop-types';
 
 import { AppAsideToggler, AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react';
-import logo from '../../assets/img/brand/ims.jpeg'
-
+import logo from '../../assets/img/brand/ims.jpeg';
+import { Button } from 'reactstrap';
+import { authenticationService, history } from '../../auth';
 
 const propTypes = {
   children: PropTypes.node,
@@ -13,6 +14,30 @@ const propTypes = {
 const defaultProps = {};
 
 class DefaultHeader extends Component {
+
+  constructor(props) {
+
+    super(props);
+
+    this.state = {
+
+    };
+
+    // this.logoutBtnHandler = this.logoutBtnHandler.bind(this);
+  }
+
+  logoutBtnHandler() {
+
+    console.log("DefaultHeader.js - logoutBtnHandler - Entry");
+
+    authenticationService.logout();
+
+    console.log("DefaultHeader.js - logoutBtnHandler - Redirecting to /login");
+    // history.push('/login');
+
+    return (window.location = "/#/Dashboard");
+  }
+
   render() {
 
     // eslint-disable-next-line
@@ -39,8 +64,17 @@ class DefaultHeader extends Component {
           </NavItem>
         </Nav>
         <Nav className="ml-auto" navbar>
+
+
+
           <NavItem className="d-md-down-none">
-            <NavLink href="#"><i className="icon-bell"></i><Badge pill color="danger">5</Badge></NavLink>
+            <Button block color="danger" size="lg" onClick={this.logoutBtnHandler}>
+              <font color="black"><b>Logout</b>
+              </font></Button>
+          </NavItem>
+
+          <NavItem className="d-md-down-none">
+            <NavLink href="#"><i className="icon-bell"></i><Badge pill color="danger">10</Badge></NavLink>
           </NavItem>
           <NavItem className="d-md-down-none">
             <NavLink href="#"><i className="icon-list"></i></NavLink>

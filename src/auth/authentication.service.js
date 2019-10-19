@@ -1,5 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 import axios from "axios";
+import {autologout} from './';
 
 const currentUserSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('currentUser')));
 
@@ -51,6 +52,10 @@ async function login(username, password) {
         localStorage.setItem('currentUser', JSON.stringify(currentUserDetails));
         currentUserSubject.next(currentUserDetails);
 
+        // Setting up the automatic logout timer on right after login 
+        // NOT IN USE - DELETE - CAN BE DELETED
+        // autologout.setup();
+
         console.log("Number of roles - " + res.data.userData.role.length + " Roles - " + res.data.userData.role);
 
         if (res.data.userData.role.length === 1) {
@@ -78,6 +83,9 @@ async function login(username, password) {
 
 function logout() {
     // remove user from local storage to log user out
+
+    console.log("authentication.srevice.js - logout - Entry");
+    
     localStorage.removeItem('currentUser');
     currentUserSubject.next(null);
 }
