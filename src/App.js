@@ -11,6 +11,7 @@ import { authenticationService } from './auth';
 import Role from 'constants';
 
 var timeoutID;
+var AUTO_LOGOUT_TIMER = 5 * 60 * 1000;
 
 class App extends Component {
 
@@ -69,12 +70,13 @@ class App extends Component {
   startTimer() {
   
       console.log('autologout - startTimer - timer started');
-      timeoutID = window.setTimeout(this.goInactive, 10 * 1000);
+      timeoutID = window.setTimeout(this.goInactive, AUTO_LOGOUT_TIMER);
   }
   
   resetTimer() {
   
-      console.log('autologout - restTimer - timer reset on activity');
+      //console.log('autologout - restTimer - timer reset on activity');
+      
       window.clearTimeout(timeoutID);
   
       // As activity is done.. calling goActive method
@@ -83,7 +85,7 @@ class App extends Component {
   
   goInactive() {
   
-      console.log('autologout - goInactive - calling logout as no activity happened for the specified time');
+      //console.log('autologout - goInactive - calling logout as no activity happened for the specified time');
   
       // logout on inactivity
       authenticationService.logout();
@@ -91,7 +93,7 @@ class App extends Component {
   
   goActive() {
   
-      console.log('autologout - goActive - goActive called as activity happened');
+      //console.log('autologout - goActive - goActive called as activity happened');
   
       this.startTimer();
   }

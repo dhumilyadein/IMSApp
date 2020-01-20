@@ -8,6 +8,8 @@ export const autologout = {
     setup
 };
 
+var AUTO_LOGOUT_TIMER = 5 * 60 * 1000;
+
 function setup() {
 
   console.log('autologout - setup - listening activity events and setting up Logout timer');
@@ -26,7 +28,7 @@ function setup() {
 function startTimer() {
 
     console.log('autologout - startTimer - timer started');
-    timeoutID = window.setTimeout(goInactive, 10 * 1000);
+    timeoutID = window.setTimeout(goInactive, AUTO_LOGOUT_TIMER);
 }
 
 function resetTimer() {
